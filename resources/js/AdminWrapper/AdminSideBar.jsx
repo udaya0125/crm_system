@@ -1,18 +1,15 @@
 import React from "react";
 import { Link, usePage } from "@inertiajs/react";
-import {
-    Home,
-    Users,
-    FolderTree,
-    Package,
-    BookOpen,
-    Settings,
-    X
-} from "lucide-react";
+import { Settings, X, Menu, ListFilter, Users } from "lucide-react";
 
-const AdminSideBar = ({ isMobileOpen, onMobileToggle, user }) => {
+const AdminSideBar = ({
+    isMobileOpen,
+    onMobileToggle,
+    isCollapsed,
+    onToggleCollapse,
+}) => {
     const { url } = usePage();
-    const currentPath = url.split("/")[1] || "dashboard";
+    const currentPath = url.split("/")[1] || "crm";
 
     const isActive = (href) => {
         const path = href.replace("/", "");
@@ -30,111 +27,166 @@ const AdminSideBar = ({ isMobileOpen, onMobileToggle, user }) => {
 
             <div
                 className={`
-                    fixed left-0 top-0 h-screen bg-white border-r z-50 transition-all duration-300
-                    w-64
-                    ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+                    fixed left-0 top-0 h-screen bg-white border-r border-gray-200 z-50 transition-all duration-300
+                    ${isCollapsed ? "w-16" : "w-64"}
+                    ${
+                        isMobileOpen
+                            ? "translate-x-0"
+                            : "-translate-x-full lg:translate-x-0"
+                    }
                 `}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b h-16">
-                    <div className="text-lg font-bold text-gray-800">Sales System</div>
-                    <button
-                        onClick={onMobileToggle}
-                        className="lg:hidden p-1 hover:bg-gray-100 rounded"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                <div
+                    className={`flex items-center justify-between p-4 border-b h-16 ${
+                        isCollapsed ? "px-3" : ""
+                    }`}
+                >
+                    {!isCollapsed && (
+                        <div className="text-lg font-bold text-gray-800 whitespace-nowrap">
+                            Sales System
+                        </div>
+                    )}
+                    <div className="flex items-center space-x-1">
+                        {/* Collapse Toggle Button - Only show on desktop */}
+                        <button
+                            onClick={onToggleCollapse}
+                            className="hidden lg:flex p-1.5 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                            title={
+                                isCollapsed
+                                    ? "Expand sidebar"
+                                    : "Collapse sidebar"
+                            }
+                        >
+                            {isCollapsed ? (
+                                <Menu className="w-4 h-4 text-gray-600" />
+                            ) : (
+                                <Menu className="w-4 h-4 text-gray-600" />
+                            )}
+                        </button>
+
+                        {/* Mobile Close Button */}
+                        <button
+                            onClick={onMobileToggle}
+                            className="lg:hidden p-1.5 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Menu Items (NO MAP, NO ROLE) */}
-                <div className="p-4 space-y-1">
-
-                    {/* Dashboard */}
+                {/* Menu Items */}
+                <div
+                    className={`p-2 space-y-1 ${isCollapsed ? "px-2" : "px-3"}`}
+                >
+                    {/* CRM */}
                     <Link
-                        href="/dashboard"
-                        className={`flex items-center p-3 rounded-lg transition-colors ${
-                            isActive("/dashboard")
-                                ? "bg-blue-50 text-blue-600 border border-blue-200"
-                                : "text-gray-600 hover:bg-gray-50"
-                        }`}
+                        href="/crm"
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/crm")
+                                    ? "bg-gray-200 text-gray-600 "
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "CRM" : ""}
                     >
-                        <Home className={`w-5 h-5 ${isActive("/dashboard") ? "text-blue-600" : "text-gray-500"}`} />
-                        <span className="ml-3 font-medium">Dashboard</span>
+                        <ListFilter
+                            className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/crm")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                CRM
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                CRM
+                            </div>
+                        )}
                     </Link>
 
                     {/* Users */}
                     <Link
                         href="/users"
-                        className={`flex items-center p-3 rounded-lg transition-colors ${
-                            isActive("/users")
-                                ? "bg-blue-50 text-blue-600 border border-blue-200"
-                                : "text-gray-600 hover:bg-gray-50"
-                        }`}
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/users")
+                                    ? "bg-gray-200 text-gray-600"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "Users" : ""}
                     >
-                        <Users className={`w-5 h-5 ${isActive("/users") ? "text-blue-600" : "text-gray-500"}`} />
-                        <span className="ml-3 font-medium">Users</span>
-                    </Link>
-
-                    {/* Categories */}
-                    <Link
-                        href="/categories"
-                        className={`flex items-center p-3 rounded-lg transition-colors ${
-                            isActive("/categories")
-                                ? "bg-blue-50 text-blue-600 border border-blue-200"
-                                : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                    >
-                        <FolderTree className={`w-5 h-5 ${isActive("/categories") ? "text-blue-600" : "text-gray-500"}`} />
-                        <span className="ml-3 font-medium">Categories</span>
-                    </Link>
-
-                    {/* Products */}
-                    <Link
-                        href="/products"
-                        className={`flex items-center p-3 rounded-lg transition-colors ${
-                            isActive("/products")
-                                ? "bg-blue-50 text-blue-600 border border-blue-200"
-                                : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                    >
-                        <Package className={`w-5 h-5 ${isActive("/products") ? "text-blue-600" : "text-gray-500"}`} />
-                        <span className="ml-3 font-medium">Products</span>
-                    </Link>
-
-                    {/* Blogs */}
-                    <Link
-                        href="/blogs"
-                        className={`flex items-center p-3 rounded-lg transition-colors ${
-                            isActive("/blogs")
-                                ? "bg-blue-50 text-blue-600 border border-blue-200"
-                                : "text-gray-600 hover:bg-gray-50"
-                        }`}
-                    >
-                        <BookOpen className={`w-5 h-5 ${isActive("/blogs") ? "text-blue-600" : "text-gray-500"}`} />
-                        <span className="ml-3 font-medium">Blogs</span>
+                        <Users
+                            className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/users")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                Users
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Users
+                            </div>
+                        )}
                     </Link>
 
                     {/* Settings */}
                     <Link
                         href="/settings"
-                        className={`flex items-center p-3 rounded-lg transition-colors ${
-                            isActive("/settings")
-                                ? "bg-blue-50 text-blue-600 border border-blue-200"
-                                : "text-gray-600 hover:bg-gray-50"
-                        }`}
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/settings")
+                                    ? "bg-gray-200 text-gray-600 "
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "Settings" : ""}
                     >
-                        <Settings className={`w-5 h-5 ${isActive("/settings") ? "text-blue-600" : "text-gray-500"}`} />
-                        <span className="ml-3 font-medium">Settings</span>
+                        <Settings
+                            className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/settings")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                Settings
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Settings
+                            </div>
+                        )}
                     </Link>
                 </div>
-
-                {/* User Info */}
-                {/* {user && (
-                    <div className="absolute bottom-4 left-4 right-4 p-3 bg-gray-50 rounded-lg">
-                        <div className="text-sm font-medium text-gray-800">{user.name}</div>
-                        <div className="text-xs text-gray-500 capitalize">{user.role}</div>
-                    </div>
-                )} */}
             </div>
         </>
     );

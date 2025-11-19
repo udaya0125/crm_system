@@ -54,7 +54,7 @@ const AdminNavBar = ({ onMenuToggle }) => {
     }, [window.location.pathname]);
 
     return (
-        <nav className="fixed top-0 right-0 w-full lg:w-[95%] h-16 bg-white border-b border-gray-200 z-30">
+        <nav className="fixed top-0 right-0 w-full lg:w-[98%] h-16 bg-white border-b border-gray-200 z-30">
             <div className="h-full px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-full">
                     {/* Left side - Menu toggle and branding */}
@@ -80,7 +80,7 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                 aria-haspopup="true"
                             >
                                 <div className="flex items-center space-x-3">
-                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+                                    <div className="w-8 h-8  rounded-full flex items-center justify-center overflow-hidden">
                                         {user?.image ? (
                                             <img
                                                 src={user.image}
@@ -101,9 +101,9 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                         <span className="text-sm font-medium text-gray-900 block">
                                             {user?.name || "Guest"}
                                         </span>
-                                        <span className="text-xs text-gray-500 block">
+                                        {/* <span className="text-xs text-gray-500 block">
                                             {user?.role || "Admin"}
-                                        </span>
+                                        </span> */}
                                     </div>
                                 </div>
                                 <ChevronDown
