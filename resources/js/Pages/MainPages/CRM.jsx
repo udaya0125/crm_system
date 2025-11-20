@@ -49,16 +49,16 @@ const CRM = () => {
                         prevStep={prevStep}
                     />
                 );
-            // case 3:
-            //     return (
-            //         <Meeting
-            //             data={formData.meeting}
-            //             updateData={(data) => updateFormData("meeting", data)}
-            //             nextStep={nextStep}
-            //             prevStep={prevStep}
-            //         />
-            //     );
             case 3:
+                return (
+                    <Meeting
+                        data={formData.meeting}
+                        updateData={(data) => updateFormData("meeting", data)}
+                        nextStep={nextStep}
+                        prevStep={prevStep}
+                    />
+                );
+            case 4:
                 return (
                     <FollowUpResponse
                         data={formData.followUpResponse}
@@ -69,7 +69,7 @@ const CRM = () => {
                         prevStep={prevStep}
                     />
                 );
-            case 4:
+            case 5:
                 return (
                     <Contract
                         data={formData.contract}

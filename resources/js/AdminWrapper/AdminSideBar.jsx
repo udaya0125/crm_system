@@ -116,7 +116,7 @@ const AdminSideBar = ({
                     </Link>
 
                     {/* Users */}
-                    <Link
+                    {/* <Link
                         href="/users"
                         className={`
                             flex items-center rounded-lg transition-colors duration-200 group relative
@@ -149,10 +149,10 @@ const AdminSideBar = ({
                                 Users
                             </div>
                         )}
-                    </Link>
+                    </Link> */}
 
                     {/* Settings */}
-                    <Link
+                    {/* <Link
                         href="/settings"
                         className={`
                             flex items-center rounded-lg transition-colors duration-200 group relative
@@ -185,7 +185,7 @@ const AdminSideBar = ({
                                 Settings
                             </div>
                         )}
-                    </Link>
+                    </Link> */}
                 </div>
             </div>
         </>

@@ -7,6 +7,7 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
         followUpDate: data.followUpDate || "",
         followUpTime: data.followUpTime || "",
         notes: data.notes || "",
+        meetingOutcomes: data.meetingOutcomes || "", // Added meeting outcomes field
     });
 
     const [errors, setErrors] = useState({});
@@ -34,10 +35,10 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
             newErrors.negativeReason = "Reason is required for negative responses";
         }
 
-        if (formData.response === "positive") {
-            if (!formData.followUpDate) newErrors.followUpDate = "Date is required";
-            if (!formData.followUpTime) newErrors.followUpTime = "Time is required";
-        }
+        // if (formData.response === "positive") {
+        //     if (!formData.followUpDate) newErrors.followUpDate = "Date is required";
+        //     if (!formData.followUpTime) newErrors.followUpTime = "Time is required";
+        // }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -56,7 +57,7 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
 
     return (
         <div className="max-w-7xl mx-auto p-4">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className=" p-6">
                 <form onSubmit={handleSubmit}>
 
                     {/* Response Dropdown */}
@@ -86,8 +87,22 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                         <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200 mb-4">
                             <h3 className="font-medium text-green-800">Meeting Details</h3>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                {/* Date */}
+                            {/* Meeting Outcomes */}
+                            <div>
+                                <label className="block text-sm text-green-700 mb-1">Meeting Outcomes *</label>
+                                <textarea
+                                    name="meetingOutcomes"
+                                    value={formData.meetingOutcomes}
+                                    onChange={handleChange}
+                                    rows="3"
+                                    className="w-full p-2 border border-green-300 rounded"
+                                    placeholder="Key outcomes and decisions from the meeting..."
+                                    required
+                                />
+                            </div>
+
+                            {/* <div className="grid grid-cols-2 gap-4">
+                               
                                 <div>
                                     <label className="block text-sm text-green-700 mb-1">Date *</label>
                                     <input
@@ -105,7 +120,7 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                                     )}
                                 </div>
 
-                                {/* Time */}
+                                
                                 <div>
                                     <label className="block text-sm text-green-700 mb-1">Time *</label>
                                     <input
@@ -121,7 +136,7 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                                         <p className="text-red-500 text-xs mt-1">{errors.followUpTime}</p>
                                     )}
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Notes */}
                             <div>
@@ -159,8 +174,21 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                                 )}
                             </div>
 
-                            {/* Follow-up Date */}
+                            {/* Meeting Outcomes */}
                             <div>
+                                <label className="block text-sm text-red-700 mb-1">Meeting Outcomes</label>
+                                <textarea
+                                    name="meetingOutcomes"
+                                    value={formData.meetingOutcomes}
+                                    onChange={handleChange}
+                                    rows="3"
+                                    className="w-full p-2 border border-red-300 rounded"
+                                    placeholder="Key outcomes and learnings from the discussion..."
+                                />
+                            </div>
+
+                            {/* Follow-up Date */}
+                            {/* <div>
                                 <label className="block text-sm text-red-700 mb-1">Follow-up Date</label>
                                 <input
                                     type="date"
@@ -170,7 +198,7 @@ const InitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                                     min={new Date().toISOString().split("T")[0]}
                                     className="w-full p-2 border border-red-300 rounded"
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Notes */}
                             <div>

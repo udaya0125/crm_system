@@ -16,7 +16,10 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
         responsiblePerson: data.responsiblePerson || "",
         comment: data.comment || "",
         messenger: data.messenger || "",
+        messengerContact: data.messengerContact || "", // Added missing field
     });
+
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,17 +27,75 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
             ...prev,
             [name]: value,
         }));
+        
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: ""
+            }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Required field validation
+        if (!formData.companyName.trim()) {
+            newErrors.companyName = "Company name is required";
+        }
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = "First name is required";
+        }
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = "Last name is required";
+        }
+        if (!formData.phone.trim()) {
+            newErrors.phone = "Phone number is required";
+        } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ''))) {
+            newErrors.phone = "Please enter a valid phone number";
+        }
+        if (!formData.email.trim()) {
+            newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = "Please enter a valid email address";
+        }
+
+        // Website validation (if provided)
+        if (formData.website && !/^https?:\/\/.+\..+/.test(formData.website)) {
+            newErrors.website = "Please enter a valid website URL";
+        }
+
+        // Messenger contact validation (if messenger is selected)
+        if (formData.messenger && !formData.messengerContact.trim()) {
+            newErrors.messengerContact = "Messenger contact is required when messenger is selected";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        updateData(formData);
-        nextStep();
+        
+        if (validateForm()) {
+            updateData(formData);
+            nextStep();
+        }
+    };
+
+    // Helper function to get input className with error state
+    const getInputClassName = (fieldName) => {
+        const baseClass = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+        return errors[fieldName] 
+            ? `${baseClass} border-red-500 focus:ring-red-500 focus:border-red-500` 
+            : baseClass;
     };
 
     return (
-        <div className="max-w-7xl mx-auto">
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="max-w-7xl mx-auto p-6">
+            <div>
+                 {/* <h2 className="text-2xl font-bold ">Company Details</h2> */}
                 <form onSubmit={handleSubmit} className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Company Name */}
@@ -48,9 +109,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.companyName}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('companyName')}
                                 placeholder="Enter company name"
                             />
+                            {errors.companyName && (
+                                <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
+                            )}
                         </div>
 
                         {/* First Name */}
@@ -64,9 +128,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.firstName}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('firstName')}
                                 placeholder="Enter first name"
                             />
+                            {errors.firstName && (
+                                <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                            )}
                         </div>
 
                         {/* Last Name */}
@@ -80,9 +147,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.lastName}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('lastName')}
                                 placeholder="Enter last name"
                             />
+                            {errors.lastName && (
+                                <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                            )}
                         </div>
 
                         {/* Client */}
@@ -95,7 +165,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 name="client"
                                 value={formData.client}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('client')}
                                 placeholder="Enter client name"
                             />
                         </div>
@@ -110,7 +180,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 name="company"
                                 value={formData.company}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('company')}
                                 placeholder="Enter company"
                             />
                         </div>
@@ -126,7 +196,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.noOfRooms}
                                 onChange={handleChange}
                                 min="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('noOfRooms')}
                                 placeholder="Enter number of rooms"
                             />
                         </div>
@@ -142,9 +212,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.phone}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('phone')}
                                 placeholder="Enter phone number"
                             />
+                            {errors.phone && (
+                                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                            )}
                         </div>
 
                         {/* Email */}
@@ -158,9 +231,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 required
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('email')}
                                 placeholder="Enter email address"
                             />
+                            {errors.email && (
+                                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                            )}
                         </div>
 
                         {/* Address */}
@@ -173,7 +249,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.address}
                                 onChange={handleChange}
                                 rows="2"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('address')}
                                 placeholder="Enter full address"
                             />
                         </div>
@@ -188,9 +264,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 name="website"
                                 value={formData.website}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('website')}
                                 placeholder="https://example.com"
                             />
+                            {errors.website && (
+                                <p className="mt-1 text-sm text-red-600">{errors.website}</p>
+                            )}
                         </div>
 
                         {/* Source */}
@@ -198,24 +277,14 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Source
                             </label>
-                            <select
+                            <input
+                                type="text"
                                 name="source"
                                 value={formData.source}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">Select source</option>
-                                <option value="website">Website</option>
-                                <option value="referral">Referral</option>
-                                <option value="social_media">
-                                    Social Media
-                                </option>
-                                <option value="advertisement">
-                                    Advertisement
-                                </option>
-                                <option value="cold_call">Cold Call</option>
-                                <option value="other">Other</option>
-                            </select>
+                                className={getInputClassName('source')}
+                                placeholder="Enter source"
+                            />
                         </div>
 
                         {/* Responsible Person */}
@@ -228,29 +297,56 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 name="responsiblePerson"
                                 value={formData.responsiblePerson}
                                 onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('responsiblePerson')}
                                 placeholder="Enter responsible person"
                             />
                         </div>
 
                         {/* Messenger */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Messenger
-                            </label>
-                            <select
-                                name="messenger"
-                                value={formData.messenger}
-                                onChange={handleChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">Select messenger</option>
-                                <option value="whatsapp">WhatsApp</option>
-                                <option value="telegram">Telegram</option>
-                                <option value="viber">Viber</option>
-                                <option value="skype">Skype</option>
-                                <option value="other">Other</option>
-                            </select>
+                        <div className="md:col-span-2">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Messenger Type */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Preferred Messenger
+                                    </label>
+                                    <select
+                                        name="messenger"
+                                        value={formData.messenger}
+                                        onChange={handleChange}
+                                        className={getInputClassName('messenger')}
+                                    >
+                                        <option value="">Select messenger</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="telegram">Telegram</option>
+                                        <option value="viber">Viber</option>
+                                        <option value="skype">Skype</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                {/* Messenger Contact */}
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Messenger Contact/Username
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="messengerContact"
+                                        value={formData.messengerContact}
+                                        onChange={handleChange}
+                                        className={getInputClassName('messengerContact')}
+                                        placeholder={
+                                            formData.messenger
+                                                ? `Enter ${formData.messenger} contact`
+                                                : "Enter contact"
+                                        }
+                                    />
+                                    {errors.messengerContact && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.messengerContact}</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
 
                         {/* Comment */}
@@ -263,7 +359,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                 value={formData.comment}
                                 onChange={handleChange}
                                 rows="4"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className={getInputClassName('comment')}
                                 placeholder="Enter any additional comments or notes"
                             />
                         </div>
@@ -273,7 +369,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                     <div className="mt-8 flex justify-end">
                         <button
                             type="submit"
-                            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                            className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Next
                         </button>

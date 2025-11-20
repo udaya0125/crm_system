@@ -7,6 +7,7 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
         followUpDate: data.followUpDate || "",
         followUpTime: data.followUpTime || "",
         notes: data.notes || "",
+        meetingOutcome: data.meetingOutcome || "",
     });
 
     const [errors, setErrors] = useState({});
@@ -34,6 +35,10 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
             newErrors.negativeReason = "Reason is required for negative responses";
         }
 
+        if (formData.response === "positive" && !formData.meetingOutcome) {
+            newErrors.meetingOutcome = "Meeting outcome is required for positive responses";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -51,7 +56,7 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
 
     return (
         <div className="max-w-7xl mx-auto p-4">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className=" p-6">
                 <form onSubmit={handleSubmit}>
 
                     {/* Response Dropdown */}
@@ -81,16 +86,34 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
                         <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200 mb-4">
                             <h3 className="font-medium text-green-800">Positive Response Details</h3>
 
+                            {/* Meeting Outcome */}
+                            <div>
+                                <label className="block text-sm text-green-700 mb-1">
+                                    Meeting Outcome *
+                                </label>
+                                <textarea
+                                    name="meetingOutcome"
+                                    value={formData.meetingOutcome}
+                                    onChange={handleChange}
+                                    rows="3"
+                                    className="w-full p-2 border border-green-300 rounded"
+                                    placeholder="Describe the outcome of the meeting (e.g., Deal closed, next steps agreed, proposal accepted, demo scheduled, contract signed...)"
+                                />
+                                {errors.meetingOutcome && (
+                                    <p className="text-red-500 text-xs mt-1">{errors.meetingOutcome}</p>
+                                )}
+                            </div>
+
                             {/* Notes */}
                             <div>
-                                <label className="block text-sm text-green-700 mb-1">Notes</label>
+                                <label className="block text-sm text-green-700 mb-1">Additional Notes</label>
                                 <textarea
                                     name="notes"
                                     value={formData.notes}
                                     onChange={handleChange}
                                     rows="3"
                                     className="w-full p-2 border border-green-300 rounded"
-                                    placeholder="Notes about the positive response..."
+                                    placeholder="Any additional notes about the positive response..."
                                 />
                             </div>
                         </div>
@@ -103,22 +126,35 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
 
                             {/* Reason */}
                             <div>
-                                <label className="block text-sm text-red-700 mb-1">Reason *</label>
+                                <label className="block text-sm text-red-700 mb-1">Reason for Negative Response *</label>
                                 <textarea
                                     name="negativeReason"
                                     value={formData.negativeReason}
                                     onChange={handleChange}
                                     rows="3"
                                     className="w-full p-2 border border-red-300 rounded"
-                                    placeholder="Why did the client decline?"
+                                    placeholder="Why did the client decline or provide negative feedback?"
                                 />
                                 {errors.negativeReason && (
                                     <p className="text-red-500 text-xs mt-1">{errors.negativeReason}</p>
                                 )}
                             </div>
 
-                            {/* Follow-up Date */}
+                            {/* Meeting Outcome for Negative Response */}
                             <div>
+                                <label className="block text-sm text-red-700 mb-1">Meeting Outcome</label>
+                                <textarea
+                                    name="meetingOutcome"
+                                    value={formData.meetingOutcome}
+                                    onChange={handleChange}
+                                    rows="3"
+                                    className="w-full p-2 border border-red-300 rounded"
+                                    placeholder="Describe the outcome of the meeting (e.g., Client not interested, budget constraints, timing issues, went with competitor, no decision made...)"
+                                />
+                            </div>
+
+                            {/* Follow-up Date */}
+                            {/* <div>
                                 <label className="block text-sm text-red-700 mb-1">Follow-up Date</label>
                                 <input
                                     type="date"
@@ -128,18 +164,18 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
                                     min={new Date().toISOString().split("T")[0]}
                                     className="w-full p-2 border border-red-300 rounded"
                                 />
-                            </div>
+                            </div> */}
 
                             {/* Notes */}
                             <div>
-                                <label className="block text-sm text-red-700 mb-1">Notes</label>
+                                <label className="block text-sm text-red-700 mb-1">Additional Notes</label>
                                 <textarea
                                     name="notes"
                                     value={formData.notes}
                                     onChange={handleChange}
                                     rows="2"
                                     className="w-full p-2 border border-red-300 rounded"
-                                    placeholder="Additional notes..."
+                                    placeholder="Any additional notes about the negative response..."
                                 />
                             </div>
                         </div>
@@ -157,9 +193,9 @@ const FollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
 
                         <button
                             type="submit"
-                            disabled={isNegative && !formData.negativeReason}
+                            disabled={(isNegative && !formData.negativeReason) || (isPositive && !formData.meetingOutcome)}
                             className={`px-6 py-2 text-white rounded ${
-                                isNegative && !formData.negativeReason
+                                (isNegative && !formData.negativeReason) || (isPositive && !formData.meetingOutcome)
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : isPositive
                                     ? "bg-green-600 hover:bg-green-700"

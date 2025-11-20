@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "@inertiajs/react";
 
 const NavBar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -10,9 +11,9 @@ const NavBar = () => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <span className="text-2xl font-light text-gray-900">
-                            Brand
-                        </span>
+                        <Link href={'/crm'} className="text-2xl font-light text-gray-900">
+                           Sales System
+                        </Link>
                     </div>
 
                     {/* Desktop Navigation */}
@@ -47,13 +48,6 @@ const NavBar = () => {
                         >
                             Contact
                         </a>
-                    </div>
-
-                    {/* CTA Button */}
-                    <div className="hidden md:block">
-                        <button className="flex items-center bg-gray-900 text-white px-6 py-2 text-sm font-medium hover:bg-gray-800 transition-colors">
-                            Get Started
-                        </button>
                     </div>
 
                     {/* Mobile menu button */}
@@ -106,11 +100,6 @@ const NavBar = () => {
                         >
                             Contact
                         </a>
-                        <div className="px-3 pt-2">
-                            <button className="flex items-center justify-center w-full bg-gray-900 text-white px-6 py-2 text-sm font-medium hover:bg-gray-800 transition-colors">
-                                Get Started
-                            </button>
-                        </div>
                     </div>
                 </div>
             )}

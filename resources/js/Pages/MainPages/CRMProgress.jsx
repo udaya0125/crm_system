@@ -75,9 +75,9 @@ const CRMProgress = ({ currentStep = 1 }) => {
     const steps = [
         { number: 1, label: "Company" },
         { number: 2, label: "Response" },
-        // { number: 3, label: "Meeting" },
-        { number: 3, label: "Follow-up" },
-        { number: 4, label: "Contract" },
+        { number: 3, label: "Meeting" },
+        { number: 4, label: "Follow-up" },
+        { number: 5, label: "Contract" },
     ];
 
     const handleStepClick = (stepNumber) => {

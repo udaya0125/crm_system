@@ -38,9 +38,9 @@ const Contract = ({ data, updateData, prevStep, onSubmit }) => {
 
     return (
         <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            {/* <h2 className="text-2xl font-bold text-gray-900 mb-6">
                 Contract Details
-            </h2>
+            </h2> */}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Contract File Upload */}
