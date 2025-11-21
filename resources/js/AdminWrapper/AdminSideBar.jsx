@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { Settings, X, Menu, ListFilter, Users } from "lucide-react";
+import { Settings, X, Menu, ListFilter, Users, Building } from "lucide-react";
 
 const AdminSideBar = ({
     isMobileOpen,
@@ -116,24 +116,24 @@ const AdminSideBar = ({
                     </Link>
 
                     {/* Users */}
-                    {/* <Link
-                        href="/users"
+                    <Link
+                        href="/company"
                         className={`
                             flex items-center rounded-lg transition-colors duration-200 group relative
                             ${isCollapsed ? "p-3 justify-center" : "p-3"}
                             ${
-                                isActive("/users")
+                                isActive("/company")
                                     ? "bg-gray-200 text-gray-600"
                                     : "text-gray-600 hover:bg-gray-50"
                             }
                         `}
-                        title={isCollapsed ? "Users" : ""}
+                        title={isCollapsed ? "Company" : ""}
                     >
-                        <Users
+                        <Building
                             className={`
                             ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
                             ${
-                                isActive("/users")
+                                isActive("/company")
                                     ? "text-gray-600"
                                     : "text-gray-500 group-hover:text-gray-700"
                             }
@@ -141,15 +141,15 @@ const AdminSideBar = ({
                         />
                         {!isCollapsed && (
                             <span className="ml-3 font-medium whitespace-nowrap">
-                                Users
+                                Company
                             </span>
                         )}
                         {isCollapsed && (
                             <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                                Users
+                                Company
                             </div>
                         )}
-                    </Link> */}
+                    </Link>
 
                     {/* Settings */}
                     {/* <Link

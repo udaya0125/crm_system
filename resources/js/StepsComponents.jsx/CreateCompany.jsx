@@ -5,8 +5,8 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
         companyName: data.companyName || "",
         firstName: data.firstName || "",
         lastName: data.lastName || "",
-        client: data.client || "",
-        company: data.company || "",
+        client_member: data.client_member || "",
+        designation: data.designation || "",
         noOfRooms: data.noOfRooms || "",
         phone: data.phone || "",
         email: data.email || "",
@@ -155,33 +155,33 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             )}
                         </div>
 
-                        {/* Client */}
+                        {/* Client Member */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Client
+                                Client Member
                             </label>
                             <input
                                 type="text"
-                                name="client"
-                                value={formData.client}
+                                name="client_member"
+                                value={formData.client_member}
                                 onChange={handleChange}
-                                className={getInputClassName('client')}
-                                placeholder="Enter client name"
+                                className={getInputClassName('client_member')}
+                                placeholder="Enter client member"
                             />
                         </div>
 
-                        {/* Company */}
+                        {/* Designation */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Company
+                                Designation
                             </label>
                             <input
                                 type="text"
-                                name="company"
-                                value={formData.company}
+                                name="designation"
+                                value={formData.designation}
                                 onChange={handleChange}
-                                className={getInputClassName('company')}
-                                placeholder="Enter company"
+                                className={getInputClassName('designation')}
+                                placeholder="Enter designation"
                             />
                         </div>
 

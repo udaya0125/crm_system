@@ -1,17 +1,16 @@
 import AdminWrapper from '@/AdminWrapper/AdminWrapper'
 import React from 'react'
 
-
-const Home = () => {
+const Company = () => {
   return (
     <div>
       <AdminWrapper>
         <h2>
-            hello
+            Company Page
         </h2>
       </AdminWrapper>
     </div>
   )
 }
 
-export default Home
+export default Company
