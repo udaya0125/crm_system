@@ -1,86 +1,160 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const CreateCompany = ({ data, updateData, nextStep }) => {
-    const [formData, setFormData] = useState({
-        companyName: data.companyName || "",
-        firstName: data.firstName || "",
-        lastName: data.lastName || "",
-        client_member: data.client_member || "",
-        designation: data.designation || "",
-        noOfRooms: data.noOfRooms || "",
-        phone: data.phone || "",
-        email: data.email || "",
-        address: data.address || "",
-        website: data.website || "",
-        source: data.source || "",
-        responsiblePerson: data.responsiblePerson || "",
-        comment: data.comment || "",
-        messenger: data.messenger || "",
-        messengerContact: data.messengerContact || "", // Added missing field
+    const {
+        register,
+        handleSubmit,
+        control,
+        watch,
+        formState: { errors, isSubmitting },
+        setError,
+    } = useForm({
+        defaultValues: {
+            companyName: data.companyName || "",
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            client_member: data.client_member || "",
+            designation: data.designation || "",
+            noOfRooms: data.noOfRooms || "",
+            phone: data.phone || "",
+            email: data.email || "",
+            address: data.address || "",
+            website: data.website || "",
+            source: data.source || "",
+            responsiblePerson: data.responsiblePerson || "",
+            comment: data.comment || "",
+            messenger: data.messenger || "",
+            messengerContact: data.messengerContact || "",
+        }
     });
 
-    const [errors, setErrors] = useState({});
+    // Watch messenger field to conditionally show validation
+    const watchedMessenger = watch("messenger");
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-        
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ""
-            }));
+    // React Quill modules configuration
+    const quillModules = {
+        toolbar: [
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            [{ 'font': [] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'align': [] }],
+            ['link', 'image'],
+            ['blockquote', 'code-block'],
+            ['clean']
+        ],
+    };
+
+    // React Quill formats
+    const quillFormats = [
+        'header', 'font', 'size',
+        'bold', 'italic', 'underline', 'strike',
+        'color', 'background',
+        'list', 'bullet',
+        'align',
+        'link', 'image',
+        'blockquote', 'code-block'
+    ];
+
+    // Axios store function
+    const storeCompany = async (formData) => {
+        try {
+            const response = await axios.post(route("ourcompany.store"), formData, {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            return response.data;
+        } catch (error) {
+            console.log("Error creating company", error);
+            throw error;
         }
     };
 
-    const validateForm = () => {
-        const newErrors = {};
+    const onSubmit = async (formData) => {
+        try {
+            // Prepare data for API - map React field names to Laravel field names
+            const apiData = {
+                company_name: formData.companyName,
+                first_name: formData.firstName,
+                last_name: formData.lastName,
+                client_member: formData.client_member,
+                designation: formData.designation,
+                no_of_rooms: formData.noOfRooms,
+                phone_no: formData.phone,
+                email: formData.email,
+                address: formData.address,
+                website: formData.website,
+                source: formData.source,
+                responsible_person: formData.responsiblePerson,
+                preffered_message: formData.messenger,
+                message_contact: formData.messengerContact,
+                comment: formData.comment,
+            };
 
-        // Required field validation
-        if (!formData.companyName.trim()) {
-            newErrors.companyName = "Company name is required";
-        }
-        if (!formData.firstName.trim()) {
-            newErrors.firstName = "First name is required";
-        }
-        if (!formData.lastName.trim()) {
-            newErrors.lastName = "Last name is required";
-        }
-        if (!formData.phone.trim()) {
-            newErrors.phone = "Phone number is required";
-        } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/\s/g, ''))) {
-            newErrors.phone = "Please enter a valid phone number";
-        }
-        if (!formData.email.trim()) {
-            newErrors.email = "Email is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            newErrors.email = "Please enter a valid email address";
-        }
-
-        // Website validation (if provided)
-        if (formData.website && !/^https?:\/\/.+\..+/.test(formData.website)) {
-            newErrors.website = "Please enter a valid website URL";
-        }
-
-        // Messenger contact validation (if messenger is selected)
-        if (formData.messenger && !formData.messengerContact.trim()) {
-            newErrors.messengerContact = "Messenger contact is required when messenger is selected";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        
-        if (validateForm()) {
-            updateData(formData);
+            // Store company via API
+            const result = await storeCompany(apiData);
+            console.log("Company created successfully:", result);
+            
+            // Extract company ID from API response
+            const createdCompanyId = result.company_id || result.id;
+            console.log("Created Company ID:", createdCompanyId);
+            
+            if (!createdCompanyId) {
+                throw new Error("Company ID not returned from API");
+            }
+            
+            // Update parent component data WITH THE COMPANY ID
+            updateData({
+                ...formData,
+                id: createdCompanyId
+            }, createdCompanyId);
+            
+            // Move to next step
             nextStep();
+            
+        } catch (error) {
+            console.log("Error creating company", error);
+            // Handle API validation errors
+            if (error.response && error.response.data.errors) {
+                const apiErrors = error.response.data.errors;
+                
+                // Map Laravel field names back to React field names
+                Object.keys(apiErrors).forEach(key => {
+                    switch(key) {
+                        case 'company_name':
+                            setError('companyName', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        case 'first_name':
+                            setError('firstName', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        case 'last_name':
+                            setError('lastName', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        case 'phone_no':
+                            setError('phone', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        case 'preffered_message':
+                            setError('messenger', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        case 'message_contact':
+                            setError('messengerContact', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        case 'responsible_person':
+                            setError('responsiblePerson', { type: 'server', message: apiErrors[key][0] });
+                            break;
+                        default:
+                            setError(key, { type: 'server', message: apiErrors[key][0] });
+                    }
+                });
+            } else {
+                alert("Error creating company. Please try again.");
+            }
         }
     };
 
@@ -94,9 +168,8 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
 
     return (
         <div className="max-w-7xl mx-auto p-6">
-            <div>
-                 {/* <h2 className="text-2xl font-bold ">Company Details</h2> */}
-                <form onSubmit={handleSubmit} className="p-6">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <form onSubmit={handleSubmit(onSubmit)} className="p-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Company Name */}
                         <div className="md:col-span-2">
@@ -105,15 +178,14 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="companyName"
-                                value={formData.companyName}
-                                onChange={handleChange}
-                                required
+                                {...register("companyName", {
+                                    required: "Company name is required",
+                                })}
                                 className={getInputClassName('companyName')}
                                 placeholder="Enter company name"
                             />
                             {errors.companyName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
+                                <p className="mt-1 text-sm text-red-600">{errors.companyName.message}</p>
                             )}
                         </div>
 
@@ -124,15 +196,14 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                required
+                                {...register("firstName", {
+                                    required: "First name is required",
+                                })}
                                 className={getInputClassName('firstName')}
                                 placeholder="Enter first name"
                             />
                             {errors.firstName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                                <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
                             )}
                         </div>
 
@@ -143,15 +214,14 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                required
+                                {...register("lastName", {
+                                    required: "Last name is required",
+                                })}
                                 className={getInputClassName('lastName')}
                                 placeholder="Enter last name"
                             />
                             {errors.lastName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                                <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
                             )}
                         </div>
 
@@ -162,9 +232,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="client_member"
-                                value={formData.client_member}
-                                onChange={handleChange}
+                                {...register("client_member")}
                                 className={getInputClassName('client_member')}
                                 placeholder="Enter client member"
                             />
@@ -177,9 +245,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="designation"
-                                value={formData.designation}
-                                onChange={handleChange}
+                                {...register("designation")}
                                 className={getInputClassName('designation')}
                                 placeholder="Enter designation"
                             />
@@ -192,13 +258,16 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="number"
-                                name="noOfRooms"
-                                value={formData.noOfRooms}
-                                onChange={handleChange}
+                                {...register("noOfRooms", {
+                                    min: { value: 0, message: "Number of rooms cannot be negative" }
+                                })}
                                 min="0"
                                 className={getInputClassName('noOfRooms')}
                                 placeholder="Enter number of rooms"
                             />
+                            {errors.noOfRooms && (
+                                <p className="mt-1 text-sm text-red-600">{errors.noOfRooms.message}</p>
+                            )}
                         </div>
 
                         {/* Phone */}
@@ -208,15 +277,18 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="tel"
-                                name="phone"
-                                value={formData.phone}
-                                onChange={handleChange}
-                                required
+                                {...register("phone", {
+                                    required: "Phone number is required",
+                                    pattern: {
+                                        value: /^[\+]?[1-9][\d]{0,15}$/,
+                                        message: "Please enter a valid phone number"
+                                    }
+                                })}
                                 className={getInputClassName('phone')}
                                 placeholder="Enter phone number"
                             />
                             {errors.phone && (
-                                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                                <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
                             )}
                         </div>
 
@@ -227,15 +299,18 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                        message: "Please enter a valid email address"
+                                    }
+                                })}
                                 className={getInputClassName('email')}
                                 placeholder="Enter email address"
                             />
                             {errors.email && (
-                                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                             )}
                         </div>
 
@@ -244,11 +319,9 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Address
                             </label>
-                            <textarea
-                                name="address"
-                                value={formData.address}
-                                onChange={handleChange}
-                                rows="2"
+                            <input
+                                type="text"
+                                {...register("address")}
                                 className={getInputClassName('address')}
                                 placeholder="Enter full address"
                             />
@@ -261,14 +334,17 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="url"
-                                name="website"
-                                value={formData.website}
-                                onChange={handleChange}
+                                {...register("website", {
+                                    pattern: {
+                                        value: /^https?:\/\/.+\..+/,
+                                        message: "Please enter a valid website URL"
+                                    }
+                                })}
                                 className={getInputClassName('website')}
                                 placeholder="https://example.com"
                             />
                             {errors.website && (
-                                <p className="mt-1 text-sm text-red-600">{errors.website}</p>
+                                <p className="mt-1 text-sm text-red-600">{errors.website.message}</p>
                             )}
                         </div>
 
@@ -279,9 +355,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="source"
-                                value={formData.source}
-                                onChange={handleChange}
+                                {...register("source")}
                                 className={getInputClassName('source')}
                                 placeholder="Enter source"
                             />
@@ -294,9 +368,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             </label>
                             <input
                                 type="text"
-                                name="responsiblePerson"
-                                value={formData.responsiblePerson}
-                                onChange={handleChange}
+                                {...register("responsiblePerson")}
                                 className={getInputClassName('responsiblePerson')}
                                 placeholder="Enter responsible person"
                             />
@@ -311,9 +383,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                         Preferred Messenger
                                     </label>
                                     <select
-                                        name="messenger"
-                                        value={formData.messenger}
-                                        onChange={handleChange}
+                                        {...register("messenger")}
                                         className={getInputClassName('messenger')}
                                     >
                                         <option value="">Select messenger</option>
@@ -332,46 +402,74 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                     </label>
                                     <input
                                         type="text"
-                                        name="messengerContact"
-                                        value={formData.messengerContact}
-                                        onChange={handleChange}
+                                        {...register("messengerContact", {
+                                            required: watchedMessenger ? "Messenger contact is required when messenger is selected" : false
+                                        })}
                                         className={getInputClassName('messengerContact')}
                                         placeholder={
-                                            formData.messenger
-                                                ? `Enter ${formData.messenger} contact`
+                                            watchedMessenger
+                                                ? `Enter ${watchedMessenger} contact`
                                                 : "Enter contact"
                                         }
                                     />
                                     {errors.messengerContact && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.messengerContact}</p>
+                                        <p className="mt-1 text-sm text-red-600">{errors.messengerContact.message}</p>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Comment */}
+                        {/* Comment - React Quill Rich Text Editor */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Comment
                             </label>
-                            <textarea
+                            <Controller
                                 name="comment"
-                                value={formData.comment}
-                                onChange={handleChange}
-                                rows="4"
-                                className={getInputClassName('comment')}
-                                placeholder="Enter any additional comments or notes"
+                                control={control}
+                                render={({ field }) => (
+                                    <ReactQuill
+                                        {...field}
+                                        theme="snow"
+                                        modules={quillModules}
+                                        formats={quillFormats}
+                                        placeholder="Enter any additional comments or notes..."
+                                        className="h-48 mb-12"
+                                        onChange={(content) => {
+                                            field.onChange(content);
+                                        }}
+                                    />
+                                )}
                             />
+                            <style jsx>{`
+                                :global(.ql-container) {
+                                    border-bottom-left-radius: 0.375rem;
+                                    border-bottom-right-radius: 0.375rem;
+                                }
+                                :global(.ql-toolbar) {
+                                    border-top-left-radius: 0.375rem;
+                                    border-top-right-radius: 0.375rem;
+                                    border-bottom: none;
+                                }
+                                :global(.ql-editor) {
+                                    min-height: 120px;
+                                }
+                                :global(.ql-editor.ql-blank::before) {
+                                    font-style: normal;
+                                    color: #9CA3AF;
+                                }
+                            `}</style>
                         </div>
                     </div>
 
                     {/* Submit Button */}
-                    <div className="mt-8 flex justify-end">
+                    <div className="mt-16 flex justify-end"> 
                         <button
                             type="submit"
+                            disabled={isSubmitting}
                             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            Next
+                            {isSubmitting ? "Creating Company..." : "Next"}
                         </button>
                     </div>
                 </form>

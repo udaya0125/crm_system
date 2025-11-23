@@ -16,6 +16,7 @@ const CRM = () => {
         followUpResponse: {},
         contract: {},
     });
+    const [companyId, setCompanyId] = useState(null);
 
     const nextStep = () => setStep((prev) => Math.min(prev + 1, 5));
     const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -28,13 +29,24 @@ const CRM = () => {
         }));
     };
 
+    // Special function to handle company creation and capture the ID
+    const updateCompanyData = (data, createdCompanyId = null) => {
+        updateFormData("company", data);
+        
+        // If we have a company ID from the API response, set it
+        if (createdCompanyId) {
+            setCompanyId(createdCompanyId);
+            console.log("Company ID set:", createdCompanyId);
+        }
+    };
+
     const renderStep = () => {
         switch (step) {
             case 1:
                 return (
                     <CreateCompany
                         data={formData.company}
-                        updateData={(data) => updateFormData("company", data)}
+                        updateData={updateCompanyData} // Use the special function
                         nextStep={nextStep}
                     />
                 );
@@ -47,6 +59,7 @@ const CRM = () => {
                         }
                         nextStep={nextStep}
                         prevStep={prevStep}
+                        companyId={companyId} // Pass companyId here
                     />
                 );
             case 3:
@@ -56,6 +69,7 @@ const CRM = () => {
                         updateData={(data) => updateFormData("meeting", data)}
                         nextStep={nextStep}
                         prevStep={prevStep}
+                        companyId={companyId} // Pass companyId to Meeting
                     />
                 );
             case 4:
@@ -67,6 +81,7 @@ const CRM = () => {
                         }
                         nextStep={nextStep}
                         prevStep={prevStep}
+                        companyId={companyId} // Pass companyId to FollowUpResponse
                     />
                 );
             case 5:
@@ -75,6 +90,7 @@ const CRM = () => {
                         data={formData.contract}
                         updateData={(data) => updateFormData("contract", data)}
                         prevStep={prevStep}
+                        companyId={companyId} // Pass companyId to Contract
                         onSubmit={() => {
                             console.log("Final CRM Data:", formData);
                             alert("CRM Process Completed Successfully!");
@@ -96,7 +112,14 @@ const CRM = () => {
                                 currentStep={step}
                                 goToStep={goToStep}
                             />
-                            <div className="p-8">{renderStep()}</div>
+                            <div className="">
+                                {/* Debug info - remove in production */}
+                                {/* <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
+                                    <strong>Current Step:</strong> {step} | 
+                                    <strong> Company ID:</strong> {companyId ? companyId : "Not set yet"}
+                                </div> */}
+                                {renderStep()}
+                            </div>
                         </div>
                     </div>
                 </div>

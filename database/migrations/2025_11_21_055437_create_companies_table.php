@@ -28,7 +28,7 @@ return new class extends Migration
             $table->string('preffered_message')->nullable();
             $table->string('message_contact')->nullable();
             $table->longText('comment');
-            $table->string('status');
+            $table->string('follow_up_date')->nullable();
             $table->string('slug');
             $table->timestamps();
         });

@@ -25,9 +25,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-    Route::get('/home', function(){
-        return Inertia::render('HomePage/Home');
-    });
+    // Route::get('/home', function(){
+    //     return Inertia::render('HomePage/Home');
+    // });
 
     Route::get('/', function(){
         return Inertia::render('MainPages/SalesSystem');
@@ -35,6 +35,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('crm', function(){
         return Inertia::render('MainPages/CRM');
+    });
+
+    Route::get('/crm/details/{slug}', function(){
+        return Inertia::render('EditPages/EditCRM');
     });
 
     Route::get('/company', function(){

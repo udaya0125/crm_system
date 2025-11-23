@@ -16,8 +16,8 @@ return new class extends Migration
             $table->date('meeting_date');
             $table->foreignId('company_id')->constrained()->onDelete('cascade'); 
             $table->string('meeting_time');
-            $table->string('meeting_type');
-            $table->string('meeting_platform');
+            $table->string('meeting_type')->nullable();
+            $table->string('meeting_platform')->nullable();
             $table->string('attendee');          
             $table->longText('agenda');
             $table->timestamps();
