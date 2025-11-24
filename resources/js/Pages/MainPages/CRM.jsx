@@ -9,7 +9,7 @@ import CRMProgress from "./CRMProgress";
 
 const CRM = () => {
     const [step, setStep] = useState(1);
-    const [formData, setFormData] = useState({
+    const [crmData, setCrmData] = useState({
         company: {},
         initialResponse: {},
         meeting: {},
@@ -22,8 +22,8 @@ const CRM = () => {
     const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
     const goToStep = (stepNumber) => setStep(stepNumber);
 
-    const updateFormData = (stepName, data) => {
-        setFormData((prev) => ({
+    const updateData = (stepName, data) => {
+        setCrmData((prev) => ({
             ...prev,
             [stepName]: { ...prev[stepName], ...data },
         }));
@@ -31,7 +31,7 @@ const CRM = () => {
 
     // Special function to handle company creation and capture the ID
     const updateCompanyData = (data, createdCompanyId = null) => {
-        updateFormData("company", data);
+        updateData("company", data);
         
         // If we have a company ID from the API response, set it
         if (createdCompanyId) {
@@ -45,7 +45,7 @@ const CRM = () => {
             case 1:
                 return (
                     <CreateCompany
-                        data={formData.company}
+                        data={crmData.company}
                         updateData={updateCompanyData} // Use the special function
                         nextStep={nextStep}
                     />
@@ -53,9 +53,9 @@ const CRM = () => {
             case 2:
                 return (
                     <InitialResponse
-                        data={formData.initialResponse}
+                        data={crmData.initialResponse}
                         updateData={(data) =>
-                            updateFormData("initialResponse", data)
+                            updateData("initialResponse", data)
                         }
                         nextStep={nextStep}
                         prevStep={prevStep}
@@ -65,8 +65,8 @@ const CRM = () => {
             case 3:
                 return (
                     <Meeting
-                        data={formData.meeting}
-                        updateData={(data) => updateFormData("meeting", data)}
+                        data={crmData.meeting}
+                        updateData={(data) => updateData("meeting", data)}
                         nextStep={nextStep}
                         prevStep={prevStep}
                         companyId={companyId} // Pass companyId to Meeting
@@ -75,9 +75,9 @@ const CRM = () => {
             case 4:
                 return (
                     <FollowUpResponse
-                        data={formData.followUpResponse}
+                        data={crmData.followUpResponse}
                         updateData={(data) =>
-                            updateFormData("followUpResponse", data)
+                            updateData("followUpResponse", data)
                         }
                         nextStep={nextStep}
                         prevStep={prevStep}
@@ -87,12 +87,12 @@ const CRM = () => {
             case 5:
                 return (
                     <Contract
-                        data={formData.contract}
-                        updateData={(data) => updateFormData("contract", data)}
+                        data={crmData.contract}
+                        updateData={(data) => updateData("contract", data)}
                         prevStep={prevStep}
                         companyId={companyId} // Pass companyId to Contract
                         onSubmit={() => {
-                            console.log("Final CRM Data:", formData);
+                            console.log("Final CRM Data:", crmData);
                             alert("CRM Process Completed Successfully!");
                         }}
                     />

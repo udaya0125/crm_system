@@ -1,16 +1,26 @@
 import React, { useState } from "react";
+import axios from "axios";
 
-const EditInitialResponse = ({ data, updateData, nextStep, prevStep }) => {
+const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, initialResponseId }) => {
     const [formData, setFormData] = useState({
-        response: data.response || "",
-        negativeReason: data.negativeReason || "",
+        response: data.initial_response || "",
+        negativeReason: data.initial_reason || "",
         followUpDate: data.followUpDate || "",
         followUpTime: data.followUpTime || "",
-        notes: data.notes || "",
-        meetingOutcomes: data.meetingOutcomes || "", // Added meeting outcomes field
+        notes: data.initial_notes || "",
+        meetingOutcomes: data.meeting_outcome || "",
     });
 
     const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+
+    // Helper function to get CSRF token safely
+    const getCsrfToken = () => {
+        if (typeof document === 'undefined') return '';
+        
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        return metaTag ? metaTag.getAttribute('content') : '';
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -35,20 +45,72 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep }) => {
             newErrors.negativeReason = "Reason is required for negative responses";
         }
 
-        // if (formData.response === "positive") {
-        //     if (!formData.followUpDate) newErrors.followUpDate = "Date is required";
-        //     if (!formData.followUpTime) newErrors.followUpTime = "Time is required";
-        // }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            updateData(formData);
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        try {
+            setSubmitting(true);
+
+            // Map frontend field names to backend field names
+            const backendData = {
+                company_id: companyId,
+                initial_response: formData.response,
+                meeting_outcome: formData.meetingOutcomes,
+                initial_notes: formData.notes,
+                initial_reason: formData.negativeReason,
+            };
+
+            if (initialResponseId) {
+                // Update existing initial response
+                await axios.put(
+                    route('ourinitialresponse.update', { id: initialResponseId }),
+                    backendData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                        },
+                    }
+                );
+                console.log("Initial response updated successfully");
+            } else {
+                // Create new initial response
+                const response = await axios.post(
+                    route('ourinitialresponse.store'),
+                    backendData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                        },
+                    }
+                );
+                console.log("Initial response created successfully:", response.data);
+            }
+
+            // Update parent component with the data
+            updateData({
+                initial_response: formData.response,
+                meeting_outcome: formData.meetingOutcomes,
+                initial_notes: formData.notes,
+                initial_reason: formData.negativeReason,
+            });
+
             nextStep();
+            
+        } catch (error) {
+            console.log("Error saving initial response", error);
+            setErrors({ submit: "Failed to save initial response. Please try again." });
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -101,43 +163,6 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                                 />
                             </div>
 
-                            {/* <div className="grid grid-cols-2 gap-4">
-                               
-                                <div>
-                                    <label className="block text-sm text-green-700 mb-1">Date *</label>
-                                    <input
-                                        type="date"
-                                        name="followUpDate"
-                                        value={formData.followUpDate}
-                                        onChange={handleChange}
-                                        min={new Date().toISOString().split("T")[0]}
-                                        className={`w-full p-2 border rounded ${
-                                            errors.followUpDate ? "border-red-300" : "border-green-300"
-                                        }`}
-                                    />
-                                    {errors.followUpDate && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.followUpDate}</p>
-                                    )}
-                                </div>
-
-                                
-                                <div>
-                                    <label className="block text-sm text-green-700 mb-1">Time *</label>
-                                    <input
-                                        type="time"
-                                        name="followUpTime"
-                                        value={formData.followUpTime}
-                                        onChange={handleChange}
-                                        className={`w-full p-2 border rounded ${
-                                            errors.followUpTime ? "border-red-300" : "border-green-300"
-                                        }`}
-                                    />
-                                    {errors.followUpTime && (
-                                        <p className="text-red-500 text-xs mt-1">{errors.followUpTime}</p>
-                                    )}
-                                </div>
-                            </div> */}
-
                             {/* Notes */}
                             <div>
                                 <label className="block text-sm text-green-700 mb-1">Notes</label>
@@ -187,19 +212,6 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                                 />
                             </div>
 
-                            {/* Follow-up Date */}
-                            {/* <div>
-                                <label className="block text-sm text-red-700 mb-1">Follow-up Date</label>
-                                <input
-                                    type="date"
-                                    name="followUpDate"
-                                    value={formData.followUpDate}
-                                    onChange={handleChange}
-                                    min={new Date().toISOString().split("T")[0]}
-                                    className="w-full p-2 border border-red-300 rounded"
-                                />
-                            </div> */}
-
                             {/* Notes */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">Notes</label>
@@ -215,28 +227,36 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep }) => {
                         </div>
                     )}
 
+                    {/* Error Message */}
+                    {errors.submit && (
+                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm text-red-600">{errors.submit}</p>
+                        </div>
+                    )}
+
                     {/* Navigation Buttons */}
                     <div className="flex justify-between gap-4 mt-6">
                         <button
                             type="button"
                             onClick={prevStep}
-                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                            disabled={submitting}
+                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Back
                         </button>
 
                         <button
                             type="submit"
-                            disabled={isNegative && !formData.negativeReason}
+                            disabled={(isNegative && !formData.negativeReason) || submitting}
                             className={`px-6 py-2 text-white rounded ${
-                                isNegative && !formData.negativeReason
+                                (isNegative && !formData.negativeReason) || submitting
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : isPositive
                                     ? "bg-green-600 hover:bg-green-700"
                                     : "bg-blue-600 hover:bg-blue-700"
                             }`}
                         >
-                            {isPositive ? "Next" : "Complete"}
+                            {submitting ? 'Saving...' : (isPositive ? "Next" : "Complete")}
                         </button>
                     </div>
                 </form>

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->longText('meeting_outcome');
             $table->longText('follow_up_notes')->nullable();
-            $table->longText('follow_up_reason');   
+            $table->longText('follow_up_reason')->nullable();   
             $table->timestamps();
         });
     }

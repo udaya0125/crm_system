@@ -1,16 +1,37 @@
 import React, { useState } from "react";
+import axios from "axios";
 
-const EditFollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
+const EditFollowUpResponse = ({ 
+    data, 
+    updateData, 
+    nextStep, 
+    prevStep, 
+    companyId, 
+    company,
+    existingData 
+}) => {
     const [formData, setFormData] = useState({
-        response: data.response || "",
-        negativeReason: data.negativeReason || "",
-        followUpDate: data.followUpDate || "",
-        followUpTime: data.followUpTime || "",
-        notes: data.notes || "",
-        meetingOutcome: data.meetingOutcome || "",
+        response: data.follow_up_response || "",
+        negativeReason: data.follow_up_reason || "",
+        followUpDate: data.follow_up_date || "",
+        followUpTime: data.follow_up_time || "",
+        notes: data.follow_up_notes || "",
+        meetingOutcome: data.meeting_outcome || "",
     });
 
     const [errors, setErrors] = useState({});
+    const [submitting, setSubmitting] = useState(false);
+
+    // Check if we're updating existing data or creating new
+    const followUpResponseId = existingData?.id || null;
+
+    // Helper function to get CSRF token safely
+    const getCsrfToken = () => {
+        if (typeof document === 'undefined') return '';
+        
+        const metaTag = document.querySelector('meta[name="csrf-token"]');
+        return metaTag ? metaTag.getAttribute('content') : '';
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -43,11 +64,70 @@ const EditFollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (validateForm()) {
-            updateData(formData);
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        try {
+            setSubmitting(true);
+
+            // Map frontend field names to backend field names
+            const backendData = {
+                company_id: companyId,
+                follow_up_response: formData.response,
+                meeting_outcome: formData.meetingOutcome,
+                follow_up_notes: formData.notes,
+                follow_up_reason: formData.negativeReason,
+            };
+
+            if (followUpResponseId) {
+                // Update existing follow-up response
+                await axios.put(
+                    route('ourfollowupresponse.update', { id: followUpResponseId }),
+                    backendData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                        },
+                    }
+                );
+                console.log("Follow-up response updated successfully");
+            } else {
+                // Create new follow-up response
+                const response = await axios.post(
+                    route('ourfollowupresponse.store'),
+                    backendData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken(),
+                        },
+                    }
+                );
+                console.log("Follow-up response created successfully:", response.data);
+            }
+
+            // Update parent component with the data
+            updateData({
+                follow_up_response: formData.response,
+                meeting_outcome: formData.meetingOutcome,
+                follow_up_notes: formData.notes,
+                follow_up_reason: formData.negativeReason,
+            });
+
             nextStep();
+            
+        } catch (error) {
+            console.log("Error saving follow-up response", error);
+            setErrors({ 
+                submit: "Failed to save follow-up response. Please try again." 
+            });
+        } finally {
+            setSubmitting(false);
         }
     };
 
@@ -153,19 +233,6 @@ const EditFollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
                                 />
                             </div>
 
-                            {/* Follow-up Date */}
-                            {/* <div>
-                                <label className="block text-sm text-red-700 mb-1">Follow-up Date</label>
-                                <input
-                                    type="date"
-                                    name="followUpDate"
-                                    value={formData.followUpDate}
-                                    onChange={handleChange}
-                                    min={new Date().toISOString().split("T")[0]}
-                                    className="w-full p-2 border border-red-300 rounded"
-                                />
-                            </div> */}
-
                             {/* Notes */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">Additional Notes</label>
@@ -181,28 +248,42 @@ const EditFollowUpResponse = ({ data, updateData, nextStep, prevStep }) => {
                         </div>
                     )}
 
+                    {/* Error Message */}
+                    {errors.submit && (
+                        <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                            <p className="text-sm text-red-600">{errors.submit}</p>
+                        </div>
+                    )}
+
                     {/* Navigation Buttons */}
                     <div className="flex justify-between gap-4 mt-6">
                         <button
                             type="button"
                             onClick={prevStep}
-                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                            disabled={submitting}
+                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Back
                         </button>
 
                         <button
                             type="submit"
-                            disabled={(isNegative && !formData.negativeReason) || (isPositive && !formData.meetingOutcome)}
+                            disabled={
+                                (isNegative && !formData.negativeReason) || 
+                                (isPositive && !formData.meetingOutcome) || 
+                                submitting
+                            }
                             className={`px-6 py-2 text-white rounded ${
-                                (isNegative && !formData.negativeReason) || (isPositive && !formData.meetingOutcome)
+                                (isNegative && !formData.negativeReason) || 
+                                (isPositive && !formData.meetingOutcome) || 
+                                submitting
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : isPositive
                                     ? "bg-green-600 hover:bg-green-700"
                                     : "bg-blue-600 hover:bg-blue-700"
                             }`}
                         >
-                            {isPositive ? "Next" : "Complete"}
+                            {submitting ? 'Saving...' : (isPositive ? "Next" : "Complete")}
                         </button>
                     </div>
                 </form>

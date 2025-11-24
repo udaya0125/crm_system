@@ -10,28 +10,28 @@ class Company extends Model
     protected $fillable = [
         'company_name', 'first_name', 'last_name', 'client_member', 'designation', 
         'no_of_rooms', 'phone_no', 'email', 'address', 'website', 'source', 
-        'responsible_person', 'preffered_message', 'message_contact', 'comment', 
+        'responsible_person', 'preffered_message', 'message_contact', 'comment','follow_up_date', 
         'status', 'slug'
     ];
 
     public function contracts()
     {
-        return $this->hasMany(CompanyContract::class);
+        return $this->hasOne(CompanyContract::class);
     }
 
     public function initialResponses()
     {
-        return $this->hasMany(CompanyInitialResponse::class);
+        return $this->hasOne(CompanyInitialResponse::class);
     }
 
     public function followUpResponses()
     {
-        return $this->hasMany(CompanyFollowUpResponse::class);
+        return $this->hasOne(CompanyFollowUpResponse::class);
     }
 
     public function meetings()
     {
-        return $this->hasMany(CompanyMeeting::class);
+        return $this->hasOne(CompanyMeeting::class);
     }
 
     protected static function boot()

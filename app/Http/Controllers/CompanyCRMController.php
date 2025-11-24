@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class CompanyCRMController extends Controller
 {
@@ -38,6 +39,27 @@ class CompanyCRMController extends Controller
         }
     }
 
+    public function indexBySlug($slug)
+    {
+        try {
+            $company = Company::with([
+                'initialResponses',
+                'meetings',
+                'followUpResponses',
+                'contracts'
+            ])->where('slug', $slug)->firstOrFail();
+
+            return Inertia::render('EditPages/EditCRM',[
+                'company' => $company
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to fetch company',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     // CREATE COMPANY
     public function storeCompany(Request $request)
     {
@@ -57,6 +79,7 @@ class CompanyCRMController extends Controller
             'responsible_person' => 'nullable|string|max:255',
             'preffered_message' => 'nullable|string|max:255',
             'message_contact' => 'nullable|string|max:255',
+            'follow_up_date' => 'nullable|date',
             'comment' => 'nullable|string',
            
         ]);
@@ -72,7 +95,7 @@ class CompanyCRMController extends Controller
             $company = Company::create($request->only([
                 'company_name', 'first_name', 'last_name', 'client_member', 'designation',
                 'no_of_rooms', 'phone_no', 'email', 'address', 'website', 'source',
-                'responsible_person', 'preffered_message', 'message_contact', 'comment',
+                'responsible_person', 'preffered_message', 'message_contact', 'comment','follow_up_date',
                 'status'
             ]));
 
@@ -106,6 +129,7 @@ class CompanyCRMController extends Controller
             'responsible_person' => 'nullable|string|max:255',
             'preffered_message' => 'nullable|string|max:255',
             'message_contact' => 'nullable|string|max:255',
+            'follow_up_date' => 'nullable|date',
             'comment' => 'nullable|string',
         ]);
 
@@ -123,6 +147,7 @@ class CompanyCRMController extends Controller
                 'company_name', 'first_name', 'last_name', 'client_member', 'designation',
                 'no_of_rooms', 'phone_no', 'email', 'address', 'website', 'source',
                 'responsible_person', 'preffered_message', 'message_contact', 'comment',
+                'follow_up_date',
                 'status'
             ]));
 
@@ -284,8 +309,10 @@ class CompanyCRMController extends Controller
             'meeting_time' => 'required|date_format:H:i',
             'meeting_type' => 'required|string',
             'meeting_platform' => 'nullable|string',
+            'meeting_location' => 'nullable|string',
             'attendee' => 'nullable|string',
             'agenda' => 'nullable|string'
+
         ]);
 
         if ($validator->fails()) {
@@ -297,7 +324,7 @@ class CompanyCRMController extends Controller
 
         try {
             $meeting = CompanyMeeting::create($request->only([
-                'meeting_date', 'meeting_time', 'meeting_type', 'meeting_platform',
+                'meeting_date', 'meeting_time', 'meeting_type', 'meeting_platform', 'meeting_location',
                 'attendee', 'company_id', 'agenda'
             ]));
 
@@ -322,6 +349,7 @@ class CompanyCRMController extends Controller
             'meeting_time' => 'sometimes|required|date_format:H:i',
             'meeting_type' => 'sometimes|required|string',
             'meeting_platform' => 'nullable|string',
+            'meeting_location' => 'nullable|string',
             'attendee' => 'nullable|string',
             'agenda' => 'nullable|string'
         ]);
@@ -336,7 +364,7 @@ class CompanyCRMController extends Controller
         try {
             $meeting = CompanyMeeting::findOrFail($id);
             $meeting->update($request->only([
-                'meeting_date', 'meeting_time', 'meeting_type', 'meeting_platform',
+                'meeting_date', 'meeting_time', 'meeting_type', 'meeting_platform', 'meeting_location',
                 'attendee', 'agenda'
             ]));
 

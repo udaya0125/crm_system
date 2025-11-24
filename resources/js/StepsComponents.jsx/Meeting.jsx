@@ -39,6 +39,22 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
         }
     }, [companyId, clearErrors]);
 
+    // Clear meeting location when switching to virtual/phone
+    useEffect(() => {
+        if (meetingType !== "in-person") {
+            setValue("meetingLocation", "");
+            clearErrors("meetingLocation");
+        }
+    }, [meetingType, setValue, clearErrors]);
+
+    // Clear meeting platform when switching to in-person/phone
+    useEffect(() => {
+        if (meetingType !== "virtual") {
+            setValue("meetingPlatform", "");
+            clearErrors("meetingPlatform");
+        }
+    }, [meetingType, setValue, clearErrors]);
+
     // Axios store function for meeting
     const storeMeeting = async (meetingData) => {
         try {
@@ -76,8 +92,8 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                 meeting_date: formData.meetingDate,
                 meeting_time: formData.meetingTime,
                 meeting_type: formData.meetingType,
-                meeting_platform: formData.meetingPlatform,
-                meeting_location: formData.meetingLocation,
+                meeting_platform: formData.meetingType === "virtual" ? formData.meetingPlatform : null,
+                meeting_location: formData.meetingType === "in-person" ? formData.meetingLocation : null,
                 attendee: formData.attendees,
                 agenda: formData.agenda,
             };
@@ -315,6 +331,20 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                                         {errors.meetingLocation.message}
                                     </p>
                                 )}
+                            </div>
+                        )}
+
+                        {meetingType === "phone" && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Phone Call Details
+                                </label>
+                                <input
+                                    type="text"
+                                    value="Phone call - no platform or location needed"
+                                    disabled
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+                                />
                             </div>
                         )}
                     </div>

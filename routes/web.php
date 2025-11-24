@@ -37,9 +37,7 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('MainPages/CRM');
     });
 
-    Route::get('/crm/details/{slug}', function(){
-        return Inertia::render('EditPages/EditCRM');
-    });
+    Route::get('/crm/details/{slug}', [CompanyCRMController::class, 'indexBySlug']);
 
     Route::get('/company', function(){
         return Inertia::render('MainPages/Company');

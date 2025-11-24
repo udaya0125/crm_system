@@ -8,9 +8,8 @@ import EditContract from "@/EditStepComponents/EditContract";
 import { Link } from "@inertiajs/react";
 import { ChevronLeft } from "lucide-react";
 
-const EditCRM = () => {
+const EditCRM = ({ company }) => {
     const [step, setStep] = useState(1);
-    const [allCompany, setAllCompany] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -23,24 +22,39 @@ const EditCRM = () => {
     });
     const [companyId, setCompanyId] = useState(null);
 
+    // Initialize with company data when component mounts
     useEffect(() => {
-        const fetchCompany = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(route("ourcompany.index"));
-                setAllCompany(response.data);
-                setError(null);
-            } catch (error) {
-                console.error("fetching error ", error);
-                setError("Failed to fetch companies. Please try again later.");
-                setAllCompany([]);
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (company) {
+            console.log("Company data received:", company);
+            setCompanyId(company.id);
 
-        fetchCompany();
-    }, [reloadTrigger]);
+            // Set the company data for editing
+            setCrmData((prev) => ({
+                ...prev,
+                company: {
+                    companyName: company.company_name || "",
+                    firstName: company.first_name || "",
+                    lastName: company.last_name || "",
+                    client_member: company.client_member || "",
+                    designation: company.designation || "",
+                    noOfRooms: company.no_of_rooms || "",
+                    phone: company.phone_no || "",
+                    email: company.email || "",
+                    address: company.address || "",
+                    website: company.website || "",
+                    source: company.source || "",
+                    responsiblePerson: company.responsible_person || "",
+                    comment: company.comment || "",
+                    messenger: company.preffered_message || "",
+                    messengerContact: company.message_contact || "",
+                },
+                initialResponse: company.initial_responses || {},
+                meeting: company.meetings || {},
+                followUpResponse: company.follow_up_responses || {},
+                contract: company.contracts || {},
+            }));
+        }
+    }, [company]);
 
     const nextStep = () => setStep((prev) => Math.min(prev + 1, 5));
     const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -70,10 +84,10 @@ const EditCRM = () => {
                 return (
                     <EditCreateCompany
                         data={crmData.company}
-                        updateData={updateCompanyData} // Use the special function
-                        allCompany={allCompany}
-                        setAllCompany={setAllCompany}
+                        updateData={updateCompanyData}
+                        company={company} // Pass the full company object
                         nextStep={nextStep}
+                        companyId={companyId} // Pass companyId for updates
                     />
                 );
             case 2:
@@ -85,7 +99,9 @@ const EditCRM = () => {
                         }
                         nextStep={nextStep}
                         prevStep={prevStep}
-                        companyId={companyId} // Pass companyId here
+                        companyId={companyId}
+                        company={company}
+                        existingData={company.initial_responses} // Pass existing data
                     />
                 );
             case 3:
@@ -95,7 +111,10 @@ const EditCRM = () => {
                         updateData={(data) => updateForm("meeting", data)}
                         nextStep={nextStep}
                         prevStep={prevStep}
-                        companyId={companyId} // Pass companyId to Meeting
+                        companyId={companyId}
+                        company={company}
+                        existingData={company.meetings} // Pass existing data
+                        meetingId={crmData.meeting.id}
                     />
                 );
             case 4:
@@ -107,7 +126,9 @@ const EditCRM = () => {
                         }
                         nextStep={nextStep}
                         prevStep={prevStep}
-                        companyId={companyId} // Pass companyId to FollowUpResponse
+                        companyId={companyId}
+                        company={company}
+                        existingData={company.follow_up_responses} // Pass existing data
                     />
                 );
             case 5:
@@ -116,7 +137,9 @@ const EditCRM = () => {
                         data={crmData.contract}
                         updateData={(data) => updateForm("contract", data)}
                         prevStep={prevStep}
-                        companyId={companyId} // Pass companyId to Contract
+                        companyId={companyId}
+                        company={company}
+                        existingData={company.contracts} // Pass existing data
                         onSubmit={() => {
                             console.log("Final CRM Data:", crmData);
                             alert("CRM Process Completed Successfully!");
@@ -135,19 +158,12 @@ const EditCRM = () => {
                     <ChevronLeft /> Back to CRM Dashboard
                 </Link>
                 <div className="mt-6 bg-white shadow-sm rounded-lg">
-                    <div className=" overflow-hidden">
+                    <div className="overflow-hidden">
                         <EditCrmProgress
                             currentStep={step}
                             goToStep={goToStep}
                         />
-                        <div className="">
-                            {/* Debug info - remove in production */}
-                            {/* <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                                    <strong>Current Step:</strong> {step} | 
-                                    <strong> Company ID:</strong> {companyId ? companyId : "Not set yet"}
-                                </div> */}
-                            {renderStep()}
-                        </div>
+                        <div className="">{renderStep()}</div>
                     </div>
                 </div>
             </div>
