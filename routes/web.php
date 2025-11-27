@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\CompanyCRMController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -15,25 +16,12 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Route::get('/dashboard', function () {
+//     return Inertia::render('Dashboard');
+// })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-    // Route::get('/home', function(){
-    //     return Inertia::render('HomePage/Home');
-    // });
-
-    Route::get('/', function(){
-        return Inertia::render('MainPages/SalesSystem');
-    });
-
-    Route::get('crm', function(){
+    Route::get('/crm', function(){
         return Inertia::render('MainPages/CRM');
     });
 
@@ -41,12 +29,70 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/company', function(){
         return Inertia::render('MainPages/Company');
+        
     });
 
-    Route::get('/company/details/{slug}', function(){
-        return Inertia::render('DetailsPage/CompanyDetails');
+    // -----------------------------------------
+    // COMPANY CRUD
+    // -----------------------------------------
+    Route::get('/ourcompany', [CompanyCRMController::class, 'index'])->name('ourcompany.index');
+    Route::post('/ourcompany', [CompanyCRMController::class, 'storeCompany'])->name('ourcompany.store');
+    Route::put('/ourcompany/{id}', [CompanyCRMController::class, 'updateCompany'])->name('ourcompany.update');
+    Route::delete('/ourcompany/{id}', [CompanyCRMController::class, 'deleteCompany'])->name('ourcompany.delete');
+
+
+    // -----------------------------------------
+    // INITIAL RESPONSE (STEP 1)
+    // -----------------------------------------
+    Route::post('/ourinitialresponse', [CompanyCRMController::class, 'storeInitialResponse'])->name('ourinitialresponse.store');
+    Route::put('/ourinitialresponse/{id}', [CompanyCRMController::class, 'updateInitialResponse'])->name('ourinitialresponse.update');
+
+    // -----------------------------------------
+    // MEETING (STEP 2)
+    // -----------------------------------------
+    Route::post('/ourmeeting', [CompanyCRMController::class, 'storeMeeting'])->name('ourmeeting.store');
+    Route::put('/ourmeeting/{id}', [CompanyCRMController::class, 'updateMeeting'])->name('ourmeeting.update');
+
+
+    // -----------------------------------------
+    // FOLLOW UP RESPONSE (STEP 3)
+    // -----------------------------------------
+    Route::post('/ourfollowupresponse', [CompanyCRMController::class, 'storeFollowUp'])->name('ourfollowupresponse.store');
+    Route::put('/ourfollowupresponse/{id}', [CompanyCRMController::class, 'updateFollowUp'])->name('ourfollowupresponse.update');
+
+
+    // -----------------------------------------
+    // CONTRACT (STEP 4)
+    // -----------------------------------------
+    Route::post('/ourcontract', [CompanyCRMController::class, 'storeContract'])->name('ourcontract.store');
+    Route::put('/ourcontract/{id}', [CompanyCRMController::class, 'updateContract'])->name('ourcontract.update');
+
+   
+});
+
+    Route::get('/', function(){
+        return Inertia::render('Auth/Login');
     });
 
+    //-----------------------------------------
+    // Only admin can access user management
+    //-----------------------------------------
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    // PAGE: User Management Page
+    Route::get('/user-management', function () {
+        return Inertia::render('DetailsPage/UserManagement');
+    });
+
+    // -----------------------------------------
+    // USER MANAGEMENT CRUD
+    // -----------------------------------------
+    Route::get('/ouruser', [UserController::class, 'index'])->name('ouruser.index');
+    Route::post('/ouruser', [UserController::class, 'store'])->name('ouruser.store');
+    Route::put('/ouruser/{id}', [UserController::class, 'update'])->name('ouruser.update');
+    Route::delete('/ouruser/{id}', [UserController::class, 'destroy'])->name('ouruser.destroy');
+});
 
     // // Index - Get all companies with relationships
     // Route::get('/ourcompany', [CompanyCRMController::class, 'index'])->name('ourcompany.index');
@@ -71,46 +117,5 @@ Route::middleware('auth')->group(function () {
     // // Meeting
     // Route::post('/ourmeeting', [CompanyCRMController::class, 'storeMeeting'])->name('ourmeeting.store');
     // Route::post('/ourmeeting/{id}', [CompanyCRMController::class, 'updateMeeting'])->name('ourmeeting.update');
-
-
-
-
-
-    // -----------------------------------------
-    // COMPANY CRUD
-    // -----------------------------------------
-    Route::get('/ourcompany', [CompanyCRMController::class, 'index'])->name('ourcompany.index');
-    Route::post('/ourcompany', [CompanyCRMController::class, 'storeCompany'])->name('ourcompany.store');
-    Route::put('/ourcompany/{id}', [CompanyCRMController::class, 'updateCompany'])->name('ourcompany.update');
-    Route::delete('/ourcompany/{id}', [CompanyCRMController::class, 'deleteCompany'])->name('ourcompany.delete');
-
-
-    // -----------------------------------------
-    // INITIAL RESPONSE (STEP 1)
-    // -----------------------------------------
-    Route::post('/ourinitialresponse', [CompanyCRMController::class, 'storeInitialResponse'])->name('ourinitialresponse.store');
-    Route::put('/ourinitialresponse/{id}', [CompanyCRMController::class, 'updateInitialResponse'])->name('ourinitialresponse.update');
-
-
-    // -----------------------------------------
-    // MEETING (STEP 2)
-    // -----------------------------------------
-    Route::post('/ourmeeting', [CompanyCRMController::class, 'storeMeeting'])->name('ourmeeting.store');
-    Route::put('/ourmeeting/{id}', [CompanyCRMController::class, 'updateMeeting'])->name('ourmeeting.update');
-
-
-    // -----------------------------------------
-    // FOLLOW UP RESPONSE (STEP 3)
-    // -----------------------------------------
-    Route::post('/ourfollowupresponse', [CompanyCRMController::class, 'storeFollowUp'])->name('ourfollowupresponse.store');
-    Route::put('/ourfollowupresponse/{id}', [CompanyCRMController::class, 'updateFollowUp'])->name('ourfollowupresponse.update');
-
-
-    // -----------------------------------------
-    // CONTRACT (STEP 4)
-    // -----------------------------------------
-    Route::post('/ourcontract', [CompanyCRMController::class, 'storeContract'])->name('ourcontract.store');
-    Route::put('/ourcontract/{id}', [CompanyCRMController::class, 'updateContract'])->name('ourcontract.update');
-
 
 require __DIR__.'/auth.php';

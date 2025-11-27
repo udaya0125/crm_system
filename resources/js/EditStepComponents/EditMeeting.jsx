@@ -1,79 +1,109 @@
-import React, { useState } from "react";
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingId, existingData }) => {
-    // Initialize state directly with existing data or default values
-    const [meetingData, setMeetingData] = useState(() => {
-        if (existingData && Object.keys(existingData).length > 0) {
-            console.log("Initializing with existing meeting data:", existingData);
-            return {
-                meetingDate: existingData.meeting_date || "",
-                meetingTime: existingData.meeting_time || "",
-                meetingType: existingData.meeting_type || "virtual",
-                meetingPlatform: existingData.meeting_platform || "",
-                meetingLocation: existingData.meeting_location || "", // Fixed: Added meeting_location
-                attendees: existingData.attendee || "",
-                meetingNotes: "",
-                actionItems: "",
-                nextSteps: "",
-                meetingOutcome: "",
-                keyDiscussionPoints: existingData.agenda || "",
-            };
-        } else if (data && Object.keys(data).length > 0) {
-            return data;
-        } else {
-            return {
-                meetingDate: "",
-                meetingTime: "",
-                meetingType: "virtual",
-                meetingPlatform: "",
-                meetingLocation: "", // Fixed: Added meeting_location
-                attendees: "",
-                meetingNotes: "",
-                actionItems: "",
-                nextSteps: "",
-                meetingOutcome: "",
-                keyDiscussionPoints: "",
-            };
-        }
+const EditMeeting = ({
+    data,
+    updateData,
+    nextStep,
+    prevStep,
+    companyId,
+    meetingId,
+    existingData,
+}) => {
+    const [submitting, setSubmitting] = React.useState(false);
+
+    // React Hook Form initialization
+    const {
+        register,
+        handleSubmit,
+        control,
+        watch,
+        setValue,
+        setError,
+        formState: { errors },
+    } = useForm({
+        mode: "onChange",
+        defaultValues: {
+            meetingDate: existingData?.meeting_date || data?.meetingDate || "",
+            meetingTime: existingData?.meeting_time || data?.meetingTime || "",
+            meetingType:
+                existingData?.meeting_type || data?.meetingType || "virtual",
+            meetingPlatform:
+                existingData?.meeting_platform || data?.meetingPlatform || "",
+            meetingLocation:
+                existingData?.meeting_location || data?.meetingLocation || "",
+            attendees: existingData?.attendee || data?.attendees || "",
+            meetingNotes: data?.meetingNotes || "",
+            actionItems: data?.actionItems || "",
+            nextSteps: data?.nextSteps || "",
+            meetingOutcome: data?.meetingOutcome || "",
+            keyDiscussionPoints:
+                existingData?.agenda || data?.keyDiscussionPoints || "",
+        },
     });
 
-    const [errors, setErrors] = useState({});
-    const [submitting, setSubmitting] = useState(false);
+    // React Quill modules configuration
+    const quillModules = {
+        toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline", "strike"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["link", "blockquote", "code-block"],
+            ["clean"],
+        ],
+    };
+
+    const quillFormats = [
+        "header",
+        "bold",
+        "italic",
+        "underline",
+        "strike",
+        "list",
+        "bullet",
+        "link",
+        "blockquote",
+        "code-block",
+    ];
+
+    // Watch meetingType for conditional fields
+    const meetingType = watch("meetingType");
+    const isVirtual = meetingType === "virtual";
+    const isInPerson = meetingType === "in-person";
+    const isPhone = meetingType === "phone";
+
+    // Update parent component when form values change
+    React.useEffect(() => {
+        const subscription = watch((value) => {
+            updateData(value);
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, updateData]);
 
     // Helper function to get CSRF token safely
     const getCsrfToken = () => {
-        if (typeof document === 'undefined') return '';
+        if (typeof document === "undefined") return "";
         const metaTag = document.querySelector('meta[name="csrf-token"]');
-        return metaTag ? metaTag.getAttribute('content') : '';
+        return metaTag ? metaTag.getAttribute("content") : "";
     };
 
-    const handleChange = (field, value) => {
-        const updatedData = { ...meetingData, [field]: value };
-        setMeetingData(updatedData);
-        updateData(updatedData);
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validateForm()) {
-            return;
-        }
-
+    const onSubmit = async (formData) => {
         try {
             setSubmitting(true);
 
             // Map frontend field names to backend field names
             const backendData = {
                 company_id: companyId,
-                meeting_date: meetingData.meetingDate,
-                meeting_time: meetingData.meetingTime,
-                meeting_type: meetingData.meetingType,
-                meeting_platform: meetingData.meetingType === "virtual" ? meetingData.meetingPlatform : null, // Only include for virtual
-                meeting_location: meetingData.meetingType === "in-person" ? meetingData.meetingLocation : null, // Fixed: Added meeting_location
-                attendee: meetingData.attendees,
-                agenda: meetingData.keyDiscussionPoints,
+                meeting_date: formData.meetingDate,
+                meeting_time: formData.meetingTime,
+                meeting_type: formData.meetingType,
+                meeting_platform: isVirtual ? formData.meetingPlatform : null,
+                meeting_location: isInPerson ? formData.meetingLocation : null,
+                attendee: formData.attendees,
+                agenda: formData.keyDiscussionPoints,
             };
 
             console.log("Submitting meeting data:", backendData);
@@ -86,96 +116,64 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                     backendData,
                     {
                         headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': getCsrfToken(),
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": getCsrfToken(),
                         },
                     }
                 );
                 console.log("Meeting updated successfully:", response.data);
             } else {
                 // Create new meeting
-                const response = await axios.post(
-                    '/ourmeeting',
-                    backendData,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': getCsrfToken(),
-                        },
-                    }
-                );
+                const response = await axios.post("/ourmeeting", backendData, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": getCsrfToken(),
+                    },
+                });
                 console.log("Meeting created successfully:", response.data);
-                
-                // If creating new, update the meetingId in parent component if needed
+
                 if (response.data.meeting_id) {
                     console.log("New meeting ID:", response.data.meeting_id);
                 }
             }
 
             nextStep();
-            
         } catch (error) {
             console.error("Error saving meeting data", error);
+            let errorMessage = "Failed to save meeting data. Please try again.";
+
             if (error.response) {
                 console.error("Server response:", error.response.data);
-                setErrors({ 
-                    submit: `Failed to save meeting data: ${error.response.data.message || 'Please try again.'}` 
-                });
-            } else {
-                setErrors({ submit: "Failed to save meeting data. Please try again." });
+                errorMessage = `Failed to save meeting data: ${
+                    error.response.data.message || "Please try again."
+                }`;
             }
+
+            setError("submit", {
+                type: "manual",
+                message: errorMessage,
+            });
         } finally {
             setSubmitting(false);
         }
     };
 
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (!meetingData.meetingDate) {
-            newErrors.meetingDate = "Meeting date is required";
-        }
-
-        if (!meetingData.meetingTime) {
-            newErrors.meetingTime = "Meeting time is required";
-        }
-
-        if (!meetingData.meetingType) {
-            newErrors.meetingType = "Meeting type is required";
-        }
-
-        if (meetingData.meetingType === "virtual" && !meetingData.meetingPlatform) {
-            newErrors.meetingPlatform = "Platform is required for virtual meetings";
-        }
-
-        if (meetingData.meetingType === "in-person" && !meetingData.meetingLocation) {
-            newErrors.meetingLocation = "Location is required for in-person meetings"; // Fixed: Added validation
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
     // Helper function to get input className with error state
     const getInputClassName = (fieldName) => {
-        const baseClass = "w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
+        const baseClass =
+            "w-full px-3 py-2  border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200";
         return errors[fieldName]
-            ? `${baseClass} border-red-500 focus:ring-red-500`
+            ? `${baseClass} border-red-500 focus:ring-red-500 bg-red-50`
             : baseClass;
     };
 
     return (
-        <div className="max-w-7xl mx-auto p-6">
-            <div className="mb-4">
-                <h2 className="text-xl font-semibold text-gray-800">
-                    {meetingId ? "Edit Meeting" : "Create Meeting"}
-                </h2>
-                {meetingId && (
-                    <p className="text-sm text-gray-600">Meeting ID: {meetingId}</p>
-                )}
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="max-w-7xl mx-auto p-6 ">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="space-y-6 bg-white p-6 rounded-lg shadow-sm border border-gray-200"
+                noValidate
+            >
                 {/* Meeting Scheduling */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -184,15 +182,15 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                         </label>
                         <input
                             type="date"
-                            value={meetingData.meetingDate}
-                            onChange={(e) =>
-                                handleChange("meetingDate", e.target.value)
-                            }
+                            {...register("meetingDate", {
+                                required: "Meeting date is required",
+                            })}
                             className={getInputClassName("meetingDate")}
-                            required
                         />
                         {errors.meetingDate && (
-                            <p className="mt-1 text-sm text-red-600">{errors.meetingDate}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.meetingDate.message}
+                            </p>
                         )}
                     </div>
 
@@ -202,15 +200,15 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                         </label>
                         <input
                             type="time"
-                            value={meetingData.meetingTime}
-                            onChange={(e) =>
-                                handleChange("meetingTime", e.target.value)
-                            }
+                            {...register("meetingTime", {
+                                required: "Meeting time is required",
+                            })}
                             className={getInputClassName("meetingTime")}
-                            required
                         />
                         {errors.meetingTime && (
-                            <p className="mt-1 text-sm text-red-600">{errors.meetingTime}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.meetingTime.message}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -222,10 +220,9 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                             Meeting Type *
                         </label>
                         <select
-                            value={meetingData.meetingType}
-                            onChange={(e) =>
-                                handleChange("meetingType", e.target.value)
-                            }
+                            {...register("meetingType", {
+                                required: "Meeting type is required",
+                            })}
                             className={getInputClassName("meetingType")}
                         >
                             <option value="virtual">Virtual</option>
@@ -233,23 +230,23 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                             <option value="phone">Phone Call</option>
                         </select>
                         {errors.meetingType && (
-                            <p className="mt-1 text-sm text-red-600">{errors.meetingType}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.meetingType.message}
+                            </p>
                         )}
                     </div>
 
-                    {meetingData.meetingType === "virtual" && (
+                    {isVirtual && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Platform *
                             </label>
                             <select
-                                value={meetingData.meetingPlatform}
-                                onChange={(e) =>
-                                    handleChange(
-                                        "meetingPlatform",
-                                        e.target.value
-                                    )
-                                }
+                                {...register("meetingPlatform", {
+                                    required: isVirtual
+                                        ? "Platform is required for virtual meetings"
+                                        : false,
+                                })}
                                 className={getInputClassName("meetingPlatform")}
                             >
                                 <option value="">Select Platform</option>
@@ -260,35 +257,37 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                                 <option value="other">Other</option>
                             </select>
                             {errors.meetingPlatform && (
-                                <p className="mt-1 text-sm text-red-600">{errors.meetingPlatform}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.meetingPlatform.message}
+                                </p>
                             )}
                         </div>
                     )}
 
-                    {meetingData.meetingType === "in-person" && (
+                    {isInPerson && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Location *
                             </label>
                             <input
                                 type="text"
-                                value={meetingData.meetingLocation}
-                                onChange={(e) =>
-                                    handleChange(
-                                        "meetingLocation",
-                                        e.target.value
-                                    )
-                                }
+                                {...register("meetingLocation", {
+                                    required: isInPerson
+                                        ? "Location is required for in-person meetings"
+                                        : false,
+                                })}
                                 placeholder="Meeting venue or address"
-                                className={getInputClassName("meetingLocation")} // Fixed: Added error styling
+                                className={getInputClassName("meetingLocation")}
                             />
                             {errors.meetingLocation && (
-                                <p className="mt-1 text-sm text-red-600">{errors.meetingLocation}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.meetingLocation.message}
+                                </p>
                             )}
                         </div>
                     )}
 
-                    {meetingData.meetingType === "phone" && (
+                    {isPhone && (
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Phone Call Details
@@ -310,38 +309,47 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                     </label>
                     <input
                         type="text"
-                        value={meetingData.attendees}
-                        onChange={(e) =>
-                            handleChange("attendees", e.target.value)
-                        }
+                        {...register("attendees")}
                         placeholder="Enter attendee names separated by commas"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     />
                     <p className="text-xs text-gray-500 mt-1">
                         Separate multiple attendees with commas
                     </p>
                 </div>
 
-                {/* Key Discussion Points & Agenda */}
+                {/* Key Discussion Points & Agenda with React Quill */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                         Key Discussion Points & Agenda
                     </label>
-                    <textarea
-                        value={meetingData.keyDiscussionPoints}
-                        onChange={(e) => 
-                            handleChange("keyDiscussionPoints", e.target.value)
-                        }
-                        rows="4"
-                        placeholder="Enter key discussion points, important decisions, budget discussions, timeline discussions, etc."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <Controller
+                        name="keyDiscussionPoints"
+                        control={control}
+                        render={({ field }) => (
+                            <ReactQuill
+                                {...field}
+                                theme="snow"
+                                modules={quillModules}
+                                formats={quillFormats}
+                                placeholder="Enter key discussion points, important decisions, budget discussions, timeline discussions, etc."
+                                className="rounded-md h-[250px] focus:outline-none focus:ring-2 focus:ring-blue-500 "
+                            />
+                        )}
                     />
+                    {errors.keyDiscussionPoints && (
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.keyDiscussionPoints.message}
+                        </p>
+                    )}
                 </div>
 
                 {/* Error Message */}
                 {errors.submit && (
                     <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-600">{errors.submit}</p>
+                        <p className="text-sm text-red-600">
+                            {errors.submit.message}
+                        </p>
                     </div>
                 )}
 
@@ -351,16 +359,20 @@ const EditMeeting = ({ data, updateData, nextStep, prevStep, companyId, meetingI
                         type="button"
                         onClick={prevStep}
                         disabled={submitting}
-                        className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
                         Back
                     </button>
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                     >
-                        {submitting ? 'Saving...' : meetingId ? 'Update Meeting' : 'Create Meeting'}
+                        {submitting
+                            ? "Saving..."
+                            : meetingId
+                            ? "Update Meeting"
+                            : "Create Meeting"}
                     </button>
                 </div>
             </form>

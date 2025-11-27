@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
+    const [existingMeetingId, setExistingMeetingId] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
     const {
         register,
         handleSubmit,
@@ -27,9 +32,33 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
 
     const meetingType = watch("meetingType");
 
+    // React Quill modules configuration
+    const quillModules = {
+        toolbar: [
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            ['link', 'image'],
+            ['clean']
+        ],
+    };
+
+    const quillFormats = [
+        'header',
+        'bold', 'italic', 'underline', 'strike',
+        'list', 'bullet', 'indent',
+        'link', 'image'
+    ];
+
     useEffect(() => {
         console.log("Company ID in Meeting:", companyId);
         console.log("Data in Meeting:", data);
+        
+        // Check if meeting data already exists and has an ID
+        if (data.meetingId) {
+            setExistingMeetingId(data.meetingId);
+        }
     }, [companyId, data]);
 
     // Clear companyId error when companyId becomes available
@@ -55,6 +84,19 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
         }
     }, [meetingType, setValue, clearErrors]);
 
+    // Check if meeting exists for this company
+    const checkExistingMeeting = async () => {
+        if (!companyId) return null;
+        
+        try {
+            const response = await axios.get(route("ourmeeting.check", { companyId }));
+            return response.data;
+        } catch (error) {
+            console.log("Error checking existing meeting", error);
+            return null;
+        }
+    };
+
     // Axios store function for meeting
     const storeMeeting = async (meetingData) => {
         try {
@@ -72,6 +114,27 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
             return response.data;
         } catch (error) {
             console.log("Error creating meeting", error);
+            throw error;
+        }
+    };
+
+    // Axios update function for meeting
+    const updateMeeting = async (meetingData, meetingId) => {
+        try {
+            console.log("Updating meeting with ID:", meetingId, "Data:", meetingData);
+
+            const response = await axios.put(
+                route("ourmeeting.update", { id: meetingId }),
+                meetingData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.log("Error updating meeting", error);
             throw error;
         }
     };
@@ -100,12 +163,27 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
 
             console.log("Final API data being sent:", apiData);
 
-            // Store meeting via API
-            const result = await storeMeeting(apiData);
-            console.log("Meeting created successfully:", result);
+            let result;
+            
+            // Check if we're updating an existing meeting or creating a new one
+            if (existingMeetingId) {
+                // Update existing meeting
+                result = await updateMeeting(apiData, existingMeetingId);
+                console.log("Meeting updated successfully:", result);
+            } else {
+                // Create new meeting
+                result = await storeMeeting(apiData);
+                console.log("Meeting created successfully:", result);
+                
+                // Store the new meeting ID for potential future updates
+                if (result.meeting && result.meeting.id) {
+                    setExistingMeetingId(result.meeting.id);
+                }
+            }
 
-            // Update parent component data
+            // Update parent component data with meeting ID
             updateData({
+                meetingId: existingMeetingId || result.meeting?.id,
                 meetingDate: formData.meetingDate,
                 meetingTime: formData.meetingTime,
                 meetingType: formData.meetingType,
@@ -118,7 +196,7 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
             // Move to next step
             nextStep();
         } catch (error) {
-            console.log("Error creating meeting", error);
+            console.log("Error saving meeting", error);
             // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
@@ -155,7 +233,7 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                     }
                 });
             } else {
-                alert("Error creating meeting. Please try again.");
+                alert(`Error ${existingMeetingId ? 'updating' : 'creating'} meeting. Please try again.`);
             }
         }
     };
@@ -191,6 +269,17 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
     return (
         <div className="max-w-7xl mx-auto p-6">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="mb-4 flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-800">
+                        Meeting Details
+                    </h2>
+                    {existingMeetingId && (
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
+                            Editing Existing Meeting
+                        </span>
+                    )}
+                </div>
+
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     {/* Company ID Error Display */}
                     {errors.companyId && (
@@ -334,7 +423,7 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                             </div>
                         )}
 
-                        {meetingType === "phone" && (
+                        {/* {meetingType === "phone" && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     Phone Call Details
@@ -346,7 +435,7 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
                                 />
                             </div>
-                        )}
+                        )} */}
                     </div>
 
                     {/* Attendees */}
@@ -377,28 +466,48 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                         )}
                     </div>
 
-                    {/* Agenda */}
+                    {/* Agenda with React Quill */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Key Discussion Points & Agenda *
                         </label>
-                        <textarea
-                            {...register("agenda", { 
-                                required: "Agenda is required" 
-                            })}
-                            rows="4"
-                            placeholder="Enter key discussion points, important decisions, budget discussions, timeline discussions, etc."
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                errors.agenda
-                                    ? "border-red-300"
-                                    : "border-gray-300"
-                            }`}
+                        <Controller
+                            name="agenda"
+                            control={control}
+                            rules={{ 
+                                required: "Agenda is required",
+                                validate: value => {
+                                    // Remove HTML tags and check if there's actual content
+                                    const textContent = value.replace(/<[^>]*>/g, '').trim();
+                                    return textContent.length > 0 || "Agenda is required";
+                                }
+                            }}
+                            render={({ field }) => (
+                                <div className={`border rounded-md focus-within:ring-2 focus-within:ring-blue-500 ${
+                                    errors.agenda ? 'border-red-300' : 'border-gray-300'
+                                }`}>
+                                    <ReactQuill
+                                        {...field}
+                                        theme="snow"
+                                        modules={quillModules}
+                                        formats={quillFormats}
+                                        placeholder="Enter key discussion points, important decisions, budget discussions, timeline discussions, etc."
+                                        className="h-48 mb-12"
+                                        onChange={(content) => {
+                                            field.onChange(content);
+                                        }}
+                                    />
+                                </div>
+                            )}
                         />
                         {errors.agenda && (
                             <p className="text-red-500 text-xs mt-1">
                                 {errors.agenda.message}
                             </p>
                         )}
+                        <p className="text-xs text-gray-500 mt-1">
+                            You can format your agenda with headers, lists, and other formatting options
+                        </p>
                     </div>
 
                     {/* Navigation Buttons */}
@@ -420,7 +529,10 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                                     : "bg-blue-600 hover:bg-blue-700"
                             }`}
                         >
-                            {isSubmitting ? "Saving..." : "Next"}
+                            {isSubmitting 
+                                ? (existingMeetingId ? "Updating..." : "Saving...") 
+                                : (existingMeetingId ? "Update & Next" : "Save & Next")
+                            }
                         </button>
                     </div>
                 </form>

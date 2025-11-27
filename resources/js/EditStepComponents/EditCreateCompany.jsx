@@ -1,257 +1,263 @@
-import React, { useEffect, useState } from "react";
-import { router } from '@inertiajs/react';
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
-const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) => {
-    const [companyData, setCompanyData] = useState({
-        companyName: "",
-        firstName: "",
-        lastName: "",
-        client_member: "",
-        designation: "",
-        noOfRooms: "",
-        phone: "",
-        email: "",
-        address: "",
-        website: "",
-        source: "",
-        responsiblePerson: "",
-        comment: "",
-        messenger: "",
-        messengerContact: "",
+const EditCreateCompany = ({
+    data,
+    updateData,
+    nextStep,
+    company,
+    companyId,
+}) => {
+    const [submitting, setSubmitting] = React.useState(false);
+    const [commentValue, setCommentValue] = React.useState("");
+
+    // React Hook Form initialization
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        setError,
+        watch,
+        formState: { errors },
+    } = useForm({
+        mode: "onChange",
+        defaultValues: {
+            companyName: "",
+            firstName: "",
+            lastName: "",
+            client_member: "",
+            designation: "",
+            noOfRooms: "",
+            phone: "",
+            email: "",
+            address: "",
+            website: "",
+            source: "",
+            responsiblePerson: "",
+            comment: "",
+            messenger: "",
+            messengerContact: "",
+        },
     });
 
-    const [errors, setErrors] = useState({});
-    const [submitting, setSubmitting] = useState(false);
+    // Watch messenger field to conditionally require messengerContact
+    const selectedMessenger = watch("messenger");
 
     // Initialize form data when component receives props
     useEffect(() => {
         if (data) {
-            setCompanyData(data);
+            Object.keys(data).forEach((key) => {
+                if (data[key] !== undefined) {
+                    setValue(key, data[key]);
+                    if (key === "comment") {
+                        setCommentValue(data[key]);
+                    }
+                }
+            });
         }
-    }, [data]);
+    }, [data, setValue]);
+
+    // Update parent component when form values change
+    useEffect(() => {
+        const subscription = watch((value) => {
+            updateData(value);
+        });
+        return () => subscription.unsubscribe();
+    }, [watch, updateData]);
+
+    // Handle comment change
+    const handleCommentChange = (value) => {
+        setCommentValue(value);
+        setValue("comment", value);
+        updateData({ ...watch(), comment: value });
+    };
+
+    // React Quill modules configuration
+    const quillModules = {
+        toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline", "strike"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["link"],
+            ["clean"],
+        ],
+    };
+
+    // React Quill formats configuration
+    const quillFormats = [
+        "header",
+        "bold",
+        "italic",
+        "underline",
+        "strike",
+        "list",
+        "bullet",
+        "link",
+    ];
 
     // Helper function to get CSRF token safely
     const getCsrfToken = () => {
-        if (typeof document === 'undefined') return '';
-        
+        if (typeof document === "undefined") return "";
+
         const metaTag = document.querySelector('meta[name="csrf-token"]');
-        return metaTag ? metaTag.getAttribute('content') : '';
+        return metaTag ? metaTag.getAttribute("content") : "";
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validateForm()) {
-            return;
-        }
-
+    const onSubmit = async (formData) => {
         try {
             setSubmitting(true);
-            
+
             if (companyId) {
                 // Update existing company
-                await handleUpdateCompany();
+                await handleUpdateCompany(formData);
             } else {
                 // Create new company
-                await handleCreateCompany();
+                await handleCreateCompany(formData);
             }
-            
+
             // Move to next step
             nextStep();
-            
         } catch (error) {
             console.log("Error saving company data", error);
-            setErrors({ submit: "Failed to save company data. Please try again." });
+            setError("submit", {
+                type: "manual",
+                message: "Failed to save company data. Please try again.",
+            });
         } finally {
             setSubmitting(false);
         }
     };
 
-    const handleUpdateCompany = async () => {
+    const handleUpdateCompany = async (formData) => {
         // Map frontend field names to backend field names
         const fieldMapping = {
-            companyName: 'company_name',
-            firstName: 'first_name',
-            lastName: 'last_name',
-            client_member: 'client_member',
-            designation: 'designation',
-            noOfRooms: 'no_of_rooms',
-            phone: 'phone_no',
-            email: 'email',
-            address: 'address',
-            website: 'website',
-            source: 'source',
-            responsiblePerson: 'responsible_person',
-            comment: 'comment',
-            messenger: 'preffered_message',
-            messengerContact: 'message_contact',
+            companyName: "company_name",
+            firstName: "first_name",
+            lastName: "last_name",
+            client_member: "client_member",
+            designation: "designation",
+            noOfRooms: "no_of_rooms",
+            phone: "phone_no",
+            email: "email",
+            address: "address",
+            website: "website",
+            source: "source",
+            responsiblePerson: "responsible_person",
+            comment: "comment",
+            messenger: "preffered_message",
+            messengerContact: "message_contact",
         };
 
         const backendData = {};
-        Object.keys(companyData).forEach(key => {
+        Object.keys(formData).forEach((key) => {
             const backendKey = fieldMapping[key] || key;
-            backendData[backendKey] = companyData[key];
+            backendData[backendKey] = formData[key];
         });
 
         try {
             const response = await axios.put(
-                route('ourcompany.update', { id: companyId }), 
+                route("ourcompany.update", { id: companyId }),
                 backendData,
                 {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken(),
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": getCsrfToken(),
                     },
                 }
             );
 
             console.log("Company updated successfully:", response.data);
-            
+
             // Update parent component with the data
-            updateData(companyData, companyId);
-            
+            updateData(formData, companyId);
         } catch (error) {
             console.error("Error updating company:", error);
             if (error.response && error.response.data) {
-                throw new Error(error.response.data.message || 'Failed to update company');
+                throw new Error(
+                    error.response.data.message || "Failed to update company"
+                );
             }
             throw error;
         }
     };
 
-    const handleCreateCompany = async () => {
+    const handleCreateCompany = async (formData) => {
         // Map frontend field names to backend field names
         const fieldMapping = {
-            companyName: 'company_name',
-            firstName: 'first_name',
-            lastName: 'last_name',
-            client_member: 'client_member',
-            designation: 'designation',
-            noOfRooms: 'no_of_rooms',
-            phone: 'phone_no',
-            email: 'email',
-            address: 'address',
-            website: 'website',
-            source: 'source',
-            responsiblePerson: 'responsible_person',
-            comment: 'comment',
-            messenger: 'preffered_message',
-            messengerContact: 'message_contact',
+            companyName: "company_name",
+            firstName: "first_name",
+            lastName: "last_name",
+            client_member: "client_member",
+            designation: "designation",
+            noOfRooms: "no_of_rooms",
+            phone: "phone_no",
+            email: "email",
+            address: "address",
+            website: "website",
+            source: "source",
+            responsiblePerson: "responsible_person",
+            comment: "comment",
+            messenger: "preffered_message",
+            messengerContact: "message_contact",
         };
 
         const backendData = {};
-        Object.keys(companyData).forEach(key => {
+        Object.keys(formData).forEach((key) => {
             const backendKey = fieldMapping[key] || key;
-            backendData[backendKey] = companyData[key];
+            backendData[backendKey] = formData[key];
         });
 
         try {
             const response = await axios.post(
-                route('ourcompany.store'), 
+                route("ourcompany.store"),
                 backendData,
                 {
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken(),
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": getCsrfToken(),
                     },
                 }
             );
 
             console.log("Company created successfully:", response.data);
-            
+
             // Update parent component with the data and new company ID
-            updateData(companyData, response.data.company_id);
-            
+            updateData(formData, response.data.company_id);
         } catch (error) {
             console.error("Error creating company:", error);
             if (error.response && error.response.data) {
-                throw new Error(error.response.data.message || 'Failed to create company');
+                throw new Error(
+                    error.response.data.message || "Failed to create company"
+                );
             }
             throw error;
         }
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setCompanyData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-
-        // Update parent component in real-time
-        updateData({ [name]: value });
-
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors((prev) => ({
-                ...prev,
-                [name]: "",
-            }));
-        }
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-
-        // Required field validation
-        if (!companyData.companyName.trim()) {
-            newErrors.companyName = "Company name is required";
-        }
-        if (!companyData.firstName.trim()) {
-            newErrors.firstName = "First name is required";
-        }
-        if (!companyData.lastName.trim()) {
-            newErrors.lastName = "Last name is required";
-        }
-        if (!companyData.phone.trim()) {
-            newErrors.phone = "Phone number is required";
-        } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(companyData.phone.replace(/\s/g, ""))) {
-            newErrors.phone = "Please enter a valid phone number";
-        }
-        if (!companyData.email.trim()) {
-            newErrors.email = "Email is required";
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(companyData.email)) {
-            newErrors.email = "Please enter a valid email address";
-        }
-
-        // Website validation (if provided)
-        if (companyData.website && !/^https?:\/\/.+\..+/.test(companyData.website)) {
-            newErrors.website = "Please enter a valid website URL";
-        }
-
-        // Messenger contact validation (if messenger is selected)
-        if (companyData.messenger && !companyData.messengerContact.trim()) {
-            newErrors.messengerContact = "Messenger contact is required when messenger is selected";
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
     // Helper function to get input className with error state
     const getInputClassName = (fieldName) => {
-        const baseClass = "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
+        const baseClass =
+            "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200";
         return errors[fieldName]
             ? `${baseClass} border-red-500 focus:ring-red-500 focus:border-red-500`
             : baseClass;
     };
 
+    // Helper function to get React Quill className with error state - UPDATED HEIGHT
+    const getQuillClassName = (fieldName) => {
+        const baseClass = "w-full h-[250px]"; // Changed from h-32 to h-96 (384px height)
+        return errors[fieldName]
+            ? `${baseClass} border-red-500 rounded-md`
+            : baseClass;
+    };
+
     return (
         <div className="max-w-7xl mx-auto p-6">
-            <div>
-                <div className="mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                        {companyId ? 'Edit Company Details' : 'Create New Company'}
-                    </h2>
-                    {companyId && (
-                        <p className="text-sm text-gray-600 mt-1">
-                            Editing: {company?.company_name}
-                        </p>
-                    )}
-                </div>
-                
-                <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg border border-gray-200">
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Company Name */}
                         <div className="md:col-span-2">
@@ -260,15 +266,16 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="companyName"
-                                value={companyData.companyName}
-                                onChange={handleChange}
-                                required
+                                {...register("companyName", {
+                                    required: "Company name is required",
+                                })}
                                 className={getInputClassName("companyName")}
                                 placeholder="Enter company name"
                             />
                             {errors.companyName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.companyName}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.companyName.message}
+                                </p>
                             )}
                         </div>
 
@@ -279,15 +286,16 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="firstName"
-                                value={companyData.firstName}
-                                onChange={handleChange}
-                                required
+                                {...register("firstName", {
+                                    required: "First name is required",
+                                })}
                                 className={getInputClassName("firstName")}
                                 placeholder="Enter first name"
                             />
                             {errors.firstName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.firstName.message}
+                                </p>
                             )}
                         </div>
 
@@ -298,15 +306,16 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="lastName"
-                                value={companyData.lastName}
-                                onChange={handleChange}
-                                required
+                                {...register("lastName", {
+                                    required: "Last name is required",
+                                })}
                                 className={getInputClassName("lastName")}
                                 placeholder="Enter last name"
                             />
                             {errors.lastName && (
-                                <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.lastName.message}
+                                </p>
                             )}
                         </div>
 
@@ -317,9 +326,7 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="client_member"
-                                value={companyData.client_member}
-                                onChange={handleChange}
+                                {...register("client_member")}
                                 className={getInputClassName("client_member")}
                                 placeholder="Enter client member"
                             />
@@ -332,9 +339,7 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="designation"
-                                value={companyData.designation}
-                                onChange={handleChange}
+                                {...register("designation")}
                                 className={getInputClassName("designation")}
                                 placeholder="Enter designation"
                             />
@@ -347,13 +352,22 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="number"
-                                name="noOfRooms"
-                                value={companyData.noOfRooms}
-                                onChange={handleChange}
+                                {...register("noOfRooms", {
+                                    min: {
+                                        value: 0,
+                                        message:
+                                            "Number of rooms cannot be negative",
+                                    },
+                                })}
                                 min="0"
                                 className={getInputClassName("noOfRooms")}
                                 placeholder="Enter number of rooms"
                             />
+                            {errors.noOfRooms && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.noOfRooms.message}
+                                </p>
+                            )}
                         </div>
 
                         {/* Phone */}
@@ -363,15 +377,21 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="tel"
-                                name="phone"
-                                value={companyData.phone}
-                                onChange={handleChange}
-                                required
+                                {...register("phone", {
+                                    required: "Phone number is required",
+                                    pattern: {
+                                        value: /^[\+]?[1-9][\d]{0,15}$/,
+                                        message:
+                                            "Please enter a valid phone number",
+                                    },
+                                })}
                                 className={getInputClassName("phone")}
                                 placeholder="Enter phone number"
                             />
                             {errors.phone && (
-                                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.phone.message}
+                                </p>
                             )}
                         </div>
 
@@ -382,15 +402,21 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="email"
-                                name="email"
-                                value={companyData.email}
-                                onChange={handleChange}
-                                required
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                        message:
+                                            "Please enter a valid email address",
+                                    },
+                                })}
                                 className={getInputClassName("email")}
                                 placeholder="Enter email address"
                             />
                             {errors.email && (
-                                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.email.message}
+                                </p>
                             )}
                         </div>
 
@@ -400,9 +426,7 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                                 Address
                             </label>
                             <textarea
-                                name="address"
-                                value={companyData.address}
-                                onChange={handleChange}
+                                {...register("address")}
                                 rows="2"
                                 className={getInputClassName("address")}
                                 placeholder="Enter full address"
@@ -416,14 +440,20 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="url"
-                                name="website"
-                                value={companyData.website}
-                                onChange={handleChange}
+                                {...register("website", {
+                                    pattern: {
+                                        value: /^https?:\/\/.+\..+/,
+                                        message:
+                                            "Please enter a valid website URL",
+                                    },
+                                })}
                                 className={getInputClassName("website")}
                                 placeholder="https://example.com"
                             />
                             {errors.website && (
-                                <p className="mt-1 text-sm text-red-600">{errors.website}</p>
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.website.message}
+                                </p>
                             )}
                         </div>
 
@@ -434,9 +464,7 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="source"
-                                value={companyData.source}
-                                onChange={handleChange}
+                                {...register("source")}
                                 className={getInputClassName("source")}
                                 placeholder="Enter source"
                             />
@@ -449,10 +477,10 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                             </label>
                             <input
                                 type="text"
-                                name="responsiblePerson"
-                                value={companyData.responsiblePerson}
-                                onChange={handleChange}
-                                className={getInputClassName("responsiblePerson")}
+                                {...register("responsiblePerson")}
+                                className={getInputClassName(
+                                    "responsiblePerson"
+                                )}
                                 placeholder="Enter responsible person"
                             />
                         </div>
@@ -466,14 +494,20 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                                         Preferred Messenger
                                     </label>
                                     <select
-                                        name="messenger"
-                                        value={companyData.messenger}
-                                        onChange={handleChange}
-                                        className={getInputClassName("messenger")}
+                                        {...register("messenger")}
+                                        className={getInputClassName(
+                                            "messenger"
+                                        )}
                                     >
-                                        <option value="">Select messenger</option>
-                                        <option value="whatsapp">WhatsApp</option>
-                                        <option value="telegram">Telegram</option>
+                                        <option value="">
+                                            Select messenger
+                                        </option>
+                                        <option value="whatsapp">
+                                            WhatsApp
+                                        </option>
+                                        <option value="telegram">
+                                            Telegram
+                                        </option>
                                         <option value="viber">Viber</option>
                                         <option value="skype">Skype</option>
                                         <option value="other">Other</option>
@@ -487,50 +521,72 @@ const EditCreateCompany = ({ data, updateData, nextStep, company, companyId }) =
                                     </label>
                                     <input
                                         type="text"
-                                        name="messengerContact"
-                                        value={companyData.messengerContact}
-                                        onChange={handleChange}
-                                        className={getInputClassName("messengerContact")}
-                                        placeholder={companyData.messenger ? `Enter ${companyData.messenger} contact` : "Enter contact"}
+                                        {...register("messengerContact", {
+                                            required: selectedMessenger
+                                                ? "Messenger contact is required when messenger is selected"
+                                                : false,
+                                        })}
+                                        className={getInputClassName(
+                                            "messengerContact"
+                                        )}
+                                        placeholder={
+                                            selectedMessenger
+                                                ? `Enter ${selectedMessenger} contact`
+                                                : "Enter contact"
+                                        }
                                     />
                                     {errors.messengerContact && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.messengerContact}</p>
+                                        <p className="mt-1 text-sm text-red-600">
+                                            {errors.messengerContact.message}
+                                        </p>
                                     )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Comment */}
+                        {/* Comment - React Quill - UPDATED HEIGHT */}
                         <div className="md:col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Comment
                             </label>
-                            <textarea
-                                name="comment"
-                                value={companyData.comment}
-                                onChange={handleChange}
-                                rows="4"
-                                className={getInputClassName("comment")}
+                            <ReactQuill
+                                value={commentValue}
+                                onChange={handleCommentChange}
+                                modules={quillModules}
+                                formats={quillFormats}
+                                className={getQuillClassName("comment")}
                                 placeholder="Enter any additional comments or notes"
+                                theme="snow"
                             />
+                            {errors.comment && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.comment.message}
+                                </p>
+                            )}
                         </div>
                     </div>
 
                     {/* Error Message */}
                     {errors.submit && (
                         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                            <p className="text-sm text-red-600">{errors.submit}</p>
+                            <p className="text-sm text-red-600">
+                                {errors.submit.message}
+                            </p>
                         </div>
                     )}
 
                     {/* Submit Button */}
-                    <div className="mt-8 flex justify-end">
+                    <div className="mt-14 flex justify-end">
                         <button
                             type="submit"
                             disabled={submitting}
                             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {submitting ? 'Saving...' : (companyId ? 'Update Company' : 'Create Company')}
+                            {submitting
+                                ? "Saving..."
+                                : companyId
+                                ? "Update Company"
+                                : "Create Company"}
                         </button>
                     </div>
                 </form>

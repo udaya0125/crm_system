@@ -76,6 +76,25 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
         }
     };
 
+    // Axios update function
+    const updateCompany = async (formData, id) => {
+        try {
+            const response = await axios.put(
+                route("ourcompany.update", { id }),
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.log("Error updating company", error);
+            throw error;
+        }
+    };
+
     const onSubmit = async (formData) => {
         try {
             // Prepare data for API - map React field names to Laravel field names
@@ -97,29 +116,40 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                 comment: formData.comment,
             };
 
-            // Store company via API
-            const result = await storeCompany(apiData);
-            console.log("Company created successfully:", result);
-            
-            // Extract company ID from API response
-            const createdCompanyId = result.company_id || result.id;
-            console.log("Created Company ID:", createdCompanyId);
-            
-            if (!createdCompanyId) {
-                throw new Error("Company ID not returned from API");
+            let result;
+            let companyId;
+
+            // Check if we're updating an existing company or creating a new one
+            if (data.id) {
+                // Update existing company
+                console.log("Updating existing company with ID:", data.id);
+                result = await updateCompany(apiData, data.id);
+                companyId = data.id;
+            } else {
+                // Create new company
+                console.log("Creating new company");
+                result = await storeCompany(apiData);
+                
+                // Extract company ID from API response
+                companyId = result.company_id || result.id;
+                console.log("Created Company ID:", companyId);
+                
+                if (!companyId) {
+                    throw new Error("Company ID not returned from API");
+                }
             }
-            
+
             // Update parent component data WITH THE COMPANY ID
             updateData({
                 ...formData,
-                id: createdCompanyId
-            }, createdCompanyId);
+                id: companyId
+            }, companyId);
             
             // Move to next step
             nextStep();
             
         } catch (error) {
-            console.log("Error creating company", error);
+            console.log("Error processing company", error);
             // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
@@ -153,7 +183,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                     }
                 });
             } else {
-                alert("Error creating company. Please try again.");
+                alert(`Error ${data.id ? 'updating' : 'creating'} company. Please try again.`);
             }
         }
     };
@@ -469,7 +499,12 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             disabled={isSubmitting}
                             className="px-6 py-3 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isSubmitting ? "Creating Company..." : "Next"}
+                            {isSubmitting 
+                                ? data.id 
+                                    ? "Updating Company..." 
+                                    : "Creating Company..."
+                                : "Next"
+                            }
                         </button>
                     </div>
                 </form>

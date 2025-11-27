@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const FollowUpResponse = ({
     data,
@@ -10,6 +12,7 @@ const FollowUpResponse = ({
     companyId,
 }) => {
     const [submitting, setSubmitting] = useState(false);
+    const [existingResponseId, setExistingResponseId] = useState(null);
 
     const {
         register,
@@ -36,10 +39,57 @@ const FollowUpResponse = ({
     const isPositive = response === "positive";
     const isNegative = response === "negative";
 
+    // React Quill modules configuration
+    const quillModules = {
+        toolbar: [
+            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            ['link'],
+            ['clean']
+        ],
+    };
+
+    const quillFormats = [
+        'header',
+        'bold', 'italic', 'underline', 'strike',
+        'list', 'bullet', 'indent',
+        'link'
+    ];
+
     useEffect(() => {
         console.log("Company ID in FollowUpResponse:", companyId);
         console.log("Data in FollowUpResponse:", data);
+        
+        // Check if we already have a follow-up response ID stored
+        if (data.followUpResponseId) {
+            setExistingResponseId(data.followUpResponseId);
+            console.log("Existing follow-up response ID:", data.followUpResponseId);
+        }
+        
+        // Check if form is completely filled to determine update vs create
+        checkExistingResponse();
     }, [companyId, data]);
+
+    // Function to check if we should update existing response
+    const checkExistingResponse = async () => {
+        if (!companyId) return;
+
+        try {
+            // Check if there's already a follow-up response for this company
+            const response = await axios.get(
+                route("ourfollowupresponse.check", { companyId })
+            );
+            
+            if (response.data.exists && response.data.id) {
+                setExistingResponseId(response.data.id);
+                console.log("Found existing follow-up response:", response.data.id);
+            }
+        } catch (error) {
+            console.log("Error checking existing response:", error);
+        }
+    };
 
     // Axios store function for follow-up response
     const storeFollowUpResponse = async (followUpData) => {
@@ -62,6 +112,27 @@ const FollowUpResponse = ({
         }
     };
 
+    // Axios update function for follow-up response
+    const updateFollowUpResponse = async (followUpData, id) => {
+        try {
+            console.log("Updating existing response with ID:", id, "Data:", followUpData);
+
+            const response = await axios.put(
+                route("ourfollowupresponse.update", { id }),
+                followUpData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            return response.data;
+        } catch (error) {
+            console.log("Error updating follow-up response", error);
+            throw error;
+        }
+    };
+
     // Custom validation function
     const validateForm = (data) => {
         const newErrors = {};
@@ -76,12 +147,18 @@ const FollowUpResponse = ({
         }
 
         // Conditional validation based on response type
-        if (data.response === "negative" && !data.negativeReason) {
-            newErrors.negativeReason = "Reason is required for negative responses";
+        if (data.response === "negative") {
+            const negativeReasonText = data.negativeReason?.replace(/<[^>]*>/g, '').trim();
+            if (!negativeReasonText) {
+                newErrors.negativeReason = "Reason is required for negative responses";
+            }
         }
 
-        if (data.response === "positive" && !data.meetingOutcome) {
-            newErrors.meetingOutcome = "Meeting outcome is required for positive responses";
+        if (data.response === "positive") {
+            const meetingOutcomeText = data.meetingOutcome?.replace(/<[^>]*>/g, '').trim();
+            if (!meetingOutcomeText) {
+                newErrors.meetingOutcome = "Meeting outcome is required for positive responses";
+            }
         }
 
         return newErrors;
@@ -114,10 +191,30 @@ const FollowUpResponse = ({
             };
 
             console.log("Final API data being sent:", apiData);
+            console.log("Existing response ID:", existingResponseId);
 
-            // Store follow-up response via API
-            const result = await storeFollowUpResponse(apiData);
-            console.log("Follow-up response created successfully:", result);
+            let result;
+
+            // Determine whether to update or create
+            if (existingResponseId) {
+                // Update existing record
+                result = await updateFollowUpResponse(apiData, existingResponseId);
+                console.log("Follow-up response updated successfully:", result);
+            } else {
+                // Create new record
+                result = await storeFollowUpResponse(apiData);
+                console.log("Follow-up response created successfully:", result);
+                
+                // Store the new ID for future updates
+                if (result.id) {
+                    setExistingResponseId(result.id);
+                    // Update parent with the new ID
+                    updateData({
+                        ...formData,
+                        followUpResponseId: result.id
+                    });
+                }
+            }
 
             // Update parent component data
             updateData(formData);
@@ -127,7 +224,11 @@ const FollowUpResponse = ({
                 nextStep();
             } else {
                 // For negative responses, show success message and then reload the page
-                alert("Negative follow-up response recorded successfully!");
+                const message = existingResponseId 
+                    ? "Negative follow-up response updated successfully!" 
+                    : "Negative follow-up response recorded successfully!";
+                
+                alert(message);
                 
                 // Reload the page after a short delay to allow the user to see the alert
                 setTimeout(() => {
@@ -135,7 +236,7 @@ const FollowUpResponse = ({
                 }, 500);
             }
         } catch (error) {
-            console.log("Error creating follow-up response", error);
+            console.log("Error processing follow-up response", error);
             // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
@@ -172,7 +273,8 @@ const FollowUpResponse = ({
                     });
                 });
             } else {
-                alert("Error creating follow-up response. Please try again.");
+                const action = existingResponseId ? "updating" : "creating";
+                alert(`Error ${action} follow-up response. Please try again.`);
             }
         } finally {
             setSubmitting(false);
@@ -184,14 +286,14 @@ const FollowUpResponse = ({
         !submitting &&
         companyId &&
         response &&
-        ((isNegative && watch("negativeReason")) ||
-            (isPositive && watch("meetingOutcome")));
+        ((isNegative && watch("negativeReason")?.replace(/<[^>]*>/g, '').trim()) ||
+            (isPositive && watch("meetingOutcome")?.replace(/<[^>]*>/g, '').trim()));
 
-    // Get button text based on response type
+    // Get button text based on response type and whether we're updating
     const getButtonText = () => {
-        if (submitting) return "Saving...";
-        if (isPositive) return "Next";
-        return "Complete";
+        if (submitting) return existingResponseId ? "Updating..." : "Saving...";
+        if (isPositive) return existingResponseId ? "Update & Next" : "Next";
+        return existingResponseId ? "Update & Complete" : "Complete";
     };
 
     // Show error if companyId is missing
@@ -222,6 +324,15 @@ const FollowUpResponse = ({
     return (
         <div className="max-w-7xl mx-auto p-4">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                {/* Status Indicator */}
+                {existingResponseId && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
+                        <p className="text-blue-600 text-sm">
+                            <strong>Note:</strong> You are updating an existing follow-up response.
+                        </p>
+                    </div>
+                )}
+
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Company ID Error Display */}
                     {errors.companyId && (
@@ -272,20 +383,37 @@ const FollowUpResponse = ({
                                 Positive Response Details
                             </h3>
 
-                            {/* Meeting Outcome */}
+                            {/* Meeting Outcome with React Quill */}
                             <div>
                                 <label className="block text-sm text-green-700 mb-1">
                                     Meeting Outcome *
                                 </label>
-                                <textarea
-                                    {...register("meetingOutcome")}
-                                    rows="3"
-                                    className={`w-full p-2 border rounded focus:ring focus:ring-green-200 focus:border-green-500 ${
-                                        errors.meetingOutcome
-                                            ? "border-red-300"
-                                            : "border-green-300"
-                                    }`}
-                                    placeholder="Describe the outcome of the meeting (e.g., Deal closed, next steps agreed, proposal accepted, demo scheduled, contract signed...)"
+                                <Controller
+                                    name="meetingOutcome"
+                                    control={control}
+                                    rules={{
+                                        validate: value => {
+                                            const textContent = value?.replace(/<[^>]*>/g, '').trim();
+                                            return textContent?.length > 0 || "Meeting outcome is required for positive responses";
+                                        }
+                                    }}
+                                    render={({ field }) => (
+                                        <div className={`border rounded-md focus-within:ring-2 focus-within:ring-green-500 ${
+                                            errors.meetingOutcome ? 'border-red-300' : 'border-green-300'
+                                        }`}>
+                                            <ReactQuill
+                                                {...field}
+                                                theme="snow"
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Describe the outcome of the meeting (e.g., Deal closed, next steps agreed, proposal accepted, demo scheduled, contract signed...)"
+                                                className="h-40 mb-12"
+                                                onChange={(content) => {
+                                                    field.onChange(content);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 />
                                 {errors.meetingOutcome && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -294,16 +422,29 @@ const FollowUpResponse = ({
                                 )}
                             </div>
 
-                            {/* Notes */}
+                            {/* Notes with React Quill */}
                             <div>
                                 <label className="block text-sm text-green-700 mb-1">
                                     Additional Notes
                                 </label>
-                                <textarea
-                                    {...register("notes")}
-                                    rows="3"
-                                    className="w-full p-2 border border-green-300 rounded focus:ring focus:ring-green-200 focus:border-green-500"
-                                    placeholder="Any additional notes about the positive response..."
+                                <Controller
+                                    name="notes"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="border border-green-300 rounded-md focus-within:ring-2 focus-within:ring-green-500">
+                                            <ReactQuill
+                                                {...field}
+                                                theme="snow"
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Any additional notes about the positive response..."
+                                                className="h-32 mb-10"
+                                                onChange={(content) => {
+                                                    field.onChange(content);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 />
                                 {errors.notes && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -321,20 +462,37 @@ const FollowUpResponse = ({
                                 Response Details
                             </h3>
 
-                            {/* Reason */}
+                            {/* Reason with React Quill */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">
                                     Reason for Negative Response *
                                 </label>
-                                <textarea
-                                    {...register("negativeReason")}
-                                    rows="3"
-                                    className={`w-full p-2 border rounded focus:ring focus:ring-red-200 focus:border-red-500 ${
-                                        errors.negativeReason
-                                            ? "border-red-300"
-                                            : "border-red-300"
-                                    }`}
-                                    placeholder="Why did the client decline or provide negative feedback?"
+                                <Controller
+                                    name="negativeReason"
+                                    control={control}
+                                    rules={{
+                                        validate: value => {
+                                            const textContent = value?.replace(/<[^>]*>/g, '').trim();
+                                            return textContent?.length > 0 || "Reason is required for negative responses";
+                                        }
+                                    }}
+                                    render={({ field }) => (
+                                        <div className={`border rounded-md focus-within:ring-2 focus-within:ring-red-500 ${
+                                            errors.negativeReason ? 'border-red-300' : 'border-red-300'
+                                        }`}>
+                                            <ReactQuill
+                                                {...field}
+                                                theme="snow"
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Why did the client decline or provide negative feedback?"
+                                                className="h-40 mb-12"
+                                                onChange={(content) => {
+                                                    field.onChange(content);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 />
                                 {errors.negativeReason && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -343,16 +501,29 @@ const FollowUpResponse = ({
                                 )}
                             </div>
 
-                            {/* Meeting Outcome for Negative Response */}
+                            {/* Meeting Outcome with React Quill */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">
                                     Meeting Outcome
                                 </label>
-                                <textarea
-                                    {...register("meetingOutcome")}
-                                    rows="3"
-                                    className="w-full p-2 border border-red-300 rounded focus:ring focus:ring-red-200 focus:border-red-500"
-                                    placeholder="Describe the outcome of the meeting (e.g., Client not interested, budget constraints, timing issues, went with competitor, no decision made...)"
+                                <Controller
+                                    name="meetingOutcome"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="border border-red-300 rounded-md focus-within:ring-2 focus-within:ring-red-500">
+                                            <ReactQuill
+                                                {...field}
+                                                theme="snow"
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Describe the outcome of the meeting (e.g., Client not interested, budget constraints, timing issues, went with competitor, no decision made...)"
+                                                className="h-32 mb-10"
+                                                onChange={(content) => {
+                                                    field.onChange(content);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 />
                                 {errors.meetingOutcome && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -361,16 +532,29 @@ const FollowUpResponse = ({
                                 )}
                             </div>
 
-                            {/* Notes */}
+                            {/* Notes with React Quill */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">
                                     Additional Notes
                                 </label>
-                                <textarea
-                                    {...register("notes")}
-                                    rows="2"
-                                    className="w-full p-2 border border-red-300 rounded focus:ring focus:ring-red-200 focus:border-red-500"
-                                    placeholder="Any additional notes about the negative response..."
+                                <Controller
+                                    name="notes"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <div className="border border-red-300 rounded-md focus-within:ring-2 focus-within:ring-red-500">
+                                            <ReactQuill
+                                                {...field}
+                                                theme="snow"
+                                                modules={quillModules}
+                                                formats={quillFormats}
+                                                placeholder="Any additional notes about the negative response..."
+                                                className="h-24 mb-8"
+                                                onChange={(content) => {
+                                                    field.onChange(content);
+                                                }}
+                                            />
+                                        </div>
+                                    )}
                                 />
                                 {errors.notes && (
                                     <p className="text-red-500 text-xs mt-1">
@@ -398,6 +582,8 @@ const FollowUpResponse = ({
                             className={`px-6 py-2 text-white rounded transition-colors ${
                                 !canSubmit || submitting
                                     ? "bg-gray-400 cursor-not-allowed"
+                                    : existingResponseId
+                                    ? "bg-yellow-600 hover:bg-yellow-700"
                                     : isPositive
                                     ? "bg-green-600 hover:bg-green-700"
                                     : "bg-blue-600 hover:bg-blue-700"
