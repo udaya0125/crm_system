@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const CreateCompany = ({ data, updateData, nextStep }) => {
     const {
@@ -96,6 +97,10 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
     };
 
     const onSubmit = async (formData) => {
+        const toastId = toast.loading(
+            data.id ? "Updating company..." : "Creating company..."
+        );
+
         try {
             // Prepare data for API - map React field names to Laravel field names
             const apiData = {
@@ -144,12 +149,19 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                 ...formData,
                 id: companyId
             }, companyId);
+
+            // Success toast
+            toast.success(
+                data.id ? "Company updated successfully!" : "Company created successfully!",
+                { id: toastId }
+            );
             
             // Move to next step
             nextStep();
             
         } catch (error) {
             console.log("Error processing company", error);
+            
             // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
@@ -182,8 +194,15 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                             setError(key, { type: 'server', message: apiErrors[key][0] });
                     }
                 });
+
+                // Show error toast for validation errors
+                toast.error("Please fix the form errors below", { id: toastId });
             } else {
-                alert(`Error ${data.id ? 'updating' : 'creating'} company. Please try again.`);
+                // Show generic error toast
+                toast.error(
+                    `Error ${data.id ? 'updating' : 'creating'} company. Please try again.`,
+                    { id: toastId }
+                );
             }
         }
     };

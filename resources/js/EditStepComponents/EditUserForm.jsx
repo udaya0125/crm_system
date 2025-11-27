@@ -171,7 +171,7 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
                             errors.role ? "border-red-500" : "border-gray-300"
                         }`}
                     >
-                        <option value="">Select Role</option>
+                        <option disabled value="">Select Role</option>
                         <option value="admin">Admin</option>
                         <option value="Customer">Customer</option>
                     </select>

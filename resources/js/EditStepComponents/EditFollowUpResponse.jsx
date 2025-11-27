@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const EditFollowUpResponse = ({
     data,
@@ -123,6 +124,13 @@ const EditFollowUpResponse = ({
         try {
             setSubmitting(true);
 
+            // Show loading toast
+            const loadingToast = toast.loading(
+                followUpResponseId 
+                    ? "Updating follow-up response..." 
+                    : "Creating follow-up response..."
+            );
+
             // Map frontend field names to backend field names
             const backendData = {
                 company_id: companyId,
@@ -142,9 +150,8 @@ const EditFollowUpResponse = ({
                     followUpResponseId
                 );
 
-                // Option 1: Using PUT method directly
                 response = await axios.put(
-                    `/ourfollowupresponse/${followUpResponseId}`, // Fixed route parameter
+                    `/ourfollowupresponse/${followUpResponseId}`,
                     backendData,
                     {
                         headers: {
@@ -153,18 +160,6 @@ const EditFollowUpResponse = ({
                         },
                     }
                 );
-
-                // Option 2: If the above doesn't work, try POST with _method
-                // response = await axios.post(
-                //     `/ourfollowupresponse/${followUpResponseId}`,
-                //     backendData,
-                //     {
-                //         headers: {
-                //             'Content-Type': 'application/json',
-                //             'X-CSRF-TOKEN': getCsrfToken(),
-                //         },
-                //     }
-                // );
 
                 console.log(
                     "Follow-up response updated successfully:",
@@ -200,20 +195,24 @@ const EditFollowUpResponse = ({
 
             updateData(updatedData);
 
-            // Show success message
-            console.log(
-                `Follow-up response ${
-                    followUpResponseId ? "updated" : "created"
-                } successfully`
+            // Show success toast
+            toast.success(
+                `Follow-up response ${followUpResponseId ? "updated" : "created"} successfully!`,
+                { id: loadingToast }
             );
 
             // Only proceed to next step for positive responses
             if (isPositive) {
-                nextStep();
+                setTimeout(() => {
+                    nextStep();
+                }, 1000);
             } else {
                 // For negative responses, reload the page after a short delay
                 setTimeout(() => {
-                    window.location.reload();
+                    toast.success("Page will reload now...");
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
                 }, 1000);
             }
         } catch (error) {
@@ -223,10 +222,19 @@ const EditFollowUpResponse = ({
             if (error.response) {
                 console.error("Server responded with:", error.response.status);
                 console.error("Response data:", error.response.data);
+                
+                // Show specific error message from server if available
+                const errorMessage = error.response.data?.message || 
+                                   error.response.data?.error || 
+                                   `Failed to ${followUpResponseId ? "update" : "save"} follow-up response`;
+                
+                toast.error(errorMessage);
             } else if (error.request) {
                 console.error("No response received:", error.request);
+                toast.error("Network error: Please check your connection and try again.");
             } else {
                 console.error("Error setting up request:", error.message);
+                toast.error(`Error: ${error.message}`);
             }
 
             setError("submit", {

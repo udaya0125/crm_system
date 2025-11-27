@@ -21,7 +21,8 @@ Route::get('/', function () {
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/crm', function(){
+    
+    Route::get('/', function(){
         return Inertia::render('MainPages/CRM');
     });
 
@@ -70,9 +71,9 @@ Route::middleware('auth')->group(function () {
    
 });
 
-    Route::get('/', function(){
-        return Inertia::render('Auth/Login');
-    });
+    // Route::get('/', function(){
+    //     return Inertia::render('Auth/Login');
+    // });
 
     //-----------------------------------------
     // Only admin can access user management

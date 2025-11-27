@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const InitialResponse = ({
     data,
@@ -168,19 +169,20 @@ const InitialResponse = ({
 
             // Only go to next step for positive responses
             if (isPositive) {
+                toast.success("Response saved successfully!");
                 nextStep();
             } else {
-                // For negative responses, show success message and then reload the page
+                // For negative responses, show success toast and then reload the page
                 const successMessage = data.initialResponseId 
                     ? "Negative response updated successfully!" 
                     : "Negative response recorded successfully!";
                 
-                alert(successMessage);
+                toast.success(successMessage);
                 
-                // Reload the page after a short delay to allow the user to see the alert
+                // Reload the page after a short delay to allow the user to see the toast
                 setTimeout(() => {
                     window.location.reload();
-                }, 500);
+                }, 1000);
             }
             
         } catch (error) {
@@ -211,9 +213,12 @@ const InitialResponse = ({
                             setError(key, { type: 'server', message: apiErrors[key][0] });
                     }
                 });
+                
+                // Show error toast for validation errors
+                toast.error("Please fix the validation errors above.");
             } else if (error.message.includes("Initial Response ID not returned")) {
                 // Specific handling for the ID issue
-                alert("Response was recorded but there was an issue with the confirmation. Please check the records manually.");
+                toast.error("Response was recorded but there was an issue with the confirmation. Please check the records manually.");
                 console.error("ID Extraction Error:", error.message);
                 
                 // Even without ID, we can proceed if it's an update or we can try to continue
@@ -224,7 +229,7 @@ const InitialResponse = ({
                 const errorMessage = data.initialResponseId 
                     ? "Error updating initial response. Please try again." 
                     : "Error creating initial response. Please try again.";
-                alert(errorMessage);
+                toast.error(errorMessage);
             }
         }
     };
@@ -302,24 +307,6 @@ const InitialResponse = ({
     return (
         <div className="max-w-7xl mx-auto p-4">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                {/* Edit Mode Indicator */}
-                {/* {data.initialResponseId && (
-                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded">
-                        <p className="text-blue-700 text-sm font-medium">
-                            📝 Editing existing initial response
-                        </p>
-                    </div>
-                )} */}
-
-                {/* Create Mode Indicator */}
-                {/* {!data.initialResponseId && (
-                    <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
-                        <p className="text-green-700 text-sm font-medium">
-                            ➕ Creating new initial response
-                        </p>
-                    </div>
-                )} */}
-
                 <form onSubmit={handleSubmit(onSubmit)}>
                     {/* Company ID Error Display */}
                     {errors.companyId && (

@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const FollowUpResponse = ({
     data,
@@ -13,6 +14,7 @@ const FollowUpResponse = ({
 }) => {
     const [submitting, setSubmitting] = useState(false);
     const [existingResponseId, setExistingResponseId] = useState(null);
+    const [isChecking, setIsChecking] = useState(false);
 
     const {
         register,
@@ -23,6 +25,7 @@ const FollowUpResponse = ({
         setValue,
         setError,
         clearErrors,
+        reset,
     } = useForm({
         defaultValues: {
             response: data.response || "",
@@ -62,14 +65,14 @@ const FollowUpResponse = ({
         console.log("Company ID in FollowUpResponse:", companyId);
         console.log("Data in FollowUpResponse:", data);
         
-        // Check if we already have a follow-up response ID stored
+        // Check if we already have a follow-up response ID stored from previous steps
         if (data.followUpResponseId) {
             setExistingResponseId(data.followUpResponseId);
-            console.log("Existing follow-up response ID:", data.followUpResponseId);
+            console.log("Existing follow-up response ID from props:", data.followUpResponseId);
+        } else {
+            // Only check API if we don't have an ID from props
+            checkExistingResponse();
         }
-        
-        // Check if form is completely filled to determine update vs create
-        checkExistingResponse();
     }, [companyId, data]);
 
     // Function to check if we should update existing response
@@ -77,6 +80,9 @@ const FollowUpResponse = ({
         if (!companyId) return;
 
         try {
+            setIsChecking(true);
+            console.log("Checking for existing follow-up response for company:", companyId);
+            
             // Check if there's already a follow-up response for this company
             const response = await axios.get(
                 route("ourfollowupresponse.check", { companyId })
@@ -84,17 +90,23 @@ const FollowUpResponse = ({
             
             if (response.data.exists && response.data.id) {
                 setExistingResponseId(response.data.id);
-                console.log("Found existing follow-up response:", response.data.id);
+                console.log("Found existing follow-up response via API:", response.data.id);
+                
+                // If we found existing data, you might want to pre-fill the form
+                // You can add logic here to fetch and pre-fill the existing data
             }
         } catch (error) {
             console.log("Error checking existing response:", error);
+            // Don't show error toast for this as it's just a check
+        } finally {
+            setIsChecking(false);
         }
     };
 
     // Axios store function for follow-up response
     const storeFollowUpResponse = async (followUpData) => {
         try {
-            console.log("Sending API request with data:", followUpData);
+            console.log("Creating new follow-up response with data:", followUpData);
 
             const response = await axios.post(
                 route("ourfollowupresponse.store"),
@@ -200,40 +212,39 @@ const FollowUpResponse = ({
                 // Update existing record
                 result = await updateFollowUpResponse(apiData, existingResponseId);
                 console.log("Follow-up response updated successfully:", result);
+                toast.success("Follow-up response updated successfully!");
             } else {
                 // Create new record
                 result = await storeFollowUpResponse(apiData);
                 console.log("Follow-up response created successfully:", result);
                 
                 // Store the new ID for future updates
-                if (result.id) {
-                    setExistingResponseId(result.id);
+                if (result.id || result.follow_up_id) {
+                    const newId = result.id || result.follow_up_id;
+                    setExistingResponseId(newId);
                     // Update parent with the new ID
                     updateData({
                         ...formData,
-                        followUpResponseId: result.id
+                        followUpResponseId: newId
                     });
                 }
+                toast.success("Follow-up response recorded successfully!");
             }
 
             // Update parent component data
-            updateData(formData);
+            updateData({
+                ...formData,
+                followUpResponseId: existingResponseId || result?.id || result?.follow_up_id
+            });
 
             // Only go to next step for positive responses
             if (isPositive) {
                 nextStep();
             } else {
-                // For negative responses, show success message and then reload the page
-                const message = existingResponseId 
-                    ? "Negative follow-up response updated successfully!" 
-                    : "Negative follow-up response recorded successfully!";
-                
-                alert(message);
-                
-                // Reload the page after a short delay to allow the user to see the alert
+                // For negative responses, reload the page after a short delay
                 setTimeout(() => {
                     window.location.reload();
-                }, 500);
+                }, 1500);
             }
         } catch (error) {
             console.log("Error processing follow-up response", error);
@@ -274,14 +285,14 @@ const FollowUpResponse = ({
                 });
             } else {
                 const action = existingResponseId ? "updating" : "creating";
-                alert(`Error ${action} follow-up response. Please try again.`);
+                toast.error(`Error ${action} follow-up response. Please try again.`);
             }
         } finally {
             setSubmitting(false);
         }
     };
 
-    // Fixed: Determine if form can be submitted
+    // Determine if form can be submitted
     const canSubmit =
         !submitting &&
         companyId &&
@@ -292,9 +303,20 @@ const FollowUpResponse = ({
     // Get button text based on response type and whether we're updating
     const getButtonText = () => {
         if (submitting) return existingResponseId ? "Updating..." : "Saving...";
-        if (isPositive) return existingResponseId ? "Update & Next" : "Next";
-        return existingResponseId ? "Update & Complete" : "Complete";
+        if (isPositive) return existingResponseId ? "Update & Next" : "Save & Next";
+        return existingResponseId ? "Update & Complete" : "Save & Complete";
     };
+
+    // Show loading while checking for existing response
+    if (isChecking) {
+        return (
+            <div className="max-w-7xl mx-auto p-4">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
+                    <p>Checking for existing follow-up response...</p>
+                </div>
+            </div>
+        );
+    }
 
     // Show error if companyId is missing
     if (!companyId) {
@@ -410,6 +432,10 @@ const FollowUpResponse = ({
                                                 className="h-40 mb-12"
                                                 onChange={(content) => {
                                                     field.onChange(content);
+                                                    // Clear error when user starts typing
+                                                    if (errors.meetingOutcome) {
+                                                        clearErrors('meetingOutcome');
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -446,11 +472,6 @@ const FollowUpResponse = ({
                                         </div>
                                     )}
                                 />
-                                {errors.notes && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.notes.message}
-                                    </p>
-                                )}
                             </div>
                         </div>
                     )}
@@ -489,6 +510,10 @@ const FollowUpResponse = ({
                                                 className="h-40 mb-12"
                                                 onChange={(content) => {
                                                     field.onChange(content);
+                                                    // Clear error when user starts typing
+                                                    if (errors.negativeReason) {
+                                                        clearErrors('negativeReason');
+                                                    }
                                                 }}
                                             />
                                         </div>
@@ -525,11 +550,6 @@ const FollowUpResponse = ({
                                         </div>
                                     )}
                                 />
-                                {errors.meetingOutcome && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.meetingOutcome.message}
-                                    </p>
-                                )}
                             </div>
 
                             {/* Notes with React Quill */}
@@ -556,11 +576,6 @@ const FollowUpResponse = ({
                                         </div>
                                     )}
                                 />
-                                {errors.notes && (
-                                    <p className="text-red-500 text-xs mt-1">
-                                        {errors.notes.message}
-                                    </p>
-                                )}
                             </div>
                         </div>
                     )}

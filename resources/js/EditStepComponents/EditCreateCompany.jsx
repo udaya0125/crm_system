@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast"; // Import react-hot-toast
 
 const EditCreateCompany = ({
     data,
@@ -110,18 +111,35 @@ const EditCreateCompany = ({
         try {
             setSubmitting(true);
 
+            // Show loading toast
+            const loadingToast = toast.loading(
+                companyId ? "Updating company..." : "Creating company..."
+            );
+
             if (companyId) {
                 // Update existing company
                 await handleUpdateCompany(formData);
+                toast.success("Company updated successfully!", {
+                    id: loadingToast,
+                });
             } else {
                 // Create new company
                 await handleCreateCompany(formData);
+                toast.success("Company created successfully!", {
+                    id: loadingToast,
+                });
             }
 
             // Move to next step
             nextStep();
         } catch (error) {
             console.log("Error saving company data", error);
+            
+            // Show error toast
+            toast.error(
+                error.message || "Failed to save company data. Please try again."
+            );
+            
             setError("submit", {
                 type: "manual",
                 message: "Failed to save company data. Please try again.",
@@ -175,12 +193,32 @@ const EditCreateCompany = ({
             updateData(formData, companyId);
         } catch (error) {
             console.error("Error updating company:", error);
+            
+            // Enhanced error handling with specific messages
+            let errorMessage = "Failed to update company";
             if (error.response && error.response.data) {
-                throw new Error(
-                    error.response.data.message || "Failed to update company"
-                );
+                errorMessage = error.response.data.message || errorMessage;
+                
+                // Handle validation errors
+                if (error.response.data.errors) {
+                    const validationErrors = error.response.data.errors;
+                    errorMessage = "Please check the form for errors";
+                    
+                    // You can also set individual field errors here if needed
+                    Object.keys(validationErrors).forEach((field) => {
+                        const backendToFrontendMapping = Object.fromEntries(
+                            Object.entries(fieldMapping).map(([frontend, backend]) => [backend, frontend])
+                        );
+                        const frontendField = backendToFrontendMapping[field] || field;
+                        setError(frontendField, {
+                            type: "server",
+                            message: validationErrors[field][0],
+                        });
+                    });
+                }
             }
-            throw error;
+            
+            throw new Error(errorMessage);
         }
     };
 
@@ -228,12 +266,32 @@ const EditCreateCompany = ({
             updateData(formData, response.data.company_id);
         } catch (error) {
             console.error("Error creating company:", error);
+            
+            // Enhanced error handling with specific messages
+            let errorMessage = "Failed to create company";
             if (error.response && error.response.data) {
-                throw new Error(
-                    error.response.data.message || "Failed to create company"
-                );
+                errorMessage = error.response.data.message || errorMessage;
+                
+                // Handle validation errors
+                if (error.response.data.errors) {
+                    const validationErrors = error.response.data.errors;
+                    errorMessage = "Please check the form for errors";
+                    
+                    // Set individual field errors
+                    Object.keys(validationErrors).forEach((field) => {
+                        const backendToFrontendMapping = Object.fromEntries(
+                            Object.entries(fieldMapping).map(([frontend, backend]) => [backend, frontend])
+                        );
+                        const frontendField = backendToFrontendMapping[field] || field;
+                        setError(frontendField, {
+                            type: "server",
+                            message: validationErrors[field][0],
+                        });
+                    });
+                }
             }
-            throw error;
+            
+            throw new Error(errorMessage);
         }
     };
 

@@ -7,12 +7,44 @@ import {
     Info,
     Trash,
     X,
+    Search,
 } from "lucide-react";
-import React, { useState, useMemo, useEffect } from "react";
-import { useTable, useSortBy, usePagination } from "react-table";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import { useTable, useSortBy, usePagination, useGlobalFilter } from "react-table";
 import axios from "axios";
 import { Link } from "@inertiajs/react";
 import { useForm, Controller } from "react-hook-form";
+import toast, { Toaster } from "react-hot-toast";
+
+// Global Filter Component
+const GlobalFilter = ({
+    globalFilter,
+    setGlobalFilter,
+}) => {
+    const [value, setValue] = useState(globalFilter);
+
+    const onChange = useCallback((value) => {
+        setGlobalFilter(value || undefined);
+    }, [setGlobalFilter]);
+
+    return (
+        <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+                type="text"
+                value={value || ""}
+                onChange={(e) => {
+                    setValue(e.target.value);
+                    onChange(e.target.value);
+                }}
+                placeholder="Search by company name..."
+                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            />
+        </div>
+    );
+};
 
 const Company = () => {
     // States
@@ -36,34 +68,37 @@ const Company = () => {
         setError: setFormError,
     } = useForm();
 
+    // Fetch companies function
+    const fetchCompany = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const response = await axios.get(route("ourcompany.index"));
+            setAllCompany(response.data);
+        } catch (error) {
+            console.error("fetching error ", error);
+            const errorMessage = "Failed to fetch companies. Please try again later.";
+            setError(errorMessage);
+            setAllCompany([]);
+            toast.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     // Use Effect
     useEffect(() => {
-        const fetchCompany = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(route("ourcompany.index"));
-                setAllCompany(response.data);
-                setError(null);
-            } catch (error) {
-                console.error("fetching error ", error);
-                setError("Failed to fetch companies. Please try again later.");
-                setAllCompany([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchCompany();
-    }, [reloadTrigger]);
+    }, [reloadTrigger, fetchCompany]);
 
     // Reset form when selected company changes
     useEffect(() => {
         if (selectedCompany) {
-            // Set the current follow-up date if it exists
             setValue("followUpDate", selectedCompany.follow_up_date || "");
         }
     }, [selectedCompany, setValue]);
 
+    // Handle delete company
     const handleDelete = async (id) => {
         if (
             !confirm(
@@ -73,6 +108,8 @@ const Company = () => {
             return;
         }
 
+        const deleteToast = toast.loading("Deleting company...");
+
         try {
             setDeleteLoading(id);
             const response = await axios.delete(
@@ -81,35 +118,41 @@ const Company = () => {
 
             console.log("Delete response:", response.data);
 
-            // Show success message
-            alert(response.data.message || "Company deleted successfully");
+            toast.success(response.data.message || "Company deleted successfully", {
+                id: deleteToast,
+            });
 
-            // Trigger reload to refresh the table
             setReloadTrigger((prev) => prev + 1);
         } catch (error) {
             console.error("Delete error:", error);
             const errorMessage =
                 error.response?.data?.message || "Failed to delete company";
-            alert(errorMessage);
+            toast.error(errorMessage, {
+                id: deleteToast,
+            });
         } finally {
             setDeleteLoading(null);
         }
     };
 
-    const handleViewDetails = (company) => {
+    // Handle view details
+    const handleViewDetails = useCallback((company) => {
         setSelectedCompany(company);
         setIsModalOpen(true);
-    };
+    }, []);
 
-    const closeModal = () => {
+    // Close modal
+    const closeModal = useCallback(() => {
         setIsModalOpen(false);
         setSelectedCompany(null);
-        reset(); // Reset form when modal closes
-    };
+        reset();
+    }, [reset]);
 
     // Submit follow-up date
     const onSubmitFollowUp = async (formData) => {
         if (!selectedCompany) return;
+
+        const updateToast = toast.loading("Updating follow-up date...");
 
         try {
             setFollowUpLoading(true);
@@ -145,12 +188,12 @@ const Company = () => {
                 follow_up_date: formData.followUpDate,
             }));
 
-            // Show success message
-            alert("Follow-up date updated successfully!");
+            toast.success("Follow-up date updated successfully!", {
+                id: updateToast,
+            });
         } catch (error) {
             console.error("Error updating follow-up date:", error);
 
-            // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
 
@@ -160,10 +203,16 @@ const Company = () => {
                             type: "server",
                             message: apiErrors[key][0],
                         });
+                        toast.error(apiErrors[key][0], {
+                            id: updateToast,
+                        });
                     }
                 });
             } else {
-                alert("Failed to update follow-up date. Please try again.");
+                const errorMessage = error.response?.data?.message || "Failed to update follow-up date. Please try again.";
+                toast.error(errorMessage, {
+                    id: updateToast,
+                });
             }
         } finally {
             setFollowUpLoading(false);
@@ -179,10 +228,10 @@ const Company = () => {
             : baseClass;
     };
 
-    // Close modal when clicking outside
+    // Close modal when clicking outside or pressing escape
     useEffect(() => {
         const handleEscape = (event) => {
-            if (event.keyCode === 27) {
+            if (event.key === "Escape") {
                 closeModal();
             }
         };
@@ -198,8 +247,9 @@ const Company = () => {
             document.removeEventListener("keydown", handleEscape);
             document.body.style.overflow = "unset";
         };
-    }, [isModalOpen]);
+    }, [isModalOpen, closeModal]);
 
+    // Columns definition
     const columns = useMemo(
         () => [
             {
@@ -214,7 +264,7 @@ const Company = () => {
                 Cell: ({ row, value }) => (
                     <Link
                         href={`/crm/details/${row.original.slug}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium"
+                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                     >
                         {value}
                     </Link>
@@ -226,7 +276,7 @@ const Company = () => {
                 Cell: ({ row, value }) => (
                     <Link
                         href={`/crm/details/${row.original.slug}`}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
                     >
                         {value}
                     </Link>
@@ -238,7 +288,7 @@ const Company = () => {
                 Cell: ({ row, value }) => (
                     <Link
                         href={`/crm/details/${row.original.slug}`}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
                     >
                         {value}
                     </Link>
@@ -250,7 +300,7 @@ const Company = () => {
                 Cell: ({ row, value }) => (
                     <Link
                         href={`/crm/details/${row.original.slug}`}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
                     >
                         {value}
                     </Link>
@@ -295,9 +345,10 @@ const Company = () => {
                 },
             },
         ],
-        [deleteLoading]
+        [deleteLoading, handleViewDetails]
     );
 
+    // React Table instance with global filter
     const {
         getTableProps,
         getTableBodyProps,
@@ -312,19 +363,83 @@ const Company = () => {
         nextPage,
         previousPage,
         setPageSize,
-        state: { pageIndex, pageSize },
+        state: { pageIndex, pageSize, globalFilter },
+        setGlobalFilter,
+        preGlobalFilteredRows,
     } = useTable(
         {
             columns,
             data: allCompany,
             initialState: { pageIndex: 0, pageSize: 5 },
+            globalFilter: useMemo(() => (rows, columnIds, filterValue) => {
+                return rows.filter(row => {
+                    const companyName = row.values.company_name?.toString().toLowerCase() || '';
+                    return companyName.includes(filterValue.toLowerCase());
+                });
+            }, []),
         },
+        useGlobalFilter,
         useSortBy,
         usePagination
     );
 
+    // Pagination handlers with toast
+    const handleFirstPage = () => {
+        gotoPage(0);
+        toast.success("First page");
+    };
+
+    const handleLastPage = () => {
+        gotoPage(pageCount - 1);
+        toast.success("Last page");
+    };
+
+    const handlePageSizeChange = (e) => {
+        setPageSize(Number(e.target.value));
+        toast.success(`Showing ${e.target.value} entries per page`);
+    };
+
+    // Clear search function
+    const clearSearch = () => {
+        setGlobalFilter(undefined);
+        toast.success("Search cleared");
+    };
+
     return (
         <AdminWrapper>
+            {/* React Hot Toast Container */}
+            {/* <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 4000,
+                    style: {
+                        background: '#363636',
+                        color: '#fff',
+                    },
+                    success: {
+                        duration: 3000,
+                        iconTheme: {
+                            primary: '#10B981',
+                            secondary: '#fff',
+                        },
+                    },
+                    error: {
+                        duration: 5000,
+                        iconTheme: {
+                            primary: '#EF4444',
+                            secondary: '#fff',
+                        },
+                    },
+                    loading: {
+                        duration: Infinity,
+                        iconTheme: {
+                            primary: '#3B82F6',
+                            secondary: '#fff',
+                        },
+                    },
+                }}
+            /> */}
+
             <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="flex flex-wrap items-center justify-between mb-6 md:mb-8">
                     <div className="flex items-center">
@@ -336,6 +451,26 @@ const Company = () => {
                                 {allCompany.length} companies
                             </span>
                         )}
+                    </div>
+
+                    {/* Search Box */}
+                    <div className="w-full md:w-auto mt-4 md:mt-0">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-64">
+                                <GlobalFilter
+                                    globalFilter={globalFilter}
+                                    setGlobalFilter={setGlobalFilter}
+                                />
+                            </div>
+                            {globalFilter && (
+                                <button
+                                    onClick={clearSearch}
+                                    className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                >
+                                    Clear
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -350,7 +485,10 @@ const Company = () => {
                     <div className="text-center py-8 text-red-500 bg-red-50 rounded-lg">
                         <p className="font-medium">{error}</p>
                         <button
-                            onClick={() => setReloadTrigger((prev) => prev + 1)}
+                            onClick={() => {
+                                setReloadTrigger((prev) => prev + 1);
+                                toast.loading("Reloading companies...");
+                            }}
                             className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
                         >
                             Try Again
@@ -358,6 +496,17 @@ const Company = () => {
                     </div>
                 ) : (
                     <>
+                        {/* Search Results Info */}
+                        {/* {globalFilter && (
+                            <div className="mb-4 p-3 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-blue-700">
+                                    Showing results for: "<strong>{globalFilter}</strong>"
+                                    {page.length === 0 && " - No companies found"}
+                                    {page.length > 0 && ` - ${page.length} company${page.length !== 1 ? 'ies' : ''} found`}
+                                </p>
+                            </div>
+                        )} */}
+
                         <div className="overflow-x-auto rounded-lg border border-gray-200">
                             <table
                                 {...getTableProps()}
@@ -443,13 +592,19 @@ const Company = () => {
                                                         className="text-gray-300 mb-2"
                                                     />
                                                     <p className="text-lg font-medium text-gray-400">
-                                                        No companies found
+                                                        {globalFilter ? "No matching companies found" : "No companies found"}
                                                     </p>
                                                     <p className="text-sm text-gray-500 mt-1">
-                                                        There are no companies
-                                                        to display at the
-                                                        moment.
+                                                        {globalFilter ? "Try adjusting your search terms" : "There are no companies to display at the moment."}
                                                     </p>
+                                                    {globalFilter && (
+                                                        <button
+                                                            onClick={clearSearch}
+                                                            className="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                                                        >
+                                                            Clear Search
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
@@ -467,9 +622,7 @@ const Company = () => {
                                     </span>
                                     <select
                                         value={pageSize}
-                                        onChange={(e) =>
-                                            setPageSize(Number(e.target.value))
-                                        }
+                                        onChange={handlePageSizeChange}
                                         className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                     >
                                         {[5, 10, 20, 50].map((size) => (
@@ -484,7 +637,7 @@ const Company = () => {
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <button
-                                        onClick={() => gotoPage(0)}
+                                        onClick={handleFirstPage}
                                         disabled={!canPreviousPage}
                                         className={`p-2 rounded transition-colors ${
                                             !canPreviousPage
@@ -495,7 +648,10 @@ const Company = () => {
                                         <ChevronLeft size={20} />
                                     </button>
                                     <button
-                                        onClick={() => previousPage()}
+                                        onClick={() => {
+                                            previousPage();
+                                            toast.success("Previous page");
+                                        }}
                                         disabled={!canPreviousPage}
                                         className={`px-4 py-2 text-sm rounded transition-colors ${
                                             !canPreviousPage
@@ -510,7 +666,10 @@ const Company = () => {
                                         <strong>{pageOptions.length}</strong>
                                     </span>
                                     <button
-                                        onClick={() => nextPage()}
+                                        onClick={() => {
+                                            nextPage();
+                                            toast.success("Next page");
+                                        }}
                                         disabled={!canNextPage}
                                         className={`px-4 py-2 text-sm rounded transition-colors ${
                                             !canNextPage
@@ -521,7 +680,7 @@ const Company = () => {
                                         Next
                                     </button>
                                     <button
-                                        onClick={() => gotoPage(pageCount - 1)}
+                                        onClick={handleLastPage}
                                         disabled={!canNextPage}
                                         className={`p-2 rounded transition-colors ${
                                             !canNextPage
@@ -733,6 +892,7 @@ const Company = () => {
                                         <Link
                                             href={`/crm/details/${selectedCompany.slug}`}
                                             className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                                            onClick={() => toast.success("Navigating to full details...")}
                                         >
                                             <Info size={16} className="mr-2" />
                                             View Full Details

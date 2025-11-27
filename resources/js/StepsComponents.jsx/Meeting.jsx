@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
     const [existingMeetingId, setExistingMeetingId] = useState(null);
@@ -145,8 +146,16 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                 type: "manual",
                 message: "Company ID is required. Please go back and select a company."
             });
+            toast.error("Company information is missing. Please go back and select a company.");
             return;
         }
+
+        setIsLoading(true);
+
+        // Show loading toast
+        const loadingToast = toast.loading(
+            existingMeetingId ? "Updating meeting..." : "Creating meeting..."
+        );
 
         try {
             // Prepare data for API - map React field names to Laravel model field names
@@ -164,26 +173,40 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
             console.log("Final API data being sent:", apiData);
 
             let result;
+            let meetingIdToStore = existingMeetingId;
             
             // Check if we're updating an existing meeting or creating a new one
             if (existingMeetingId) {
                 // Update existing meeting
                 result = await updateMeeting(apiData, existingMeetingId);
                 console.log("Meeting updated successfully:", result);
+                
+                // Update loading toast to success
+                toast.success("Meeting updated successfully!", { id: loadingToast });
             } else {
                 // Create new meeting
                 result = await storeMeeting(apiData);
                 console.log("Meeting created successfully:", result);
                 
+                // Update loading toast to success
+                toast.success("Meeting created successfully!", { id: loadingToast });
+                
                 // Store the new meeting ID for potential future updates
                 if (result.meeting && result.meeting.id) {
+                    meetingIdToStore = result.meeting.id;
                     setExistingMeetingId(result.meeting.id);
+                } else if (result.meeting_id) {
+                    meetingIdToStore = result.meeting_id;
+                    setExistingMeetingId(result.meeting_id);
+                } else if (result.data && result.data.id) {
+                    meetingIdToStore = result.data.id;
+                    setExistingMeetingId(result.data.id);
                 }
             }
 
             // Update parent component data with meeting ID
             updateData({
-                meetingId: existingMeetingId || result.meeting?.id,
+                meetingId: meetingIdToStore,
                 meetingDate: formData.meetingDate,
                 meetingTime: formData.meetingTime,
                 meetingType: formData.meetingType,
@@ -193,13 +216,26 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                 agenda: formData.agenda,
             });
 
-            // Move to next step
-            nextStep();
+            // Show success message and move to next step
+            setTimeout(() => {
+                nextStep();
+            }, 1000); // Small delay to show success message
+
         } catch (error) {
             console.log("Error saving meeting", error);
+            
+            // Update loading toast to error
+            toast.error(
+                `Error ${existingMeetingId ? 'updating' : 'creating'} meeting. Please try again.`, 
+                { id: loadingToast }
+            );
+            
             // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
+
+                // Show validation error toast
+                toast.error("Please check the form for errors.");
 
                 // Map Laravel field names back to React field names
                 Object.keys(apiErrors).forEach((key) => {
@@ -232,14 +268,20 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                             setError(key, { type: "server", message: apiErrors[key][0] });
                     }
                 });
-            } else {
-                alert(`Error ${existingMeetingId ? 'updating' : 'creating'} meeting. Please try again.`);
+            } else if (error.response && error.response.data.message) {
+                // Show server error message
+                toast.error(error.response.data.message);
+            } else if (error.message) {
+                // Show generic error message
+                toast.error(error.message);
             }
+        } finally {
+            setIsLoading(false);
         }
     };
 
     // Determine if form can be submitted
-    const canSubmit = companyId && isValid && !isSubmitting;
+    const canSubmit = companyId && isValid && !isSubmitting && !isLoading;
 
     // Show error if companyId is missing
     if (!companyId) {
@@ -422,20 +464,6 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                                 )}
                             </div>
                         )}
-
-                        {/* {meetingType === "phone" && (
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Phone Call Details
-                                </label>
-                                <input
-                                    type="text"
-                                    value="Phone call - no platform or location needed"
-                                    disabled
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-                                />
-                            </div>
-                        )} */}
                     </div>
 
                     {/* Attendees */}
@@ -515,7 +543,7 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                         <button
                             type="button"
                             onClick={prevStep}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isLoading}
                             className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Back
@@ -529,7 +557,7 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                                     : "bg-blue-600 hover:bg-blue-700"
                             }`}
                         >
-                            {isSubmitting 
+                            {isSubmitting || isLoading
                                 ? (existingMeetingId ? "Updating..." : "Saving...") 
                                 : (existingMeetingId ? "Update & Next" : "Save & Next")
                             }

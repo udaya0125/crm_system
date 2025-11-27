@@ -202,7 +202,7 @@ export default function Login({ status, canResetPassword }) {
                             </div>
 
                             {/* Remember Me & Forgot Password */}
-                            <div className="flex items-center justify-between">
+                            {/* <div className="flex items-center justify-between">
                                 <label className="flex items-center cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -221,7 +221,7 @@ export default function Login({ status, canResetPassword }) {
                                         Forgot password?
                                     </Link>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Submit Button */}
                             <button

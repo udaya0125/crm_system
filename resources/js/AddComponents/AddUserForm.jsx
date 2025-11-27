@@ -274,12 +274,12 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
                     </label>
                     <select
                         {...register("role", { required: "Role is required" })}
-                        className={`mt-1 block w-full border rounded-md px-3 py-2 focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                        className={`mt-1 block w-full border rounded-md px-3 py-2  focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
                             errors.role ? "border-red-500" : "border-gray-300"
                         }`}
                     >
-                        <option value="">Select Role</option>
-                        <option value="admin">Admin</option>
+                        <option disabled value="">Select Role</option>
+                        <option  value="admin">Admin</option>
                         <option value="Customer">Customer</option>
                         
                     </select>

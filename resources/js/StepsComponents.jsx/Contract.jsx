@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 
 const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
     useEffect(() => {
@@ -88,10 +89,13 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
 
             // Validate the file
             await trigger("contractFile");
+            
+            toast.success(`File "${file.name}" selected successfully`);
         }
     };
 
     const handleRemoveFile = () => {
+        const fileName = contractFile?.name || 'File';
         setContractFile(null);
         setFilePreview(null);
         setValue("contractFile", null);
@@ -105,6 +109,9 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
         });
 
         clearErrors("contractFile");
+        
+        // Show info toast for file removal
+        toast.success(`${fileName} removed`);
     };
 
     // Custom validation function for file
@@ -142,11 +149,15 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
                 type: "manual",
                 message: "Company ID is required. Please go back and select a company."
             });
+            toast.error("Company information missing. Please go back and select a company.");
             return;
         }
 
         try {
             setSubmitting(true);
+            
+            // Show loading toast
+            const loadingToast = toast.loading('Uploading contract...');
 
             // Create FormData for file upload
             const apiFormData = new FormData();
@@ -174,15 +185,20 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
             // Call parent onSubmit
             onSubmit();
 
-            // Show success message and reload the page
-            alert("Contract uploaded successfully! CRM process completed.");
-            
-            // Reload the page after a short delay to allow the user to see the alert
+            // Dismiss loading toast and show success
+            toast.dismiss(loadingToast);
+            toast.success('Contract uploaded successfully! CRM process completed.');
+
+            // Reload the page after a short delay to allow the user to see the success message
             setTimeout(() => {
                 window.location.reload();
-            }, 500);
+            }, 2000);
         } catch (error) {
             console.log("Error creating contract", error);
+            
+            // Dismiss any loading toasts
+            toast.dismiss();
+            
             // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
@@ -195,22 +211,25 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
                                 type: "server",
                                 message: apiErrors[key][0]
                             });
+                            toast.error(`File error: ${apiErrors[key][0]}`);
                             break;
                         case "company_id":
                             setError("companyId", {
                                 type: "server",
                                 message: apiErrors[key][0]
                             });
+                            toast.error(`Company error: ${apiErrors[key][0]}`);
                             break;
                         default:
                             setError(key, {
                                 type: "server",
                                 message: apiErrors[key][0]
                             });
+                            toast.error(`${key}: ${apiErrors[key][0]}`);
                     }
                 });
             } else {
-                alert("Error uploading contract. Please try again.");
+                toast.error("Error uploading contract. Please try again.");
             }
         } finally {
             setSubmitting(false);
@@ -323,15 +342,6 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
         <div className="max-w-7xl mx-auto p-6">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-                    {/* Company ID Error Display */}
-                    {errors.companyId && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
-                            <p className="text-red-500 text-sm">
-                                {errors.companyId.message}
-                            </p>
-                        </div>
-                    )}
-
                     {/* Contract File Upload */}
                     <div className="space-y-4">
                         <label className="block text-sm font-medium text-gray-700">

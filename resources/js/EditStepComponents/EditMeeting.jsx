@@ -3,6 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const EditMeeting = ({
     data,
@@ -109,9 +110,10 @@ const EditMeeting = ({
             console.log("Submitting meeting data:", backendData);
             console.log("Meeting ID:", meetingId);
 
+            let response;
             if (meetingId) {
                 // Update existing meeting
-                const response = await axios.put(
+                response = await axios.put(
                     `/ourmeeting/${meetingId}`,
                     backendData,
                     {
@@ -122,15 +124,17 @@ const EditMeeting = ({
                     }
                 );
                 console.log("Meeting updated successfully:", response.data);
+                toast.success("Meeting updated successfully!");
             } else {
                 // Create new meeting
-                const response = await axios.post("/ourmeeting", backendData, {
+                response = await axios.post("/ourmeeting", backendData, {
                     headers: {
                         "Content-Type": "application/json",
                         "X-CSRF-TOKEN": getCsrfToken(),
                     },
                 });
                 console.log("Meeting created successfully:", response.data);
+                toast.success("Meeting created successfully!");
 
                 if (response.data.meeting_id) {
                     console.log("New meeting ID:", response.data.meeting_id);
@@ -149,6 +153,9 @@ const EditMeeting = ({
                 }`;
             }
 
+            // Show error toast
+            toast.error(errorMessage);
+            
             setError("submit", {
                 type: "manual",
                 message: errorMessage,

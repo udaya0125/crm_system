@@ -1,6 +1,12 @@
 import React from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { X, Menu, ListFilter, Building, User2 } from "lucide-react";
+import {
+    X,
+    Menu,
+    ListFilter,
+    Building,
+    User2,
+} from "lucide-react";
 
 const AdminSideBar = ({
     isMobileOpen,
@@ -9,7 +15,7 @@ const AdminSideBar = ({
     onToggleCollapse,
 }) => {
     const { url } = usePage();
-    const currentPath = url.split("/")[1] || "crm";
+    const currentPath = url.split("/")[1];
 
     const isActive = (href) => {
         const path = href.replace("/", "");
@@ -18,7 +24,7 @@ const AdminSideBar = ({
 
     // Get authenticated user from auth prop
     const { auth } = usePage().props;
-    const user = auth?.user;
+       const user = auth?.user;
 
     // Check The Role of the User
     const isAdmin = user?.role === "admin";
@@ -31,6 +37,7 @@ const AdminSideBar = ({
                     onClick={onMobileToggle}
                 />
             )}
+            
 
             <div
                 className={`
@@ -84,12 +91,12 @@ const AdminSideBar = ({
                 >
                     {/* CRM */}
                     <Link
-                        href="/crm"
+                        href="/"
                         className={`
                             flex items-center rounded-lg transition-colors duration-200 group relative
                             ${isCollapsed ? "p-3 justify-center" : "p-3"}
                             ${
-                                isActive("/crm")
+                                isActive("/")
                                     ? "bg-gray-200 text-gray-600 "
                                     : "text-gray-600 hover:bg-gray-50"
                             }
@@ -100,7 +107,7 @@ const AdminSideBar = ({
                             className={`
                             ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
                             ${
-                                isActive("/crm")
+                                isActive("/")
                                     ? "text-gray-600"
                                     : "text-gray-500 group-hover:text-gray-700"
                             }

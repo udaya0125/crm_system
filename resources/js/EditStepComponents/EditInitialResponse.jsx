@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
 
 const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, existingData }) => {
     const [submitting, setSubmitting] = React.useState(false);
@@ -79,6 +80,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
             return response.data;
         } catch (error) {
             console.error("Error checking existing initial response:", error);
+            toast.error("Failed to check existing responses");
             return { exists: false, id: null };
         }
     };
@@ -88,6 +90,9 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
     const onSubmit = async (formData) => {
         try {
             setSubmitting(true);
+            
+            // Show loading toast
+            const loadingToast = toast.loading('Saving initial response...');
 
             // Map frontend field names to backend field names
             const backendData = {
@@ -115,6 +120,8 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                     }
                 );
                 console.log("Initial response updated successfully");
+                toast.dismiss(loadingToast);
+                toast.success("Initial response updated successfully!");
             } else {
                 // Check if company already has an initial response
                 const existingResponse = await checkExistingInitialResponse();
@@ -133,6 +140,8 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                     );
                     savedResponseId = existingResponse.id;
                     console.log("Existing initial response updated successfully");
+                    toast.dismiss(loadingToast);
+                    toast.success("Existing response updated successfully!");
                 } else {
                     // Create new response
                     const response = await axios.post(
@@ -147,6 +156,8 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                     );
                     savedResponseId = response.data.id;
                     console.log("Initial response created successfully:", response.data);
+                    toast.dismiss(loadingToast);
+                    toast.success("Initial response created successfully!");
                 }
             }
 
@@ -159,14 +170,45 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                 initial_response_id: savedResponseId,
             });
 
-            nextStep();
+            // Check if response is negative
+            if (formData.response === "negative") {
+                // Show success toast with longer duration
+                toast.success("Negative response recorded successfully! Page will reload in a moment...", {
+                    duration: 4000,
+                });
+                
+                // Wait a moment for the toast to be visible, then reload the page
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                // For positive responses, proceed to next step as normal
+                // toast.success("Moving to next step...");
+                nextStep();
+            }
             
         } catch (error) {
             console.log("Error saving initial response", error);
+            
+            // Dismiss any loading toasts
+            toast.dismiss();
+            
             setError("submit", {
                 type: "manual",
                 message: "Failed to save initial response. Please try again."
             });
+            
+            // Show detailed error toast
+            if (error.response) {
+                // Server responded with error status
+                toast.error(`Server error: ${error.response.status} - ${error.response.data.message || 'Please try again.'}`);
+            } else if (error.request) {
+                // Request made but no response received
+                toast.error("Network error: Please check your connection and try again.");
+            } else {
+                // Something else happened
+                toast.error("Failed to save initial response. Please try again.");
+            }
         } finally {
             setSubmitting(false);
         }
@@ -201,6 +243,21 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
         return "space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4";
     };
 
+    // Handle back button click with toast
+    const handleBackClick = () => {
+        toast.success("Returning to previous step...");
+        prevStep();
+    };
+
+    // Show info toast when response type is selected
+    // React.useEffect(() => {
+    //     if (isPositive) {
+    //         toast.success("Positive response selected! Please provide meeting details.");
+    //     } else if (isNegative) {
+    //         toast.error("Negative response selected. Please provide reason for decline.");
+    //     }
+    // }, [isPositive, isNegative]);
+
     return (
         <div className="max-w-7xl mx-auto p-4">
             <style jsx>{`
@@ -231,6 +288,16 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                                 required: "Response type is required",
                             })}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none transition-colors duration-200"
+                            onChange={(e) => {
+                                // Trigger the form change
+                                register("response").onChange(e);
+                                // Show immediate feedback
+                                if (e.target.value === "positive") {
+                                    toast.success("Positive response selected!");
+                                } else if (e.target.value === "negative") {
+                                    toast.error("Negative response selected.");
+                                }
+                            }}
                         >
                             <option value="">-- Select Response Type --</option>
                             <option value="positive">Positive</option>
@@ -347,7 +414,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                     <div className="flex justify-between gap-4 mt-6">
                         <button
                             type="button"
-                            onClick={prevStep}
+                            onClick={handleBackClick}
                             disabled={submitting}
                             className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                         >
@@ -362,7 +429,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : isPositive
                                     ? "bg-green-600 hover:bg-green-700"
-                                    : "bg-blue-600 hover:bg-blue-700"
+                                    : "bg-red-600 hover:bg-red-700"
                             }`}
                         >
                             {submitting ? 'Saving...' : (isPositive ? "Next" : "Complete")}

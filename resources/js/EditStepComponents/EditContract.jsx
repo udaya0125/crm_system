@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { router } from "@inertiajs/react";
+import toast from "react-hot-toast";
 
 const EditContract = ({
     data,
@@ -17,8 +18,7 @@ const EditContract = ({
     const [existingContract, setExistingContract] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [initialized, setInitialized] = useState(false);
-       const imgurl = import.meta.env.VITE_IMAGE_PATH;
-
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
 
     const contractId = existingData?.id || null;
 
@@ -85,6 +85,7 @@ const EditContract = ({
                     message:
                         "File type not allowed. Please upload PDF, JPG, PNG, GIF, or SVG files.",
                 });
+                toast.error("Invalid file type. Please upload PDF, JPG, PNG, GIF, or SVG files.");
                 return;
             }
 
@@ -93,6 +94,7 @@ const EditContract = ({
                     type: "manual",
                     message: "File size must be less than 2MB",
                 });
+                toast.error("File size must be less than 2MB");
                 return;
             }
 
@@ -103,6 +105,7 @@ const EditContract = ({
             setValue("contractFile", file);
 
             setExistingContract(null);
+            toast.success("File selected successfully!");
         }
     };
 
@@ -112,6 +115,7 @@ const EditContract = ({
         setExistingContract(null);
         setValue("contractFile", null);
         clearErrors("contractFile");
+        toast.success("File removed successfully!");
     };
 
     const onFormSubmit = async (formData) => {
@@ -120,8 +124,11 @@ const EditContract = ({
                 type: "manual",
                 message: "Contract file is required",
             });
+            toast.error("Please select a contract file to upload.");
             return;
         }
+
+        const submitToast = toast.loading("Uploading contract...");
 
         try {
             setSubmitting(true);
@@ -160,12 +167,15 @@ const EditContract = ({
                         formData,
                         config
                     );
+                    toast.success("Contract updated successfully!", { id: submitToast });
                 } else {
                     await axios.post(route("ourcontract.store"), formData, config);
+                    toast.success("Contract uploaded successfully!", { id: submitToast });
                 }
             } else if (existingContract) {
                 // If no new file but existing contract, just proceed
                 console.log("Using existing contract, no file change");
+                toast.success("Contract information saved!", { id: submitToast });
             }
 
             updateData({
@@ -178,7 +188,7 @@ const EditContract = ({
 
             onSubmit();
 
-            alert("Contract uploaded successfully! CRM process completed.");
+            toast.success("CRM process completed successfully!");
             
             // Wait a moment for everything to process, then force full page reload
             setTimeout(() => {
@@ -199,6 +209,7 @@ const EditContract = ({
             }
 
             setError("submit", { type: "manual", message: msg });
+            toast.error(msg, { id: submitToast, duration: 5000 });
         } finally {
             setSubmitting(false);
         }
