@@ -36,7 +36,7 @@ const AdminWrapper = ({ children }) => {
                 onToggleCollapse={toggleCollapse}
             />
 
-            <main className={`pt-16 min-h-screen transition-all duration-300 ${
+            <main className={`pt-16 min-h-screen  transition-all duration-300 ${
                 isCollapsed ? 'lg:ml-16' : 'lg:ml-64'
             }`}>
                 <div className="p-6">{children}</div>

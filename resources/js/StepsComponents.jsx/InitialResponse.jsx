@@ -38,18 +38,16 @@ const InitialResponse = ({
         setIsLoading(false);
     }, [companyId, data]);
 
-    // Watch response value to conditionally show sections
     const responseValue = watch("response");
     const isPositive = responseValue === "positive";
     const isNegative = responseValue === "negative";
 
-    // React Quill modules configuration
     const quillModules = {
         toolbar: [
             [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
             ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            [{ 'indent': '-1' }, { 'indent': '+1' }],
             ['link'],
             ['clean']
         ],
@@ -62,19 +60,13 @@ const InitialResponse = ({
         'link'
     ];
 
-    // Axios store function for initial response
     const storeInitialResponse = async (responseData) => {
         try {
             console.log("Creating new initial response:", responseData);
-
             const response = await axios.post(
                 route("ourinitialresponse.store"),
                 responseData,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
+                { headers: { "Content-Type": "application/json" } }
             );
             return response.data;
         } catch (error) {
@@ -83,19 +75,13 @@ const InitialResponse = ({
         }
     };
 
-    // Axios update function for initial response
     const updateInitialResponse = async (responseData, id) => {
         try {
             console.log("Updating existing initial response:", id, responseData);
-
             const response = await axios.put(
                 route("ourinitialresponse.update", { id }),
                 responseData,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
+                { headers: { "Content-Type": "application/json" } }
             );
             return response.data;
         } catch (error) {
@@ -104,21 +90,17 @@ const InitialResponse = ({
         }
     };
 
-    // Helper function to extract response ID from API response
     const extractResponseId = (result) => {
-        // Try different possible response structures
         if (result.id) return result.id;
         if (result.data && result.data.id) return result.data.id;
         if (result.initialResponse && result.initialResponse.id) return result.initialResponse.id;
         if (result.response_id) return result.response_id;
-        
         console.warn("Unexpected API response structure:", result);
         return null;
     };
 
     const onSubmit = async (formData) => {
         try {
-            // Prepare data for API - map React field names to Laravel model field names
             const apiData = {
                 company_id: companyId,
                 initial_response: formData.response,
@@ -132,28 +114,15 @@ const InitialResponse = ({
             let result;
             let responseId;
 
-            // Check if we're updating an existing record or creating a new one
             if (data.initialResponseId) {
-                // Update existing initial response
-                console.log("Updating existing initial response with ID:", data.initialResponseId);
                 result = await updateInitialResponse(apiData, data.initialResponseId);
                 responseId = data.initialResponseId;
             } else {
-                // Create new initial response
-                console.log("Creating new initial response");
                 result = await storeInitialResponse(apiData);
-                
-                // Extract response ID from API response
                 responseId = extractResponseId(result);
-                console.log("API Response:", result);
-                console.log("Extracted Response ID:", responseId);
-                
                 if (!responseId) {
-                    // If we can't find the ID, check if the response was successful anyway
                     if (result.success || result.message) {
-                        // If the API indicates success but no ID, we might need to fetch the latest record
-                        console.log("API indicates success but no ID returned. You may need to handle this case differently.");
-                        // For now, we'll throw an error but you might want to implement a fallback
+                        console.log("API indicates success but no ID returned.");
                         throw new Error("Initial Response ID not returned from API. Response structure: " + JSON.stringify(result));
                     } else {
                         throw new Error("Initial Response ID not returned from API and no success indicator found.");
@@ -161,37 +130,28 @@ const InitialResponse = ({
                 }
             }
 
-            // Update parent component data WITH THE RESPONSE ID
             updateData({
                 ...formData,
                 initialResponseId: responseId
             });
 
-            // Only go to next step for positive responses
             if (isPositive) {
                 toast.success("Response saved successfully!");
                 nextStep();
             } else {
-                // For negative responses, show success toast and then reload the page
                 const successMessage = data.initialResponseId 
                     ? "Negative response updated successfully!" 
                     : "Negative response recorded successfully!";
-                
                 toast.success(successMessage);
-                
-                // Reload the page after a short delay to allow the user to see the toast
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
             }
-            
+
         } catch (error) {
             console.error("Error processing initial response", error);
-            // Handle API validation errors
             if (error.response && error.response.data.errors) {
                 const apiErrors = error.response.data.errors;
-                
-                // Map Laravel field names back to React field names
                 Object.keys(apiErrors).forEach(key => {
                     switch(key) {
                         case 'initial_response':
@@ -213,18 +173,11 @@ const InitialResponse = ({
                             setError(key, { type: 'server', message: apiErrors[key][0] });
                     }
                 });
-                
-                // Show error toast for validation errors
                 toast.error("Please fix the validation errors above.");
             } else if (error.message.includes("Initial Response ID not returned")) {
-                // Specific handling for the ID issue
                 toast.error("Response was recorded but there was an issue with the confirmation. Please check the records manually.");
                 console.error("ID Extraction Error:", error.message);
-                
-                // Even without ID, we can proceed if it's an update or we can try to continue
-                if (isPositive) {
-                    nextStep();
-                }
+                if (isPositive) nextStep();
             } else {
                 const errorMessage = data.initialResponseId 
                     ? "Error updating initial response. Please try again." 
@@ -234,7 +187,6 @@ const InitialResponse = ({
         }
     };
 
-    // Helper function to get input className with error state
     const getInputClassName = (fieldName) => {
         const baseClass = "w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:border-blue-500 transition-colors duration-200";
         return errors[fieldName] 
@@ -242,47 +194,38 @@ const InitialResponse = ({
             : baseClass;
     };
 
-    // Determine if form can be submitted
     const canSubmit = () => {
-        if (isSubmitting || !companyId || !responseValue) {
-            return false;
-        }
-
+        if (isSubmitting || !companyId || !responseValue) return false;
         if (isNegative) {
             const negativeReasonText = watch("negativeReason")?.replace(/<[^>]*>/g, '').trim();
             return !!negativeReasonText;
         }
-
         if (isPositive) {
             const meetingOutcomesText = watch("meetingOutcomes")?.replace(/<[^>]*>/g, '').trim();
             return !!meetingOutcomesText;
         }
-
         return false;
     };
 
-    // Get button text based on response type and edit mode
     const getButtonText = () => {
         if (isSubmitting) return data.initialResponseId ? "Updating..." : "Saving...";
         if (isPositive) return data.initialResponseId ? "Update & Next" : "Save & Next";
         return data.initialResponseId ? "Update Response" : "Save Response";
     };
 
-    // Show loading state
     if (isLoading) {
         return (
-            <div className="max-w-7xl mx-auto p-4">
+            <div className="max-w-4xl mx-auto p-4 sm:p-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-                    <p>Loading...</p>
+                    <p className="text-gray-600">Loading...</p>
                 </div>
             </div>
         );
     }
 
-    // Show error if companyId is missing
     if (!companyId) {
         return (
-            <div className="max-w-7xl mx-auto p-4">
+            <div className="max-w-7xl mx-auto w-full p-4 sm:p-6">
                 <div className="bg-red-50 border border-red-200 rounded-lg p-6">
                     <h3 className="text-red-800 font-medium text-lg mb-2">
                         Error: Company Information Missing
@@ -295,7 +238,7 @@ const InitialResponse = ({
                     <button
                         type="button"
                         onClick={prevStep}
-                        className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 w-full sm:w-auto"
                     >
                         Back to Company Selection
                     </button>
@@ -305,10 +248,9 @@ const InitialResponse = ({
     }
 
     return (
-        <div className="max-w-7xl mx-auto p-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+        <div className="max-w-7xl mx-auto ">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-sm border border-gray-200">
                 <form onSubmit={handleSubmit(onSubmit)}>
-                    {/* Company ID Error Display */}
                     {errors.companyId && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
                             <p className="text-red-500 text-sm">
@@ -322,17 +264,13 @@ const InitialResponse = ({
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Initial Response *
                         </label>
-
                         {errors.response && (
                             <p className="text-red-500 text-sm mb-2">
                                 {errors.response.message}
                             </p>
                         )}
-
                         <select
-                            {...register("response", {
-                                required: "Response type is required"
-                            })}
+                            {...register("response", { required: "Response type is required" })}
                             className={getInputClassName('response')}
                         >
                             <option value="">-- Select Response Type --</option>
@@ -343,12 +281,11 @@ const InitialResponse = ({
 
                     {/* Positive Section */}
                     {isPositive && (
-                        <div className="space-y-4 p-4 bg-green-50 rounded-lg border border-green-200 mb-4">
-                            <h3 className="font-medium text-green-800">
+                        <div className="space-y-4 p-3 sm:p-4 bg-green-50 rounded-lg border border-green-200 mb-6">
+                            <h3 className="font-medium text-green-800 text-base">
                                 Meeting Details
                             </h3>
 
-                            {/* Meeting Outcomes with React Quill */}
                             <div>
                                 <label className="block text-sm text-green-700 mb-1">
                                     Meeting Outcomes *
@@ -373,7 +310,7 @@ const InitialResponse = ({
                                                 modules={quillModules}
                                                 formats={quillFormats}
                                                 placeholder="Key outcomes and decisions from the meeting..."
-                                                className="h-40 mb-12"
+                                                className="h-40 mb-12 text-sm"
                                             />
                                         </div>
                                     )}
@@ -385,7 +322,6 @@ const InitialResponse = ({
                                 )}
                             </div>
 
-                            {/* Notes with React Quill */}
                             <div>
                                 <label className="block text-sm text-green-700 mb-1">
                                     Notes
@@ -401,7 +337,7 @@ const InitialResponse = ({
                                                 modules={quillModules}
                                                 formats={quillFormats}
                                                 placeholder="Meeting notes and discussion points..."
-                                                className="h-32 mb-10"
+                                                className="h-32 mb-10 text-sm"
                                             />
                                         </div>
                                     )}
@@ -412,12 +348,11 @@ const InitialResponse = ({
 
                     {/* Negative Section */}
                     {isNegative && (
-                        <div className="space-y-4 p-4 bg-red-50 rounded-lg border border-red-200 mb-4">
-                            <h3 className="font-medium text-red-800">
+                        <div className="space-y-4 p-3 sm:p-4 bg-red-50 rounded-lg border border-red-200 mb-6">
+                            <h3 className="font-medium text-red-800 text-base">
                                 Response Details
                             </h3>
 
-                            {/* Reason with React Quill - Made required */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">
                                     Reason *
@@ -442,7 +377,7 @@ const InitialResponse = ({
                                                 modules={quillModules}
                                                 formats={quillFormats}
                                                 placeholder="Why did the client decline?"
-                                                className="h-40 mb-12"
+                                                className="h-40 mb-12 text-sm"
                                             />
                                         </div>
                                     )}
@@ -454,7 +389,6 @@ const InitialResponse = ({
                                 )}
                             </div>
 
-                            {/* Meeting Outcomes with React Quill */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">
                                     Meeting Outcomes
@@ -470,14 +404,13 @@ const InitialResponse = ({
                                                 modules={quillModules}
                                                 formats={quillFormats}
                                                 placeholder="Key outcomes and learnings from the discussion..."
-                                                className="h-32 mb-10"
+                                                className="h-32 mb-10 text-sm"
                                             />
                                         </div>
                                     )}
                                 />
                             </div>
 
-                            {/* Notes with React Quill */}
                             <div>
                                 <label className="block text-sm text-red-700 mb-1">
                                     Notes
@@ -493,7 +426,7 @@ const InitialResponse = ({
                                                 modules={quillModules}
                                                 formats={quillFormats}
                                                 placeholder="Additional notes..."
-                                                className="h-24 mb-8"
+                                                className="h-24 mb-8 text-sm"
                                             />
                                         </div>
                                     )}
@@ -503,12 +436,12 @@ const InitialResponse = ({
                     )}
 
                     {/* Navigation Buttons */}
-                    <div className="flex justify-between gap-4 mt-6">
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                         <button
                             type="button"
                             onClick={prevStep}
                             disabled={isSubmitting}
-                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
                         >
                             Back
                         </button>
@@ -516,7 +449,7 @@ const InitialResponse = ({
                         <button
                             type="submit"
                             disabled={!canSubmit() || isSubmitting}
-                            className={`px-6 py-2 text-white rounded transition-colors ${
+                            className={`px-4 py-2 text-white rounded transition-colors w-full sm:w-auto ${
                                 !canSubmit() || isSubmitting
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : data.initialResponseId

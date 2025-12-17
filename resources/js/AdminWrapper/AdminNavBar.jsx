@@ -127,7 +127,7 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                     </div>
 
                                     {/* Menu items */}
-                                    <div className="py-1">
+                                    {/* <div className="py-1">
                                         <Link
                                             href={""}
                                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
@@ -148,7 +148,7 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                             <Settings className="w-4 h-4 mr-3 text-gray-400" />
                                             Settings
                                         </Link>
-                                    </div>
+                                    </div> */}
 
                                     {/* Logout section */}
                                     <div className="border-t border-gray-100 pt-1">

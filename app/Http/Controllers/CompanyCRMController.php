@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\MeetingScheduled;
 
 class CompanyCRMController extends Controller
 {
@@ -19,7 +21,7 @@ class CompanyCRMController extends Controller
      *                COMPANY CRUD
      * ============================================ */
 
-    // LIST ALL COMPANIES
+    // LIST ALL COMPANIES WITH RELATIONS
     public function index()
     {
         try {
@@ -39,6 +41,7 @@ class CompanyCRMController extends Controller
         }
     }
 
+    // GET COMPANY BY SLUG
     public function indexBySlug($slug)
     {
         try {
@@ -60,177 +63,8 @@ class CompanyCRMController extends Controller
         }
     }
 
-    // CREATE COMPANY
-    public function storeCompany(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'company_name' => 'required|string|max:255',
-            'first_name' => 'nullable|string|max:255',
-            'last_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone_no' => 'nullable|string|max:20',
-            'status' => 'nullable|string|max:50',
-            'client_member' => 'nullable|string|max:255',
-            'designation' => 'nullable|string|max:255',
-            'no_of_rooms' => 'nullable|integer',
-            'address' => 'nullable|string',
-            'website' => 'nullable|string|max:255',
-            'source' => 'nullable|string|max:255',
-            'responsible_person' => 'nullable|string|max:255',
-            'preffered_message' => 'nullable|string|max:255',
-            'message_contact' => 'nullable|string|max:255',
-            'follow_up_date' => 'nullable|date',
-            'comment' => 'nullable|string',
-
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        try {
-            $company = Company::create($request->only([
-                'company_name', 'first_name', 'last_name', 'client_member', 'designation',
-                'no_of_rooms', 'phone_no', 'email', 'address', 'website', 'source',
-                'responsible_person', 'preffered_message', 'message_contact', 'comment', 'follow_up_date',
-                'status',
-            ]));
-
-            return response()->json([
-                'message' => 'Company created successfully',
-                'company_id' => $company->id,
-                'company' => $company->load(['initialResponses', 'meetings', 'followUpResponses', 'contracts']),
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create company',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    // UPDATE COMPANY
-    public function updateCompany(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'company_name' => 'sometimes|required|string|max:255',
-            'email' => 'nullable|email|max:255',
-            'phone_no' => 'nullable|string|max:20',
-            'status' => 'nullable|string|max:50',
-            'client_member' => 'nullable|string|max:255',
-            'designation' => 'nullable|string|max:255',
-            'no_of_rooms' => 'nullable|integer',
-            'address' => 'nullable|string',
-            'website' => 'nullable|string|max:255',
-            'source' => 'nullable|string|max:255',
-            'responsible_person' => 'nullable|string|max:255',
-            'preffered_message' => 'nullable|string|max:255',
-            'message_contact' => 'nullable|string|max:255',
-            'follow_up_date' => 'nullable|date',
-            'comment' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
-        try {
-            $company = Company::findOrFail($id);
-
-            $company->update($request->only([
-                'company_name', 'first_name', 'last_name', 'client_member', 'designation',
-                'no_of_rooms', 'phone_no', 'email', 'address', 'website', 'source',
-                'responsible_person', 'preffered_message', 'message_contact', 'comment',
-                'follow_up_date',
-                'status',
-            ]));
-
-            return response()->json([
-                'message' => 'Company updated successfully',
-                'company_id' => $company->id,
-                'company' => $company->fresh(['initialResponses', 'meetings', 'followUpResponses', 'contracts']),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to update company',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    // DELETE COMPANY + ALL RELATED RECORDS - FIXED VERSION
-    public function deleteCompany($id)
-    {
-        try {
-            DB::beginTransaction();
-
-            // Find the company first
-            $company = Company::find($id);
-
-            if (! $company) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Company not found',
-                ], 404);
-            }
-
-            \Log::info('Deleting company: '.$id);
-
-            // Delete contract images first
-            $contracts = CompanyContract::where('company_id', $id)->get();
-            \Log::info('Found '.$contracts->count().' contracts to delete');
-
-            foreach ($contracts as $contract) {
-                if ($contract->image) {
-                    $imagePath = $contract->image;
-                    // Handle both full paths and relative paths
-                    if (strpos($imagePath, 'contracts/') === 0) {
-                        $imagePath = 'public/'.$imagePath;
-                    }
-                    if (Storage::exists($imagePath)) {
-                        Storage::delete($imagePath);
-                        \Log::info('Deleted contract image: '.$imagePath);
-                    }
-                }
-                $contract->delete();
-            }
-
-            // Delete other related records
-            CompanyInitialResponse::where('company_id', $id)->delete();
-            CompanyMeeting::where('company_id', $id)->delete();
-            CompanyFollowUpResponse::where('company_id', $id)->delete();
-
-            // Finally delete the company
-            $company->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Company and all related records deleted successfully',
-            ], 200);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Company deletion error: '.$e->getMessage());
-            \Log::error('Error trace: '.$e->getTraceAsString());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to delete company',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-
-    // SHOW SINGLE COMPANY WITH RELATIONS
-    public function showCompany($id)
+    // SHOW SINGLE COMPANY WITH ALL RELATIONS
+    public function show($id)
     {
         try {
             $company = Company::with([
@@ -241,14 +75,195 @@ class CompanyCRMController extends Controller
             ])->findOrFail($id);
 
             return response()->json([
+                'success' => true,
                 'company_id' => $company->id,
                 'company' => $company,
             ]);
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'Company not found',
                 'error' => $e->getMessage(),
             ], 404);
+        }
+    }
+
+    // CREATE COMPANY
+    public function storeCompany(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'company_name'       => 'required|string|max:255',
+            'full_name'          => 'nullable|string|max:255',
+            'designation'        => 'nullable|string|max:255',
+            'phone_no'           => 'nullable|string|max:20',
+            'email'              => 'nullable|email|max:255',
+            'address'            => 'nullable|string',
+            'responsible_person' => 'nullable|string|max:255',
+            'our_team'           => 'nullable|string|max:255',
+            'client_member'      => 'nullable|string|max:255',
+            'comment'            => 'nullable|string',
+            'follow_up_date'     => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $company = Company::create($request->only([
+                'company_name',
+                'full_name',
+                'designation',
+                'phone_no',
+                'email',
+                'address',
+                'responsible_person',
+                'our_team',
+                'client_member',
+                'comment',
+                'follow_up_date',
+            ]));
+
+            return response()->json([
+                'message'    => 'Company created successfully',
+                'company_id' => $company->id,
+                'company'    => $company->load([
+                    'initialResponses',
+                    'meetings',
+                    'followUpResponses',
+                    'contracts'
+                ]),
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to create company',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // UPDATE COMPANY
+    public function updateCompany(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'company_name'       => 'sometimes|required|string|max:255',
+            'full_name'          => 'nullable|string|max:255',
+            'designation'        => 'nullable|string|max:255',
+            'phone_no'           => 'nullable|string|max:20',
+            'email'              => 'nullable|email|max:255',
+            'address'            => 'nullable|string',
+            'responsible_person' => 'nullable|string|max:255',
+            'our_team'           => 'nullable|string|max:255',
+            'client_member'      => 'nullable|string|max:255',
+            'comment'            => 'nullable|string',
+            'follow_up_date'     => 'nullable|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors'  => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $company = Company::findOrFail($id);
+
+            $company->update($request->only([
+                'company_name',
+                'full_name',
+                'designation',
+                'phone_no',
+                'email',
+                'address',
+                'responsible_person',
+                'our_team',
+                'client_member',
+                'comment',
+                'follow_up_date',
+            ]));
+
+            return response()->json([
+                'message'    => 'Company updated successfully',
+                'company_id' => $company->id,
+                'company'    => $company->fresh([
+                    'initialResponses',
+                    'meetings',
+                    'followUpResponses',
+                    'contracts'
+                ]),
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update company',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    // DELETE COMPANY WITH ALL RELATED RECORDS
+    public function deleteCompany($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $company = Company::find($id);
+
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Company not found',
+                ], 404);
+            }
+
+            \Log::info('Deleting company: ' . $id);
+
+            // Delete contract & image
+            if ($company->contracts) {
+                if ($company->contracts->image) {
+                    $imagePath = $company->contracts->image;
+
+                    if (strpos($imagePath, 'contracts/') === 0) {
+                        $imagePath = 'public/' . $imagePath;
+                    }
+
+                    if (Storage::exists($imagePath)) {
+                        Storage::delete($imagePath);
+                    }
+                }
+                $company->contracts()->delete();
+            }
+
+            // Delete hasOne relations
+            $company->initialResponses()?->delete();
+            $company->meetings()?->delete();
+            $company->followUpResponses()?->delete();
+
+            // Delete company
+            $company->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Company and related records deleted successfully',
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Company deletion error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to delete company',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
     }
 
@@ -332,86 +347,199 @@ class CompanyCRMController extends Controller
      *              MEETING (STEP 2)
      * ============================================ */
 
-    public function storeMeeting(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'company_id' => 'required|exists:companies,id',
-            'meeting_date' => 'required|date',
-            'meeting_time' => 'required|date_format:H:i',
-            'meeting_type' => 'required|string',
-            'meeting_platform' => 'nullable|string',
-            'meeting_location' => 'nullable|string',
-            'attendee' => 'nullable|string',
-            'agenda' => 'nullable|string',
+    // public function storeMeeting(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'company_id' => 'required|exists:companies,id',
+    //         'meeting_date' => 'required|date',
+    //         'meeting_time' => 'required|date_format:H:i',
+    //         'meeting_type' => 'required|string',
+    //         'phone_details' => 'nullable|string',
+    //         'meeting_location' => 'nullable|string',
+    //         'attendee' => 'nullable|string',
+    //         'agenda' => 'nullable|string',
+    //     ]);
 
-        ]);
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'message' => 'Validation failed',
+    //             'errors' => $validator->errors(),
+    //         ], 422);
+    //     }
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
+    //     try {
+    //         $meeting = CompanyMeeting::create($request->only([
+    //             'meeting_date', 'meeting_time', 'meeting_type', 'phone_details', 'meeting_location',
+    //             'attendee', 'company_id', 'agenda',
+    //         ]));
 
-        try {
-            $meeting = CompanyMeeting::create($request->only([
-                'meeting_date', 'meeting_time', 'meeting_type', 'meeting_platform', 'meeting_location',
-                'attendee', 'company_id', 'agenda',
-            ]));
+    //         return response()->json([
+    //             'message' => 'Meeting added successfully',
+    //             'meeting_id' => $meeting->id,
+    //             'company_id' => $meeting->company_id,
+    //             'data' => $meeting->load('company'),
+    //         ], 201);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Failed to add meeting',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
 
-            return response()->json([
-                'message' => 'Meeting added successfully',
-                'meeting_id' => $meeting->id,
-                'company_id' => $meeting->company_id,
-                'data' => $meeting->load('company'),
-            ], 201);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to add meeting',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
+    // public function updateMeeting(Request $request, $id)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'meeting_date' => 'sometimes|required|date',
+    //         'meeting_time' => 'sometimes|required|date_format:H:i',
+    //         'meeting_type' => 'sometimes|required|string',
+    //         'phone_details' => 'nullable|string',
+    //         'meeting_location' => 'nullable|string',
+    //         'attendee' => 'nullable|string',
+    //         'agenda' => 'nullable|string',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'message' => 'Validation failed',
+    //             'errors' => $validator->errors(),
+    //         ], 422);
+    //     }
+
+    //     try {
+    //         $meeting = CompanyMeeting::findOrFail($id);
+    //         $meeting->update($request->only([
+    //             'meeting_date', 'meeting_time', 'meeting_type', 'phone_details', 'meeting_location',
+    //             'attendee', 'agenda',
+    //         ]));
+
+    //         return response()->json([
+    //             'message' => 'Meeting updated successfully',
+    //             'meeting_id' => $meeting->id,
+    //             'company_id' => $meeting->company_id,
+    //             'data' => $meeting->fresh('company'),
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Failed to update meeting',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+
+    /* ============================================
+ *              MEETING (STEP 2)
+ * ============================================ */
+
+public function storeMeeting(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'company_id' => 'required|exists:companies,id',
+        'meeting_date' => 'required|date',
+        'meeting_time' => 'required|date_format:H:i',
+        'meeting_type' => 'required|string',
+        'phone_details' => 'nullable|string',
+        'meeting_location' => 'nullable|string',
+        'attendee' => 'nullable|string',
+        'agenda' => 'nullable|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ], 422);
     }
 
-    public function updateMeeting(Request $request, $id)
-    {
-        $validator = Validator::make($request->all(), [
-            'meeting_date' => 'sometimes|required|date',
-            'meeting_time' => 'sometimes|required|date_format:H:i',
-            'meeting_type' => 'sometimes|required|string',
-            'meeting_platform' => 'nullable|string',
-            'meeting_location' => 'nullable|string',
-            'attendee' => 'nullable|string',
-            'agenda' => 'nullable|string',
-        ]);
+    try {
+        $meeting = CompanyMeeting::create($request->only([
+            'meeting_date', 'meeting_time', 'meeting_type', 'phone_details', 'meeting_location',
+            'attendee', 'company_id', 'agenda',
+        ]));
 
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
+        // Load the company relationship
+        $meeting->load('company');
 
+        // Send email notification to admin
         try {
-            $meeting = CompanyMeeting::findOrFail($id);
-            $meeting->update($request->only([
-                'meeting_date', 'meeting_time', 'meeting_type', 'meeting_platform', 'meeting_location',
-                'attendee', 'agenda',
-            ]));
-
-            return response()->json([
-                'message' => 'Meeting updated successfully',
-                'meeting_id' => $meeting->id,
-                'company_id' => $meeting->company_id,
-                'data' => $meeting->fresh('company'),
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to update meeting',
-                'error' => $e->getMessage(),
-            ], 500);
+            $adminEmail = config('mail.admin_email', 'sandip@sait.com.np');
+            Mail::to($adminEmail)->send(new MeetingScheduled($meeting));
+        } catch (\Exception $mailException) {
+            // Log the error but don't fail the meeting creation
+            \Log::error('Failed to send meeting notification email: ' . $mailException->getMessage());
         }
+
+        return response()->json([
+            'message' => 'Meeting added successfully',
+            'meeting_id' => $meeting->id,
+            'company_id' => $meeting->company_id,
+            'data' => $meeting,
+        ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to add meeting',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
+public function updateMeeting(Request $request, $id)
+{
+    $validator = Validator::make($request->all(), [
+        'meeting_date' => 'sometimes|required|date',
+        'meeting_time' => 'sometimes|required|date_format:H:i',
+        'meeting_type' => 'sometimes|required|string',
+        'phone_details' => 'nullable|string',
+        'meeting_location' => 'nullable|string',
+        'attendee' => 'nullable|string',
+        'agenda' => 'nullable|string',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    try {
+        $meeting = CompanyMeeting::findOrFail($id);
+        
+        // Check if date or time is being updated
+        $dateOrTimeChanged = $request->has('meeting_date') || $request->has('meeting_time');
+        
+        $meeting->update($request->only([
+            'meeting_date', 'meeting_time', 'meeting_type', 'phone_details', 'meeting_location',
+            'attendee', 'agenda',
+        ]));
+
+        // Load the company relationship
+        $meeting->load('company');
+
+        // Send email notification if date or time changed
+        if ($dateOrTimeChanged) {
+            try {
+                $adminEmail = config('mail.admin_email', 'sandip@sait.com.np');
+                Mail::to($adminEmail)->send(new MeetingScheduled($meeting));
+            } catch (\Exception $mailException) {
+                \Log::error('Failed to send meeting update notification email: ' . $mailException->getMessage());
+            }
+        }
+
+        return response()->json([
+            'message' => 'Meeting updated successfully',
+            'meeting_id' => $meeting->id,
+            'company_id' => $meeting->company_id,
+            'data' => $meeting,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Failed to update meeting',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
 
     /* ============================================
      *        FOLLOW UP RESPONSE (STEP 3)
@@ -497,7 +625,7 @@ class CompanyCRMController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'company_id' => 'required|exists:companies,id',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048',
+            'image' => 'required|file|mimes:pdf,jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -508,7 +636,6 @@ class CompanyCRMController extends Controller
         }
 
         try {
-            // Store the image in storage/app/public/contracts
             $imagePath = $request->file('image')->store('contracts', 'public');
 
             $contract = CompanyContract::create([
@@ -520,7 +647,7 @@ class CompanyCRMController extends Controller
                 'message' => 'Contract added successfully',
                 'contract_id' => $contract->id,
                 'company_id' => $contract->company_id,
-                'image_url' => Storage::url($imagePath), // Return the public URL
+                'image_url' => Storage::url($imagePath),
                 'data' => $contract->load('company'),
             ], 201);
         } catch (\Exception $e) {
@@ -533,9 +660,8 @@ class CompanyCRMController extends Controller
 
     public function updateContract(Request $request, $id)
     {
-        // Fix validation - make image optional for updates, required for creates
         $validator = Validator::make($request->all(), [
-            'image' => 'required|file|mimes:jpeg,png,jpg,gif,svg,pdf|max:2048', // Use 'file' instead of 'image' to allow PDF
+            'image' => 'required|file|mimes:pdf,jpeg,png,jpg,gif,svg|max:2048',
             'company_id' => 'required|exists:companies,id',
         ]);
 
@@ -549,16 +675,14 @@ class CompanyCRMController extends Controller
         try {
             $contract = CompanyContract::findOrFail($id);
 
-            // Check if file exists in request
-            if (! $request->hasFile('image')) {
+            if (!$request->hasFile('image')) {
                 return response()->json([
-                    'message' => 'No image file provided',
+                    'message' => 'No file provided',
                 ], 422);
             }
 
             $imageFile = $request->file('image');
 
-            // Debug logging
             \Log::info('Updating contract', [
                 'contract_id' => $id,
                 'file_name' => $imageFile->getClientOriginalName(),
@@ -566,12 +690,10 @@ class CompanyCRMController extends Controller
                 'file_type' => $imageFile->getMimeType(),
             ]);
 
-            // Delete old image if exists
             if ($contract->image && Storage::disk('public')->exists($contract->image)) {
                 Storage::disk('public')->delete($contract->image);
             }
 
-            // Store new image
             $imagePath = $imageFile->store('contracts', 'public');
 
             $contract->update([
@@ -584,7 +706,6 @@ class CompanyCRMController extends Controller
                 'contract_id' => $contract->id,
                 'company_id' => $contract->company_id,
                 'image_url' => Storage::url($imagePath),
-                'image_path' => $imagePath, // Return the path for debugging
                 'data' => $contract->fresh('company'),
             ]);
 

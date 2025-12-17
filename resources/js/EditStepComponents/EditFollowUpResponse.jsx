@@ -15,11 +15,8 @@ const EditFollowUpResponse = ({
     existingData,
 }) => {
     const [submitting, setSubmitting] = React.useState(false);
-
-    // Check if we're updating existing data or creating new
     const followUpResponseId = existingData?.id || null;
 
-    // React Hook Form initialization
     const {
         register,
         handleSubmit,
@@ -47,12 +44,10 @@ const EditFollowUpResponse = ({
         },
     });
 
-    // Watch response field to conditionally show sections
     const responseType = watch("response");
     const isPositive = responseType === "positive";
     const isNegative = responseType === "negative";
 
-    // ReactQuill modules configuration
     const quillModules = {
         toolbar: [
             [{ header: [1, 2, 3, false] }],
@@ -78,17 +73,14 @@ const EditFollowUpResponse = ({
         "background",
     ];
 
-    // Helper function to get CSRF token safely
     const getCsrfToken = () => {
         if (typeof document === "undefined") return "";
-
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         return metaTag ? metaTag.getAttribute("content") : "";
     };
 
-    // Updated helper function with increased height
     const getQuillClassName = (fieldName) => {
-        const baseClass = "custom-quill-editor rounded focus:outline-none";
+        const baseClass = "custom-quill-editor rounded focus:outline-none w-full";
         const isError = errors[fieldName];
 
         if (isPositive) {
@@ -106,50 +98,44 @@ const EditFollowUpResponse = ({
             : `${baseClass} border-gray-300 bg-white`;
     };
 
-    // Add custom CSS for Quill editor height
     const quillStyles = `
         .custom-quill-editor .ql-container {
-            height: 200px !important; /* Increased from default ~150px */
-            min-height: 200px !important;
+            min-height: 160px !important;
+            height: auto !important;
             font-size: 14px;
         }
         .custom-quill-editor .ql-editor {
-            min-height: 200px !important;
-            max-height: 200px !important;
-            overflow-y: auto;
+            min-height: 160px !important;
+            font-size: 14px;
+        }
+        @media (min-width: 640px) {
+            .custom-quill-editor .ql-container,
+            .custom-quill-editor .ql-editor {
+                min-height: 200px !important;
+            }
         }
     `;
 
     const onSubmit = async (formData) => {
         try {
             setSubmitting(true);
-
-            // Show loading toast
             const loadingToast = toast.loading(
-                followUpResponseId 
-                    ? "Updating follow-up response..." 
+                followUpResponseId
+                    ? "Updating follow-up response..."
                     : "Creating follow-up response..."
             );
 
-            // Map frontend field names to backend field names
             const backendData = {
                 company_id: companyId,
                 follow_up_response: formData.response,
                 meeting_outcome: formData.meetingOutcome,
                 follow_up_notes: formData.notes,
                 follow_up_reason: formData.negativeReason,
-                _method: followUpResponseId ? "PUT" : "POST", // Important for Laravel
+                _method: followUpResponseId ? "PUT" : "POST",
             };
 
             let response;
-
             if (followUpResponseId) {
-                // Update existing follow-up response
-                console.log(
-                    "Updating existing follow-up response with ID:",
-                    followUpResponseId
-                );
-
                 response = await axios.put(
                     `/ourfollowupresponse/${followUpResponseId}`,
                     backendData,
@@ -160,98 +146,64 @@ const EditFollowUpResponse = ({
                         },
                     }
                 );
-
-                console.log(
-                    "Follow-up response updated successfully:",
-                    response.data
-                );
             } else {
-                // Create new follow-up response
-                console.log("Creating new follow-up response");
-                response = await axios.post(
-                    "/ourfollowupresponse",
-                    backendData,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": getCsrfToken(),
-                        },
-                    }
-                );
-                console.log(
-                    "Follow-up response created successfully:",
-                    response.data
-                );
+                response = await axios.post("/ourfollowupresponse", backendData, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": getCsrfToken(),
+                    },
+                });
             }
 
-            // Update parent component with the data
             const updatedData = {
                 follow_up_response: formData.response,
                 meeting_outcome: formData.meetingOutcome,
                 follow_up_notes: formData.notes,
                 follow_up_reason: formData.negativeReason,
-                id: followUpResponseId || response.data.id, // Include the ID
+                id: followUpResponseId || response.data.id,
             };
 
             updateData(updatedData);
 
-            // Show success toast
             toast.success(
                 `Follow-up response ${followUpResponseId ? "updated" : "created"} successfully!`,
                 { id: loadingToast }
             );
 
-            // Only proceed to next step for positive responses
             if (isPositive) {
-                setTimeout(() => {
-                    nextStep();
-                }, 1000);
+                setTimeout(() => nextStep(), 1000);
             } else {
-                // For negative responses, reload the page after a short delay
                 setTimeout(() => {
                     toast.success("Page will reload now...");
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 500);
+                    setTimeout(() => window.location.reload(), 500);
                 }, 1000);
             }
         } catch (error) {
             console.error("Error saving follow-up response", error);
-
-            // More detailed error logging
+            let errorMessage = "An unknown error occurred.";
             if (error.response) {
-                console.error("Server responded with:", error.response.status);
-                console.error("Response data:", error.response.data);
-                
-                // Show specific error message from server if available
-                const errorMessage = error.response.data?.message || 
-                                   error.response.data?.error || 
-                                   `Failed to ${followUpResponseId ? "update" : "save"} follow-up response`;
-                
-                toast.error(errorMessage);
+                errorMessage =
+                    error.response.data?.message ||
+                    error.response.data?.error ||
+                    `Failed to ${followUpResponseId ? "update" : "save"} follow-up response`;
             } else if (error.request) {
-                console.error("No response received:", error.request);
-                toast.error("Network error: Please check your connection and try again.");
+                errorMessage = "Network error: Please check your connection.";
             } else {
-                console.error("Error setting up request:", error.message);
-                toast.error(`Error: ${error.message}`);
+                errorMessage = error.message;
             }
-
+            toast.error(errorMessage);
             setError("submit", {
                 type: "manual",
-                message: `Failed to ${
-                    followUpResponseId ? "update" : "save"
-                } follow-up response. Please try again.`,
+                message: `Failed to ${followUpResponseId ? "update" : "save"} follow-up response.`,
             });
         } finally {
             setSubmitting(false);
         }
     };
 
-    // Helper function to get input className with error state
     const getInputClassName = (fieldName) => {
         const baseClass =
-            "w-full p-2 border rounded focus:ring focus:ring-blue-200 focus:outline-none";
+            "w-full p-2.5 border rounded-lg focus:ring focus:ring-blue-200 focus:outline-none text-sm";
         const isError = errors[fieldName];
 
         if (isPositive) {
@@ -270,48 +222,39 @@ const EditFollowUpResponse = ({
     };
 
     const getSectionClassName = () => {
-        if (isPositive) {
-            return "space-y-4 p-4 bg-green-50 rounded-lg border border-green-200 mb-4";
-        } else if (isNegative) {
-            return "space-y-4 p-4 bg-red-50 rounded-lg border border-red-200 mb-4";
-        }
-        return "space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4";
+        if (isPositive)
+            return "space-y-4 p-4 sm:p-5 bg-green-50 rounded-lg border border-green-200 mb-5";
+        if (isNegative)
+            return "space-y-4 p-4 sm:p-5 bg-red-50 rounded-lg border border-red-200 mb-5";
+        return "space-y-4 p-4 sm:p-5 bg-gray-50 rounded-lg border border-gray-200 mb-5";
     };
 
-    // Get button text based on response type
     const getButtonText = () => {
         if (submitting) return "Saving...";
-        if (isPositive) return "Next";
-        return "Complete & Reload";
+        return isPositive ? "Next" : "Complete & Reload";
     };
 
-    // Debug info (remove in production)
-    const showDebugInfo = process.env.NODE_ENV === "development";
-
     return (
-        <div className="max-w-7xl mx-auto p-4">
-            {/* Add custom styles for Quill editor */}
+        <div className="max-w-7xl mx-auto p-4 sm:p-6">
             <style>{quillStyles}</style>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     {/* Response Dropdown */}
-                    <div className="mb-6">
+                    <div className="mb-5 sm:mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Follow-up Response *
                         </label>
-
                         {errors.response && (
-                            <p className="text-red-500 text-sm mb-2">
+                            <p className="text-red-500 text-xs mb-2">
                                 {errors.response.message}
                             </p>
                         )}
-
                         <select
                             {...register("response", {
                                 required: "Response type is required",
                             })}
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none text-sm"
                         >
                             <option value="">-- Select Response Type --</option>
                             <option value="positive">Positive</option>
@@ -323,10 +266,8 @@ const EditFollowUpResponse = ({
                     {(isPositive || isNegative) && (
                         <div className={getSectionClassName()}>
                             <h3
-                                className={`font-medium ${
-                                    isPositive
-                                        ? "text-green-800"
-                                        : "text-red-800"
+                                className={`text-sm font-medium ${
+                                    isPositive ? "text-green-800" : "text-red-800"
                                 }`}
                             >
                                 {isPositive
@@ -334,16 +275,9 @@ const EditFollowUpResponse = ({
                                     : "Response Details"}
                             </h3>
 
-                            {/* Negative Reason - Only for negative responses */}
                             {isNegative && (
-                                <div>
-                                    <label
-                                        className={`block text-sm mb-1 ${
-                                            isNegative
-                                                ? "text-red-700"
-                                                : "text-green-700"
-                                        }`}
-                                    >
+                                <div className="mt-3">
+                                    <label className="block text-xs font-medium text-red-700 mb-1">
                                         Reason for Negative Response *
                                     </label>
                                     <Controller
@@ -360,9 +294,7 @@ const EditFollowUpResponse = ({
                                                 theme="snow"
                                                 modules={quillModules}
                                                 formats={quillFormats}
-                                                className={getQuillClassName(
-                                                    "negativeReason"
-                                                )}
+                                                className={getQuillClassName("negativeReason")}
                                                 placeholder="Why did the client decline or provide negative feedback?"
                                             />
                                         )}
@@ -375,18 +307,13 @@ const EditFollowUpResponse = ({
                                 </div>
                             )}
 
-                            {/* Meeting Outcome */}
-                            <div>
+                            <div className="mt-3">
                                 <label
-                                    className={`block text-sm mb-1 ${
-                                        isPositive
-                                            ? "text-green-700"
-                                            : "text-red-700"
+                                    className={`block text-xs font-medium mb-1 ${
+                                        isPositive ? "text-green-700" : "text-red-700"
                                     }`}
                                 >
-                                    {isPositive
-                                        ? "Meeting Outcome *"
-                                        : "Meeting Outcome"}
+                                    {isPositive ? "Meeting Outcome *" : "Meeting Outcome"}
                                 </label>
                                 <Controller
                                     name="meetingOutcome"
@@ -402,13 +329,11 @@ const EditFollowUpResponse = ({
                                             theme="snow"
                                             modules={quillModules}
                                             formats={quillFormats}
-                                            className={getQuillClassName(
-                                                "meetingOutcome"
-                                            )}
+                                            className={getQuillClassName("meetingOutcome")}
                                             placeholder={
                                                 isPositive
-                                                    ? "Describe the outcome of the meeting (e.g., Deal closed, next steps agreed, proposal accepted, demo scheduled, contract signed...)"
-                                                    : "Describe the outcome of the meeting (e.g., Client not interested, budget constraints, timing issues, went with competitor, no decision made...)"
+                                                    ? "Describe the outcome (e.g., Deal closed, next steps agreed...)"
+                                                    : "Describe the outcome (e.g., Client not interested, budget constraints...)"
                                             }
                                         />
                                     )}
@@ -420,13 +345,10 @@ const EditFollowUpResponse = ({
                                 )}
                             </div>
 
-                            {/* Notes */}
-                            <div>
+                            <div className="mt-3">
                                 <label
-                                    className={`block text-sm mb-1 ${
-                                        isPositive
-                                            ? "text-green-700"
-                                            : "text-red-700"
+                                    className={`block text-xs font-medium mb-1 ${
+                                        isPositive ? "text-green-700" : "text-red-700"
                                     }`}
                                 >
                                     Additional Notes
@@ -440,9 +362,7 @@ const EditFollowUpResponse = ({
                                             theme="snow"
                                             modules={quillModules}
                                             formats={quillFormats}
-                                            className={getQuillClassName(
-                                                "notes"
-                                            )}
+                                            className={getQuillClassName("notes")}
                                             placeholder={
                                                 isPositive
                                                     ? "Any additional notes about the positive response..."
@@ -455,7 +375,6 @@ const EditFollowUpResponse = ({
                         </div>
                     )}
 
-                    {/* Success/Error Messages */}
                     {errors.submit && (
                         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                             <p className="text-sm text-red-600">
@@ -465,12 +384,12 @@ const EditFollowUpResponse = ({
                     )}
 
                     {/* Navigation Buttons */}
-                    <div className="flex justify-between gap-4 mt-6">
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                         <button
                             type="button"
                             onClick={prevStep}
                             disabled={submitting}
-                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            className="px-5 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 w-full sm:w-auto"
                         >
                             Back
                         </button>
@@ -478,7 +397,7 @@ const EditFollowUpResponse = ({
                         <button
                             type="submit"
                             disabled={submitting}
-                            className={`px-6 py-2 text-white rounded transition-colors duration-200 ${
+                            className={`px-5 py-2.5 text-white rounded-lg font-medium transition-colors duration-200 w-full sm:w-auto ${
                                 submitting
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : isPositive

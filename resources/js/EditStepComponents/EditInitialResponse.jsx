@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, existingData }) => {
     const [submitting, setSubmitting] = React.useState(false);
 
-    // React Hook Form initialization
     const {
         register,
         handleSubmit,
@@ -29,18 +28,16 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
         },
     });
 
-    // Watch response field to conditionally show sections
     const responseType = watch("response");
     const isPositive = responseType === "positive";
     const isNegative = responseType === "negative";
 
-    // React Quill modules configuration
     const quillModules = {
         toolbar: [
             [{ 'header': [1, 2, 3, false] }],
             ['bold', 'italic', 'underline', 'strike'],
-            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-            ['link', 'clean']
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+            ['link', 'clean'],
         ],
     };
 
@@ -48,25 +45,20 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
         'header',
         'bold', 'italic', 'underline', 'strike',
         'list', 'bullet',
-        'link'
+        'link',
     ];
 
-    // Helper function to handle React Quill changes
     const handleQuillChange = (fieldName, value) => {
         setValue(fieldName, value, { shouldValidate: true });
-        // Trigger validation for the field
         trigger(fieldName);
     };
 
-    // Helper function to get CSRF token safely
     const getCsrfToken = () => {
         if (typeof document === 'undefined') return '';
-        
         const metaTag = document.querySelector('meta[name="csrf-token"]');
         return metaTag ? metaTag.getAttribute('content') : '';
     };
 
-    // Check if company already has an initial response
     const checkExistingInitialResponse = async () => {
         try {
             const response = await axios.get(
@@ -85,16 +77,11 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
         }
     };
 
-    console.log(existingData)
-
     const onSubmit = async (formData) => {
         try {
             setSubmitting(true);
-            
-            // Show loading toast
             const loadingToast = toast.loading('Saving initial response...');
 
-            // Map frontend field names to backend field names
             const backendData = {
                 company_id: companyId,
                 initial_response: formData.response,
@@ -105,9 +92,6 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
 
             let savedResponseId = existingData;
 
-            console.log(existingData)
-
-            // If we have an existingData, always update
             if (existingData) {
                 await axios.put(
                     route('ourinitialresponse.update', { id: existingData }),
@@ -119,15 +103,11 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                         },
                     }
                 );
-                console.log("Initial response updated successfully");
                 toast.dismiss(loadingToast);
                 toast.success("Initial response updated successfully!");
             } else {
-                // Check if company already has an initial response
                 const existingResponse = await checkExistingInitialResponse();
-                console.log(existingResponse)
                 if (existingResponse.exists && existingResponse.id) {
-                    // Update existing response
                     await axios.put(
                         route('ourinitialresponse.update', { id: existingResponse.id }),
                         backendData,
@@ -139,11 +119,9 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                         }
                     );
                     savedResponseId = existingResponse.id;
-                    console.log("Existing initial response updated successfully");
                     toast.dismiss(loadingToast);
                     toast.success("Existing response updated successfully!");
                 } else {
-                    // Create new response
                     const response = await axios.post(
                         route('ourinitialresponse.store'),
                         backendData,
@@ -155,13 +133,11 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                         }
                     );
                     savedResponseId = response.data.id;
-                    console.log("Initial response created successfully:", response.data);
                     toast.dismiss(loadingToast);
                     toast.success("Initial response created successfully!");
                 }
             }
 
-            // Update parent component with the data and the response ID
             updateData({
                 initial_response: formData.response,
                 meeting_outcome: formData.meetingOutcomes,
@@ -170,43 +146,29 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                 initial_response_id: savedResponseId,
             });
 
-            // Check if response is negative
             if (formData.response === "negative") {
-                // Show success toast with longer duration
                 toast.success("Negative response recorded successfully! Page will reload in a moment...", {
                     duration: 4000,
                 });
-                
-                // Wait a moment for the toast to be visible, then reload the page
                 setTimeout(() => {
                     window.location.reload();
                 }, 2000);
             } else {
-                // For positive responses, proceed to next step as normal
-                // toast.success("Moving to next step...");
                 nextStep();
             }
-            
         } catch (error) {
             console.log("Error saving initial response", error);
-            
-            // Dismiss any loading toasts
             toast.dismiss();
-            
             setError("submit", {
                 type: "manual",
                 message: "Failed to save initial response. Please try again."
             });
-            
-            // Show detailed error toast
+
             if (error.response) {
-                // Server responded with error status
                 toast.error(`Server error: ${error.response.status} - ${error.response.data.message || 'Please try again.'}`);
             } else if (error.request) {
-                // Request made but no response received
                 toast.error("Network error: Please check your connection and try again.");
             } else {
-                // Something else happened
                 toast.error("Failed to save initial response. Please try again.");
             }
         } finally {
@@ -214,11 +176,10 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
         }
     };
 
-    // Helper function to get React Quill className with error state
     const getQuillClassName = (fieldName, sectionType) => {
         const baseClass = "rounded focus:outline-none transition-colors duration-200 custom-quill-height";
         const isError = errors[fieldName];
-        
+
         if (sectionType === "positive") {
             return isError 
                 ? `${baseClass} border-red-300 bg-red-50` 
@@ -228,7 +189,6 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                 ? `${baseClass} border-red-300 bg-red-50` 
                 : `${baseClass} border-red-300 bg-white`;
         }
-        
         return isError 
             ? `${baseClass} border-red-300 bg-red-50` 
             : `${baseClass} border-gray-300 bg-white`;
@@ -236,62 +196,54 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
 
     const getSectionClassName = () => {
         if (isPositive) {
-            return "space-y-4 p-4 bg-green-50 rounded-lg border border-green-200 mb-4";
+            return "space-y-4 p-4 sm:p-5 bg-green-50 rounded-lg border border-green-200 mb-5";
         } else if (isNegative) {
-            return "space-y-4 p-4 bg-red-50 rounded-lg border border-red-200 mb-4";
+            return "space-y-4 p-4 sm:p-5 bg-red-50 rounded-lg border border-red-200 mb-5";
         }
-        return "space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200 mb-4";
+        return "space-y-4 p-4 sm:p-5 bg-gray-50 rounded-lg border border-gray-200 mb-5";
     };
 
-    // Handle back button click with toast
     const handleBackClick = () => {
         toast.success("Returning to previous step...");
         prevStep();
     };
 
-    // Show info toast when response type is selected
-    // React.useEffect(() => {
-    //     if (isPositive) {
-    //         toast.success("Positive response selected! Please provide meeting details.");
-    //     } else if (isNegative) {
-    //         toast.error("Negative response selected. Please provide reason for decline.");
-    //     }
-    // }, [isPositive, isNegative]);
-
     return (
-        <div className="max-w-7xl mx-auto p-4">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
             <style jsx>{`
                 .custom-quill-height .ql-container {
-                    height: 200px !important;
-                    min-height: 200px !important;
+                    min-height: 150px !important;
                 }
                 .custom-quill-height .ql-editor {
-                    height: 150px !important;
-                    min-height: 150px !important;
+                    min-height: 130px !important;
+                }
+                @media (min-width: 640px) {
+                    .custom-quill-height .ql-container {
+                        min-height: 200px !important;
+                    }
+                    .custom-quill-height .ql-editor {
+                        min-height: 180px !important;
+                    }
                 }
             `}</style>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 sm:p-6">
                 <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     {/* Response Dropdown */}
                     <div className="mb-6">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Initial Response *
                         </label>
-
                         {errors.response && (
                             <p className="text-red-500 text-sm mb-2">{errors.response.message}</p>
                         )}
-
                         <select
                             {...register("response", {
                                 required: "Response type is required",
                             })}
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200 focus:outline-none transition-colors duration-200"
                             onChange={(e) => {
-                                // Trigger the form change
                                 register("response").onChange(e);
-                                // Show immediate feedback
                                 if (e.target.value === "positive") {
                                     toast.success("Positive response selected!");
                                 } else if (e.target.value === "negative") {
@@ -308,14 +260,14 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                     {/* Conditional Sections */}
                     {(isPositive || isNegative) && (
                         <div className={getSectionClassName()}>
-                            <h3 className={`font-medium ${isPositive ? 'text-green-800' : 'text-red-800'}`}>
+                            <h3 className={`text-sm font-semibold mb-3 ${isPositive ? 'text-green-800' : 'text-red-800'}`}>
                                 {isPositive ? 'Meeting Details' : 'Response Details'}
                             </h3>
 
-                            {/* Negative Reason - Only for negative responses */}
+                            {/* Negative Reason */}
                             {isNegative && (
-                                <div>
-                                    <label className={`block text-sm mb-1 ${isNegative ? 'text-red-700' : 'text-green-700'}`}>
+                                <div className="mb-4">
+                                    <label className="block text-sm mb-1 text-red-700">
                                         Reason *
                                     </label>
                                     <ReactQuill
@@ -345,7 +297,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                             )}
 
                             {/* Meeting Outcomes */}
-                            <div>
+                            <div className="mb-4">
                                 <label className={`block text-sm mb-1 ${isPositive ? 'text-green-700' : 'text-red-700'}`}>
                                     {isPositive ? "Meeting Outcomes *" : "Meeting Outcomes"}
                                 </label>
@@ -356,7 +308,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                                     formats={quillFormats}
                                     className={getQuillClassName("meetingOutcomes", isPositive ? "positive" : "negative")}
                                     placeholder={
-                                        isPositive 
+                                        isPositive
                                             ? "Key outcomes and decisions from the meeting..."
                                             : "Key outcomes and learnings from the discussion..."
                                     }
@@ -403,7 +355,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                         </div>
                     )}
 
-                    {/* Error Message */}
+                    {/* Submit Error */}
                     {errors.submit && (
                         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
                             <p className="text-sm text-red-600">{errors.submit.message}</p>
@@ -411,12 +363,12 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                     )}
 
                     {/* Navigation Buttons */}
-                    <div className="flex justify-between gap-4 mt-6">
+                    <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                         <button
                             type="button"
                             onClick={handleBackClick}
                             disabled={submitting}
-                            className="px-6 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 w-full sm:w-auto"
                         >
                             Back
                         </button>
@@ -424,7 +376,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                         <button
                             type="submit"
                             disabled={submitting}
-                            className={`px-6 py-2 text-white rounded transition-colors duration-200 ${
+                            className={`px-4 py-2 text-white rounded transition-colors duration-200 w-full sm:w-auto ${
                                 submitting
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : isPositive

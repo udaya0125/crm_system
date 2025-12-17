@@ -27,11 +27,13 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::get('/crm/details/{slug}', [CompanyCRMController::class, 'indexBySlug']);
+    Route::get('/allcompany/{id}', [CompanyCRMController::class, 'show']);
 
     Route::get('/company', function(){
         return Inertia::render('MainPages/Company');
         
     });
+
 
     // -----------------------------------------
     // COMPANY CRUD

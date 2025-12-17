@@ -1,11 +1,19 @@
-import AdminWrapper from '@/AdminWrapper/AdminWrapper'
-import React, { useEffect, useMemo, useState } from 'react'
-import { useTable, useSortBy, usePagination } from 'react-table'
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight, Pen, SquarePen, Trash } from 'lucide-react'
-import axios from 'axios'
-import AddUserForm from '@/AddComponents/AddUserForm';
-import EditUserForm from '@/EditStepComponents/EditUserForm'
-
+import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+import React, { useEffect, useMemo, useState } from "react";
+import { useTable, useSortBy, usePagination } from "react-table";
+import {
+    ChevronUp,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Pen,
+    SquarePen,
+    Trash,
+    Plus,
+} from "lucide-react";
+import axios from "axios";
+import AddUserForm from "@/AddComponents/AddUserForm";
+import EditUserForm from "@/EditStepComponents/EditUserForm";
 
 const UserManagement = () => {
     const [allUser, setAllUser] = useState([]);
@@ -14,19 +22,19 @@ const UserManagement = () => {
     const [showAddForm, setShowAddForm] = useState(false);
     const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const [error, setError] = useState("");
 
     // Use Effect
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 setLoading(true);
-                setError('');
+                setError("");
                 const response = await axios.get(route("ouruser.index"));
                 setAllUser(response.data.users);
             } catch (error) {
                 console.error("fetching error ", error);
-                setError('Failed to fetch users. Please try again.');
+                setError("Failed to fetch users. Please try again.");
             } finally {
                 setLoading(false);
             }
@@ -56,13 +64,15 @@ const UserManagement = () => {
                 Header: "Role",
                 accessor: "role",
                 Cell: ({ value }) => (
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        value === 'admin' 
-                            ? 'bg-red-100 text-red-800'
-                            : value === 'editor'
-                            ? 'bg-blue-100 text-blue-800'
-                            : 'bg-green-100 text-green-800'
-                    }`}>
+                    <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            value === "admin"
+                                ? "bg-red-100 text-red-800"
+                                : value === "editor"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-green-100 text-green-800"
+                        }`}
+                    >
                         {value}
                     </span>
                 ),
@@ -76,7 +86,10 @@ const UserManagement = () => {
                             onClick={() => handleEdit(row.original)}
                             className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                         >
-                            <SquarePen size={21} className="inline-block mr-1" />
+                            <SquarePen
+                                size={21}
+                                className="inline-block mr-1"
+                            />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
@@ -120,7 +133,7 @@ const UserManagement = () => {
 
     // handleDelete
     const handleDelete = async (id) => {
-        if (!confirm('Are you sure you want to delete this user?')) {
+        if (!confirm("Are you sure you want to delete this user?")) {
             return;
         }
 
@@ -132,7 +145,7 @@ const UserManagement = () => {
             setReloadTrigger((prev) => !prev);
         } catch (error) {
             console.log(error);
-            alert('Failed to delete user. Please try again.');
+            alert("Failed to delete user. Please try again.");
         }
     };
 
@@ -174,9 +187,10 @@ const UserManagement = () => {
                         <h1 className="text-2xl font-bold">User Management</h1>
                         <button
                             onClick={handleAddNew}
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200"
+                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200 flex items-center gap-2"
                         >
-                            Add New User
+                            <Plus size={16} />
+                            <span>Add New User</span>
                         </button>
                     </div>
 
@@ -199,7 +213,8 @@ const UserManagement = () => {
                         <div className="bg-white shadow-md rounded-lg overflow-hidden">
                             {allUser.length === 0 ? (
                                 <div className="text-center py-8 text-gray-500">
-                                    No users found. Click "Add New User" to create one.
+                                    No users found. Click "Add New User" to
+                                    create one.
                                 </div>
                             ) : (
                                 <>
@@ -209,29 +224,49 @@ const UserManagement = () => {
                                             className="min-w-full divide-y divide-gray-200"
                                         >
                                             <thead className="bg-gray-50">
-                                                {headerGroups.map((headerGroup) => (
-                                                    <tr {...headerGroup.getHeaderGroupProps()}>
-                                                        {headerGroup.headers.map((column) => (
-                                                            <th
-                                                                {...column.getHeaderProps(column.getSortByToggleProps())}
-                                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                                            >
-                                                                <div className="flex items-center">
-                                                                    {column.render("Header")}
-                                                                    {column.isSorted ? (
-                                                                        column.isSortedDesc ? (
-                                                                            <ChevronDown size={16} className="ml-1" />
-                                                                        ) : (
-                                                                            <ChevronUp size={16} className="ml-1" />
-                                                                        )
-                                                                    ) : (
-                                                                        ""
-                                                                    )}
-                                                                </div>
-                                                            </th>
-                                                        ))}
-                                                    </tr>
-                                                ))}
+                                                {headerGroups.map(
+                                                    (headerGroup) => (
+                                                        <tr
+                                                            {...headerGroup.getHeaderGroupProps()}
+                                                        >
+                                                            {headerGroup.headers.map(
+                                                                (column) => (
+                                                                    <th
+                                                                        {...column.getHeaderProps(
+                                                                            column.getSortByToggleProps()
+                                                                        )}
+                                                                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                                    >
+                                                                        <div className="flex items-center">
+                                                                            {column.render(
+                                                                                "Header"
+                                                                            )}
+                                                                            {column.isSorted ? (
+                                                                                column.isSortedDesc ? (
+                                                                                    <ChevronDown
+                                                                                        size={
+                                                                                            16
+                                                                                        }
+                                                                                        className="ml-1"
+                                                                                    />
+                                                                                ) : (
+                                                                                    <ChevronUp
+                                                                                        size={
+                                                                                            16
+                                                                                        }
+                                                                                        className="ml-1"
+                                                                                    />
+                                                                                )
+                                                                            ) : (
+                                                                                ""
+                                                                            )}
+                                                                        </div>
+                                                                    </th>
+                                                                )
+                                                            )}
+                                                        </tr>
+                                                    )
+                                                )}
                                             </thead>
                                             <tbody
                                                 {...getTableBodyProps()}
@@ -244,14 +279,18 @@ const UserManagement = () => {
                                                             {...row.getRowProps()}
                                                             className="hover:bg-gray-50"
                                                         >
-                                                            {row.cells.map((cell) => (
-                                                                <td
-                                                                    {...cell.getCellProps()}
-                                                                    className="px-6 py-4 whitespace-nowrap"
-                                                                >
-                                                                    {cell.render("Cell")}
-                                                                </td>
-                                                            ))}
+                                                            {row.cells.map(
+                                                                (cell) => (
+                                                                    <td
+                                                                        {...cell.getCellProps()}
+                                                                        className="px-6 py-4 whitespace-nowrap"
+                                                                    >
+                                                                        {cell.render(
+                                                                            "Cell"
+                                                                        )}
+                                                                    </td>
+                                                                )
+                                                            )}
                                                         </tr>
                                                     );
                                                 })}
@@ -267,11 +306,18 @@ const UserManagement = () => {
                                             </span>
                                             <select
                                                 value={pageSize}
-                                                onChange={(e) => setPageSize(Number(e.target.value))}
+                                                onChange={(e) =>
+                                                    setPageSize(
+                                                        Number(e.target.value)
+                                                    )
+                                                }
                                                 className="border border-gray-300 rounded-md px-2 py-1 text-sm"
                                             >
                                                 {[5, 10, 20, 50].map((size) => (
-                                                    <option key={size} value={size}>
+                                                    <option
+                                                        key={size}
+                                                        value={size}
+                                                    >
                                                         {size}
                                                     </option>
                                                 ))}
@@ -304,8 +350,12 @@ const UserManagement = () => {
                                                 Previous
                                             </button>
                                             <span className="text-sm text-gray-700">
-                                                Page <strong>{pageIndex + 1}</strong> of{" "}
-                                                <strong>{pageOptions.length}</strong>
+                                                Page{" "}
+                                                <strong>{pageIndex + 1}</strong>{" "}
+                                                of{" "}
+                                                <strong>
+                                                    {pageOptions.length}
+                                                </strong>
                                             </span>
                                             <button
                                                 onClick={() => nextPage()}
@@ -319,7 +369,9 @@ const UserManagement = () => {
                                                 Next
                                             </button>
                                             <button
-                                                onClick={() => gotoPage(pageCount - 1)}
+                                                onClick={() =>
+                                                    gotoPage(pageCount - 1)
+                                                }
                                                 disabled={!canNextPage}
                                                 className={`p-1 rounded ${
                                                     !canNextPage
@@ -363,7 +415,7 @@ const UserManagement = () => {
                 </div>
             </AdminWrapper>
         </div>
-    )
-}
+    );
+};
 
-export default UserManagement
+export default UserManagement;

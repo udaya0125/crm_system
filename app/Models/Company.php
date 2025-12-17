@@ -7,11 +7,10 @@ use Illuminate\Support\Str;
 
 class Company extends Model
 {
+ 
+
     protected $fillable = [
-        'company_name', 'first_name', 'last_name', 'client_member', 'designation', 
-        'no_of_rooms', 'phone_no', 'email', 'address', 'website', 'source', 
-        'responsible_person', 'preffered_message', 'message_contact', 'comment','follow_up_date', 
-        'status', 'slug'
+        'company_name','full_name','designation','phone_no','email','address','responsible_person','our_team','client_member','comment','follow_up_date','slug'
     ];
 
     public function contracts()
@@ -38,20 +37,31 @@ class Company extends Model
     {
         parent::boot();
 
+        // Generate slug when creating
         static::creating(function ($company) {
-            // Generate slug without saving first
-            $company->slug = $company->generateUniqueSlug();
+            $company->slug = $company->generateUniqueSlug($company->company_name);
+        });
+
+        // Update slug when company_name is changed
+        static::updating(function ($company) {
+            if ($company->isDirty('company_name')) {
+                $company->slug = $company->generateUniqueSlug($company->company_name, $company->id);
+            }
         });
     }
 
-    protected function generateUniqueSlug()
+    protected function generateUniqueSlug($name, $ignoreId = null)
     {
-        $baseSlug = Str::slug($this->company_name);
+        $baseSlug = Str::slug($name);
         $slug = $baseSlug;
         $counter = 1;
 
-        // Check if slug exists (excluding current model if updating)
-        while (static::where('slug', $slug)->exists()) {
+        // Check if slug exists (but ignore current record)
+        while (
+            static::where('slug', $slug)
+                ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
+                ->exists()
+        ) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
         }

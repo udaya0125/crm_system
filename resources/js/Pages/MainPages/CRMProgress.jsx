@@ -86,7 +86,7 @@ const CRMProgress = ({ currentStep = 1 }) => {
     };
 
     return (
-        <div className="w-full max-w-7xl ">
+        <div className="w-full max-w-7xl mx-auto mb-8">
             <div className="flex border-b border-gray-200">
                 {steps.map((step) => {
                     const isCurrent = currentStep === step.number;
