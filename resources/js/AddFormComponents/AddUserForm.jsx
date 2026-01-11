@@ -346,8 +346,7 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
                             Select Role
                         </option>
                         <option value="admin">Admin</option>
-                        <option value="customer">Customer</option>
-                        <option value="editor">Editor</option>
+                        <option value="user">User</option>
                     </select>
                     {errors.role && (
                         <p className="text-red-500 text-xs mt-1">

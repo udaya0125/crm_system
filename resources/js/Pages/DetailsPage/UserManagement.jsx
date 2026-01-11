@@ -12,7 +12,7 @@ import {
     Plus,
 } from "lucide-react";
 import axios from "axios";
-import AddUserForm from "@/AddComponents/AddUserForm";
+import AddUserForm from "@/AddFormComponents/AddUserForm";
 import EditUserForm from "@/EditStepComponents/EditUserForm";
 
 const UserManagement = () => {

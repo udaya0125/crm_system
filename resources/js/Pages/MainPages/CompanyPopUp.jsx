@@ -211,6 +211,9 @@
 
 // export default CompanyPopUp;
 
+
+
+
 import React, { useEffect, useState } from "react";
 import {
     X,
@@ -516,6 +519,15 @@ const CompanyPopUp = ({
     const ContractImage = ({ imageUrl }) => {
         const [imageError, setImageError] = useState(false);
 
+        const handleSimpleDownload = (imageUrl) => {
+            const link = document.createElement("a");
+            link.href = `${imgurl}/${imageUrl}`;
+            link.download = extractFileName(imageUrl) || "contract";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
         return (
             <div className="space-y-4">
                 <div className="border rounded-lg overflow-hidden bg-gray-50">
@@ -568,14 +580,13 @@ const CompanyPopUp = ({
                             <ExternalLink size={16} />
                             Open in New Tab
                         </a>
-                        <a
-                            href={`${imgurl}/${imageUrl}`}
-                            download
+                        <button
+                            onClick={() => handleSimpleDownload(imageUrl)}
                             className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
                         >
                             <Download size={16} />
                             Download
-                        </a>
+                        </button>
                     </div>
                 )}
             </div>
@@ -626,10 +637,10 @@ const CompanyPopUp = ({
                 </div>
 
                 {/* Content */}
-                <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                <div className="px-6 py-6 max-h-[70vh] overflow-y-auto ">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Left Column - Main Content */}
-                        <div className="lg:col-span-2 space-y-6 ">
+                        <div className="lg:col-span-2 space-y-6 sticky -top-2 self-start ">
                             {/* CRM Steps */}
                             <div className="space-y-6">
                                 <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
@@ -979,10 +990,13 @@ const CompanyPopUp = ({
                     </div>
                 </div> */}
 
-                 <div className="sticky bottom-0 border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                <div className="sticky bottom-0 border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
                     <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
                         <div className="text-xs text-gray-500 sm:text-sm">
-                            Last updated: {new Date(selectedCompany.updated_at).toLocaleString()}
+                            Last updated:{" "}
+                            {new Date(
+                                selectedCompany.updated_at
+                            ).toLocaleString()}
                         </div>
                         <div className="flex w-full justify-between gap-2 sm:w-auto sm:justify-end">
                             <button

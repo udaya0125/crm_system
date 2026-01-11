@@ -1,11 +1,15 @@
 import React from "react";
 import { Link, usePage } from "@inertiajs/react";
-import {
-    X,
-    Menu,
-    ListFilter,
-    Building,
+import { 
+    X, 
+    Menu, 
+    ListFilter, 
+    Building, 
     User2,
+    CheckSquare, // For Tasks
+    Users, // For User Management
+    ClipboardList, // For Task Assignments
+    ListTodo
 } from "lucide-react";
 
 const AdminSideBar = ({
@@ -24,7 +28,7 @@ const AdminSideBar = ({
 
     // Get authenticated user from auth prop
     const { auth } = usePage().props;
-       const user = auth?.user;
+    const user = auth?.user;
 
     // Check The Role of the User
     const isAdmin = user?.role === "admin";
@@ -37,7 +41,6 @@ const AdminSideBar = ({
                     onClick={onMobileToggle}
                 />
             )}
-            
 
             <div
                 className={`
@@ -89,7 +92,9 @@ const AdminSideBar = ({
                 <div
                     className={`p-2 space-y-1 ${isCollapsed ? "px-2" : "px-3"}`}
                 >
-                    {/* CRM */}
+                    {/* //-----------------------------------------
+                        // CRM Link
+                        //----------------------------------------- */}
                     <Link
                         href="/"
                         className={`
@@ -125,7 +130,9 @@ const AdminSideBar = ({
                         )}
                     </Link>
 
-                    {/* Company */}
+                    {/* //-----------------------------------------
+                        // Company Link
+                        //----------------------------------------- */}
                     <Link
                         href="/company"
                         className={`
@@ -161,11 +168,92 @@ const AdminSideBar = ({
                         )}
                     </Link>
 
-                    {/* User Management */}
-                    {isAdmin && (
-                        <Link
-                            href="/user-management"
+                    {/* //-----------------------------------------
+                        // Tasks Link
+                        //----------------------------------------- */}
+                    <Link
+                        href="/tasks"
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/tasks")
+                                    ? "bg-gray-200 text-gray-600"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "Tasks" : ""}
+                    >
+                        <CheckSquare
                             className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/tasks")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                Tasks
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Tasks
+                            </div>
+                        )}
+                    </Link>
+
+
+                    {/* //-----------------------------------------
+                        // To Do Page Link
+                        //----------------------------------------- */}
+                    <Link
+                        href="/todo"
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/todo")
+                                    ? "bg-gray-200 text-gray-600"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "To Do" : ""}
+                    >
+                        <ListTodo
+                            className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/todo")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                To Do
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                To Do
+                            </div>
+                        )}
+                    </Link>
+
+                    {/* Admin Links */}
+                    {isAdmin && (
+                        <>
+                            {/* //-----------------------------------------
+                                // User Management Link for Admins
+                                //----------------------------------------- */}
+                            <Link
+                                href="/user-management"
+                                className={`
                                 flex items-center rounded-lg transition-colors duration-200 group relative
                                 ${isCollapsed ? "p-3 justify-center" : "p-3"}
                                 ${
@@ -174,10 +262,10 @@ const AdminSideBar = ({
                                         : "text-gray-600 hover:bg-gray-50"
                                 }
                             `}
-                            title={isCollapsed ? "User Management" : ""}
-                        >
-                            <User2
-                                className={`
+                                title={isCollapsed ? "User Management" : ""}
+                            >
+                                <Users
+                                    className={`
                                 ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
                                 ${
                                     isActive("/user-management")
@@ -185,18 +273,57 @@ const AdminSideBar = ({
                                         : "text-gray-500 group-hover:text-gray-700"
                                 }
                             `}
-                            />
-                            {!isCollapsed && (
-                                <span className="ml-3 font-medium whitespace-nowrap">
-                                    User Management
-                                </span>
-                            )}
-                            {isCollapsed && (
-                                <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                                    User Management
-                                </div>
-                            )}
-                        </Link>
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        User Management
+                                    </span>
+                                )}
+                                {isCollapsed && (
+                                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                        User Management
+                                    </div>
+                                )}
+                            </Link>
+
+                            {/* //-----------------------------------------
+                                // Task Assignments Link for Admins
+                                //----------------------------------------- */}
+                            <Link
+                                href="/task-assignments"
+                                className={`
+                                flex items-center rounded-lg transition-colors duration-200 group relative
+                                ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                                ${
+                                    isActive("/task-assignments")
+                                        ? "bg-gray-200 text-gray-600 "
+                                        : "text-gray-600 hover:bg-gray-50"
+                                }
+                            `}
+                                title={isCollapsed ? "Task Assignments" : ""}
+                            >
+                                <ClipboardList
+                                    className={`
+                                ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                                ${
+                                    isActive("/task-assignments")
+                                        ? "text-gray-600"
+                                        : "text-gray500 group-hover:text-gray-700"
+                                }
+                            `}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Task Assignments
+                                    </span>
+                                )}
+                                {isCollapsed && (
+                                    <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                        Task Assignments
+                                    </div>
+                                )}
+                            </Link>
+                        </>
                     )}
                 </div>
             </div>

@@ -46,4 +46,44 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    
+     // A user has many task lists
+    public function taskLists()
+    {
+        return $this->hasMany(TaskList::class);
+    }
+
+    // (Optional) A user has many tasks through task lists
+    public function tasks()
+    {
+        return $this->hasManyThrough(Task::class, TaskList::class);
+    }
+
+
+     public function assignedTasks()
+    {
+        return $this->hasMany(TaskList::class, 'assigned_to');
+    }
+
+    public function createdTasks()
+    {
+        return $this->hasMany(TaskList::class, 'user_id');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isUser()
+    {
+        return $this->role === 'user';
+    }
+
+    public function todos()
+    {
+        return $this->hasMany(Todo::class);
+    }
 }

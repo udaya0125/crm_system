@@ -1,0 +1,2547 @@
+// // import React, { useState, useEffect, useMemo } from "react";
+// // import axios from "axios";
+// // import AddTask from "@/AddFormComponents/AddTask";
+// // import EditTask from "@/EditFormComponents/EditTask";
+// // import { usePage } from "@inertiajs/react";
+// // import {
+// //     Calendar,
+// //     ChevronUp,
+// //     ChevronDown,
+// //     ChevronLeft,
+// //     ChevronRight,
+// //     Edit,
+// //     Trash2,
+// //     Plus,
+// //     X,
+// //     Eye,
+// //     CheckCircle,
+// //     Square,
+// //     Clock,
+// //     AlertCircle,
+// //     User,
+// //     ListTodo,
+// //     FileText,
+// //     CalendarDays
+// // } from "lucide-react";
+// // import { useTable, useSortBy, usePagination } from "react-table";
+// // import parse from 'html-react-parser';
+
+// // const Task = () => {
+// //     const [tasks, setTasks] = useState([]);
+// //     const [editingTask, setEditingTask] = useState(null);
+// //     const [reloadTrigger, setReloadTrigger] = useState(false);
+// //     const [isModalOpen, setIsModalOpen] = useState(false);
+// //     const [taskLists, setTaskLists] = useState([]);
+// //     const [modalMode, setModalMode] = useState("add");
+// //     const [selectedTask, setSelectedTask] = useState(null);
+// //     const user = usePage().props.auth.user;
+
+// //     // Custom parser to replace HTML elements with Lucide icons
+// //     const parseWithIcons = (html) => {
+// //         if (!html) return null;
+
+// //         // First parse the HTML
+// //         const elements = parse(html);
+
+// //         // Function to recursively replace elements
+// //         const replaceElements = (node) => {
+// //             if (!node || typeof node !== 'object') return node;
+
+// //             // Handle arrays
+// //             if (Array.isArray(node)) {
+// //                 return node.map(replaceElements);
+// //             }
+
+// //             // Handle React elements
+// //             if (node.props && node.props.children) {
+// //                 // Replace ul/ol with custom styled lists
+// //                 if (node.type === 'ul' || node.type === 'ol') {
+// //                     const children = React.Children.map(node.props.children, (child, index) => {
+// //                         if (child && child.props && child.type === 'li') {
+// //                             return React.cloneElement(child, {
+// //                                 className: `${child.props.className || ''} flex items-start gap-2 py-1`,
+// //                                 children: (
+// //                                     <>
+// //                                         {node.type === 'ul' ? (
+// //                                             <CheckCircle size={12} className="mt-1.5 text-blue-500 flex-shrink-0" />
+// //                                         ) : (
+// //                                             <span className="text-sm font-medium text-blue-600 w-5 flex-shrink-0">
+// //                                                 {index + 1}.
+// //                                             </span>
+// //                                         )}
+// //                                         <span className="flex-1">{replaceElements(child.props.children)}</span>
+// //                                     </>
+// //                                 )
+// //                             });
+// //                         }
+// //                         return child;
+// //                     });
+
+// //                     return React.createElement(node.type, {
+// //                         ...node.props,
+// //                         className: `${node.props.className || ''} space-y-2 my-2`,
+// //                         children: children
+// //                     });
+// //                 }
+
+// //                 // Replace checkboxes/todo items
+// //                 if (node.props.className && node.props.className.includes('ql-direction')) {
+// //                     const children = React.Children.map(node.props.children, (child) => {
+// //                         if (child && child.props && child.type === 'span') {
+// //                             const isChecked = child.props.style?.textDecoration === 'line-through';
+// //                             return React.cloneElement(child, {
+// //                                 children: (
+// //                                     <div className="flex items-center gap-2">
+// //                                         {isChecked ? (
+// //                                             <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+// //                                         ) : (
+// //                                             <Square size={16} className="text-gray-400 flex-shrink-0" />
+// //                                         )}
+// //                                         <span className={isChecked ? 'line-through text-gray-500' : ''}>
+// //                                             {child.props.children}
+// //                                         </span>
+// //                                     </div>
+// //                                 )
+// //                             });
+// //                         }
+// //                         return child;
+// //                     });
+
+// //                     return React.createElement('div', {
+// //                         ...node.props,
+// //                         children: children
+// //                     });
+// //                 }
+
+// //                 // Continue recursion for other elements
+// //                 const newChildren = React.Children.map(node.props.children, replaceElements);
+// //                 return React.cloneElement(node, { children: newChildren });
+// //             }
+
+// //             return node;
+// //         };
+
+// //         return replaceElements(elements);
+// //     };
+
+// //     // Fetch tasks and task lists
+// //     useEffect(() => {
+// //         const fetchAllData = async () => {
+// //             try {
+// //                 // Fetch tasks
+// //                 const tasksResponse = await axios.get(route("ourtask.index"));
+// //                 setTasks(tasksResponse.data.data);
+
+// //                 // Fetch task lists (for dropdown in form)
+// //                 const taskListsResponse = await axios.get(
+// //                     route("tasklists.index")
+// //                 );
+// //                 setTaskLists(taskListsResponse.data.data);
+// //             } catch (error) {
+// //                 console.error("fetching error ", error);
+// //             }
+// //         };
+
+// //         fetchAllData();
+// //     }, [reloadTrigger]);
+
+// //     // Handle edit task
+// //     const handleEdit = (task) => {
+// //         setEditingTask(task);
+// //         setModalMode("edit");
+// //         setIsModalOpen(true);
+// //     };
+
+// //     // Handle delete task
+// //     const handleDelete = async (taskId) => {
+// //         if (window.confirm("Are you sure you want to delete this task?")) {
+// //             try {
+// //                 await axios.delete(route("ourtask.destroy", taskId));
+// //                 setReloadTrigger((prev) => !prev);
+// //                 if (selectedTask?.id === taskId) {
+// //                     setSelectedTask(null);
+// //                 }
+// //             } catch (error) {
+// //                 console.error("Error deleting task:", error);
+// //             }
+// //         }
+// //     };
+
+// //     // Handle add task
+// //     const handleAddTask = async (newTask) => {
+// //         try {
+// //             await axios.post(route("ourtask.store"), newTask);
+// //             setReloadTrigger((prev) => !prev);
+// //             setIsModalOpen(false);
+// //         } catch (error) {
+// //             console.error("Error adding task:", error);
+// //             throw error;
+// //         }
+// //     };
+
+// //     // Handle update task
+// //     const handleUpdate = async (updatedTask) => {
+// //         try {
+// //             await axios.put(
+// //                 route("ourtask.update", editingTask.id),
+// //                 updatedTask
+// //             );
+// //             setReloadTrigger((prev) => !prev);
+// //             setIsModalOpen(false);
+// //             setEditingTask(null);
+// //         } catch (error) {
+// //             console.error("Error updating task:", error);
+// //             throw error;
+// //         }
+// //     };
+
+// //     // Open add modal
+// //     const openAddModal = () => {
+// //         setEditingTask(null);
+// //         setModalMode("add");
+// //         setIsModalOpen(true);
+// //     };
+
+// //     // Close modal
+// //     const closeModal = () => {
+// //         setIsModalOpen(false);
+// //         setEditingTask(null);
+// //         setModalMode("add");
+// //     };
+
+// //     // Define columns for react-table
+// //     const columns = useMemo(
+// //         () => [
+// //             {
+// //                 Header: "S/N",
+// //                 accessor: (row, index) => index + 1,
+// //                 id: "rowIndex",
+// //                 width: 50,
+// //             },
+// //             {
+// //                 Header: "Status",
+// //                 accessor: "is_completed",
+// //                 Cell: ({ value }) => (
+// //                     <div className="flex items-center gap-2">
+// //                         {value ? (
+// //                             <CheckCircle size={16} className="text-green-500" />
+// //                         ) : (
+// //                             <Clock size={16} className="text-yellow-500" />
+// //                         )}
+// //                         <span
+// //                             className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+// //                                 value
+// //                                     ? "bg-green-100 text-green-800"
+// //                                     : "bg-yellow-100 text-yellow-800"
+// //                             }`}
+// //                         >
+// //                             {value ? "Complete" : "Incomplete"}
+// //                         </span>
+// //                     </div>
+// //                 ),
+// //                 width: 140,
+// //             },
+// //             {
+// //                 Header: "Title",
+// //                 accessor: "title",
+// //                 Cell: ({ row, value }) => (
+// //                     <div className="flex items-center gap-2">
+// //                         <FileText size={16} className="text-gray-400 flex-shrink-0" />
+// //                         <span
+// //                             className={`text-sm font-medium ${
+// //                                 row.original.is_completed
+// //                                     ? "line-through text-gray-500"
+// //                                     : "text-gray-900"
+// //                             }`}
+// //                         >
+// //                             {value}
+// //                         </span>
+// //                     </div>
+// //                 ),
+// //             },
+// //             {
+// //                 Header: "Due Time",
+// //                 Cell: ({ row }) => {
+// //                     const { due_date, due_time, is_completed } = row.original;
+
+// //                     if (!due_date) {
+// //                         return (
+// //                             <div className="flex items-center gap-2">
+// //                                 <CalendarDays size={16} className="text-gray-400" />
+// //                                 <span className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+// //                                     No due date
+// //                                 </span>
+// //                             </div>
+// //                         );
+// //                     }
+
+// //                     // Combine date + time safely
+// //                     const dateTimeString = due_time
+// //                         ? `${due_date}T${due_time}`
+// //                         : `${due_date}T00:00`;
+
+// //                     const dueDateTime = new Date(dateTimeString);
+// //                     const isOverdue = dueDateTime < new Date() && !is_completed;
+
+// //                     return (
+// //                         <div className="flex items-center gap-2">
+// //                             {isOverdue ? (
+// //                                 <AlertCircle size={16} className="text-red-500" />
+// //                             ) : (
+// //                                 <Calendar size={16} className="text-blue-500" />
+// //                             )}
+// //                             <span
+// //                                 className={`px-3 py-1 text-xs rounded-full ${
+// //                                     isOverdue
+// //                                         ? "bg-red-100 text-red-800"
+// //                                         : "bg-blue-100 text-blue-800"
+// //                                 }`}
+// //                             >
+// //                                 {dueDateTime.toLocaleString([], {
+// //                                     year: "numeric",
+// //                                     month: "short",
+// //                                     day: "numeric",
+// //                                     hour: "2-digit",
+// //                                     minute: "2-digit",
+// //                                 })}
+// //                             </span>
+// //                         </div>
+// //                     );
+// //                 },
+// //                 width: 200,
+// //             },
+// //             {
+// //                 Header: "Task List",
+// //                 accessor: "task_list.title",
+// //                 Cell: ({ row }) => (
+// //                     <div className="flex flex-col gap-1">
+// //                         <div className="flex items-center gap-2">
+// //                             <ListTodo size={16} className="text-gray-400 flex-shrink-0" />
+// //                             <span className="font-medium text-sm text-gray-900">
+// //                                 {row.original.task_list?.title || "No task list"}
+// //                             </span>
+// //                         </div>
+// //                         {row.original.task_list?.description && (
+// //                             <span className="text-xs text-gray-500 truncate max-w-xs ml-7">
+// //                                 {row.original.task_list.description}
+// //                             </span>
+// //                         )}
+// //                     </div>
+// //                 ),
+// //             },
+// //             {
+// //                 Header: "Assigned To",
+// //                 accessor: "task_list.assigned_user.name",
+// //                 Cell: ({ row }) => (
+// //                     <div className="flex items-center gap-2">
+// //                         <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+// //                             {row.original.task_list?.assigned_user?.name ? (
+// //                                 <User size={16} className="text-blue-600" />
+// //                             ) : (
+// //                                 <span className="text-xs font-semibold text-blue-600">
+// //                                     U
+// //                                 </span>
+// //                             )}
+// //                         </div>
+// //                         <span className="text-sm text-gray-700">
+// //                             {row.original.task_list?.assigned_user?.name ||
+// //                                 "Unassigned"}
+// //                         </span>
+// //                     </div>
+// //                 ),
+// //                 width: 180,
+// //             },
+// //             {
+// //                 Header: "Actions",
+// //                 accessor: "id",
+// //                 Cell: ({ row }) => (
+// //                     <div className="flex items-center gap-2">
+// //                         <button
+// //                             onClick={() => setSelectedTask(row.original)}
+// //                             className={`p-2 rounded transition-colors flex items-center justify-center ${
+// //                                 selectedTask?.id === row.original.id
+// //                                     ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+// //                                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+// //                             }`}
+// //                             title="View task details"
+// //                         >
+// //                             <Eye size={16} />
+// //                         </button>
+// //                         <button
+// //                             onClick={() => handleEdit(row.original)}
+// //                             className="p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+// //                             title="Edit task"
+// //                         >
+// //                             <Edit size={16} />
+// //                         </button>
+// //                         <button
+// //                             onClick={() => handleDelete(row.original.id)}
+// //                             className="p-2 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+// //                             title="Delete task"
+// //                         >
+// //                             <Trash2 size={16} />
+// //                         </button>
+// //                     </div>
+// //                 ),
+// //                 width: 160,
+// //             },
+// //         ],
+// //         [selectedTask]
+// //     );
+
+// //     // Create table instance
+// //     const {
+// //         getTableProps,
+// //         getTableBodyProps,
+// //         headerGroups,
+// //         page,
+// //         prepareRow,
+// //         canPreviousPage,
+// //         canNextPage,
+// //         pageOptions,
+// //         pageCount,
+// //         gotoPage,
+// //         nextPage,
+// //         previousPage,
+// //         setPageSize,
+// //         state: { pageIndex, pageSize },
+// //     } = useTable(
+// //         {
+// //             columns,
+// //             data: tasks,
+// //             initialState: { pageIndex: 0, pageSize: 10 },
+// //         },
+// //         useSortBy,
+// //         usePagination
+// //     );
+
+// //     return (
+// //         <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+// //             {/* Header */}
+// //             <div className="mb-8">
+// //                 <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+// //                     <ListTodo size={32} className="text-blue-600" />
+// //                     Task Management
+// //                 </h1>
+// //                 <p className="text-gray-600 ml-11">Manage your tasks efficiently</p>
+// //             </div>
+
+// //             {/* Add Task Button */}
+// //             <div className="mb-6">
+// //                 <button
+// //                     onClick={openAddModal}
+// //                     className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
+// //                 >
+// //                     <Plus size={20} />
+// //                     Add New Task
+// //                 </button>
+// //             </div>
+
+// //             {/* Tasks Table */}
+// //             <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+// //                 <div className="overflow-x-auto">
+// //                     <table
+// //                         {...getTableProps()}
+// //                         className="min-w-full divide-y divide-gray-200"
+// //                     >
+// //                         <thead className="bg-gray-100">
+// //                             {headerGroups.map((headerGroup) => (
+// //                                 <tr {...headerGroup.getHeaderGroupProps()}>
+// //                                     {headerGroup.headers.map((column) => (
+// //                                         <th
+// //                                             {...column.getHeaderProps(
+// //                                                 column.getSortByToggleProps()
+// //                                             )}
+// //                                             className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+// //                                             style={{ width: column.width }}
+// //                                         >
+// //                                             <div className="flex items-center">
+// //                                                 {column.render("Header")}
+// //                                                 {column.isSorted ? (
+// //                                                     column.isSortedDesc ? (
+// //                                                         <ChevronDown
+// //                                                             size={16}
+// //                                                             className="ml-1"
+// //                                                         />
+// //                                                     ) : (
+// //                                                         <ChevronUp
+// //                                                             size={16}
+// //                                                             className="ml-1"
+// //                                                         />
+// //                                                     )
+// //                                                 ) : (
+// //                                                     ""
+// //                                                 )}
+// //                                             </div>
+// //                                         </th>
+// //                                     ))}
+// //                                 </tr>
+// //                             ))}
+// //                         </thead>
+// //                         <tbody
+// //                             {...getTableBodyProps()}
+// //                             className="bg-white divide-y divide-gray-200"
+// //                         >
+// //                             {page.length === 0 ? (
+// //                                 <tr>
+// //                                     <td
+// //                                         colSpan={columns.length}
+// //                                         className="px-6 py-8 text-center text-gray-500"
+// //                                     >
+// //                                         <div className="flex flex-col items-center justify-center py-8">
+// //                                             <FileText size={64} className="text-gray-300 mb-4" />
+// //                                             <p className="text-lg text-gray-500 mb-2">No tasks found</p>
+// //                                             <p className="text-gray-400">Add your first task to get started!</p>
+// //                                         </div>
+// //                                     </td>
+// //                                 </tr>
+// //                             ) : (
+// //                                 page.map((row) => {
+// //                                     prepareRow(row);
+// //                                     const task = row.original;
+
+// //                                     return (
+// //                                         <tr
+// //                                             {...row.getRowProps()}
+// //                                             className={`hover:bg-gray-50 transition-colors ${
+// //                                                 selectedTask?.id === task.id
+// //                                                     ? "bg-blue-50"
+// //                                                     : ""
+// //                                             }`}
+// //                                         >
+// //                                             {row.cells.map((cell) => (
+// //                                                 <td
+// //                                                     {...cell.getCellProps()}
+// //                                                     className="px-6 py-4"
+// //                                                 >
+// //                                                     {cell.render("Cell")}
+// //                                                 </td>
+// //                                             ))}
+// //                                         </tr>
+// //                                     );
+// //                                 })
+// //                             )}
+// //                         </tbody>
+// //                     </table>
+// //                 </div>
+
+// //                 {/* Pagination */}
+// //                 <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+// //                     <div className="flex items-center">
+// //                         <span className="text-sm text-gray-700 mr-2">Show</span>
+// //                         <select
+// //                             value={pageSize}
+// //                             onChange={(e) =>
+// //                                 setPageSize(Number(e.target.value))
+// //                             }
+// //                             className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+// //                         >
+// //                             {[5, 10, 20, 30, 50].map((size) => (
+// //                                 <option key={size} value={size}>
+// //                                     {size}
+// //                                 </option>
+// //                             ))}
+// //                         </select>
+// //                         <span className="text-sm text-gray-700 ml-2">
+// //                             entries
+// //                         </span>
+// //                     </div>
+// //                     <div className="flex items-center space-x-2">
+// //                         <button
+// //                             onClick={() => gotoPage(0)}
+// //                             disabled={!canPreviousPage}
+// //                             className={`p-1 rounded ${
+// //                                 !canPreviousPage
+// //                                     ? "opacity-50 cursor-not-allowed"
+// //                                     : "hover:bg-gray-200"
+// //                             }`}
+// //                         >
+// //                             <ChevronLeft size={20} />
+// //                         </button>
+// //                         <button
+// //                             onClick={() => previousPage()}
+// //                             disabled={!canPreviousPage}
+// //                             className={`px-3 py-1 rounded ${
+// //                                 !canPreviousPage
+// //                                     ? "opacity-50 cursor-not-allowed"
+// //                                     : "hover:bg-gray-200"
+// //                             }`}
+// //                         >
+// //                             Previous
+// //                         </button>
+// //                         <span className="text-sm text-gray-700">
+// //                             Page <strong>{pageIndex + 1}</strong> of{" "}
+// //                             <strong>{pageOptions.length}</strong>
+// //                         </span>
+// //                         <button
+// //                             onClick={() => nextPage()}
+// //                             disabled={!canNextPage}
+// //                             className={`px-3 py-1 rounded ${
+// //                                 !canNextPage
+// //                                     ? "opacity-50 cursor-not-allowed"
+// //                                     : "hover:bg-gray-200"
+// //                             }`}
+// //                         >
+// //                             Next
+// //                         </button>
+// //                         <button
+// //                             onClick={() => gotoPage(pageCount - 1)}
+// //                             disabled={!canNextPage}
+// //                             className={`p-1 rounded ${
+// //                                 !canNextPage
+// //                                     ? "opacity-50 cursor-not-allowed"
+// //                                     : "hover:bg-gray-200"
+// //                             }`}
+// //                         >
+// //                             <ChevronRight size={20} />
+// //                         </button>
+// //                     </div>
+// //                 </div>
+// //             </div>
+
+// //             {/* Task Details Section - Below the Table */}
+// //             {selectedTask && (
+// //                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+// //                     {/* Task Information */}
+// //                     <div className="p-6">
+// //                         <div>
+// //                             <div className="flex justify-between">
+// //                                 <div className="flex items-center gap-3 mb-4">
+// //                                     <FileText size={24} className="text-blue-600" />
+// //                                     <h3 className="text-lg font-semibold text-gray-800">
+// //                                         {selectedTask.title}
+// //                                     </h3>
+// //                                 </div>
+// //                                 <div className="flex items-center gap-2">
+// //                                     <button
+// //                                         onClick={() => handleEdit(selectedTask)}
+// //                                         className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
+// //                                         title="Edit task"
+// //                                     >
+// //                                         <Edit size={16} />
+// //                                     </button>
+// //                                     <button
+// //                                         onClick={() => setSelectedTask(null)}
+// //                                         className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+// //                                         title="Close details"
+// //                                     >
+// //                                         <X size={20} />
+// //                                     </button>
+// //                                 </div>
+// //                             </div>
+
+// //                             {selectedTask.descriptions &&
+// //                             selectedTask.descriptions.length > 0 ? (
+// //                                 <div className="space-y-4">
+// //                                     {selectedTask.descriptions
+// //                                         .slice()
+// //                                         .reverse()
+// //                                         .map((description, index) => (
+// //                                             <div
+// //                                                 key={index}
+// //                                                 className="bg-gray-50 border border-gray-200 rounded-lg p-4"
+// //                                             >
+// //                                                 <div className="flex items-start gap-3 mb-3">
+// //                                                     <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+// //                                                         {selectedTask.task_list?.assigned_user?.name ? (
+// //                                                             <User size={20} className="text-blue-600" />
+// //                                                         ) : (
+// //                                                             <span className="text-sm font-semibold text-blue-600">
+// //                                                                 {selectedTask.task_list?.assigned_user?.name?.charAt(0) || "U"}
+// //                                                             </span>
+// //                                                         )}
+// //                                                     </div>
+// //                                                     <div className="flex-1">
+// //                                                         <div className="flex justify-between items-start mb-2">
+// //                                                             <div className="font-medium text-gray-800">
+// //                                                                 {selectedTask.task_list?.assigned_user?.name && (
+// //                                                                     <h2 className="font-medium text-gray-800">
+// //                                                                         {selectedTask.task_list.assigned_user.name}
+// //                                                                     </h2>
+// //                                                                 )}
+// //                                                             </div>
+// //                                                             <div className="flex gap-2 items-center">
+// //                                                                 <Calendar
+// //                                                                     size={14}
+// //                                                                     className="text-gray-400"
+// //                                                                 />
+// //                                                                 <p className="text-xs text-gray-500">
+// //                                                                     {description.created_at
+// //                                                                         ? new Date(
+// //                                                                               description.created_at
+// //                                                                           ).toLocaleString()
+// //                                                                         : "Unknown date"}
+// //                                                                 </p>
+// //                                                             </div>
+// //                                                         </div>
+// //                                                     </div>
+// //                                                 </div>
+
+// //                                                 <div className="pl-14">
+// //                                                     <div className="prose max-w-none text-md text-gray-700 pl-4 py-2">
+// //                                                         {/* Using custom parser with Lucide icons */}
+// //                                                         {parseWithIcons(description.content || "")}
+// //                                                     </div>
+// //                                                 </div>
+// //                                             </div>
+// //                                         ))}
+// //                                 </div>
+// //                             ) : (
+// //                                 <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+// //                                     <FileText size={64} className="mx-auto text-gray-300 mb-3" />
+// //                                     <h4 className="text-lg font-medium text-gray-500 mb-2">
+// //                                         No descriptions available
+// //                                     </h4>
+// //                                     <p className="text-gray-400 text-sm">
+// //                                         There are no descriptions for this task yet.
+// //                                     </p>
+// //                                 </div>
+// //                             )}
+// //                         </div>
+// //                     </div>
+// //                 </div>
+// //             )}
+
+// //             {/* Modal */}
+// //             {isModalOpen && (
+// //                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+// //                     <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+// //                         <div className="p-6">
+// //                             <div className="flex justify-between items-center mb-6">
+// //                                 <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+// //                                     {modalMode === "edit" ? (
+// //                                         <>
+// //                                             <Edit size={24} className="text-blue-600" />
+// //                                             Edit Task
+// //                                         </>
+// //                                     ) : (
+// //                                         <>
+// //                                             <Plus size={24} className="text-blue-600" />
+// //                                             Add New Task
+// //                                         </>
+// //                                     )}
+// //                                 </h2>
+// //                                 <button
+// //                                     onClick={closeModal}
+// //                                     className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+// //                                 >
+// //                                     <X size={24} />
+// //                                 </button>
+// //                             </div>
+
+// //                             {modalMode === "edit" ? (
+// //                                 <EditTask
+// //                                     onUpdateTask={handleUpdate}
+// //                                     onClose={closeModal}
+// //                                     editingTask={editingTask}
+// //                                     taskLists={taskLists}
+// //                                 />
+// //                             ) : (
+// //                                 <AddTask
+// //                                     onAddTask={handleAddTask}
+// //                                     onClose={closeModal}
+// //                                     taskLists={taskLists}
+// //                                 />
+// //                             )}
+// //                         </div>
+// //                     </div>
+// //                 </div>
+// //             )}
+// //         </div>
+// //     );
+// // };
+
+// // export default Task;
+
+// import React, { useState, useEffect, useMemo } from "react";
+// import axios from "axios";
+// import { usePage } from "@inertiajs/react";
+// import {
+//     Calendar,
+//     ChevronUp,
+//     ChevronDown,
+//     ChevronLeft,
+//     ChevronRight,
+//     Edit,
+//     Trash2,
+//     Plus,
+//     X,
+//     Eye,
+//     CheckCircle,
+//     Square,
+//     User,
+//     ListTodo,
+//     FileText,
+// } from "lucide-react";
+// import { useTable, useSortBy, usePagination } from "react-table";
+// import parse from "html-react-parser";
+// import EditTask from "@/EditFormComponents/EditTask";
+// import AddTask from "@/AddFormComponents/AddTask";
+// import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+
+// const Task = () => {
+//     const [tasks, setTasks] = useState([]);
+//     const [editingTask, setEditingTask] = useState(null);
+//     const [reloadTrigger, setReloadTrigger] = useState(false);
+//     const [isModalOpen, setIsModalOpen] = useState(false);
+//     const [taskLists, setTaskLists] = useState([]);
+//     const [modalMode, setModalMode] = useState("add");
+//     const [selectedTask, setSelectedTask] = useState(null);
+//     const user = usePage().props.auth.user;
+
+//     // Custom parser to replace HTML elements with Lucide icons
+//     const parseWithIcons = (html) => {
+//         if (!html) return null;
+
+//         // First parse the HTML
+//         const elements = parse(html);
+
+//         // Function to recursively replace elements
+//         const replaceElements = (node) => {
+//             if (!node || typeof node !== "object") return node;
+
+//             // Handle arrays
+//             if (Array.isArray(node)) {
+//                 return node.map(replaceElements);
+//             }
+
+//             // Handle React elements
+//             if (node.props && node.props.children) {
+//                 // Replace ul/ol with custom styled lists
+//                 if (node.type === "ul" || node.type === "ol") {
+//                     const children = React.Children.map(
+//                         node.props.children,
+//                         (child, index) => {
+//                             if (child && child.props && child.type === "li") {
+//                                 return React.cloneElement(child, {
+//                                     className: `${
+//                                         child.props.className || ""
+//                                     } flex items-start gap-2 py-1`,
+//                                     children: (
+//                                         <>
+//                                             {node.type === "ul" ? (
+//                                                 <CheckCircle
+//                                                     size={12}
+//                                                     className="mt-1.5 text-blue-500 flex-shrink-0"
+//                                                 />
+//                                             ) : (
+//                                                 <span className="text-sm font-medium text-blue-600 w-5 flex-shrink-0">
+//                                                     {index + 1}.
+//                                                 </span>
+//                                             )}
+//                                             <span className="flex-1">
+//                                                 {replaceElements(
+//                                                     child.props.children
+//                                                 )}
+//                                             </span>
+//                                         </>
+//                                     ),
+//                                 });
+//                             }
+//                             return child;
+//                         }
+//                     );
+
+//                     return React.createElement(node.type, {
+//                         ...node.props,
+//                         className: `${
+//                             node.props.className || ""
+//                         } space-y-2 my-2`,
+//                         children: children,
+//                     });
+//                 }
+
+//                 // Replace checkboxes/todo items
+//                 if (
+//                     node.props.className &&
+//                     node.props.className.includes("ql-direction")
+//                 ) {
+//                     const children = React.Children.map(
+//                         node.props.children,
+//                         (child) => {
+//                             if (child && child.props && child.type === "span") {
+//                                 const isChecked =
+//                                     child.props.style?.textDecoration ===
+//                                     "line-through";
+//                                 return React.cloneElement(child, {
+//                                     children: (
+//                                         <div className="flex items-center gap-2">
+//                                             {isChecked ? (
+//                                                 <CheckCircle
+//                                                     size={16}
+//                                                     className="text-green-500 flex-shrink-0"
+//                                                 />
+//                                             ) : (
+//                                                 <Square
+//                                                     size={16}
+//                                                     className="text-gray-400 flex-shrink-0"
+//                                                 />
+//                                             )}
+//                                             <span
+//                                                 className={
+//                                                     isChecked
+//                                                         ? "line-through text-gray-500"
+//                                                         : ""
+//                                                 }
+//                                             >
+//                                                 {child.props.children}
+//                                             </span>
+//                                         </div>
+//                                     ),
+//                                 });
+//                             }
+//                             return child;
+//                         }
+//                     );
+
+//                     return React.createElement("div", {
+//                         ...node.props,
+//                         children: children,
+//                     });
+//                 }
+
+//                 // Continue recursion for other elements
+//                 const newChildren = React.Children.map(
+//                     node.props.children,
+//                     replaceElements
+//                 );
+//                 return React.cloneElement(node, { children: newChildren });
+//             }
+
+//             return node;
+//         };
+
+//         return replaceElements(elements);
+//     };
+
+//     // Fetch tasks and task lists
+//     useEffect(() => {
+//         const fetchAllData = async () => {
+//             try {
+//                 // Fetch tasks
+//                 const tasksResponse = await axios.get(route("ourtask.index"));
+//                 setTasks(tasksResponse.data.data);
+
+//                 // Fetch task lists (for dropdown in form)
+//                 const taskListsResponse = await axios.get(
+//                     route("tasklists.index")
+//                 );
+//                 setTaskLists(taskListsResponse.data.data);
+//             } catch (error) {
+//                 console.error("fetching error ", error);
+//             }
+//         };
+
+//         fetchAllData();
+//     }, [reloadTrigger]);
+
+//     // Handle edit task
+//     const handleEdit = (task) => {
+//         // Don't allow editing if task is completed
+//         if (task.is_completed) {
+//             return;
+//         }
+//         setEditingTask(task);
+//         setModalMode("edit");
+//         setIsModalOpen(true);
+//     };
+
+//     // Handle delete task
+//     const handleDelete = async (taskId) => {
+//         if (window.confirm("Are you sure you want to delete this task?")) {
+//             try {
+//                 await axios.delete(route("ourtask.destroy", taskId));
+//                 setReloadTrigger((prev) => !prev);
+//                 if (selectedTask?.id === taskId) {
+//                     setSelectedTask(null);
+//                 }
+//             } catch (error) {
+//                 console.error("Error deleting task:", error);
+//             }
+//         }
+//     };
+
+//     // Handle add task
+//     const handleAddTask = async (newTask) => {
+//         try {
+//             await axios.post(route("ourtask.store"), newTask);
+//             setReloadTrigger((prev) => !prev);
+//             setIsModalOpen(false);
+//         } catch (error) {
+//             console.error("Error adding task:", error);
+//             throw error;
+//         }
+//     };
+
+//     // Handle update task
+//     const handleUpdate = async (updatedTask) => {
+//         try {
+//             await axios.put(
+//                 route("ourtask.update", editingTask.id),
+//                 updatedTask
+//             );
+//             setReloadTrigger((prev) => !prev);
+//             setIsModalOpen(false);
+//             setEditingTask(null);
+//         } catch (error) {
+//             console.error("Error updating task:", error);
+//             throw error;
+//         }
+//     };
+
+//     // Open add modal
+//     const openAddModal = () => {
+//         setEditingTask(null);
+//         setModalMode("add");
+//         setIsModalOpen(true);
+//     };
+
+//     // Close modal
+//     const closeModal = () => {
+//         setIsModalOpen(false);
+//         setEditingTask(null);
+//         setModalMode("add");
+//     };
+
+//     // Define columns for react-table
+//     const columns = useMemo(
+//         () => [
+//             {
+//                 Header: "S/N",
+//                 accessor: (row, index) => index + 1,
+//                 id: "rowIndex",
+//                 width: 50,
+//             },
+//             {
+//                 Header: "Status",
+//                 accessor: "is_completed",
+//                 Cell: ({ value }) => (
+//                     <div className="flex items-center gap-2">
+//                         <span
+//                             className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+//                                 value
+//                                     ? "bg-green-100 text-green-800"
+//                                     : "bg-yellow-100 text-yellow-800"
+//                             }`}
+//                         >
+//                             {value ? "Complete" : "Incomplete"}
+//                         </span>
+//                     </div>
+//                 ),
+//                 width: 140,
+//             },
+//             {
+//                 Header: "Title",
+//                 accessor: "title",
+//                 Cell: ({ value }) => (
+//                     <div className="flex items-center gap-2">
+//                         <span className={`text-sm font-medium text-gray-900 `}>
+//                             {value}
+//                         </span>
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 Header: "Due Time",
+//                 Cell: ({ row }) => {
+//                     const { due_date, due_time, is_completed } = row.original;
+
+//                     const dateTimeString = due_time
+//                         ? `${due_date}T${due_time}`
+//                         : `${due_date}T00:00`;
+
+//                     const dueDateTime = new Date(dateTimeString);
+//                     const isOverdue = dueDateTime < new Date() && !is_completed;
+
+//                     const formattedDate = `${String(
+//                         dueDateTime.getDate()
+//                     ).padStart(2, "0")}/${String(
+//                         dueDateTime.getMonth() + 1
+//                     ).padStart(2, "0")}/${dueDateTime.getFullYear()}`;
+
+//                     return (
+//                         <div className="flex flex-col lg:flex-row items-center gap-2">
+//                             <span
+//                                 className={`px-3 py-1 text-xs rounded-full ${
+//                                     isOverdue
+//                                         ? "bg-red-100 text-red-800"
+//                                         : "bg-blue-100 text-blue-800"
+//                                 }`}
+//                             >
+//                                 {formattedDate}
+//                             </span>
+//                         </div>
+//                     );
+//                 },
+//                 width: 200,
+//             },
+
+//             {
+//                 Header: "Task List",
+//                 accessor: "task_list.title",
+//                 Cell: ({ row }) => (
+//                     <div className="flex flex-col gap-1">
+//                         <div>
+//                             <span className="font-medium text-sm text-gray-900">
+//                                 {row.original.task_list?.title ||
+//                                     "No task list"}
+//                             </span>
+//                         </div>
+//                         {row.original.task_list?.description && (
+//                             <span className="text-xs text-gray-500 truncate max-w-xs">
+//                                 {row.original.task_list.description}
+//                             </span>
+//                         )}
+//                     </div>
+//                 ),
+//             },
+
+//             {
+//                 Header: "Actions",
+//                 accessor: "id",
+//                 Cell: ({ row }) => {
+//                     const task = row.original;
+//                     const isCompleted = task.is_completed;
+
+//                     return (
+//                         <div className="flex items-center gap-2">
+//                             <button
+//                                 onClick={() => setSelectedTask(task)}
+//                                 className={`p-2 rounded transition-colors flex items-center justify-center ${
+//                                     selectedTask?.id === task.id
+//                                         ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+//                                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+//                                 }`}
+//                                 title="View task details"
+//                             >
+//                                 <Eye size={16} />
+//                             </button>
+
+//                             {/* Only show edit button if task is NOT completed */}
+//                             {!isCompleted && (
+//                                 <button
+//                                     onClick={() => handleEdit(task)}
+//                                     className="p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
+//                                     title="Edit task"
+//                                 >
+//                                     <Edit size={16} />
+//                                 </button>
+//                             )}
+
+//                             {/* <button
+//                                 onClick={() => handleDelete(task.id)}
+//                                 className="p-2 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+//                                 title="Delete task"
+//                             >
+//                                 <Trash2 size={16} />
+//                             </button> */}
+//                         </div>
+//                     );
+//                 },
+//                 width: 160,
+//             },
+//         ],
+//         [selectedTask]
+//     );
+
+//     // Create table instance
+//     const {
+//         getTableProps,
+//         getTableBodyProps,
+//         headerGroups,
+//         page,
+//         prepareRow,
+//         canPreviousPage,
+//         canNextPage,
+//         pageOptions,
+//         pageCount,
+//         gotoPage,
+//         nextPage,
+//         previousPage,
+//         setPageSize,
+//         state: { pageIndex, pageSize },
+//     } = useTable(
+//         {
+//             columns,
+//             data: tasks,
+//             initialState: { pageIndex: 0, pageSize: 10 },
+//         },
+//         useSortBy,
+//         usePagination
+//     );
+
+//     return (
+//         <AdminWrapper>
+//             <div className="min-h-screen bg-gray-50 px-4">
+//                 {/* Header */}
+//                 <div className="mb-8 flex justify-between items-center">
+//                     <h1 className="text-3xl font-bold text-gray-800 ">
+//                         Task Management
+//                     </h1>
+//                     {/* Add Task Button */}
+//                     <div className="mb-6">
+//                         <button
+//                             onClick={openAddModal}
+//                             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
+//                         >
+//                             <Plus size={20} />
+//                             Add New Task
+//                         </button>
+//                     </div>
+//                 </div>
+
+//                 {/* Tasks Table */}
+//                 <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+//                     <div className="overflow-x-auto">
+//                         <table
+//                             {...getTableProps()}
+//                             className="min-w-full divide-y divide-gray-200"
+//                         >
+//                             <thead className="bg-gray-100">
+//                                 {headerGroups.map((headerGroup) => (
+//                                     <tr {...headerGroup.getHeaderGroupProps()}>
+//                                         {headerGroup.headers.map((column) => (
+//                                             <th
+//                                                 {...column.getHeaderProps(
+//                                                     column.getSortByToggleProps()
+//                                                 )}
+//                                                 className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+//                                                 style={{ width: column.width }}
+//                                             >
+//                                                 <div className="flex items-center">
+//                                                     {column.render("Header")}
+//                                                     {column.isSorted ? (
+//                                                         column.isSortedDesc ? (
+//                                                             <ChevronDown
+//                                                                 size={16}
+//                                                                 className="ml-1"
+//                                                             />
+//                                                         ) : (
+//                                                             <ChevronUp
+//                                                                 size={16}
+//                                                                 className="ml-1"
+//                                                             />
+//                                                         )
+//                                                     ) : (
+//                                                         ""
+//                                                     )}
+//                                                 </div>
+//                                             </th>
+//                                         ))}
+//                                     </tr>
+//                                 ))}
+//                             </thead>
+//                             <tbody
+//                                 {...getTableBodyProps()}
+//                                 className="bg-white divide-y divide-gray-200"
+//                             >
+//                                 {page.length === 0 ? (
+//                                     <tr>
+//                                         <td
+//                                             colSpan={columns.length}
+//                                             className="px-6 py-8 text-center text-gray-500"
+//                                         >
+//                                             <div className="flex flex-col items-center justify-center py-8">
+//                                                 <FileText
+//                                                     size={64}
+//                                                     className="text-gray-300 mb-4"
+//                                                 />
+//                                                 <p className="text-lg text-gray-500 mb-2">
+//                                                     No tasks found
+//                                                 </p>
+//                                                 <p className="text-gray-400">
+//                                                     Add your first task to get
+//                                                     started!
+//                                                 </p>
+//                                             </div>
+//                                         </td>
+//                                     </tr>
+//                                 ) : (
+//                                     page.map((row) => {
+//                                         prepareRow(row);
+//                                         const task = row.original;
+
+//                                         return (
+//                                             <tr
+//                                                 {...row.getRowProps()}
+//                                                 className={`hover:bg-gray-50 transition-colors ${
+//                                                     selectedTask?.id === task.id
+//                                                         ? "bg-blue-50"
+//                                                         : ""
+//                                                 }`}
+//                                             >
+//                                                 {row.cells.map((cell) => (
+//                                                     <td
+//                                                         {...cell.getCellProps()}
+//                                                         className="px-6 py-4"
+//                                                     >
+//                                                         {cell.render("Cell")}
+//                                                     </td>
+//                                                 ))}
+//                                             </tr>
+//                                         );
+//                                     })
+//                                 )}
+//                             </tbody>
+//                         </table>
+//                     </div>
+
+//                     {/* Pagination */}
+//                     <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+//                         <div className="flex items-center">
+//                             <span className="text-sm text-gray-700 mr-2">
+//                                 Show
+//                             </span>
+//                             <select
+//                                 value={pageSize}
+//                                 onChange={(e) =>
+//                                     setPageSize(Number(e.target.value))
+//                                 }
+//                                 className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+//                             >
+//                                 {[5, 10, 20, 30, 50].map((size) => (
+//                                     <option key={size} value={size}>
+//                                         {size}
+//                                     </option>
+//                                 ))}
+//                             </select>
+//                             <span className="text-sm text-gray-700 ml-2">
+//                                 entries
+//                             </span>
+//                         </div>
+//                         <div className="flex items-center space-x-2">
+//                             <button
+//                                 onClick={() => gotoPage(0)}
+//                                 disabled={!canPreviousPage}
+//                                 className={`p-1 rounded ${
+//                                     !canPreviousPage
+//                                         ? "opacity-50 cursor-not-allowed"
+//                                         : "hover:bg-gray-200"
+//                                 }`}
+//                             >
+//                                 <ChevronLeft size={20} />
+//                             </button>
+//                             <button
+//                                 onClick={() => previousPage()}
+//                                 disabled={!canPreviousPage}
+//                                 className={`px-3 py-1 rounded ${
+//                                     !canPreviousPage
+//                                         ? "opacity-50 cursor-not-allowed"
+//                                         : "hover:bg-gray-200"
+//                                 }`}
+//                             >
+//                                 Previous
+//                             </button>
+//                             <span className="text-sm text-gray-700">
+//                                 Page <strong>{pageIndex + 1}</strong> of{" "}
+//                                 <strong>{pageOptions.length}</strong>
+//                             </span>
+//                             <button
+//                                 onClick={() => nextPage()}
+//                                 disabled={!canNextPage}
+//                                 className={`px-3 py-1 rounded ${
+//                                     !canNextPage
+//                                         ? "opacity-50 cursor-not-allowed"
+//                                         : "hover:bg-gray-200"
+//                                 }`}
+//                             >
+//                                 Next
+//                             </button>
+//                             <button
+//                                 onClick={() => gotoPage(pageCount - 1)}
+//                                 disabled={!canNextPage}
+//                                 className={`p-1 rounded ${
+//                                     !canNextPage
+//                                         ? "opacity-50 cursor-not-allowed"
+//                                         : "hover:bg-gray-200"
+//                                 }`}
+//                             >
+//                                 <ChevronRight size={20} />
+//                             </button>
+//                         </div>
+//                     </div>
+//                 </div>
+
+//                 {/* Task Details Section - Below the Table */}
+//                 {selectedTask && (
+//                     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+//                         {/* Task Information */}
+//                         <div className="p-6">
+//                             <div>
+//                                 <div className="flex justify-between">
+//                                     <div className="flex items-center gap-3 mb-4">
+//                                         <FileText
+//                                             size={24}
+//                                             className="text-blue-600"
+//                                         />
+//                                         <h3 className="text-lg font-semibold text-gray-800">
+//                                             {selectedTask.title}
+//                                         </h3>
+//                                     </div>
+//                                     <div className="flex items-center gap-2">
+//                                         {!selectedTask.is_completed && (
+//                                             <button
+//                                                 onClick={() =>
+//                                                     handleEdit(selectedTask)
+//                                                 }
+//                                                 className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
+//                                                 title="Edit task"
+//                                             >
+//                                                 <Edit size={16} />
+//                                             </button>
+//                                         )}
+//                                         <button
+//                                             onClick={() =>
+//                                                 setSelectedTask(null)
+//                                             }
+//                                             className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+//                                             title="Close details"
+//                                         >
+//                                             <X size={20} />
+//                                         </button>
+//                                     </div>
+//                                 </div>
+
+//                                 {selectedTask.descriptions &&
+//                                 selectedTask.descriptions.length > 0 ? (
+//                                     <div className="space-y-4">
+//                                         {selectedTask.descriptions
+//                                             .slice()
+//                                             .reverse()
+//                                             .map((description, index) => (
+//                                                 <div
+//                                                     key={index}
+//                                                     className="bg-gray-50 border border-gray-200 rounded-lg p-4"
+//                                                 >
+//                                                     <div className="flex items-start gap-3 mb-3">
+//                                                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+//                                                             {selectedTask
+//                                                                 .task_list
+//                                                                 ?.assigned_user
+//                                                                 ?.name ? (
+//                                                                 <User
+//                                                                     size={20}
+//                                                                     className="text-blue-600"
+//                                                                 />
+//                                                             ) : (
+//                                                                 <span className="text-sm font-semibold text-blue-600">
+//                                                                     {selectedTask.task_list?.assigned_user?.name?.charAt(
+//                                                                         0
+//                                                                     ) || "U"}
+//                                                                 </span>
+//                                                             )}
+//                                                         </div>
+//                                                         <div className="flex-1">
+//                                                             <div className="flex justify-between items-start mb-2">
+//                                                                 <div className="font-medium text-gray-800">
+//                                                                     {selectedTask
+//                                                                         .task_list
+//                                                                         ?.assigned_user
+//                                                                         ?.name && (
+//                                                                         <h2 className="font-medium text-gray-800">
+//                                                                             {
+//                                                                                 selectedTask
+//                                                                                     .task_list
+//                                                                                     .assigned_user
+//                                                                                     .name
+//                                                                             }
+//                                                                         </h2>
+//                                                                     )}
+//                                                                 </div>
+//                                                                 <div className="flex gap-2 items-center">
+//                                                                     <Calendar
+//                                                                         size={
+//                                                                             14
+//                                                                         }
+//                                                                         className="text-gray-400"
+//                                                                     />
+//                                                                     <p className="text-xs text-gray-500">
+//                                                                         {description.created_at
+//                                                                             ? new Date(
+//                                                                                   description.created_at
+//                                                                               ).toLocaleString()
+//                                                                             : "Unknown date"}
+//                                                                     </p>
+//                                                                 </div>
+//                                                             </div>
+//                                                         </div>
+//                                                     </div>
+
+//                                                     <div className="pl-14">
+//                                                         <div className="prose max-w-none text-md text-gray-700 pl-4 py-2">
+//                                                             {/* Using custom parser with Lucide icons */}
+//                                                             {parseWithIcons(
+//                                                                 description.content ||
+//                                                                     ""
+//                                                             )}
+//                                                         </div>
+//                                                     </div>
+//                                                 </div>
+//                                             ))}
+//                                     </div>
+//                                 ) : (
+//                                     <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+//                                         <FileText
+//                                             size={64}
+//                                             className="mx-auto text-gray-300 mb-3"
+//                                         />
+//                                         <h4 className="text-lg font-medium text-gray-500 mb-2">
+//                                             No descriptions available
+//                                         </h4>
+//                                         <p className="text-gray-400 text-sm">
+//                                             There are no descriptions for this
+//                                             task yet.
+//                                         </p>
+//                                     </div>
+//                                 )}
+//                             </div>
+//                         </div>
+//                     </div>
+//                 )}
+
+//                 {/* Modal */}
+//                 {isModalOpen && (
+//                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+//                         <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+//                             <div className="p-6">
+//                                 <div className="flex justify-between items-center mb-6">
+//                                     <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+//                                         {modalMode === "edit" ? (
+//                                             <>
+//                                                 {editingTask?.is_completed
+//                                                     ? "View Task (Completed)"
+//                                                     : "Edit Task"}
+//                                             </>
+//                                         ) : (
+//                                             <>Add New Task</>
+//                                         )}
+//                                     </h2>
+//                                     <button
+//                                         onClick={closeModal}
+//                                         className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+//                                     >
+//                                         <X size={24} />
+//                                     </button>
+//                                 </div>
+
+//                                 {modalMode === "edit" ? (
+//                                     editingTask?.is_completed ? (
+//                                         <div className="text-center py-12">
+//                                             <h3 className="text-xl font-semibold text-gray-700 mb-2">
+//                                                 Task is Completed
+//                                             </h3>
+//                                             <p className="text-gray-600 mb-6 max-w-md mx-auto">
+//                                                 This task has been marked as
+//                                                 completed and cannot be edited.
+//                                             </p>
+//                                             <div className="flex gap-3 justify-center">
+//                                                 <button
+//                                                     onClick={closeModal}
+//                                                     className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+//                                                 >
+//                                                     Close
+//                                                 </button>
+//                                             </div>
+//                                         </div>
+//                                     ) : (
+//                                         <EditTask
+//                                             onUpdateTask={handleUpdate}
+//                                             onClose={closeModal}
+//                                             editingTask={editingTask}
+//                                             taskLists={taskLists}
+//                                         />
+//                                     )
+//                                 ) : (
+//                                     <AddTask
+//                                         onAddTask={handleAddTask}
+//                                         onClose={closeModal}
+//                                         taskLists={taskLists}
+//                                     />
+//                                 )}
+//                             </div>
+//                         </div>
+//                     </div>
+//                 )}
+//             </div>
+//         </AdminWrapper>
+//     );
+// };
+
+// export default Task;
+
+import React, { useState, useEffect, useMemo } from "react";
+import axios from "axios";
+import { usePage } from "@inertiajs/react";
+import {
+    Calendar,
+    ChevronUp,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Edit,
+    Plus,
+    X,
+    Eye,
+    CheckCircle,
+    Square,
+    User,
+    FileText,
+    Users,
+} from "lucide-react";
+import { useTable, useSortBy, usePagination } from "react-table";
+import parse from "html-react-parser";
+import EditTask from "@/EditFormComponents/EditTask";
+import AddTask from "@/AddFormComponents/AddTask";
+import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+
+const Task = () => {
+    const [tasks, setTasks] = useState([]);
+    const [editingTask, setEditingTask] = useState(null);
+    const [reloadTrigger, setReloadTrigger] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [taskLists, setTaskLists] = useState([]);
+    const [modalMode, setModalMode] = useState("add");
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [selectedTaskList, setSelectedTaskList] = useState(null);
+    const [showTaskListPopup, setShowTaskListPopup] = useState(false);
+    const user = usePage().props.auth.user;
+
+    // Custom parser to replace HTML elements with Lucide icons
+    const parseWithIcons = (html) => {
+        if (!html) return null;
+
+        const elements = parse(html);
+
+        const replaceElements = (node) => {
+            if (!node || typeof node !== "object") return node;
+
+            if (Array.isArray(node)) {
+                return node.map(replaceElements);
+            }
+
+            if (node.props && node.props.children) {
+                // Replace ul/ol with custom styled lists
+                if (node.type === "ul" || node.type === "ol") {
+                    const children = React.Children.map(
+                        node.props.children,
+                        (child, index) => {
+                            if (child && child.props && child.type === "li") {
+                                return React.cloneElement(child, {
+                                    className: `${
+                                        child.props.className || ""
+                                    } flex items-start gap-2 py-1`,
+                                    children: (
+                                        <>
+                                            {node.type === "ul" ? (
+                                                <CheckCircle
+                                                    size={12}
+                                                    className="mt-1.5 text-blue-500 flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <span className="text-sm font-medium text-blue-600 w-5 flex-shrink-0">
+                                                    {index + 1}.
+                                                </span>
+                                            )}
+                                            <span className="flex-1">
+                                                {replaceElements(
+                                                    child.props.children
+                                                )}
+                                            </span>
+                                        </>
+                                    ),
+                                });
+                            }
+                            return child;
+                        }
+                    );
+
+                    return React.createElement(node.type, {
+                        ...node.props,
+                        className: `${
+                            node.props.className || ""
+                        } space-y-2 my-2`,
+                        children: children,
+                    });
+                }
+
+                // Replace checkboxes/todo items
+                if (
+                    node.props.className &&
+                    node.props.className.includes("ql-direction")
+                ) {
+                    const children = React.Children.map(
+                        node.props.children,
+                        (child) => {
+                            if (child && child.props && child.type === "span") {
+                                const isChecked =
+                                    child.props.style?.textDecoration ===
+                                    "line-through";
+                                return React.cloneElement(child, {
+                                    children: (
+                                        <div className="flex items-center gap-2">
+                                            {isChecked ? (
+                                                <CheckCircle
+                                                    size={16}
+                                                    className="text-green-500 flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <Square
+                                                    size={16}
+                                                    className="text-gray-400 flex-shrink-0"
+                                                />
+                                            )}
+                                            <span
+                                                className={
+                                                    isChecked
+                                                        ? "line-through text-gray-500"
+                                                        : ""
+                                                }
+                                            >
+                                                {child.props.children}
+                                            </span>
+                                        </div>
+                                    ),
+                                });
+                            }
+                            return child;
+                        }
+                    );
+
+                    return React.createElement("div", {
+                        ...node.props,
+                        children: children,
+                    });
+                }
+
+                const newChildren = React.Children.map(
+                    node.props.children,
+                    replaceElements
+                );
+                return React.cloneElement(node, { children: newChildren });
+            }
+
+            return node;
+        };
+
+        return replaceElements(elements);
+    };
+
+    // Fetch tasks and task lists
+    useEffect(() => {
+        const fetchAllData = async () => {
+            try {
+                // Fetch tasks
+                const tasksResponse = await axios.get(route("ourtask.index"));
+                setTasks(tasksResponse.data.data);
+
+                // Fetch task lists (for dropdown in form)
+                const taskListsResponse = await axios.get(
+                    route("tasklists.index")
+                );
+                setTaskLists(taskListsResponse.data.data);
+            } catch (error) {
+                console.error("fetching error ", error);
+            }
+        };
+
+        fetchAllData();
+    }, [reloadTrigger]);
+
+    // Handle edit task
+    const handleEdit = (task) => {
+        // Don't allow editing if task is completed
+        if (task.is_completed) {
+            return;
+        }
+        setEditingTask(task);
+        setModalMode("edit");
+        setIsModalOpen(true);
+    };
+
+    // Handle delete task
+    const handleDelete = async (taskId) => {
+        if (window.confirm("Are you sure you want to delete this task?")) {
+            try {
+                await axios.delete(route("ourtask.destroy", taskId));
+                setReloadTrigger((prev) => !prev);
+                if (selectedTask?.id === taskId) {
+                    setSelectedTask(null);
+                }
+            } catch (error) {
+                console.error("Error deleting task:", error);
+            }
+        }
+    };
+
+    // Handle add task
+    const handleAddTask = async (newTask) => {
+        try {
+            await axios.post(route("ourtask.store"), newTask);
+            setReloadTrigger((prev) => !prev);
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Error adding task:", error);
+            throw error;
+        }
+    };
+
+    // Handle update task
+    const handleUpdate = async (updatedTask) => {
+        try {
+            await axios.put(
+                route("ourtask.update", editingTask.id),
+                updatedTask
+            );
+            setReloadTrigger((prev) => !prev);
+            setIsModalOpen(false);
+            setEditingTask(null);
+        } catch (error) {
+            console.error("Error updating task:", error);
+            throw error;
+        }
+    };
+
+    // Open add modal
+    const openAddModal = () => {
+        setEditingTask(null);
+        setModalMode("add");
+        setIsModalOpen(true);
+    };
+
+    // Close modal
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setEditingTask(null);
+        setModalMode("add");
+    };
+
+    // Handle click on task list cell
+    const handleTaskListClick = (taskList) => {
+        if (taskList) {
+            setSelectedTaskList(taskList);
+            setShowTaskListPopup(true);
+        }
+    };
+
+    // Close task list popup
+    const closeTaskListPopup = () => {
+        setShowTaskListPopup(false);
+        setSelectedTaskList(null);
+    };
+
+    // Define columns for react-table
+    const columns = useMemo(
+        () => [
+            {
+                Header: "S/N",
+                accessor: (row, index) => index + 1,
+                id: "rowIndex",
+                width: 50,
+            },
+            {
+                Header: "Status",
+                accessor: "is_completed",
+                Cell: ({ value }) => (
+                    <div className="flex items-center gap-2">
+                        <span
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+                                value
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                            }`}
+                        >
+                            {value ? "Complete" : "Incomplete"}
+                        </span>
+                    </div>
+                ),
+                width: 140,
+            },
+            {
+                Header: "Title",
+                accessor: "title",
+                Cell: ({ value }) => (
+                    <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium text-gray-900 `}>
+                            {value}
+                        </span>
+                    </div>
+                ),
+            },
+            {
+                Header: "Due Time",
+                Cell: ({ row }) => {
+                    const { due_date, due_time, is_completed } = row.original;
+
+                    const dateTimeString = due_time
+                        ? `${due_date}T${due_time}`
+                        : `${due_date}T00:00`;
+
+                    const dueDateTime = new Date(dateTimeString);
+                    const isOverdue = dueDateTime < new Date() && !is_completed;
+
+                    const formattedDate = `${String(
+                        dueDateTime.getDate()
+                    ).padStart(2, "0")}/${String(
+                        dueDateTime.getMonth() + 1
+                    ).padStart(2, "0")}/${dueDateTime.getFullYear()}`;
+
+                    return (
+                        <div className="flex flex-col lg:flex-row items-center gap-2">
+                            <span
+                                className={`px-3 py-1 text-xs rounded-full ${
+                                    isOverdue
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-blue-100 text-blue-800"
+                                }`}
+                            >
+                                {formattedDate}
+                            </span>
+                        </div>
+                    );
+                },
+                width: 200,
+            },
+            {
+                Header: "Task List",
+                accessor: "task_list.title",
+                Cell: ({ row }) => {
+                    const taskList = row.original.task_list;
+
+                    return (
+                        <div
+                            className="flex flex-col gap-1 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+                            onClick={() => handleTaskListClick(taskList)}
+                            title="Click to view task list details"
+                        >
+                            <span className="font-medium text-sm text-gray-900 hover:text-blue-600">
+                                {taskList?.title || "No task list"}
+                            </span>
+                        </div>
+                    );
+                },
+            },
+            {
+                Header: "Actions",
+                accessor: "id",
+                Cell: ({ row }) => {
+                    const task = row.original;
+                    const isCompleted = task.is_completed;
+
+                    return (
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setSelectedTask(task)}
+                                className={`p-2 rounded transition-colors flex items-center justify-center ${
+                                    selectedTask?.id === task.id
+                                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                }`}
+                                title="View task details"
+                            >
+                                <Eye size={16} />
+                            </button>
+
+                            {/* Only show edit button if task is NOT completed AND user role is 'user' */}
+                            {!isCompleted && user.role === "user" && (
+                                <button
+                                    onClick={() => handleEdit(task)}
+                                    className="p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
+                                    title="Edit task"
+                                >
+                                    <Edit size={16} />
+                                </button>
+                            )}
+                        </div>
+                    );
+                },
+                width: 160,
+            },
+        ],
+        [selectedTask]
+    );
+
+    // Create table instance
+    const {
+        getTableProps,
+        getTableBodyProps,
+        headerGroups,
+        page,
+        prepareRow,
+        canPreviousPage,
+        canNextPage,
+        pageOptions,
+        pageCount,
+        gotoPage,
+        nextPage,
+        previousPage,
+        setPageSize,
+        state: { pageIndex, pageSize },
+    } = useTable(
+        {
+            columns,
+            data: tasks,
+            initialState: { pageIndex: 0, pageSize: 10 },
+        },
+        useSortBy,
+        usePagination
+    );
+
+    return (
+        <AdminWrapper>
+            <div className="min-h-screen bg-gray-50 px-4">
+                {/* Header */}
+                <div className="mb-8 flex justify-between items-center">
+                    <h1 className="text-3xl font-bold text-gray-800 ">
+                        Task Management
+                    </h1>
+                    {/* Add Task Button */}
+                    {/* Add Task Button - Only show if user role is 'user' */}
+                    {user.role === "user" && (
+                        <div className="mb-6">
+                            <button
+                                onClick={openAddModal}
+                                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
+                            >
+                                <Plus size={20} />
+                                Add New Task
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                {/* Tasks Table */}
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                    <div className="overflow-x-auto">
+                        <table
+                            {...getTableProps()}
+                            className="min-w-full divide-y divide-gray-200"
+                        >
+                            <thead className="bg-gray-100">
+                                {headerGroups.map((headerGroup) => (
+                                    <tr {...headerGroup.getHeaderGroupProps()}>
+                                        {headerGroup.headers.map((column) => (
+                                            <th
+                                                {...column.getHeaderProps(
+                                                    column.getSortByToggleProps()
+                                                )}
+                                                className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
+                                                style={{ width: column.width }}
+                                            >
+                                                <div className="flex items-center">
+                                                    {column.render("Header")}
+                                                    {column.isSorted ? (
+                                                        column.isSortedDesc ? (
+                                                            <ChevronDown
+                                                                size={16}
+                                                                className="ml-1"
+                                                            />
+                                                        ) : (
+                                                            <ChevronUp
+                                                                size={16}
+                                                                className="ml-1"
+                                                            />
+                                                        )
+                                                    ) : (
+                                                        ""
+                                                    )}
+                                                </div>
+                                            </th>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </thead>
+                            <tbody
+                                {...getTableBodyProps()}
+                                className="bg-white divide-y divide-gray-200"
+                            >
+                                {page.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={columns.length}
+                                            className="px-6 py-8 text-center text-gray-500"
+                                        >
+                                            <div className="flex flex-col items-center justify-center py-8">
+                                                <FileText
+                                                    size={64}
+                                                    className="text-gray-300 mb-4"
+                                                />
+                                                <p className="text-lg text-gray-500 mb-2">
+                                                    No tasks found
+                                                </p>
+                                                <p className="text-gray-400">
+                                                    Add your first task to get
+                                                    started!
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    page.map((row) => {
+                                        prepareRow(row);
+                                        const task = row.original;
+
+                                        return (
+                                            <tr
+                                                {...row.getRowProps()}
+                                                className={`hover:bg-gray-50 transition-colors ${
+                                                    selectedTask?.id === task.id
+                                                        ? "bg-blue-50"
+                                                        : ""
+                                                }`}
+                                            >
+                                                {row.cells.map((cell) => (
+                                                    <td
+                                                        {...cell.getCellProps()}
+                                                        className="px-6 py-4"
+                                                    >
+                                                        {cell.render("Cell")}
+                                                    </td>
+                                                ))}
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {/* Pagination */}
+                    <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
+                        <div className="flex items-center">
+                            <span className="text-sm text-gray-700 mr-2">
+                                Show
+                            </span>
+                            <select
+                                value={pageSize}
+                                onChange={(e) =>
+                                    setPageSize(Number(e.target.value))
+                                }
+                                className="border border-gray-300 rounded-md px-2 py-1 text-sm"
+                            >
+                                {[5, 10, 20, 30, 50].map((size) => (
+                                    <option key={size} value={size}>
+                                        {size}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="text-sm text-gray-700 ml-2">
+                                entries
+                            </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => gotoPage(0)}
+                                disabled={!canPreviousPage}
+                                className={`p-1 rounded ${
+                                    !canPreviousPage
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-200"
+                                }`}
+                            >
+                                <ChevronLeft size={20} />
+                            </button>
+                            <button
+                                onClick={() => previousPage()}
+                                disabled={!canPreviousPage}
+                                className={`px-3 py-1 rounded ${
+                                    !canPreviousPage
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-200"
+                                }`}
+                            >
+                                Previous
+                            </button>
+                            <span className="text-sm text-gray-700">
+                                Page <strong>{pageIndex + 1}</strong> of{" "}
+                                <strong>{pageOptions.length}</strong>
+                            </span>
+                            <button
+                                onClick={() => nextPage()}
+                                disabled={!canNextPage}
+                                className={`px-3 py-1 rounded ${
+                                    !canNextPage
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-200"
+                                }`}
+                            >
+                                Next
+                            </button>
+                            <button
+                                onClick={() => gotoPage(pageCount - 1)}
+                                disabled={!canNextPage}
+                                className={`p-1 rounded ${
+                                    !canNextPage
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-200"
+                                }`}
+                            >
+                                <ChevronRight size={20} />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Task Details Section - Below the Table */}
+                {selectedTask && (
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+                        {/* Task Information */}
+                        <div className="p-6">
+                            <div>
+                                <div className="flex justify-between">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <FileText
+                                            size={24}
+                                            className="text-blue-600"
+                                        />
+                                        <h3 className="text-lg font-semibold text-gray-800">
+                                            {selectedTask.title}
+                                        </h3>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {!selectedTask.is_completed && (
+                                            <button
+                                                onClick={() =>
+                                                    handleEdit(selectedTask)
+                                                }
+                                                className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
+                                                title="Edit task"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() =>
+                                                setSelectedTask(null)
+                                            }
+                                            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                                            title="Close details"
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {selectedTask.descriptions &&
+                                selectedTask.descriptions.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {selectedTask.descriptions
+                                            .slice()
+                                            .reverse()
+                                            .map((description, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4"
+                                                >
+                                                    <div className="flex items-start gap-3 mb-3">
+                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                            {selectedTask
+                                                                .task_list
+                                                                ?.assigned_user
+                                                                ?.name ? (
+                                                                <User
+                                                                    size={20}
+                                                                    className="text-blue-600"
+                                                                />
+                                                            ) : (
+                                                                <span className="text-sm font-semibold text-blue-600">
+                                                                    {selectedTask.task_list?.assigned_user?.name?.charAt(
+                                                                        0
+                                                                    ) || "U"}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div className="font-medium text-gray-800">
+                                                                    {selectedTask
+                                                                        .task_list
+                                                                        ?.assigned_user
+                                                                        ?.name && (
+                                                                        <h2 className="font-medium text-gray-800">
+                                                                            {
+                                                                                selectedTask
+                                                                                    .task_list
+                                                                                    .assigned_user
+                                                                                    .name
+                                                                            }
+                                                                        </h2>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex gap-2 items-center">
+                                                                    <Calendar
+                                                                        size={
+                                                                            14
+                                                                        }
+                                                                        className="text-gray-400"
+                                                                    />
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {description.created_at
+                                                                            ? new Date(
+                                                                                  description.created_at
+                                                                              ).toLocaleString()
+                                                                            : "Unknown date"}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pl-14">
+                                                        <div className="prose max-w-none text-md text-gray-700 pl-4 py-2">
+                                                            {/* Using custom parser with Lucide icons */}
+                                                            {parseWithIcons(
+                                                                description.content ||
+                                                                    ""
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                                        <FileText
+                                            size={64}
+                                            className="mx-auto text-gray-300 mb-3"
+                                        />
+                                        <h4 className="text-lg font-medium text-gray-500 mb-2">
+                                            No descriptions available
+                                        </h4>
+                                        <p className="text-gray-400 text-sm">
+                                            There are no descriptions for this
+                                            task yet.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Task List Details Popup - Fixed positioning */}
+                {showTaskListPopup && selectedTaskList && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-800">
+                                        {selectedTaskList.title}
+                                    </h2>
+                                    <button
+                                        onClick={closeTaskListPopup}
+                                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    <h4 className="text-md font-semibold text-gray-700">
+                                        Description
+                                    </h4>
+                                    {/* Task List Description with HTML parsing */}
+                                    {selectedTaskList.description && (
+                                        <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+                                            <div className="text-gray-600">
+                                                {parseWithIcons(
+                                                    selectedTaskList.description
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Assigned By (Creator) */}
+                                    <div className="border border-gray-200 rounded-lg p-4">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <User
+                                                size={20}
+                                                className="text-green-600"
+                                            />
+                                            <h4 className="text-md font-semibold text-gray-700">
+                                                Assigned By (Creator)
+                                            </h4>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                                {selectedTaskList.creator
+                                                    ?.name ? (
+                                                    <User
+                                                        size={20}
+                                                        className="text-green-600"
+                                                    />
+                                                ) : (
+                                                    <span className="text-sm font-semibold text-green-600">
+                                                        {selectedTaskList.creator?.name?.charAt(
+                                                            0
+                                                        ) || "U"}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-800">
+                                                    {selectedTaskList.creator
+                                                        ?.name || "Unknown"}
+                                                </p>
+                                                {selectedTaskList.creator
+                                                    ?.email && (
+                                                    <p className="text-sm text-gray-500">
+                                                        {
+                                                            selectedTaskList
+                                                                .creator.email
+                                                        }
+                                                    </p>
+                                                )}
+                                                {selectedTaskList.creator
+                                                    ?.role && (
+                                                    <p className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full inline-block mt-1">
+                                                        {
+                                                            selectedTaskList
+                                                                .creator.role
+                                                        }
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Assigned To */}
+                                    <div className="border border-gray-200 rounded-lg p-4">
+                                        <div className="flex items-center gap-3 mb-3">
+                                            <Users
+                                                size={20}
+                                                className="text-blue-600"
+                                            />
+                                            <h4 className="text-md font-semibold text-gray-700">
+                                                Assigned To
+                                            </h4>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                                {selectedTaskList.assigned_user
+                                                    ?.name ? (
+                                                    <User
+                                                        size={20}
+                                                        className="text-blue-600"
+                                                    />
+                                                ) : (
+                                                    <span className="text-sm font-semibold text-blue-600">
+                                                        {selectedTaskList.assigned_user?.name?.charAt(
+                                                            0
+                                                        ) || "U"}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-gray-800">
+                                                    {selectedTaskList
+                                                        .assigned_user?.name ||
+                                                        "Unassigned"}
+                                                </p>
+                                                {selectedTaskList.assigned_user
+                                                    ?.email && (
+                                                    <p className="text-sm text-gray-500">
+                                                        {
+                                                            selectedTaskList
+                                                                .assigned_user
+                                                                .email
+                                                        }
+                                                    </p>
+                                                )}
+                                                {selectedTaskList.assigned_user
+                                                    ?.role && (
+                                                    <p className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full inline-block mt-1">
+                                                        {
+                                                            selectedTaskList
+                                                                .assigned_user
+                                                                .role
+                                                        }
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Close Button */}
+                                    <div className="flex justify-end pt-4">
+                                        <button
+                                            onClick={closeTaskListPopup}
+                                            className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Task Modal */}
+                {isModalOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="p-6">
+                                <div className="flex justify-between items-center mb-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                                        {modalMode === "edit" ? (
+                                            <>
+                                                {editingTask?.is_completed
+                                                    ? "View Task (Completed)"
+                                                    : "Edit Task"}
+                                            </>
+                                        ) : (
+                                            <>Add New Task</>
+                                        )}
+                                    </h2>
+                                    <button
+                                        onClick={closeModal}
+                                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                                    >
+                                        <X size={24} />
+                                    </button>
+                                </div>
+
+                                {modalMode === "edit" ? (
+                                    editingTask?.is_completed ? (
+                                        <div className="text-center py-12">
+                                            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                                                Task is Completed
+                                            </h3>
+                                            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                                                This task has been marked as
+                                                completed and cannot be edited.
+                                            </p>
+                                            <div className="flex gap-3 justify-center">
+                                                <button
+                                                    onClick={closeModal}
+                                                    className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                                                >
+                                                    Close
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <EditTask
+                                            onUpdateTask={handleUpdate}
+                                            onClose={closeModal}
+                                            editingTask={editingTask}
+                                            taskLists={taskLists}
+                                        />
+                                    )
+                                ) : (
+                                    <AddTask
+                                        onAddTask={handleAddTask}
+                                        onClose={closeModal}
+                                        taskLists={taskLists}
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </AdminWrapper>
+    );
+};
+
+export default Task;
