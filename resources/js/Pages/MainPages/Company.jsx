@@ -7,8 +7,6 @@ import {
     Info,
     Trash,
     Search,
-    FileText,
-    Eye,
     User,
     Mail,
     Phone,
@@ -447,13 +445,10 @@ const Company = () => {
             {
                 Header: "Follow Up Date",
                 accessor: "follow_up_date",
-                Cell: ({ row, value }) => (
-                    <Link
-                        href={`/crm/details/${row.original.slug}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200 hover:underline"
-                    >
+                Cell: ({ value }) => (
+                    <span className="text-gray-800 font-medium">
                         {value || "N/A"}
-                    </Link>
+                    </span>
                 ),
             },
 

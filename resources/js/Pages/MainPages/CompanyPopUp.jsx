@@ -502,9 +502,9 @@ const CompanyPopUp = ({
                         )}
                     </div>
                     <div>
-                        <div className="text-xs text-gray-500">
+                        {/* <div className="text-xs text-gray-500">
                             Step {number}
-                        </div>
+                        </div> */}
                         <div className="text-sm font-medium text-gray-900">
                             {title}
                         </div>

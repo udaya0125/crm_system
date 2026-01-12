@@ -1579,7 +1579,6 @@ import {
     ChevronLeft,
     ChevronRight,
     Edit,
-    Plus,
     X,
     Eye,
     CheckCircle,
@@ -1988,9 +1987,9 @@ const Task = () => {
 
     return (
         <AdminWrapper>
-            <div className="min-h-screen bg-gray-50 px-4">
+            <div className="min-h-screen bg-gray-50 ">
                 {/* Header */}
-                <div className="mb-8 flex justify-between items-center">
+                <div className=" flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <h1 className="text-3xl font-bold text-gray-800 ">
                         Task Management
                     </h1>
@@ -2002,7 +2001,6 @@ const Task = () => {
                                 onClick={openAddModal}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
                             >
-                                <Plus size={20} />
                                 Add New Task
                             </button>
                         </div>
@@ -2350,7 +2348,7 @@ const Task = () => {
                                         </div>
                                     )}
 
-                                    {/* Assigned By (Creator) */}
+                                    {/* Assigned By Admin */}
                                     <div className="border border-gray-200 rounded-lg p-4">
                                         <div className="flex items-center gap-3 mb-3">
                                             <User
@@ -2358,7 +2356,7 @@ const Task = () => {
                                                 className="text-green-600"
                                             />
                                             <h4 className="text-md font-semibold text-gray-700">
-                                                Assigned By (Creator)
+                                                Assigned By
                                             </h4>
                                         </div>
                                         <div className="flex items-center gap-3">

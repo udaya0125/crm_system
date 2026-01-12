@@ -458,10 +458,6 @@
 
 // export default TaskAssigned;
 
-
-
-
-
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { usePage } from "@inertiajs/react";
@@ -578,7 +574,8 @@ const TaskAssigned = () => {
                 Header: "Title",
                 accessor: "title",
                 Cell: ({ row }) => {
-                    const isCurrentUserTask = row.original.assigned_to === user.id;
+                    const isCurrentUserTask =
+                        row.original.assigned_to === user.id;
                     return (
                         <div className="flex items-center">
                             <div className="text-sm font-medium text-gray-900">
@@ -617,9 +614,7 @@ const TaskAssigned = () => {
                             </div>
                         </>
                     ) : (
-                        <span className="text-gray-400">
-                            Unknown User
-                        </span>
+                        <span className="text-gray-400">Unknown User</span>
                     );
                 },
             },
@@ -635,13 +630,11 @@ const TaskAssigned = () => {
                         <>
                             {value.name}
                             <div className="text-xs text-gray-500">
-                               {value.email}
+                                {value.email}
                             </div>
                         </>
                     ) : (
-                        <span className="text-gray-400">
-                            Unknown
-                        </span>
+                        <span className="text-gray-400">Unknown</span>
                     );
                 },
             });
@@ -656,13 +649,13 @@ const TaskAssigned = () => {
                                 onClick={() => handleEdit(row.original)}
                                 className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                             >
-                               <Edit size={16} />
+                                <Edit size={16} />
                             </button>
                             <button
                                 onClick={() => handleDelete(row.original.id)}
                                 className="text-red-600 hover:text-red-900 transition duration-200"
                             >
-                               <Trash2 size={16} />
+                                <Trash2 size={16} />
                             </button>
                         </div>
                     );
@@ -702,25 +695,35 @@ const TaskAssigned = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto px-4">
+            <div className="container mx-auto">
                 {/* Header with role badge */}
-                <div className="mb-8">
-                    <div className="flex justify-between items-center mb-4">
-                        <h1 className="text-3xl font-bold text-gray-800">
-                            Assigned Tasks
-                        </h1>
-                        {/* Admin actions */}
-                        {user.role === "admin" && (
-                            <div className="flex justify-end mb-4">
-                                <button
-                                    onClick={handleAddNew}
-                                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200"
-                                >
-                                    + Assign New Task
-                                </button>
-                            </div>
-                        )}
-                    </div>
+                {/* <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h1 className="text-3xl font-bold text-gray-800">
+                        Assigned Tasks
+                    </h1>
+                   
+                    {user.role === "admin" && (
+                        <div className="flex justify-end mb-4">
+                            <button
+                                onClick={handleAddNew}
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+                            >
+                                + Assign New Task
+                            </button>
+                        </div>
+                    )}
+                </div> */}
+
+                <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                        ToDo List
+                    </h1>
+                    <button
+                        onClick={handleAddNew}
+                        className="bg-blue-600 hover:bg-blue-700 w-[170px] text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
+                    >
+                       Assign New Task
+                    </button>
                 </div>
 
                 {/* Add Task Form - Only show for admin */}
@@ -788,32 +791,44 @@ const TaskAssigned = () => {
                                     >
                                         <thead className="bg-gray-50">
                                             {headerGroups.map((headerGroup) => (
-                                                <tr {...headerGroup.getHeaderGroupProps()}>
-                                                    {headerGroup.headers.map((column) => (
-                                                        <th
-                                                            {...column.getHeaderProps(column.getSortByToggleProps())}
-                                                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                                        >
-                                                            <div className="flex items-center">
-                                                                {column.render("Header")}
-                                                                {column.isSorted ? (
-                                                                    column.isSortedDesc ? (
-                                                                        <ChevronDown
-                                                                            size={16}
-                                                                            className="ml-1"
-                                                                        />
-                                                                    ) : (
-                                                                        <ChevronUp
-                                                                            size={16}
-                                                                            className="ml-1"
-                                                                        />
-                                                                    )
-                                                                ) : (
-                                                                    ""
+                                                <tr
+                                                    {...headerGroup.getHeaderGroupProps()}
+                                                >
+                                                    {headerGroup.headers.map(
+                                                        (column) => (
+                                                            <th
+                                                                {...column.getHeaderProps(
+                                                                    column.getSortByToggleProps()
                                                                 )}
-                                                            </div>
-                                                        </th>
-                                                    ))}
+                                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                                            >
+                                                                <div className="flex items-center">
+                                                                    {column.render(
+                                                                        "Header"
+                                                                    )}
+                                                                    {column.isSorted ? (
+                                                                        column.isSortedDesc ? (
+                                                                            <ChevronDown
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                                className="ml-1"
+                                                                            />
+                                                                        ) : (
+                                                                            <ChevronUp
+                                                                                size={
+                                                                                    16
+                                                                                }
+                                                                                className="ml-1"
+                                                                            />
+                                                                        )
+                                                                    ) : (
+                                                                        ""
+                                                                    )}
+                                                                </div>
+                                                            </th>
+                                                        )
+                                                    )}
                                                 </tr>
                                             ))}
                                         </thead>
@@ -823,7 +838,9 @@ const TaskAssigned = () => {
                                         >
                                             {page.map((row) => {
                                                 prepareRow(row);
-                                                const isCurrentUserTask = row.original.assigned_to === user.id;
+                                                const isCurrentUserTask =
+                                                    row.original.assigned_to ===
+                                                    user.id;
                                                 return (
                                                     <tr
                                                         {...row.getRowProps()}
@@ -833,14 +850,18 @@ const TaskAssigned = () => {
                                                                 : ""
                                                         } hover:bg-gray-50 transition-colors`}
                                                     >
-                                                        {row.cells.map((cell) => (
-                                                            <td
-                                                                {...cell.getCellProps()}
-                                                                className="px-6 py-4 whitespace-nowrap"
-                                                            >
-                                                                {cell.render("Cell")}
-                                                            </td>
-                                                        ))}
+                                                        {row.cells.map(
+                                                            (cell) => (
+                                                                <td
+                                                                    {...cell.getCellProps()}
+                                                                    className="px-6 py-4 whitespace-nowrap"
+                                                                >
+                                                                    {cell.render(
+                                                                        "Cell"
+                                                                    )}
+                                                                </td>
+                                                            )
+                                                        )}
                                                     </tr>
                                                 );
                                             })}
@@ -857,7 +878,9 @@ const TaskAssigned = () => {
                                         <select
                                             value={pageSize}
                                             onChange={(e) =>
-                                                setPageSize(Number(e.target.value))
+                                                setPageSize(
+                                                    Number(e.target.value)
+                                                )
                                             }
                                             className="border border-gray-300 rounded-md px-2 py-1 text-sm"
                                         >
@@ -895,8 +918,11 @@ const TaskAssigned = () => {
                                             Previous
                                         </button>
                                         <span className="text-sm text-gray-700">
-                                            Page <strong>{pageIndex + 1}</strong> of{" "}
-                                            <strong>{pageOptions.length}</strong>
+                                            Page{" "}
+                                            <strong>{pageIndex + 1}</strong> of{" "}
+                                            <strong>
+                                                {pageOptions.length}
+                                            </strong>
                                         </span>
                                         <button
                                             onClick={() => nextPage()}
@@ -910,7 +936,9 @@ const TaskAssigned = () => {
                                             Next
                                         </button>
                                         <button
-                                            onClick={() => gotoPage(pageCount - 1)}
+                                            onClick={() =>
+                                                gotoPage(pageCount - 1)
+                                            }
                                             disabled={!canNextPage}
                                             className={`p-1 rounded ${
                                                 !canNextPage

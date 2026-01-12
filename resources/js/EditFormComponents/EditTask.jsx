@@ -256,9 +256,9 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                         />
                     )}
                 />
-                <p className="text-xs text-gray-500">
+                {/* <p className="text-xs text-gray-500">
                     {isTaskCompleted ? 'Cannot modify due date for completed tasks' : 'Select both date and time for the task deadline'}
-                </p>
+                </p> */}
             </div>
 
             

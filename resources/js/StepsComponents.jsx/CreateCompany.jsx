@@ -593,7 +593,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                 toast.error("Please fix the form errors", { id: toastId });
             } else {
                 toast.error("Something went wrong", { id: toastId });
-            }
+            } 
         }
     };
 

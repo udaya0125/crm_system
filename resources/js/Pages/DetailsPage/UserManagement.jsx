@@ -6,10 +6,8 @@ import {
     ChevronDown,
     ChevronLeft,
     ChevronRight,
-    Pen,
     SquarePen,
     Trash,
-    Plus,
 } from "lucide-react";
 import axios from "axios";
 import AddUserForm from "@/AddFormComponents/AddUserForm";
@@ -182,14 +180,13 @@ const UserManagement = () => {
     return (
         <div>
             <AdminWrapper>
-                <div className="p-4">
+                <div className="">
                     <div className="flex justify-between items-center mb-4">
                         <h1 className="text-2xl font-bold">User Management</h1>
                         <button
                             onClick={handleAddNew}
                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition duration-200 flex items-center gap-2"
                         >
-                            <Plus size={16} />
                             <span>Add New User</span>
                         </button>
                     </div>

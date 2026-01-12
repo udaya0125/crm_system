@@ -138,9 +138,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                         </div>
                     )}
                 />
-                <p className="text-xs text-gray-500">
+                {/* <p className="text-xs text-gray-500">
                     Add description using rich text editor.
-                </p>
+                </p> */}
             </div>
 
             {/* Due Date and Time Field */}
@@ -160,9 +160,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                         />
                     )}
                 />
-                <p className="text-xs text-gray-500">
+                {/* <p className="text-xs text-gray-500">
                     Select both date and time for the task deadline
-                </p>
+                </p> */}
             </div>
 
             {/* Task List ID Field */}
@@ -184,7 +184,8 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                             <option value="">Select a Task List</option>
                             {taskLists && taskLists.map((list) => (
                                 <option key={list.id} value={list.id}>
-                                    {list.title} {list.assigned_user ? `(Assigned to: ${list.assigned_user.name})` : ''}
+                                    {list.title} 
+                                    {/* {list.assigned_user ? `(Assigned to: ${list.assigned_user.name})` : ''} */}
                                 </option>
                             ))}
                         </select>

@@ -364,7 +364,7 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="flex-1 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition duration-200"
+                        className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded  transition duration-200"
                     >
                         Cancel
                     </button>

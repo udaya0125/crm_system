@@ -454,8 +454,6 @@
 
 // export default AddTodo;
 
-
-
 import React, { useEffect } from "react";
 import { X } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -570,7 +568,6 @@ const AddTodo = ({ onClose, handleAdd }) => {
     };
 
     return (
-        
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
                 <div className="p-6">
@@ -587,7 +584,10 @@ const AddTodo = ({ onClose, handleAdd }) => {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <form
+                        onSubmit={handleSubmit(onSubmit)}
+                        className="space-y-4"
+                    >
                         {error && (
                             <div className="p-3 bg-red-100 text-red-700 rounded">
                                 {error}
@@ -656,7 +656,7 @@ const AddTodo = ({ onClose, handleAdd }) => {
 
                         {/* Due Date */}
                         <div>
-                            <label className="block text-gray-700 text-sm font-bold mb-2 mt-8">
+                            <label className="block text-gray-700 text-sm font-bold mb-2 mt-16 lg:mt-10">
                                 Due Date
                             </label>
                             <input
@@ -669,18 +669,18 @@ const AddTodo = ({ onClose, handleAdd }) => {
                         {/* Submit Button */}
                         <div className="flex gap-3 pt-4">
                             <button
-                                type="submit"
-                                disabled={isSubmitting}
-                                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isSubmitting ? "Saving..." : "Create Todo"}
-                            </button>
-                            <button
                                 type="button"
                                 onClick={handleCancel}
                                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded"
                             >
                                 Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isSubmitting ? "Saving..." : "Create Todo"}
                             </button>
                         </div>
                     </form>

@@ -8,15 +8,12 @@ import {
     ChevronRight,
     Edit,
     Trash2,
-    Plus,
     X,
     Eye,
     FileText,
     Calendar,
     CheckCircle,
     Square,
-    User,
-    Users,
 } from "lucide-react";
 import AddTodo from "@/AddFormComponents/AddTodo";
 import EditTodo from "@/EditFormComponents/EditTodo";
@@ -418,12 +415,10 @@ const ToDOPage = () => {
                     <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
                         ToDo List
                     </h1>
-
                     <button
                         onClick={openAddModal}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
+                        className="bg-blue-600 hover:bg-blue-700 w-[150px] text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
                     >
-                        <Plus size={20} />
                         Add New ToDo
                     </button>
                 </div>

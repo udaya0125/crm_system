@@ -228,7 +228,7 @@ const EditTodo = ({
                         <div>
                             <div className="flex justify-between items-center mb-4">
                                 <label className="block text-gray-700 text-sm font-bold">
-                                    Descriptions
+                                    Description
                                 </label>
                                 {/* <button
                                     type="button"
@@ -242,9 +242,9 @@ const EditTodo = ({
 
                             {/* Show editable fields for new descriptions */}
                             <div>
-                                <p className="text-sm text-gray-600 mb-3 font-medium">
+                                {/* <p className="text-sm text-gray-600 mb-3 font-medium">
                                     New Descriptions:
-                                </p>
+                                </p> */}
                                 {fields.map((field, index) => {
                                     // Skip original descriptions (they're displayed above as read-only)
                                     if (field.isOriginal) return null;
@@ -316,7 +316,7 @@ const EditTodo = ({
 
                         {/* Due Date */}
                         <div>
-                            <label className="block text-gray-700 text-sm font-bold py-4 mb-2">
+                            <label className="block text-gray-700 text-sm font-bold mt-20 lg:mt-14 mb-2">
                                 Due Date
                             </label>
                             <input
@@ -364,7 +364,15 @@ const EditTodo = ({
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex gap-3 pt-6 border-t">
+                        <div className="flex gap-3 pt-6">
+                            <button
+                                type="button"
+                                onClick={handleCancel}
+                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting}
+                            >
+                                Cancel
+                            </button>
                             <button
                                 type="submit"
                                 disabled={isSubmitting}
@@ -397,14 +405,6 @@ const EditTodo = ({
                                 ) : (
                                     "Update Todo"
                                 )}
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleCancel}
-                                className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                disabled={isSubmitting}
-                            >
-                                Cancel
                             </button>
                         </div>
                     </form>

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('is_completed')->default(false)->nullable();
             $table->date('due_date')->nullable();
             $table->time('due_time')->nullable();
-            $table->foreignId('task_list_id')->constrained()->onDelete('cascade');
+            $table->foreignId('task_list_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

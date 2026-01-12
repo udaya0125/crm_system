@@ -105,8 +105,8 @@ const CRM = () => {
     return (
         <div>
             <AdminWrapper>
-                <div className="py-8">
-                    <div className="max-w-7xl mx-auto w-full px-4">
+                <div className="py-6">
+                    <div className="">
                         <div className="overflow-hidden">
                             <CRMProgress
                                 currentStep={step}

@@ -635,7 +635,7 @@ const EditCreateCompany = ({
     // Initialize form from props - FIXED VERSION
     useEffect(() => {
         if (data && Object.keys(data).length > 0) {
-            console.log("Initializing form with data:", data); // Debug log
+            console.log("Initializing form with data:", data); 
             
             // Direct mapping of data fields to form fields
             // If data comes from backend with snake_case, map to camelCase
