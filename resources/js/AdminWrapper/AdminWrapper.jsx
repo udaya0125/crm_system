@@ -12,7 +12,7 @@ const AdminWrapper = ({ children }) => {
     const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
     const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
-    // Close mobile sidebar on resize
+    // Close mobile sidebar on window resize
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 1024) {

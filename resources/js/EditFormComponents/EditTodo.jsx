@@ -230,21 +230,10 @@ const EditTodo = ({
                                 <label className="block text-gray-700 text-sm font-bold">
                                     Description
                                 </label>
-                                {/* <button
-                                    type="button"
-                                    onClick={handleAddDescription}
-                                    className="text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-1 px-3 rounded transition-colors"
-                                    disabled={isSubmitting}
-                                >
-                                    + Add Description
-                                </button> */}
                             </div>
 
                             {/* Show editable fields for new descriptions */}
                             <div>
-                                {/* <p className="text-sm text-gray-600 mb-3 font-medium">
-                                    New Descriptions:
-                                </p> */}
                                 {fields.map((field, index) => {
                                     // Skip original descriptions (they're displayed above as read-only)
                                     if (field.isOriginal) return null;

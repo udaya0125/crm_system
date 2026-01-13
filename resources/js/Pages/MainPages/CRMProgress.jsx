@@ -65,7 +65,7 @@
 //   );
 // };
 
-// export default CRMProgress;
+// export default CRMProgress
 
 
 

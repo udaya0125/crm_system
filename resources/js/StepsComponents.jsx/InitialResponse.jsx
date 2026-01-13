@@ -322,6 +322,8 @@ const InitialResponse = ({
                                 )}
                             </div>
 
+                            {/* Notes */}
+
                             <div>
                                 <label className="block text-sm text-green-700 mb-1">
                                     Notes
@@ -435,7 +437,7 @@ const InitialResponse = ({
                         </div>
                     )}
 
-                    {/* Navigation Buttons */}
+                    {/* Navigation Buttons  */}
                     <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                         <button
                             type="button"

@@ -249,7 +249,7 @@ const AdminSideBar = ({
                     {isAdmin && (
                         <>
                             {/* //-----------------------------------------
-                                // User Management Link for Admins
+                                // User Management Link for Admin
                                 //----------------------------------------- */}
                             <Link
                                 href="/user-management"

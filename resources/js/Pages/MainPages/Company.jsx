@@ -734,7 +734,7 @@ const Company = () => {
                             </table>
                         </div>
 
-                        {pageCount > 1 && (
+                        {pageCount > 0 && (
                             <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
                                 <div className="flex items-center flex-wrap gap-2">
                                     <span className="text-sm text-gray-700">

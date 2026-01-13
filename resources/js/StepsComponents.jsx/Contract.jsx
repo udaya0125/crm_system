@@ -480,6 +480,8 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
                         />
                     </div>
 
+                    {/* Button Group */}
+
                     <div className="flex flex-col sm:flex-row justify-between gap-3 pt-4 sm:pt-6 ">
                         <button
                             type="button"

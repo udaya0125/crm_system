@@ -82,6 +82,7 @@ const CompanyDetails = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [followUpLoading, setFollowUpLoading] = useState(false);
     const abortControllerRef = useRef(null);
+     const imgurl = import.meta.env.VITE_IMAGE_PATH;
 
     const {
         register,
@@ -246,7 +247,7 @@ const CompanyDetails = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "#",
+                Header: "S/N",
                 accessor: (row, i) => i + 1,
                 id: "rowIndex",
                 width: 60,
@@ -402,7 +403,7 @@ const CompanyDetails = () => {
                                 </div>
                                 {value.image && (
                                     <a 
-                                        href={`/storage/${value.image}`}
+                                        href={`${imgurl}/${value.image}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="text-xs text-blue-600 hover:underline flex items-center gap-1"

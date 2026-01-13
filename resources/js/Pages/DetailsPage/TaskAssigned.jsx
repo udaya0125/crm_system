@@ -726,7 +726,7 @@ const TaskAssigned = () => {
                     </button>
                 </div>
 
-                {/* Add Task Form - Only show for admin */}
+                {/* Add Task Form - Only Admin can Add Task */}
                 {user.role === "admin" && (
                     <AddTaskAssigned
                         setReloadTrigger={setReloadTrigger}
@@ -736,7 +736,7 @@ const TaskAssigned = () => {
                     />
                 )}
 
-                {/* Edit Task Form - Only show for admin */}
+                {/* Edit Task Form - Only Admin can Edit Task */}
                 {user.role === "admin" && (
                     <EditTaskAssigned
                         editingTaskList={editingTaskList}

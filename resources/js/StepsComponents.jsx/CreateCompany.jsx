@@ -607,7 +607,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
             <div className="bg-white p-6 rounded-lg shadow border">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {/* Company Name - Required */}
+                        {/* Company Name - Required  */}
                         <div className="sm:col-span-2">
                             <label className="block text-sm font-medium mb-1">
                                 Company Name *
@@ -749,7 +749,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
                                     )}
                                 </div>
 
-                                {/* Client Member - Required */}
+                                {/* Client Member  - Required */}
                                 <div>
                                     <label className="block text-sm font-medium mb-1">
                                         Client Member *

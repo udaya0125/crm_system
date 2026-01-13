@@ -256,9 +256,6 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                         />
                     )}
                 />
-                {/* <p className="text-xs text-gray-500">
-                    {isTaskCompleted ? 'Cannot modify due date for completed tasks' : 'Select both date and time for the task deadline'}
-                </p> */}
             </div>
 
             
@@ -279,11 +276,6 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                         </select>
                     )}
                 />
-                {/* {isTaskCompleted && (
-                    <p className="text-sm text-blue-600">
-                        Note: Changing status to "Incomplete" will re-enable editing.
-                    </p>
-                )} */}
             </div>
 
             {/* Action Buttons */}

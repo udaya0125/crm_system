@@ -257,7 +257,7 @@ const EditInitialResponse = ({ data, updateData, nextStep, prevStep, companyId, 
                         </select>
                     </div>
 
-                    {/* Conditional Sections */}
+                    {/* Conditional Section*/}
                     {(isPositive || isNegative) && (
                         <div className={getSectionClassName()}>
                             <h3 className={`text-sm font-semibold mb-3 ${isPositive ? 'text-green-800' : 'text-red-800'}`}>

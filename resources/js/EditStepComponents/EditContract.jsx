@@ -388,6 +388,8 @@ const EditContract = ({
                                             strokeLinejoin="round"
                                         />
                                     </svg>
+
+                                    {/* Upload the contract file by clicking the button below. */}
                                     <div className="mt-4">
                                         <label
                                             htmlFor="contract-upload"

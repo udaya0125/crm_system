@@ -116,6 +116,8 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+
+                {/* Name */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         Name
@@ -160,6 +162,8 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
                         Email cannot be changed
                     </p>
                 </div>
+
+                {/* Role */}
 
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">

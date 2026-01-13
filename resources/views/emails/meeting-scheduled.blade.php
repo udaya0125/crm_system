@@ -61,6 +61,9 @@
     </style>
 </head>
 <body>
+
+    {{-- Heading section --}}
+
     <div class="header">
         <h1>🗓️ New Meeting Scheduled</h1>
     </div>
@@ -133,6 +136,8 @@
         </div>
         @endif
     </div>
+
+    {{-- Footer section --}}
     
     <div class="footer">
         <p>This is an automated notification from your CRM system.</p>

@@ -464,6 +464,8 @@ const Meeting = ({ data, updateData, nextStep, prevStep, companyId }) => {
                             )}
                         </div>
 
+                        {/* Meeting Type Specific Fields */}
+
                         {meetingType === "in-person" && (
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">

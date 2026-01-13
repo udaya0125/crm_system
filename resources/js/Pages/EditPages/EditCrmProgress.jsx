@@ -21,6 +21,7 @@ const EditCrmProgress = ({ currentStep = 1 }) => {
                     const isCurrent = currentStep === step.number;
 
                     return (
+                        // Step counting button
                         <button
                             key={step.number}
                             onClick={() => handleStepClick(step.number)}

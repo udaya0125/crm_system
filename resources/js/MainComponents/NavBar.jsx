@@ -17,6 +17,7 @@ const NavBar = () => {
                     </div>
 
                     {/* Desktop Navigation */}
+
                     <div className="hidden md:flex items-center space-x-8">
                         <a
                             href="#home"
@@ -101,6 +102,8 @@ const NavBar = () => {
                             Contact
                         </a>
                     </div>
+                    {/* Add any additional mobile navigation items here */}
+
                 </div>
             )}
         </nav>

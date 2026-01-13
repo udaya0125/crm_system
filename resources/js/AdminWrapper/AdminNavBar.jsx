@@ -101,9 +101,6 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                         <span className="text-sm font-medium text-gray-900 block">
                                             {user?.name || "Guest"}
                                         </span>
-                                        {/* <span className="text-xs text-gray-500 block">
-                                            {user?.role || "Admin"}
-                                        </span> */}
                                     </div>
                                 </div>
                                 <ChevronDown
@@ -125,30 +122,6 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                             {user?.email || ""}
                                         </p>
                                     </div>
-
-                                    {/* Menu items */}
-                                    {/* <div className="py-1">
-                                        <Link
-                                            href={""}
-                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                                            onClick={() =>
-                                                setIsUserMenuOpen(false)
-                                            }
-                                        >
-                                            <UserCircle className="w-4 h-4 mr-3 text-gray-400" />
-                                            Profile
-                                        </Link>
-                                        <Link
-                                            href={""}
-                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-150"
-                                            onClick={() =>
-                                                setIsUserMenuOpen(false)
-                                            }
-                                        >
-                                            <Settings className="w-4 h-4 mr-3 text-gray-400" />
-                                            Settings
-                                        </Link>
-                                    </div> */}
 
                                     {/* Logout section */}
                                     <div className="border-t border-gray-100 pt-1">

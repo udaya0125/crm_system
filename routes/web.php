@@ -180,7 +180,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Only user can access task list viewing
     //-----------------------------------------
 
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth', 'role:user,admin'])->group(function () {
 
     // -----------------------------------------
     // TASK MANAGEMENT CRUD
@@ -197,6 +197,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/tasklists', [TaskListController::class, 'index'])->name('tasklists.index');
 
 });
+
 
     // // Index - Get all companies with relationships
     // Route::get('/ourcompany', [CompanyCRMController::class, 'index'])->name('ourcompany.index');

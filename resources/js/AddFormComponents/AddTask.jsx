@@ -138,9 +138,6 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                         </div>
                     )}
                 />
-                {/* <p className="text-xs text-gray-500">
-                    Add description using rich text editor.
-                </p> */}
             </div>
 
             {/* Due Date and Time Field */}
@@ -160,9 +157,6 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                         />
                     )}
                 />
-                {/* <p className="text-xs text-gray-500">
-                    Select both date and time for the task deadline
-                </p> */}
             </div>
 
             {/* Task List ID Field */}

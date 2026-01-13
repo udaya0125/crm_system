@@ -1106,6 +1106,9 @@ const FollowUpResponse = ({
                         </div>
                     )}
 
+                    {/* Button Group */}
+
+
                     <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
                         <button
                             type="button"

@@ -113,11 +113,6 @@ const CRM = () => {
                                 goToStep={goToStep}
                             />
                             <div className="">
-                                {/* Debug info - remove in production */}
-                                {/* <div className="mb-4 p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700">
-                                    <strong>Current Step:</strong> {step} | 
-                                    <strong> Company ID:</strong> {companyId ? companyId : "Not set yet"}
-                                </div> */}
                                 {renderStep()}
                             </div>
                         </div>

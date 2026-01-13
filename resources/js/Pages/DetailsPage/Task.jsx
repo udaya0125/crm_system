@@ -1989,14 +1989,14 @@ const Task = () => {
         <AdminWrapper>
             <div className="min-h-screen bg-gray-50 ">
                 {/* Header */}
-                <div className=" flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div className=" flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
                     <h1 className="text-3xl font-bold text-gray-800 ">
                         Task Management
                     </h1>
                     {/* Add Task Button */}
                     {/* Add Task Button - Only show if user role is 'user' */}
                     {user.role === "user" && (
-                        <div className="mb-6">
+                        <div className="mb-4">
                             <button
                                 onClick={openAddModal}
                                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
@@ -2196,17 +2196,19 @@ const Task = () => {
                                         </h3>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        {!selectedTask.is_completed && (
-                                            <button
-                                                onClick={() =>
-                                                    handleEdit(selectedTask)
-                                                }
-                                                className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
-                                                title="Edit task"
-                                            >
-                                                <Edit size={16} />
-                                            </button>
-                                        )}
+                                        {!selectedTask.is_completed &&
+                                            user.role === "user" && (
+                                                <button
+                                                    onClick={() =>
+                                                        handleEdit(selectedTask)
+                                                    }
+                                                    className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
+                                                    title="Edit task"
+                                                >
+                                                    <Edit size={16} />
+                                                </button>
+                                            )}
+
                                         <button
                                             onClick={() =>
                                                 setSelectedTask(null)

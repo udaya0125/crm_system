@@ -285,32 +285,6 @@ const ToDOPage = () => {
                     </div>
                 ),
             },
-            // {
-            //     Header: "Description",
-            //     accessor: "descriptions",
-            //     Cell: ({ value }) => {
-            //         const latestDescription = value?.length > 0 ? value[0]?.description : null;
-            //         const truncatedText = latestDescription 
-            //             ? (latestDescription.length > 100 
-            //                 ? latestDescription.substring(0, 100) + '...' 
-            //                 : latestDescription)
-            //             : "No description";
-                    
-            //         return (
-            //             <div className="text-sm text-gray-900">
-            //                 {latestDescription ? (
-            //                     <div className="max-w-xs">
-            //                         {truncatedText}
-            //                     </div>
-            //                 ) : (
-            //                     <span className="text-gray-400">
-            //                         No description
-            //                     </span>
-            //                 )}
-            //             </div>
-            //         );
-            //     },
-            // },
             {
                 Header: "Due Date",
                 accessor: "due_date",
