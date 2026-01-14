@@ -10,7 +10,7 @@ class TaskList extends Model
         'title',
         'description',
         'user_id',
-        'assigned_to'
+        'assigned_to',
     ];
 
     // Creator of the task list (usually admin)
@@ -37,19 +37,16 @@ class TaskList extends Model
         return $this->creator();
     }
 
-
-
-
     // public function user()
     // {
     //     return $this->belongsTo(User::class, 'user_id'); // Creator
     // }
-    
+
     // public function assignedUser()
     // {
     //     return $this->belongsTo(User::class, 'assigned_user_id'); // Assigned user
     // }
-    
+
     // public function tasks()
     // {
     //     return $this->hasMany(Task::class);

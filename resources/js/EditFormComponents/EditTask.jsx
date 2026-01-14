@@ -21,27 +21,29 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
 
     const [existingDescriptions, setExistingDescriptions] = useState([]);
     const [newDescriptionFields, setNewDescriptionFields] = useState([""]);
-    
+
     // Check if task is completed
     const isTaskCompleted = editingTask?.is_completed;
 
     // React Quill modules configuration
     const quillModules = {
-        toolbar: !isTaskCompleted ? [
-            ["bold", "italic", "underline", "strike"],
-            ["blockquote", "code-block"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            [{ script: "sub" }, { script: "super" }],
-            [{ indent: "-1" }, { indent: "+1" }],
-            [{ direction: "rtl" }],
-            [{ size: ["small", false, "large", "huge"] }],
-            [{ header: [1, 2, 3, 4, 5, 6, false] }],
-            [{ color: [] }, { background: [] }],
-            [{ font: [] }],
-            [{ align: [] }],
-            ["clean"],
-            ["link", "image"],
-        ] : false, // Disable toolbar if task is completed
+        toolbar: !isTaskCompleted
+            ? [
+                  ["bold", "italic", "underline", "strike"],
+                  ["blockquote", "code-block"],
+                  [{ list: "ordered" }, { list: "bullet" }],
+                  [{ script: "sub" }, { script: "super" }],
+                  [{ indent: "-1" }, { indent: "+1" }],
+                  [{ direction: "rtl" }],
+                  [{ size: ["small", false, "large", "huge"] }],
+                  [{ header: [1, 2, 3, 4, 5, 6, false] }],
+                  [{ color: [] }, { background: [] }],
+                  [{ font: [] }],
+                  [{ align: [] }],
+                  ["clean"],
+                  ["link", "image"],
+              ]
+            : false, // Disable toolbar if task is completed
     };
 
     const quillFormats = [
@@ -67,18 +69,18 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
     // Format date to d-m-y H:i format for Laravel
     const formatDateForBackend = (dateString) => {
         if (!dateString) return null;
-        
+
         try {
             const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, "0");
+            const month = String(date.getMonth() + 1).padStart(2, "0");
             const year = String(date.getFullYear()).slice(-2);
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            
+            const hours = String(date.getHours()).padStart(2, "0");
+            const minutes = String(date.getMinutes()).padStart(2, "0");
+
             return `${day}-${month}-${year} ${hours}:${minutes}`;
         } catch (error) {
-            console.error('Error formatting date:', error);
+            console.error("Error formatting date:", error);
             return null;
         }
     };
@@ -86,27 +88,27 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
     // Format date for datetime-local input from backend data
     const formatDateForInput = (dateString, timeString) => {
         if (!dateString) return "";
-        
+
         try {
             const date = new Date(dateString);
-            
+
             // If time is available, add it to the date
             if (timeString) {
-                const [hours, minutes] = timeString.split(':');
+                const [hours, minutes] = timeString.split(":");
                 date.setHours(parseInt(hours) || 0);
                 date.setMinutes(parseInt(minutes) || 0);
             }
-            
+
             // Format to YYYY-MM-DDTHH:mm for datetime-local input
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, "0");
             const day = String(date.getDate()).padStart(2, "0");
             const hours = String(date.getHours()).padStart(2, "0");
             const minutes = String(date.getMinutes()).padStart(2, "0");
-            
+
             return `${year}-${month}-${day}T${hours}:${minutes}`;
         } catch (error) {
-            console.error('Error formatting date for input:', error);
+            console.error("Error formatting date for input:", error);
             return "";
         }
     };
@@ -121,10 +123,15 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
             setNewDescriptionFields([""]);
 
             // Format the date for datetime-local input
-            const formattedDate = formatDateForInput(editingTask.due_date, editingTask.due_time);
+            const formattedDate = formatDateForInput(
+                editingTask.due_date,
+                editingTask.due_time
+            );
 
             reset({
-                is_completed: editingTask.is_completed ? "complete" : "incomplete",
+                is_completed: editingTask.is_completed
+                    ? "complete"
+                    : "incomplete",
                 due_date: formattedDate,
                 new_descriptions: [""],
             });
@@ -158,7 +165,8 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                 is_completed: data.is_completed === "complete",
                 due_date: formattedDueDate,
                 task_list_id: editingTask.task_list_id,
-                descriptions: allDescriptions.length > 0 ? allDescriptions : [""],
+                descriptions:
+                    allDescriptions.length > 0 ? allDescriptions : [""],
             };
 
             await onUpdateTask(taskData);
@@ -214,7 +222,13 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                             name={`new_descriptions.${index}`}
                             control={control}
                             render={({ field }) => (
-                                <div className={`border ${isTaskCompleted ? 'border-gray-200 bg-gray-50' : 'border-gray-300'} rounded-lg overflow-hidden`}>
+                                <div
+                                    className={`border ${
+                                        isTaskCompleted
+                                            ? "border-gray-200 bg-gray-50"
+                                            : "border-gray-300"
+                                    } rounded-lg overflow-hidden`}
+                                >
                                     <ReactQuill
                                         {...field}
                                         theme="snow"
@@ -222,7 +236,10 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                                         formats={quillFormats}
                                         className="h-40 mb-12"
                                         value={field.value}
-                                        onChange={(content) => !isTaskCompleted && field.onChange(content)}
+                                        onChange={(content) =>
+                                            !isTaskCompleted &&
+                                            field.onChange(content)
+                                        }
                                         readOnly={isTaskCompleted}
                                     />
                                 </div>
@@ -248,9 +265,9 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                             {...field}
                             type="datetime-local"
                             className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:border-blue-500 transition duration-200 ${
-                                isTaskCompleted 
-                                    ? 'border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed' 
-                                    : 'border-gray-300 focus:ring-blue-500'
+                                isTaskCompleted
+                                    ? "border-gray-200 bg-gray-50 text-gray-500 cursor-not-allowed"
+                                    : "border-gray-300 focus:ring-blue-500"
                             }`}
                             disabled={isTaskCompleted}
                         />
@@ -258,7 +275,6 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
                 />
             </div>
 
-            
             <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700">
                     Status

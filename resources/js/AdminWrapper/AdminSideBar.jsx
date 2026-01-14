@@ -1,15 +1,15 @@
 import React from "react";
 import { Link, usePage } from "@inertiajs/react";
-import { 
-    X, 
-    Menu, 
-    ListFilter, 
-    Building, 
+import {
+    X,
+    Menu,
+    ListFilter,
+    Building,
     User2,
     CheckSquare, // For Tasks
     Users, // For User Management
     ClipboardList, // For Task Assignments
-    ListTodo
+    ListTodo,
 } from "lucide-react";
 
 const AdminSideBar = ({
@@ -205,7 +205,6 @@ const AdminSideBar = ({
                             </div>
                         )}
                     </Link>
-
 
                     {/* //-----------------------------------------
                         // To Do Page Link

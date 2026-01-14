@@ -577,7 +577,6 @@ const AddTaskAssigned = ({
 
                 <form onSubmit={handleSubmit(onSubmit)}>
                     <div className="mb-4">
-
                         {/* Task Title */}
                         <label
                             className="block text-gray-700 text-sm font-bold mb-2"

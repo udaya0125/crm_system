@@ -1993,7 +1993,6 @@ const Task = () => {
                     <h1 className="text-3xl font-bold text-gray-800 ">
                         Task Management
                     </h1>
-                    {/* Add Task Button */}
                     {/* Add Task Button - Only show if user role is 'user' */}
                     {user.role === "user" && (
                         <div className="mb-4">

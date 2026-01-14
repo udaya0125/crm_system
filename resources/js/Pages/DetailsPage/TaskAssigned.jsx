@@ -722,7 +722,7 @@ const TaskAssigned = () => {
                         onClick={handleAddNew}
                         className="bg-blue-600 hover:bg-blue-700 w-[170px] text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
                     >
-                       Assign New Task
+                        Assign New Task
                     </button>
                 </div>
 

@@ -9,7 +9,7 @@ class Description extends Model
     protected $fillable = [
         'content',
         'user_id',
-        'task_id'
+        'task_id',
     ];
 
     public function task()

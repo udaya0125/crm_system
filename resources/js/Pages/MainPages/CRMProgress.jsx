@@ -67,8 +67,6 @@
 
 // export default CRMProgress
 
-
-
 import React from "react";
 
 const CRMProgress = ({ currentStep = 1 }) => {

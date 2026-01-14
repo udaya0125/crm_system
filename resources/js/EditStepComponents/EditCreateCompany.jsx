@@ -505,8 +505,8 @@
 //                                         className={getInputClassName("messenger")}
 //                                     >
 //                                         <option value="">Select messenger</option>
-//                                         <option value="whatsapp">WhatsApp</option>                                      
-//                                         <option value="viber">Viber</option>                                      
+//                                         <option value="whatsapp">WhatsApp</option>
+//                                         <option value="viber">Viber</option>
 //                                         <option value="other">Other</option>
 //                                     </select>
 //                                 </div>
@@ -592,31 +592,21 @@
 
 // export default EditCreateCompany;
 
-
-
-
-
-
 import React, { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form"; 
+import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import toast from "react-hot-toast";
 
-const EditCreateCompany = ({
-    data,
-    updateData,
-    nextStep,
-    companyId,
-}) => {
+const EditCreateCompany = ({ data, updateData, nextStep, companyId }) => {
     const {
         register,
         handleSubmit,
         control,
         setValue,
         setError,
-        watch, 
+        watch,
         formState: { errors, isSubmitting },
     } = useForm({
         mode: "onChange",
@@ -637,8 +627,8 @@ const EditCreateCompany = ({
     // Initialize form from props - FIXED VERSION
     useEffect(() => {
         if (data && Object.keys(data).length > 0) {
-            console.log("Initializing form with data:", data); 
-            
+            console.log("Initializing form with data:", data);
+
             // Direct mapping of data fields to form fields
             // If data comes from backend with snake_case, map to camelCase
             const formData = {
@@ -648,19 +638,19 @@ const EditCreateCompany = ({
                 phone: data.phone_no || data.phone || "",
                 email: data.email || "",
                 address: data.address || "",
-                responsiblePerson: data.responsible_person || data.responsiblePerson || "",
+                responsiblePerson:
+                    data.responsible_person || data.responsiblePerson || "",
                 ourTeam: data.our_team || data.ourTeam || "",
                 client_member: data.client_member || "",
                 comment: data.comment || "",
             };
-            
+
             // Set each form field value
             Object.keys(formData).forEach((key) => {
                 setValue(key, formData[key]);
             });
         }
     }, [data, setValue]);
-
 
     console.log("EditCreateCompany received data:", data);
 
@@ -732,28 +722,27 @@ const EditCreateCompany = ({
                     }
                 );
             } else {
-                result = await axios.post(
-                    route("ourcompany.store"),
-                    apiData,
-                    {
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-CSRF-TOKEN": getCsrfToken(),
-                        },
-                    }
-                );
+                result = await axios.post(route("ourcompany.store"), apiData, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": getCsrfToken(),
+                    },
+                });
                 finalCompanyId = result.data.company_id;
             }
 
             // Update parent with the complete data including ID
-            updateData({ 
-                ...formData, 
-                id: finalCompanyId 
-            }, finalCompanyId);
+            updateData(
+                {
+                    ...formData,
+                    id: finalCompanyId,
+                },
+                finalCompanyId
+            );
 
             toast.success(
-                companyId 
-                    ? "Company updated successfully" 
+                companyId
+                    ? "Company updated successfully"
                     : "Company created successfully",
                 { id: toastId }
             );
@@ -761,10 +750,10 @@ const EditCreateCompany = ({
             nextStep();
         } catch (error) {
             console.error("Error saving company:", error);
-            
+
             if (error.response?.data?.errors) {
                 const apiErrors = error.response.data.errors;
-                
+
                 // Map backend field names to frontend field names
                 const fieldMapping = {
                     company_name: "companyName",
@@ -788,8 +777,8 @@ const EditCreateCompany = ({
                 toast.error("Please fix the form errors", { id: toastId });
             } else {
                 toast.error(
-                    error.response?.data?.message || 
-                    "Failed to save company data. Please try again.",
+                    error.response?.data?.message ||
+                        "Failed to save company data. Please try again.",
                     { id: toastId }
                 );
             }
@@ -886,7 +875,8 @@ const EditCreateCompany = ({
                                     required: "Email is required",
                                     pattern: {
                                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                                        message: "Please enter a valid email address",
+                                        message:
+                                            "Please enter a valid email address",
                                     },
                                 })}
                                 className={inputClass("email")}
@@ -955,7 +945,8 @@ const EditCreateCompany = ({
                                     </label>
                                     <input
                                         {...register("client_member", {
-                                            required: "Client member is required",
+                                            required:
+                                                "Client member is required",
                                         })}
                                         className={inputClass("client_member")}
                                         placeholder="Enter client members"

@@ -18,7 +18,13 @@ import {
     MapPin,
     Users,
 } from "lucide-react";
-import React, { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import React, {
+    useState,
+    useMemo,
+    useEffect,
+    useCallback,
+    useRef,
+} from "react";
 import {
     useTable,
     useSortBy,
@@ -45,7 +51,7 @@ const GlobalFilter = ({ globalFilter, setGlobalFilter }) => {
             if (debounceTimeout.current) {
                 clearTimeout(debounceTimeout.current);
             }
-            
+
             debounceTimeout.current = setTimeout(() => {
                 setGlobalFilter(newValue || undefined);
             }, 300);
@@ -82,7 +88,7 @@ const CompanyDetails = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [followUpLoading, setFollowUpLoading] = useState(false);
     const abortControllerRef = useRef(null);
-     const imgurl = import.meta.env.VITE_IMAGE_PATH;
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
 
     const {
         register,
@@ -99,19 +105,22 @@ const CompanyDetails = () => {
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort();
             }
-            
+
             abortControllerRef.current = new AbortController();
-            
+
             setLoading(true);
             setError(null);
-            
+
             try {
                 const response = await axios.get(route("ourcompany.index"), {
-                    signal: abortControllerRef.current.signal
+                    signal: abortControllerRef.current.signal,
                 });
                 setAllCompany(response.data);
             } catch (error) {
-                if (error.name === 'CanceledError' || error.name === 'AbortError') {
+                if (
+                    error.name === "CanceledError" ||
+                    error.name === "AbortError"
+                ) {
                     return;
                 }
                 console.error("Fetching error", error);
@@ -132,37 +141,50 @@ const CompanyDetails = () => {
     }, [reloadTrigger]);
 
     const handleDelete = useCallback(async (id) => {
-        if (!window.confirm("Are you sure you want to delete this company and all its related records? This action cannot be undone.")) {
+        if (
+            !window.confirm(
+                "Are you sure you want to delete this company and all its related records? This action cannot be undone."
+            )
+        ) {
             return;
         }
-        
+
         const deleteToast = toast.loading("Deleting company...");
         try {
             setDeleteLoading(id);
-            const response = await axios.delete(route("ourcompany.delete", { id }));
-            toast.success(response.data.message || "Company deleted successfully", { 
-                id: deleteToast,
-                duration: 3000 
-            });
-            setReloadTrigger(prev => prev + 1);
+            const response = await axios.delete(
+                route("ourcompany.delete", { id })
+            );
+            toast.success(
+                response.data.message || "Company deleted successfully",
+                {
+                    id: deleteToast,
+                    duration: 3000,
+                }
+            );
+            setReloadTrigger((prev) => prev + 1);
         } catch (error) {
             console.error("Delete error:", error);
-            const errorMessage = error.response?.data?.message || "Failed to delete company";
-            toast.error(errorMessage, { 
+            const errorMessage =
+                error.response?.data?.message || "Failed to delete company";
+            toast.error(errorMessage, {
                 id: deleteToast,
-                duration: 4000 
+                duration: 4000,
             });
         } finally {
             setDeleteLoading(null);
         }
     }, []);
 
-    const handleViewDetails = useCallback((company) => {
-        setSelectedCompany(company);
-        setIsModalOpen(true);
-        reset();
-        clearErrors();
-    }, [reset, clearErrors]);
+    const handleViewDetails = useCallback(
+        (company) => {
+            setSelectedCompany(company);
+            setIsModalOpen(true);
+            reset();
+            clearErrors();
+        },
+        [reset, clearErrors]
+    );
 
     const closeModal = useCallback(() => {
         setIsModalOpen(false);
@@ -171,78 +193,85 @@ const CompanyDetails = () => {
         clearErrors();
     }, [reset, clearErrors]);
 
-    const onSubmitFollowUp = useCallback(async (formData) => {
-        if (!selectedCompany) return;
-        
-        const updateToast = toast.loading("Updating follow-up date...");
-        try {
-            setFollowUpLoading(true);
-            const apiData = { 
-                follow_up_date: formData.followUpDate,
-                _method: 'PUT'
-            };
-            
-            const response = await axios.post(
-                route("ourcompany.update", { id: selectedCompany.id }),
-                apiData,
-                { 
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "Accept": "application/json"
-                    } 
-                }
-            );
-            
-            setAllCompany(prevCompanies =>
-                prevCompanies.map(company =>
-                    company.id === selectedCompany.id
-                        ? { ...company, follow_up_date: formData.followUpDate }
-                        : company
-                )
-            );
-            
-            setSelectedCompany(prev => ({
-                ...prev,
-                follow_up_date: formData.followUpDate,
-            }));
-            
-            toast.success("Follow-up date updated successfully!", {
-                id: updateToast,
-                duration: 3000
-            });
-            
-            setTimeout(() => {
-                closeModal();
-            }, 1000);
-            
-        } catch (error) {
-            console.error("Error updating follow-up date:", error);
-            
-            if (error.response?.data?.errors) {
-                const apiErrors = error.response.data.errors;
-                Object.keys(apiErrors).forEach(key => {
-                    if (key === "follow_up_date") {
-                        setFormError("followUpDate", {
-                            type: "server",
-                            message: apiErrors[key][0],
-                        });
-                        toast.error(apiErrors[key][0], { 
-                            id: updateToast,
-                            duration: 4000 
-                        });
+    const onSubmitFollowUp = useCallback(
+        async (formData) => {
+            if (!selectedCompany) return;
+
+            const updateToast = toast.loading("Updating follow-up date...");
+            try {
+                setFollowUpLoading(true);
+                const apiData = {
+                    follow_up_date: formData.followUpDate,
+                    _method: "PUT",
+                };
+
+                const response = await axios.post(
+                    route("ourcompany.update", { id: selectedCompany.id }),
+                    apiData,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            Accept: "application/json",
+                        },
                     }
-                });
-            } else {
-                const errorMessage = error.response?.data?.message || "Failed to update follow-up date.";
-                toast.error(errorMessage, { 
+                );
+
+                setAllCompany((prevCompanies) =>
+                    prevCompanies.map((company) =>
+                        company.id === selectedCompany.id
+                            ? {
+                                  ...company,
+                                  follow_up_date: formData.followUpDate,
+                              }
+                            : company
+                    )
+                );
+
+                setSelectedCompany((prev) => ({
+                    ...prev,
+                    follow_up_date: formData.followUpDate,
+                }));
+
+                toast.success("Follow-up date updated successfully!", {
                     id: updateToast,
-                    duration: 4000 
+                    duration: 3000,
                 });
+
+                setTimeout(() => {
+                    closeModal();
+                }, 1000);
+            } catch (error) {
+                console.error("Error updating follow-up date:", error);
+
+                if (error.response?.data?.errors) {
+                    const apiErrors = error.response.data.errors;
+                    Object.keys(apiErrors).forEach((key) => {
+                        if (key === "follow_up_date") {
+                            setFormError("followUpDate", {
+                                type: "server",
+                                message: apiErrors[key][0],
+                            });
+                            toast.error(apiErrors[key][0], {
+                                id: updateToast,
+                                duration: 4000,
+                            });
+                        }
+                    });
+                } else {
+                    const errorMessage =
+                        error.response?.data?.message ||
+                        "Failed to update follow-up date.";
+                    toast.error(errorMessage, {
+                        id: updateToast,
+                        duration: 4000,
+                    });
+                }
+            } finally {
+                setFollowUpLoading(false);
             }
-        } finally {
-            setFollowUpLoading(false);
-        }
-    }, [selectedCompany, setFormError, closeModal]);
+        },
+        [selectedCompany, setFormError, closeModal]
+    );
 
     const columns = useMemo(
         () => [
@@ -274,26 +303,44 @@ const CompanyDetails = () => {
                         {value ? (
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 rounded-full ${
-                                        value.initial_response === 'positive' 
-                                            ? 'bg-green-500'
-                                            : value.initial_response === 'negative'
-                                            ? 'bg-red-500'
-                                            : 'bg-yellow-500'
-                                    }`}></span>
-                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                        value.initial_response === 'positive' 
-                                            ? 'bg-green-100 text-green-800'
-                                            : value.initial_response === 'negative'
-                                            ? 'bg-red-100 text-red-800'
-                                            : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                        {value.initial_response?.toUpperCase() || 'N/A'}
+                                    <span
+                                        className={`w-2 h-2 rounded-full ${
+                                            value.initial_response ===
+                                            "positive"
+                                                ? "bg-green-500"
+                                                : value.initial_response ===
+                                                  "negative"
+                                                ? "bg-red-500"
+                                                : "bg-yellow-500"
+                                        }`}
+                                    ></span>
+                                    <span
+                                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                                            value.initial_response ===
+                                            "positive"
+                                                ? "bg-green-100 text-green-800"
+                                                : value.initial_response ===
+                                                  "negative"
+                                                ? "bg-red-100 text-red-800"
+                                                : "bg-yellow-100 text-yellow-800"
+                                        }`}
+                                    >
+                                        {value.initial_response?.toUpperCase() ||
+                                            "N/A"}
                                     </span>
                                 </div>
                                 {value.initial_notes && (
-                                    <div className="text-xs text-gray-500 truncate" title={value.initial_notes.replace(/<[^>]*>/g, '')}>
-                                        {value.initial_notes.replace(/<[^>]*>/g, '').substring(0, 40)}...
+                                    <div
+                                        className="text-xs text-gray-500 truncate"
+                                        title={value.initial_notes.replace(
+                                            /<[^>]*>/g,
+                                            ""
+                                        )}
+                                    >
+                                        {value.initial_notes
+                                            .replace(/<[^>]*>/g, "")
+                                            .substring(0, 40)}
+                                        ...
                                     </div>
                                 )}
                             </div>
@@ -314,27 +361,55 @@ const CompanyDetails = () => {
                         {value ? (
                             <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                    <Calendar size={12} className="text-gray-500" />
-                                    <span className="text-xs font-medium">{value.meeting_date}</span>
-                                    <Clock size={12} className="text-gray-500" />
-                                    <span className="text-xs">{value.meeting_time}</span>
+                                    <Calendar
+                                        size={12}
+                                        className="text-gray-500"
+                                    />
+                                    <span className="text-xs font-medium">
+                                        {value.meeting_date}
+                                    </span>
+                                    <Clock
+                                        size={12}
+                                        className="text-gray-500"
+                                    />
+                                    <span className="text-xs">
+                                        {value.meeting_time}
+                                    </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ${
-                                        value.meeting_type === 'in-person'
-                                            ? 'bg-blue-100 text-blue-800'
-                                            : value.meeting_type === 'virtual'
-                                            ? 'bg-purple-100 text-purple-800'
-                                            : 'bg-gray-100 text-gray-800'
-                                    }`}>
-                                        {value.meeting_type === 'in-person' && <MapPin size={10} />}
-                                        {value.meeting_type === 'virtual' && <Phone size={10} />}
-                                        {value.meeting_type || 'N/A'}
+                                    <span
+                                        className={`inline-flex items-center gap-1 px-2 py-1 text-xs rounded-full ${
+                                            value.meeting_type === "in-person"
+                                                ? "bg-blue-100 text-blue-800"
+                                                : value.meeting_type ===
+                                                  "virtual"
+                                                ? "bg-purple-100 text-purple-800"
+                                                : "bg-gray-100 text-gray-800"
+                                        }`}
+                                    >
+                                        {value.meeting_type === "in-person" && (
+                                            <MapPin size={10} />
+                                        )}
+                                        {value.meeting_type === "virtual" && (
+                                            <Phone size={10} />
+                                        )}
+                                        {value.meeting_type || "N/A"}
                                     </span>
                                     {value.attendee && (
-                                        <span className="text-xs text-gray-500" title={value.attendee}>
-                                            <Users size={10} className="inline mr-1" />
-                                            {value.attendee.length > 15 ? value.attendee.substring(0, 15) + '...' : value.attendee}
+                                        <span
+                                            className="text-xs text-gray-500"
+                                            title={value.attendee}
+                                        >
+                                            <Users
+                                                size={10}
+                                                className="inline mr-1"
+                                            />
+                                            {value.attendee.length > 15
+                                                ? value.attendee.substring(
+                                                      0,
+                                                      15
+                                                  ) + "..."
+                                                : value.attendee}
                                         </span>
                                     )}
                                 </div>
@@ -356,26 +431,44 @@ const CompanyDetails = () => {
                         {value ? (
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <span className={`w-2 h-2 rounded-full ${
-                                        value.follow_up_response === 'positive' 
-                                            ? 'bg-green-500'
-                                            : value.follow_up_response === 'negative'
-                                            ? 'bg-red-500'
-                                            : 'bg-yellow-500'
-                                    }`}></span>
-                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                        value.follow_up_response === 'positive' 
-                                            ? 'bg-green-100 text-green-800'
-                                            : value.follow_up_response === 'negative'
-                                            ? 'bg-red-100 text-red-800'
-                                            : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                        {value.follow_up_response?.toUpperCase() || 'N/A'}
+                                    <span
+                                        className={`w-2 h-2 rounded-full ${
+                                            value.follow_up_response ===
+                                            "positive"
+                                                ? "bg-green-500"
+                                                : value.follow_up_response ===
+                                                  "negative"
+                                                ? "bg-red-500"
+                                                : "bg-yellow-500"
+                                        }`}
+                                    ></span>
+                                    <span
+                                        className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                                            value.follow_up_response ===
+                                            "positive"
+                                                ? "bg-green-100 text-green-800"
+                                                : value.follow_up_response ===
+                                                  "negative"
+                                                ? "bg-red-100 text-red-800"
+                                                : "bg-yellow-100 text-yellow-800"
+                                        }`}
+                                    >
+                                        {value.follow_up_response?.toUpperCase() ||
+                                            "N/A"}
                                     </span>
                                 </div>
                                 {value.follow_up_notes && (
-                                    <div className="text-xs text-gray-500 truncate" title={value.follow_up_notes.replace(/<[^>]*>/g, '')}>
-                                        {value.follow_up_notes.replace(/<[^>]*>/g, '').substring(0, 40)}...
+                                    <div
+                                        className="text-xs text-gray-500 truncate"
+                                        title={value.follow_up_notes.replace(
+                                            /<[^>]*>/g,
+                                            ""
+                                        )}
+                                    >
+                                        {value.follow_up_notes
+                                            .replace(/<[^>]*>/g, "")
+                                            .substring(0, 40)}
+                                        ...
                                     </div>
                                 )}
                             </div>
@@ -396,13 +489,16 @@ const CompanyDetails = () => {
                         {value ? (
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <FileText size={14} className="text-green-500" />
+                                    <FileText
+                                        size={14}
+                                        className="text-green-500"
+                                    />
                                     <span className="inline-block px-2 py-0.5 text-xs bg-green-100 text-green-800 rounded-full font-medium">
                                         Contract
                                     </span>
                                 </div>
                                 {value.image && (
-                                    <a 
+                                    <a
                                         href={`${imgurl}/${value.image}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -431,7 +527,7 @@ const CompanyDetails = () => {
                     <div className="space-y-1 max-w-[180px]">
                         <div className="flex items-center gap-2">
                             <Mail size={12} className="text-gray-500" />
-                            <a 
+                            <a
                                 href={`mailto:${row.original.email}`}
                                 className="text-xs text-blue-600 hover:text-blue-800 hover:underline truncate"
                                 title={row.original.email}
@@ -441,7 +537,7 @@ const CompanyDetails = () => {
                         </div>
                         <div className="flex items-center gap-2">
                             <Phone size={12} className="text-gray-500" />
-                            <a 
+                            <a
                                 href={`tel:${row.original.phone_no}`}
                                 className="text-xs text-blue-600 hover:text-blue-800 hover:underline"
                             >
@@ -451,7 +547,10 @@ const CompanyDetails = () => {
                         {row.original.designation && (
                             <div className="flex items-center gap-2">
                                 <User size={12} className="text-gray-500" />
-                                <span className="text-xs text-gray-600 truncate" title={row.original.designation}>
+                                <span
+                                    className="text-xs text-gray-600 truncate"
+                                    title={row.original.designation}
+                                >
                                     {row.original.designation}
                                 </span>
                             </div>
@@ -463,28 +562,42 @@ const CompanyDetails = () => {
                 Header: "Follow-up Date",
                 accessor: "follow_up_date",
                 Cell: ({ value }) => {
-                    if (!value) return (
-                        <div className="flex items-center gap-2 text-gray-400">
-                            <Calendar size={14} />
-                            <span>N/A</span>
-                        </div>
-                    );
-                    
+                    if (!value)
+                        return (
+                            <div className="flex items-center gap-2 text-gray-400">
+                                <Calendar size={14} />
+                                <span>N/A</span>
+                            </div>
+                        );
+
                     try {
                         const date = new Date(value);
                         if (isNaN(date.getTime())) {
-                            return <span className="text-gray-500">Invalid Date</span>;
+                            return (
+                                <span className="text-gray-500">
+                                    Invalid Date
+                                </span>
+                            );
                         }
-                        
+
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         const followUpDate = new Date(date);
                         followUpDate.setHours(0, 0, 0, 0);
                         const isPastDue = followUpDate < today;
-                        const isToday = followUpDate.getTime() === today.getTime();
-                        
+                        const isToday =
+                            followUpDate.getTime() === today.getTime();
+
                         return (
-                            <div className={`flex items-center gap-2 ${isPastDue ? 'text-red-600 font-medium' : isToday ? 'text-orange-600 font-medium' : ''}`}>
+                            <div
+                                className={`flex items-center gap-2 ${
+                                    isPastDue
+                                        ? "text-red-600 font-medium"
+                                        : isToday
+                                        ? "text-orange-600 font-medium"
+                                        : ""
+                                }`}
+                            >
                                 <Calendar size={14} />
                                 <div className="flex flex-col">
                                     <span className="whitespace-nowrap">
@@ -495,19 +608,23 @@ const CompanyDetails = () => {
                                         })}
                                     </span>
                                     {(isPastDue || isToday) && (
-                                        <span className={`text-xs px-1.5 py-0.5 rounded mt-1 w-fit ${
-                                            isPastDue 
-                                                ? 'bg-red-100 text-red-800' 
-                                                : 'bg-orange-100 text-orange-800'
-                                        }`}>
-                                            {isPastDue ? 'Past Due' : 'Today'}
+                                        <span
+                                            className={`text-xs px-1.5 py-0.5 rounded mt-1 w-fit ${
+                                                isPastDue
+                                                    ? "bg-red-100 text-red-800"
+                                                    : "bg-orange-100 text-orange-800"
+                                            }`}
+                                        >
+                                            {isPastDue ? "Past Due" : "Today"}
                                         </span>
                                     )}
                                 </div>
                             </div>
                         );
                     } catch (error) {
-                        return <span className="text-gray-500">Invalid Date</span>;
+                        return (
+                            <span className="text-gray-500">Invalid Date</span>
+                        );
                     }
                 },
             },
@@ -557,10 +674,10 @@ const CompanyDetails = () => {
         {
             columns,
             data: allCompany,
-            initialState: { 
-                pageIndex: 0, 
+            initialState: {
+                pageIndex: 0,
                 pageSize: 10,
-                sortBy: [{ id: 'rowIndex', desc: false }]
+                sortBy: [{ id: "rowIndex", desc: false }],
             },
         },
         useGlobalFilter,
@@ -605,25 +722,25 @@ const CompanyDetails = () => {
     };
 
     const retryFetch = () => {
-        setReloadTrigger(prev => prev + 1);
+        setReloadTrigger((prev) => prev + 1);
         toast.loading("Reloading companies...");
     };
 
     return (
         <AdminWrapper>
-            <Toaster 
+            <Toaster
                 position="top-right"
                 toastOptions={{
                     duration: 3000,
                     style: {
-                        background: '#363636',
-                        color: '#fff',
+                        background: "#363636",
+                        color: "#fff",
                     },
                     success: {
                         duration: 3000,
                         iconTheme: {
-                            primary: '#10B981',
-                            secondary: '#fff',
+                            primary: "#10B981",
+                            secondary: "#fff",
                         },
                     },
                     error: {
@@ -631,7 +748,7 @@ const CompanyDetails = () => {
                     },
                 }}
             />
-            
+
             <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div className="flex items-center flex-wrap gap-2">
@@ -640,7 +757,10 @@ const CompanyDetails = () => {
                         </h1>
                         {allCompany.length > 0 && (
                             <span className="px-2.5 py-1 text-xs sm:text-sm bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">
-                                {allCompany.length} {allCompany.length === 1 ? 'company' : 'companies'}
+                                {allCompany.length}{" "}
+                                {allCompany.length === 1
+                                    ? "company"
+                                    : "companies"}
                             </span>
                         )}
                     </div>
@@ -697,7 +817,9 @@ const CompanyDetails = () => {
                                                             column.getSortByToggleProps()
                                                         )}
                                                         className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors whitespace-nowrap"
-                                                        style={{ width: column.width }}
+                                                        style={{
+                                                            width: column.width,
+                                                        }}
                                                     >
                                                         <div className="flex items-center">
                                                             {column.render(
@@ -706,12 +828,16 @@ const CompanyDetails = () => {
                                                             {column.isSorted ? (
                                                                 column.isSortedDesc ? (
                                                                     <ChevronDown
-                                                                        size={14}
+                                                                        size={
+                                                                            14
+                                                                        }
                                                                         className="ml-1"
                                                                     />
                                                                 ) : (
                                                                     <ChevronUp
-                                                                        size={14}
+                                                                        size={
+                                                                            14
+                                                                        }
                                                                         className="ml-1"
                                                                     />
                                                                 )
@@ -771,7 +897,9 @@ const CompanyDetails = () => {
                                                     </p>
                                                     {globalFilter && (
                                                         <button
-                                                            onClick={clearSearch}
+                                                            onClick={
+                                                                clearSearch
+                                                            }
                                                             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                                                         >
                                                             Clear Search
@@ -789,13 +917,20 @@ const CompanyDetails = () => {
                             <div className="flex flex-col sm:flex-row items-center justify-between mt-6 gap-4">
                                 <div className="flex items-center flex-wrap gap-2 text-sm text-gray-700">
                                     <span>Showing</span>
-                                    <span className="font-medium">{pageIndex * pageSize + 1}</span>
+                                    <span className="font-medium">
+                                        {pageIndex * pageSize + 1}
+                                    </span>
                                     <span>to</span>
                                     <span className="font-medium">
-                                        {Math.min((pageIndex + 1) * pageSize, allCompany.length)}
+                                        {Math.min(
+                                            (pageIndex + 1) * pageSize,
+                                            allCompany.length
+                                        )}
                                     </span>
                                     <span>of</span>
-                                    <span className="font-medium">{allCompany.length}</span>
+                                    <span className="font-medium">
+                                        {allCompany.length}
+                                    </span>
                                     <span>entries</span>
                                     <select
                                         value={pageSize}
@@ -813,7 +948,9 @@ const CompanyDetails = () => {
                                 <div className="flex items-center gap-1">
                                     <button
                                         onClick={handleFirstPage}
-                                        disabled={!canPreviousPage || pageIndex === 0}
+                                        disabled={
+                                            !canPreviousPage || pageIndex === 0
+                                        }
                                         className={`p-1.5 rounded transition-colors ${
                                             !canPreviousPage || pageIndex === 0
                                                 ? "opacity-50 cursor-not-allowed text-gray-400"
@@ -835,32 +972,41 @@ const CompanyDetails = () => {
                                         Previous
                                     </button>
                                     <div className="flex items-center mx-2">
-                                        {Array.from({ length: Math.min(5, pageCount) }, (_, i) => {
-                                            let pageNum;
-                                            if (pageCount <= 5) {
-                                                pageNum = i;
-                                            } else if (pageIndex < 3) {
-                                                pageNum = i;
-                                            } else if (pageIndex > pageCount - 4) {
-                                                pageNum = pageCount - 5 + i;
-                                            } else {
-                                                pageNum = pageIndex - 2 + i;
+                                        {Array.from(
+                                            { length: Math.min(5, pageCount) },
+                                            (_, i) => {
+                                                let pageNum;
+                                                if (pageCount <= 5) {
+                                                    pageNum = i;
+                                                } else if (pageIndex < 3) {
+                                                    pageNum = i;
+                                                } else if (
+                                                    pageIndex >
+                                                    pageCount - 4
+                                                ) {
+                                                    pageNum = pageCount - 5 + i;
+                                                } else {
+                                                    pageNum = pageIndex - 2 + i;
+                                                }
+
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() =>
+                                                            gotoPage(pageNum)
+                                                        }
+                                                        className={`w-8 h-8 mx-1 rounded text-sm ${
+                                                            pageIndex ===
+                                                            pageNum
+                                                                ? "bg-blue-600 text-white"
+                                                                : "text-gray-700 hover:bg-gray-200"
+                                                        }`}
+                                                    >
+                                                        {pageNum + 1}
+                                                    </button>
+                                                );
                                             }
-                                            
-                                            return (
-                                                <button
-                                                    key={pageNum}
-                                                    onClick={() => gotoPage(pageNum)}
-                                                    className={`w-8 h-8 mx-1 rounded text-sm ${
-                                                        pageIndex === pageNum
-                                                            ? 'bg-blue-600 text-white'
-                                                            : 'text-gray-700 hover:bg-gray-200'
-                                                    }`}
-                                                >
-                                                    {pageNum + 1}
-                                                </button>
-                                            );
-                                        })}
+                                        )}
                                     </div>
                                     <button
                                         onClick={nextPage}
@@ -875,9 +1021,13 @@ const CompanyDetails = () => {
                                     </button>
                                     <button
                                         onClick={handleLastPage}
-                                        disabled={!canNextPage || pageIndex === pageCount - 1}
+                                        disabled={
+                                            !canNextPage ||
+                                            pageIndex === pageCount - 1
+                                        }
                                         className={`p-1.5 rounded transition-colors ${
-                                            !canNextPage || pageIndex === pageCount - 1
+                                            !canNextPage ||
+                                            pageIndex === pageCount - 1
                                                 ? "opacity-50 cursor-not-allowed text-gray-400"
                                                 : "text-gray-600 hover:bg-gray-200"
                                         }`}

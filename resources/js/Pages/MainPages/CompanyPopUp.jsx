@@ -1,4 +1,3 @@
-
 // import React, { useEffect, useState } from "react";
 // import {
 //     X,
@@ -782,8 +781,6 @@
 
 // export default CompanyPopUp;
 
-
-
 import React, { useEffect, useState } from "react";
 import {
     X,
@@ -917,18 +914,18 @@ const Modal = ({ isOpen, onClose, children }) => {
     useEffect(() => {
         if (isOpen) {
             // Disable body scroll
-            document.body.style.overflow = 'hidden';
-            document.body.style.paddingRight = '15px'; // Compensate for scrollbar width
+            document.body.style.overflow = "hidden";
+            document.body.style.paddingRight = "15px"; // Compensate for scrollbar width
         } else {
             // Enable body scroll
-            document.body.style.overflow = 'auto';
-            document.body.style.paddingRight = '0';
+            document.body.style.overflow = "auto";
+            document.body.style.paddingRight = "0";
         }
-        
+
         // Cleanup on unmount
         return () => {
-            document.body.style.overflow = 'auto';
-            document.body.style.paddingRight = '0';
+            document.body.style.overflow = "auto";
+            document.body.style.paddingRight = "0";
         };
     }, [isOpen]);
 
@@ -1111,7 +1108,7 @@ const CompanyPopUp = ({
         const handleSimpleDownload = (imageUrl) => {
             const link = document.createElement("a");
             link.href = `${imgurl}/${imageUrl}`;
-            link.download = imageUrl.split('/').pop() || "contract";
+            link.download = imageUrl.split("/").pop() || "contract";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1168,7 +1165,9 @@ const CompanyPopUp = ({
                             className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
                         >
                             <ExternalLink size={16} />
-                            <span className="hidden sm:inline">Open in New Tab</span>
+                            <span className="hidden sm:inline">
+                                Open in New Tab
+                            </span>
                             <span className="sm:hidden">View Full</span>
                         </a>
                         <button

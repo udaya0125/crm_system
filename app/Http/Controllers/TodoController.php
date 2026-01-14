@@ -21,7 +21,7 @@ class TodoController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $todos
+            'data' => $todos,
         ]);
     }
 
@@ -34,7 +34,7 @@ class TodoController extends Controller
             'title' => 'required|string|max:255',
             'due_date' => 'nullable|date',
             'descriptions' => 'nullable|array',
-            'descriptions.*' => 'string'
+            'descriptions.*' => 'string',
         ]);
 
         $todo = Todo::create([
@@ -48,7 +48,7 @@ class TodoController extends Controller
             foreach ($request->descriptions as $desc) {
                 TodoDescription::create([
                     'todo_id' => $todo->id,
-                    'description' => $desc
+                    'description' => $desc,
                 ]);
             }
         }
@@ -56,7 +56,7 @@ class TodoController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Todo created successfully',
-            'data' => $todo->load('descriptions')
+            'data' => $todo->load('descriptions'),
         ], 201);
     }
 
@@ -74,7 +74,7 @@ class TodoController extends Controller
             'due_date' => 'nullable|date',
             'is_completed' => 'boolean',
             'descriptions' => 'nullable|array',
-            'descriptions.*' => 'string'
+            'descriptions.*' => 'string',
         ]);
 
         $todo->update([
@@ -89,7 +89,7 @@ class TodoController extends Controller
             foreach ($request->descriptions as $desc) {
                 TodoDescription::create([
                     'todo_id' => $todo->id,
-                    'description' => $desc
+                    'description' => $desc,
                 ]);
             }
         }
@@ -97,7 +97,7 @@ class TodoController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Todo updated successfully',
-            'data' => $todo->load('descriptions')
+            'data' => $todo->load('descriptions'),
         ]);
     }
 
@@ -114,7 +114,7 @@ class TodoController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Todo deleted successfully'
+            'message' => 'Todo deleted successfully',
         ]);
     }
 }

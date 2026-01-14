@@ -173,8 +173,6 @@
 
 // export default EditCRM;
 
-
-
 import React, { useEffect, useState } from "react";
 import EditCrmProgress from "./EditCrmProgress";
 import EditCreateCompany from "@/EditStepComponents/EditCreateCompany";
@@ -210,16 +208,16 @@ const EditCRM = ({ company }) => {
                 ...prev,
                 company: {
                     companyName: company.company_name || "",
-                    fullName: company.full_name || "", 
+                    fullName: company.full_name || "",
                     designation: company.designation || "",
                     phone: company.phone_no || "",
                     email: company.email || "",
                     address: company.address || "",
                     responsiblePerson: company.responsible_person || "",
-                    ourTeam: company.our_team || "", 
+                    ourTeam: company.our_team || "",
                     client_member: company.client_member || "",
                     comment: company.comment || "",
-                    follow_up_date: company.follow_up_date || "", 
+                    follow_up_date: company.follow_up_date || "",
                 },
                 initialResponse: company.initial_responses || {},
                 meeting: company.meetings || {},

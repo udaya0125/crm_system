@@ -80,7 +80,8 @@ const EditFollowUpResponse = ({
     };
 
     const getQuillClassName = (fieldName) => {
-        const baseClass = "custom-quill-editor rounded focus:outline-none w-full";
+        const baseClass =
+            "custom-quill-editor rounded focus:outline-none w-full";
         const isError = errors[fieldName];
 
         if (isPositive) {
@@ -147,12 +148,16 @@ const EditFollowUpResponse = ({
                     }
                 );
             } else {
-                response = await axios.post("/ourfollowupresponse", backendData, {
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": getCsrfToken(),
-                    },
-                });
+                response = await axios.post(
+                    "/ourfollowupresponse",
+                    backendData,
+                    {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRF-TOKEN": getCsrfToken(),
+                        },
+                    }
+                );
             }
 
             const updatedData = {
@@ -166,7 +171,9 @@ const EditFollowUpResponse = ({
             updateData(updatedData);
 
             toast.success(
-                `Follow-up response ${followUpResponseId ? "updated" : "created"} successfully!`,
+                `Follow-up response ${
+                    followUpResponseId ? "updated" : "created"
+                } successfully!`,
                 { id: loadingToast }
             );
 
@@ -185,7 +192,9 @@ const EditFollowUpResponse = ({
                 errorMessage =
                     error.response.data?.message ||
                     error.response.data?.error ||
-                    `Failed to ${followUpResponseId ? "update" : "save"} follow-up response`;
+                    `Failed to ${
+                        followUpResponseId ? "update" : "save"
+                    } follow-up response`;
             } else if (error.request) {
                 errorMessage = "Network error: Please check your connection.";
             } else {
@@ -194,7 +203,9 @@ const EditFollowUpResponse = ({
             toast.error(errorMessage);
             setError("submit", {
                 type: "manual",
-                message: `Failed to ${followUpResponseId ? "update" : "save"} follow-up response.`,
+                message: `Failed to ${
+                    followUpResponseId ? "update" : "save"
+                } follow-up response.`,
             });
         } finally {
             setSubmitting(false);
@@ -267,7 +278,9 @@ const EditFollowUpResponse = ({
                         <div className={getSectionClassName()}>
                             <h3
                                 className={`text-sm font-medium ${
-                                    isPositive ? "text-green-800" : "text-red-800"
+                                    isPositive
+                                        ? "text-green-800"
+                                        : "text-red-800"
                                 }`}
                             >
                                 {isPositive
@@ -294,7 +307,9 @@ const EditFollowUpResponse = ({
                                                 theme="snow"
                                                 modules={quillModules}
                                                 formats={quillFormats}
-                                                className={getQuillClassName("negativeReason")}
+                                                className={getQuillClassName(
+                                                    "negativeReason"
+                                                )}
                                                 placeholder="Why did the client decline or provide negative feedback?"
                                             />
                                         )}
@@ -312,10 +327,14 @@ const EditFollowUpResponse = ({
                             <div className="mt-3">
                                 <label
                                     className={`block text-xs font-medium mb-1 ${
-                                        isPositive ? "text-green-700" : "text-red-700"
+                                        isPositive
+                                            ? "text-green-700"
+                                            : "text-red-700"
                                     }`}
                                 >
-                                    {isPositive ? "Meeting Outcome *" : "Meeting Outcome"}
+                                    {isPositive
+                                        ? "Meeting Outcome *"
+                                        : "Meeting Outcome"}
                                 </label>
                                 <Controller
                                     name="meetingOutcome"
@@ -331,7 +350,9 @@ const EditFollowUpResponse = ({
                                             theme="snow"
                                             modules={quillModules}
                                             formats={quillFormats}
-                                            className={getQuillClassName("meetingOutcome")}
+                                            className={getQuillClassName(
+                                                "meetingOutcome"
+                                            )}
                                             placeholder={
                                                 isPositive
                                                     ? "Describe the outcome (e.g., Deal closed, next steps agreed...)"
@@ -350,7 +371,9 @@ const EditFollowUpResponse = ({
                             <div className="mt-3">
                                 <label
                                     className={`block text-xs font-medium mb-1 ${
-                                        isPositive ? "text-green-700" : "text-red-700"
+                                        isPositive
+                                            ? "text-green-700"
+                                            : "text-red-700"
                                     }`}
                                 >
                                     Additional Notes
@@ -364,7 +387,9 @@ const EditFollowUpResponse = ({
                                             theme="snow"
                                             modules={quillModules}
                                             formats={quillFormats}
-                                            className={getQuillClassName("notes")}
+                                            className={getQuillClassName(
+                                                "notes"
+                                            )}
                                             placeholder={
                                                 isPositive
                                                     ? "Any additional notes about the positive response..."

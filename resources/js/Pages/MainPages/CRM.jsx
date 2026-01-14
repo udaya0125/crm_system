@@ -112,9 +112,7 @@ const CRM = () => {
                                 currentStep={step}
                                 goToStep={goToStep}
                             />
-                            <div className="">
-                                {renderStep()}
-                            </div>
+                            <div className="">{renderStep()}</div>
                         </div>
                     </div>
                 </div>

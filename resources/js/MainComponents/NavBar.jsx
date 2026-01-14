@@ -11,8 +11,11 @@ const NavBar = () => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex-shrink-0">
-                        <Link href={'/crm'} className="text-2xl font-light text-gray-900">
-                           Sales System
+                        <Link
+                            href={"/crm"}
+                            className="text-2xl font-light text-gray-900"
+                        >
+                            Sales System
                         </Link>
                     </div>
 
@@ -103,7 +106,6 @@ const NavBar = () => {
                         </a>
                     </div>
                     {/* Add any additional mobile navigation items here */}
-
                 </div>
             )}
         </nav>

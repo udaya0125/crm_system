@@ -11,7 +11,7 @@ class Task extends Model
         'is_completed',
         'due_date',
         'due_time',
-        'task_list_id'
+        'task_list_id',
     ];
 
     // A task belongs to a task list

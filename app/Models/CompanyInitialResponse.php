@@ -8,7 +8,7 @@ class CompanyInitialResponse extends Model
 {
     //
     protected $fillable = [
-        'initial_response','company_id','meeting_outcome','initial_notes','initial_reason'
+        'initial_response', 'company_id', 'meeting_outcome', 'initial_notes', 'initial_reason',
     ];
 
     public function company()
