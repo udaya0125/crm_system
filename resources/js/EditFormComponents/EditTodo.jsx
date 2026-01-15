@@ -34,7 +34,7 @@ const EditTodo = ({
 
     const [error, setError] = React.useState("");
 
-    // Custom CSS for smaller Quill editor
+    // Custom CSS for smaller Quill editor & toolbar
     const quillStyles = {
         height: "150px",
         marginBottom: "10px",

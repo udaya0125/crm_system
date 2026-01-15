@@ -9,6 +9,10 @@ const SalesSystem = () => {
                 <h1 className="text-3xl font-bold mb-4">Sales System</h1>
                 <p>Welcome to the Sales System main page.</p>
             </div>
+            <div>
+                {/* Additional content can be added here */}
+            
+            </div>
         </div>
     );
 };

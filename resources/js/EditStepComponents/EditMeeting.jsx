@@ -20,7 +20,7 @@ const EditMeeting = ({
     const [hasPhoneDetails, setHasPhoneDetails] = useState(false);
     const [hasMeetingLocation, setHasMeetingLocation] = useState(false);
 
-    // Track if user has interacted with the form
+    // Track if user has interacted with the form fields
     const [touchedFields, setTouchedFields] = useState({});
 
     const {

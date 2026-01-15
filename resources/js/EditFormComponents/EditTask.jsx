@@ -22,7 +22,7 @@ const EditTask = ({ onUpdateTask, onClose, editingTask, taskLists }) => {
     const [existingDescriptions, setExistingDescriptions] = useState([]);
     const [newDescriptionFields, setNewDescriptionFields] = useState([""]);
 
-    // Check if task is completed
+    // Check if task is completed & disable editing if so
     const isTaskCompleted = editingTask?.is_completed;
 
     // React Quill modules configuration

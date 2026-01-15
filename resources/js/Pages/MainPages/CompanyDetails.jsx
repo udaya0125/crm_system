@@ -37,7 +37,7 @@ import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import CompanyPopUp from "./CompanyPopUp";
 
-// Global Filter Component
+// Global Filter Component with Debounce
 const GlobalFilter = ({ globalFilter, setGlobalFilter }) => {
     const [value, setValue] = useState(globalFilter || "");
     const debounceTimeout = useRef(null);

@@ -58,7 +58,7 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
         } catch (error) {
             if (error.response && error.response.data.errors) {
                 setApiErrors(error.response.data.errors);
-                // Set errors in react-hook-form
+                // Set errors in react-hook-form & throw to stop submission
                 Object.keys(error.response.data.errors).forEach((key) => {
                     setError(key, {
                         type: "server",

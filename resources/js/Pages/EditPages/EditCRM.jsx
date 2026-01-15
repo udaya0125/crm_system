@@ -203,7 +203,7 @@ const EditCRM = ({ company }) => {
             console.log("Company data received:", company);
             setCompanyId(company.id);
 
-            // Set the company data for editing - FIXED MAPPING
+            // Set the company data for editing - FIXED MAPPING ISSUES
             setCrmData((prev) => ({
                 ...prev,
                 company: {

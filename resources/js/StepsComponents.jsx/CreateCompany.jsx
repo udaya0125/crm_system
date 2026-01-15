@@ -1,3 +1,356 @@
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import toast from "react-hot-toast";
+
+const CreateCompany = ({ data, updateData, nextStep }) => {
+    const {
+        register,
+        handleSubmit,
+        control,
+        formState: { errors, isSubmitting },
+        setError,
+    } = useForm({
+        defaultValues: {
+            companyName: data.companyName || "",
+            fullName: data.fullName || "",
+            designation: data.designation || "",
+            phone: data.phone || "",
+            email: data.email || "",
+            address: data.address || "",
+            responsiblePerson: data.responsiblePerson || "",
+            ourTeam: data.ourTeam || "",
+            client_member: data.client_member || "",
+            comment: data.comment || "",
+        },
+    });
+
+    const quillModules = {
+        toolbar: [
+            [{ header: [1, 2, 3, false] }],
+            ["bold", "italic", "underline"],
+            [{ list: "ordered" }, { list: "bullet" }],
+            ["link"],
+            ["clean"],
+        ],
+    };
+
+    const quillFormats = [
+        "header",
+        "bold",
+        "italic",
+        "underline",
+        "list",
+        "bullet",
+        "link",
+    ];
+
+    const storeCompany = async (payload) => {
+        const response = await axios.post(
+            route("ourcompany.store"),
+            payload,
+            { headers: { "Content-Type": "application/json" } }
+        );
+        return response.data;
+    };
+
+    const updateCompany = async (payload, id) => {
+        const response = await axios.put(
+            route("ourcompany.update", { id }),
+            payload,
+            { headers: { "Content-Type": "application/json" } }
+        );
+        return response.data;
+    };
+
+    console.log("CreateCompany received data:", data);
+
+    const onSubmit = async (formData) => {
+        const toastId = toast.loading(
+            data.id ? "Updating company..." : "Creating company..."
+        );
+
+        try {
+            const apiData = {
+                company_name: formData.companyName,
+                full_name: formData.fullName,
+                designation: formData.designation,
+                phone_no: formData.phone,
+                email: formData.email,
+                address: formData.address,
+                responsible_person: formData.responsiblePerson,
+                our_team: formData.ourTeam,
+                client_member: formData.client_member,
+                comment: formData.comment,
+            };
+
+            let result, companyId;
+
+            if (data.id) {
+                result = await updateCompany(apiData, data.id);
+                companyId = data.id;
+            } else {
+                result = await storeCompany(apiData);
+                companyId = result.company_id;
+            }
+
+            updateData({ ...formData, id: companyId }, companyId);
+
+            toast.success(
+                data.id
+                    ? "Company updated successfully"
+                    : "Company created successfully",
+                { id: toastId }
+            );
+
+            nextStep();
+        } catch (error) {
+            if (error.response?.data?.errors) {
+                const apiErrors = error.response.data.errors;
+
+                Object.keys(apiErrors).forEach((key) => {
+                    const map = {
+                        company_name: "companyName",
+                        full_name: "fullName",
+                        phone_no: "phone",
+                        responsible_person: "responsiblePerson",
+                        client_member: "client_member",
+                        our_team: "ourTeam",
+                    };
+
+                    setError(map[key] || key, {
+                        type: "server",
+                        message: apiErrors[key][0],
+                    });
+                });
+
+                toast.error("Please fix the form errors", { id: toastId });
+            } else {
+                toast.error("Something went wrong", { id: toastId });
+            } 
+        }
+    };
+
+    const inputClass = (name) =>
+        `w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 ${
+            errors[name] ? "border-red-500" : "border-gray-300"
+        }`;
+
+    return (
+        <div className="max-w-7xl mx-auto w-full">
+            <div className="bg-white p-6 rounded-lg shadow border">
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {/* Company Name - Required  */}
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium mb-1">
+                                Company Name *
+                            </label>
+                            <input
+                                {...register("companyName", {
+                                    required: "Company name is required",
+                                })}
+                                className={inputClass("companyName")}
+                                placeholder="Enter company name"
+                            />
+                            {errors.companyName && (
+                                <p className="text-xs text-red-600">
+                                    {errors.companyName.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Full Name - Required */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Client Full Name *
+                            </label>
+                            <input
+                                {...register("fullName", {
+                                    required: "Full name is required",
+                                })}
+                                className={inputClass("fullName")}
+                                placeholder="Enter client full name"
+                            />
+                            {errors.fullName && (
+                                <p className="text-xs text-red-600">
+                                    {errors.fullName.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Designation - Optional */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Designation
+                            </label>
+                            <input
+                                {...register("designation")}
+                                className={inputClass("designation")}
+                                placeholder="Enter designation"
+                            />
+                        </div>
+
+                        {/* Phone - Required */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Phone *
+                            </label>
+                            <input
+                                {...register("phone", {
+                                    required: "Phone is required",
+                                })}
+                                className={inputClass("phone")}
+                                placeholder="Enter phone number"
+                            />
+                            {errors.phone && (
+                                <p className="text-xs text-red-600">
+                                    {errors.phone.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Email - Required */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Email *
+                            </label>
+                            <input
+                                type="email"
+                                {...register("email", {
+                                    required: "Email is required",
+                                    pattern: {
+                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                        message: "Invalid email address",
+                                    },
+                                })}
+                                className={inputClass("email")}
+                                placeholder="Enter email address"
+                            />
+                            {errors.email && (
+                                <p className="text-xs text-red-600">
+                                    {errors.email.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Address - Optional */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Address
+                            </label>
+                            <input
+                                {...register("address")}
+                                className={inputClass("address")}
+                                placeholder="Enter company address"
+                            />
+                        </div>
+
+                        {/* Responsible Person - Optional */}
+                        <div>
+                            <label className="block text-sm font-medium mb-1">
+                                Responsible Person
+                            </label>
+                            <input
+                                {...register("responsiblePerson")}
+                                className={inputClass("responsiblePerson")}
+                                placeholder="Enter responsible person"
+                            />
+                        </div>
+
+                        {/* Our Team & Client Member Section */}
+                        <div className="sm:col-span-2">
+                            <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                                Meeting With ...
+                            </h2>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                {/* Our Team - Required */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Our Team *
+                                    </label>
+                                    <input
+                                        {...register("ourTeam", {
+                                            required: "Our team is required",
+                                        })}
+                                        className={inputClass("ourTeam")}
+                                        placeholder="Enter our team members"
+                                    />
+                                    {errors.ourTeam && (
+                                        <p className="text-xs text-red-600">
+                                            {errors.ourTeam.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Client Member  - Required */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Client Member *
+                                    </label>
+                                    <input
+                                        {...register("client_member", {
+                                            required: "Client member is required",
+                                        })}
+                                        className={inputClass("client_member")}
+                                        placeholder="Enter client members"
+                                    />
+                                    {errors.client_member && (
+                                        <p className="text-xs text-red-600">
+                                            {errors.client_member.message}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Comment - Optional */}
+                        <div className="sm:col-span-2">
+                            <label className="block text-sm font-medium mb-1">
+                                Comment
+                            </label>
+                            <Controller
+                                name="comment"
+                                control={control}
+                                render={({ field }) => (
+                                    <ReactQuill
+                                        {...field}
+                                        theme="snow"
+                                        modules={quillModules}
+                                        formats={quillFormats}
+                                        className="h-32"
+                                        placeholder="Enter any additional comments or notes..."
+                                    />
+                                )}
+                            />
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end pt-16 md:pt-8">
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
+                        >
+                            {isSubmitting
+                                ? data.id
+                                    ? "Updating..."
+                                    : "Creating..."
+                                : "Next"}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+};
+
+export default CreateCompany;
+
+
+
 // import React from "react";
 // import { useForm, Controller } from "react-hook-form";
 // import axios from "axios";
@@ -460,355 +813,3 @@
 // export default CreateCompany;
 
 
-
-
-import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import axios from "axios";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import toast from "react-hot-toast";
-
-const CreateCompany = ({ data, updateData, nextStep }) => {
-    const {
-        register,
-        handleSubmit,
-        control,
-        formState: { errors, isSubmitting },
-        setError,
-    } = useForm({
-        defaultValues: {
-            companyName: data.companyName || "",
-            fullName: data.fullName || "",
-            designation: data.designation || "",
-            phone: data.phone || "",
-            email: data.email || "",
-            address: data.address || "",
-            responsiblePerson: data.responsiblePerson || "",
-            ourTeam: data.ourTeam || "",
-            client_member: data.client_member || "",
-            comment: data.comment || "",
-        },
-    });
-
-    const quillModules = {
-        toolbar: [
-            [{ header: [1, 2, 3, false] }],
-            ["bold", "italic", "underline"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            ["link"],
-            ["clean"],
-        ],
-    };
-
-    const quillFormats = [
-        "header",
-        "bold",
-        "italic",
-        "underline",
-        "list",
-        "bullet",
-        "link",
-    ];
-
-    const storeCompany = async (payload) => {
-        const response = await axios.post(
-            route("ourcompany.store"),
-            payload,
-            { headers: { "Content-Type": "application/json" } }
-        );
-        return response.data;
-    };
-
-    const updateCompany = async (payload, id) => {
-        const response = await axios.put(
-            route("ourcompany.update", { id }),
-            payload,
-            { headers: { "Content-Type": "application/json" } }
-        );
-        return response.data;
-    };
-
-    console.log("CreateCompany received data:", data);
-
-    const onSubmit = async (formData) => {
-        const toastId = toast.loading(
-            data.id ? "Updating company..." : "Creating company..."
-        );
-
-        try {
-            const apiData = {
-                company_name: formData.companyName,
-                full_name: formData.fullName,
-                designation: formData.designation,
-                phone_no: formData.phone,
-                email: formData.email,
-                address: formData.address,
-                responsible_person: formData.responsiblePerson,
-                our_team: formData.ourTeam,
-                client_member: formData.client_member,
-                comment: formData.comment,
-            };
-
-            let result, companyId;
-
-            if (data.id) {
-                result = await updateCompany(apiData, data.id);
-                companyId = data.id;
-            } else {
-                result = await storeCompany(apiData);
-                companyId = result.company_id;
-            }
-
-            updateData({ ...formData, id: companyId }, companyId);
-
-            toast.success(
-                data.id
-                    ? "Company updated successfully"
-                    : "Company created successfully",
-                { id: toastId }
-            );
-
-            nextStep();
-        } catch (error) {
-            if (error.response?.data?.errors) {
-                const apiErrors = error.response.data.errors;
-
-                Object.keys(apiErrors).forEach((key) => {
-                    const map = {
-                        company_name: "companyName",
-                        full_name: "fullName",
-                        phone_no: "phone",
-                        responsible_person: "responsiblePerson",
-                        client_member: "client_member",
-                        our_team: "ourTeam",
-                    };
-
-                    setError(map[key] || key, {
-                        type: "server",
-                        message: apiErrors[key][0],
-                    });
-                });
-
-                toast.error("Please fix the form errors", { id: toastId });
-            } else {
-                toast.error("Something went wrong", { id: toastId });
-            } 
-        }
-    };
-
-    const inputClass = (name) =>
-        `w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 ${
-            errors[name] ? "border-red-500" : "border-gray-300"
-        }`;
-
-    return (
-        <div className="max-w-7xl mx-auto w-full">
-            <div className="bg-white p-6 rounded-lg shadow border">
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        {/* Company Name - Required  */}
-                        <div className="sm:col-span-2">
-                            <label className="block text-sm font-medium mb-1">
-                                Company Name *
-                            </label>
-                            <input
-                                {...register("companyName", {
-                                    required: "Company name is required",
-                                })}
-                                className={inputClass("companyName")}
-                                placeholder="Enter company name"
-                            />
-                            {errors.companyName && (
-                                <p className="text-xs text-red-600">
-                                    {errors.companyName.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Full Name - Required */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Client Full Name *
-                            </label>
-                            <input
-                                {...register("fullName", {
-                                    required: "Full name is required",
-                                })}
-                                className={inputClass("fullName")}
-                                placeholder="Enter client full name"
-                            />
-                            {errors.fullName && (
-                                <p className="text-xs text-red-600">
-                                    {errors.fullName.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Designation - Optional */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Designation
-                            </label>
-                            <input
-                                {...register("designation")}
-                                className={inputClass("designation")}
-                                placeholder="Enter designation"
-                            />
-                        </div>
-
-                        {/* Phone - Required */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Phone *
-                            </label>
-                            <input
-                                {...register("phone", {
-                                    required: "Phone is required",
-                                })}
-                                className={inputClass("phone")}
-                                placeholder="Enter phone number"
-                            />
-                            {errors.phone && (
-                                <p className="text-xs text-red-600">
-                                    {errors.phone.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Email - Required */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Email *
-                            </label>
-                            <input
-                                type="email"
-                                {...register("email", {
-                                    required: "Email is required",
-                                    pattern: {
-                                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                                        message: "Invalid email address",
-                                    },
-                                })}
-                                className={inputClass("email")}
-                                placeholder="Enter email address"
-                            />
-                            {errors.email && (
-                                <p className="text-xs text-red-600">
-                                    {errors.email.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Address - Optional */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Address
-                            </label>
-                            <input
-                                {...register("address")}
-                                className={inputClass("address")}
-                                placeholder="Enter company address"
-                            />
-                        </div>
-
-                        {/* Responsible Person - Optional */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">
-                                Responsible Person
-                            </label>
-                            <input
-                                {...register("responsiblePerson")}
-                                className={inputClass("responsiblePerson")}
-                                placeholder="Enter responsible person"
-                            />
-                        </div>
-
-                        {/* Our Team & Client Member Section */}
-                        <div className="sm:col-span-2">
-                            <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                                Meeting With ...
-                            </h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                {/* Our Team - Required */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Our Team *
-                                    </label>
-                                    <input
-                                        {...register("ourTeam", {
-                                            required: "Our team is required",
-                                        })}
-                                        className={inputClass("ourTeam")}
-                                        placeholder="Enter our team members"
-                                    />
-                                    {errors.ourTeam && (
-                                        <p className="text-xs text-red-600">
-                                            {errors.ourTeam.message}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Client Member  - Required */}
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">
-                                        Client Member *
-                                    </label>
-                                    <input
-                                        {...register("client_member", {
-                                            required: "Client member is required",
-                                        })}
-                                        className={inputClass("client_member")}
-                                        placeholder="Enter client members"
-                                    />
-                                    {errors.client_member && (
-                                        <p className="text-xs text-red-600">
-                                            {errors.client_member.message}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Comment - Optional */}
-                        <div className="sm:col-span-2">
-                            <label className="block text-sm font-medium mb-1">
-                                Comment
-                            </label>
-                            <Controller
-                                name="comment"
-                                control={control}
-                                render={({ field }) => (
-                                    <ReactQuill
-                                        {...field}
-                                        theme="snow"
-                                        modules={quillModules}
-                                        formats={quillFormats}
-                                        className="h-32"
-                                        placeholder="Enter any additional comments or notes..."
-                                    />
-                                )}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-end pt-16 md:pt-8">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors duration-200"
-                        >
-                            {isSubmitting
-                                ? data.id
-                                    ? "Updating..."
-                                    : "Creating..."
-                                : "Next"}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
-};
-
-export default CreateCompany;

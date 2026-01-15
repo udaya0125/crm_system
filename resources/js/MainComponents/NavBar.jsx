@@ -106,6 +106,7 @@ const NavBar = () => {
                         </a>
                     </div>
                     {/* Add any additional mobile navigation items here */}
+                    
                 </div>
             )}
         </nav>

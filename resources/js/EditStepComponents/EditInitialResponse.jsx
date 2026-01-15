@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
@@ -13,7 +13,7 @@ const EditInitialResponse = ({
     companyId,
     existingData,
 }) => {
-    const [submitting, setSubmitting] = React.useState(false);
+    const [submitting, setSubmitting] = useState(false);
 
     const {
         register,

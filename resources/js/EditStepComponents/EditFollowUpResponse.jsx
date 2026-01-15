@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import ReactQuill from "react-quill";
@@ -14,7 +14,7 @@ const EditFollowUpResponse = ({
     company,
     existingData,
 }) => {
-    const [submitting, setSubmitting] = React.useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const followUpResponseId = existingData?.id || null;
 
     const {

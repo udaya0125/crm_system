@@ -20,7 +20,7 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
         },
     });
 
-    // React Quill modules configuration
+    // React Quill modules configuration and formats
     const quillModules = {
         toolbar: [
             ["bold", "italic", "underline", "strike"],
