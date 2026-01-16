@@ -33,7 +33,7 @@ const EditCreateCompany = ({ data, updateData, nextStep, companyId }) => {
     // Initialize form from props - FIXED VERSION
     useEffect(() => {
         if (data && Object.keys(data).length > 0) {
-            console.log("Initializing form with data:", data);
+            // console.log("Initializing form with data:", data);
 
             // Direct mapping of data fields to form fields
             // If data comes from backend with snake_case, map to camelCase
@@ -58,7 +58,7 @@ const EditCreateCompany = ({ data, updateData, nextStep, companyId }) => {
         }
     }, [data, setValue]);
 
-    console.log("EditCreateCompany received data:", data);
+    // console.log("EditCreateCompany received data:", data);
 
     // Sync form changes to parent
     useEffect(() => {

@@ -222,6 +222,12 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     // // Meeting
     // Route::post('/ourmeeting', [CompanyCRMController::class, 'storeMeeting'])->name('ourmeeting.store');
     // Route::post('/ourmeeting/{id}', [CompanyCRMController::class, 'updateMeeting'])->name('ourmeeting.update');
+
+
+    // Route::get('/sale', function(){
+    //     return Inertia::render('MainPages/SalesSystem');
+        
+    // });
     
 
 require __DIR__.'/auth.php';

@@ -200,7 +200,7 @@ const EditCRM = ({ company }) => {
     // Initialize with company data when component mounts
     useEffect(() => {
         if (company) {
-            console.log("Company data received:", company);
+            // console.log("Company data received:", company);
             setCompanyId(company.id);
 
             // Set the company data for editing - FIXED MAPPING ISSUES

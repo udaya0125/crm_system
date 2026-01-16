@@ -65,7 +65,7 @@ const CreateCompany = ({ data, updateData, nextStep }) => {
         return response.data;
     };
 
-    console.log("CreateCompany received data:", data);
+    // console.log("CreateCompany received data:", data);
 
     const onSubmit = async (formData) => {
         const toastId = toast.loading(

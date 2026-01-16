@@ -138,7 +138,7 @@ const Company = () => {
         };
     }, [reloadTrigger]);
 
-    console.log("All Company Data:", allCompany);
+    // console.log("All Company Data:", allCompany);
     const handleDelete = useCallback(async (id) => {
         if (
             !window.confirm(

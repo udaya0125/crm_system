@@ -29,7 +29,7 @@ const CRM = () => {
         }));
     };
 
-    // Special function to handle company creation and capture the ID
+    // Special function to handle company creation and capture the ID 
     const updateCompanyData = (data, createdCompanyId = null) => {
         updateData("company", data);
 

@@ -433,7 +433,7 @@ const EditContract = ({
                                         />
                                     </svg>
 
-                                    {/* Upload the contract file by clicking the button below. */}
+                                    {/* Upload the contract file by clicking the button below & selecting a file. */}
                                     <div className="mt-4">
                                         <label
                                             htmlFor="contract-upload"

@@ -132,7 +132,7 @@ const Modal = ({ isOpen, onClose, children }) => {
         if (isOpen) {
             // Disable body scroll
             document.body.style.overflow = "hidden";
-            document.body.style.paddingRight = "15px"; // Compensate for scrollbar width
+            document.body.style.paddingRight = "15px"; // Compensate for scrollbar width to prevent layout shift
         } else {
             // Enable body scroll
             document.body.style.overflow = "auto";
