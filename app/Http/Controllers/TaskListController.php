@@ -15,7 +15,7 @@ class TaskListController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Admin can see all tasks
         if ($user->role === 'admin') {
             $taskLists = TaskList::with(['creator', 'assignedUser'])
@@ -31,7 +31,7 @@ class TaskListController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $taskLists
+            'data' => $taskLists,
         ], 200);
     }
 
@@ -41,12 +41,12 @@ class TaskListController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
-        
+
         // Double check middleware - only admin can access
         if ($user->role !== 'admin') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only admins can assign tasks'
+                'message' => 'Only admins can assign tasks',
             ], 403);
         }
 
@@ -58,10 +58,10 @@ class TaskListController extends Controller
 
         // Verify the assigned user exists
         $assignedUser = User::find($validated['user_id']);
-        if (!$assignedUser) {
+        if (! $assignedUser) {
             return response()->json([
                 'success' => false,
-                'message' => 'Assigned user not found'
+                'message' => 'Assigned user not found',
             ], 404);
         }
 
@@ -79,7 +79,7 @@ class TaskListController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Task assigned successfully',
-            'data' => $taskList
+            'data' => $taskList,
         ], 201);
     }
 
@@ -89,20 +89,20 @@ class TaskListController extends Controller
     public function update(Request $request, $id)
     {
         $user = Auth::user();
-        
+
         if ($user->role !== 'admin') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only admins can update tasks'
+                'message' => 'Only admins can update tasks',
             ], 403);
         }
 
         $taskList = TaskList::find($id);
 
-        if (!$taskList) {
+        if (! $taskList) {
             return response()->json([
                 'success' => false,
-                'message' => 'Task list not found'
+                'message' => 'Task list not found',
             ], 404);
         }
 
@@ -115,10 +115,10 @@ class TaskListController extends Controller
         // Update assigned user if provided
         if (isset($validated['user_id'])) {
             $assignedUser = User::find($validated['user_id']);
-            if (!$assignedUser) {
+            if (! $assignedUser) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Assigned user not found'
+                    'message' => 'Assigned user not found',
                 ], 404);
             }
             $taskList->assigned_to = $validated['user_id'];
@@ -134,7 +134,7 @@ class TaskListController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Task updated successfully',
-            'data' => $taskList
+            'data' => $taskList,
         ], 200);
     }
 
@@ -144,20 +144,20 @@ class TaskListController extends Controller
     public function destroy($id)
     {
         $user = Auth::user();
-        
+
         if ($user->role !== 'admin') {
             return response()->json([
                 'success' => false,
-                'message' => 'Only admins can delete tasks'
+                'message' => 'Only admins can delete tasks',
             ], 403);
         }
 
         $taskList = TaskList::find($id);
 
-        if (!$taskList) {
+        if (! $taskList) {
             return response()->json([
                 'success' => false,
-                'message' => 'Task list not found'
+                'message' => 'Task list not found',
             ], 404);
         }
 
@@ -167,7 +167,7 @@ class TaskListController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Task deleted successfully'
+            'message' => 'Task deleted successfully',
         ], 200);
     }
 }

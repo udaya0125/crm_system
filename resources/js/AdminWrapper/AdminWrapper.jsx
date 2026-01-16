@@ -12,7 +12,7 @@ const AdminWrapper = ({ children }) => {
     const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
     const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
-    // Close mobile sidebar on window resize
+    // Close mobile sidebar on window resize & adjust layout
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 1024) {
@@ -36,9 +36,11 @@ const AdminWrapper = ({ children }) => {
                 onToggleCollapse={toggleCollapse}
             />
 
-            <main className={`pt-16 min-h-screen  transition-all duration-300 ${
-                isCollapsed ? 'lg:ml-16' : 'lg:ml-64'
-            }`}>
+            <main
+                className={`pt-16 min-h-screen  transition-all duration-300 ${
+                    isCollapsed ? "lg:ml-16" : "lg:ml-64"
+                }`}
+            >
                 <div className="p-6">{children}</div>
             </main>
         </div>

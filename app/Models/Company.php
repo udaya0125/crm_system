@@ -7,10 +7,8 @@ use Illuminate\Support\Str;
 
 class Company extends Model
 {
- 
-
     protected $fillable = [
-        'company_name','full_name','designation','phone_no','email','address','responsible_person','our_team','client_member','comment','follow_up_date','slug'
+        'company_name', 'full_name', 'designation', 'phone_no', 'email', 'address', 'responsible_person', 'our_team', 'client_member', 'comment', 'follow_up_date', 'slug',
     ];
 
     public function contracts()
@@ -45,7 +43,10 @@ class Company extends Model
         // Update slug when company_name is changed
         static::updating(function ($company) {
             if ($company->isDirty('company_name')) {
-                $company->slug = $company->generateUniqueSlug($company->company_name, $company->id);
+                $company->slug = $company->generateUniqueSlug(
+                    $company->company_name,
+                    $company->id
+                );
             }
         });
     }
@@ -53,18 +54,19 @@ class Company extends Model
     protected function generateUniqueSlug($name, $ignoreId = null)
     {
         $baseSlug = Str::slug($name);
-        $slug = $baseSlug;
-        $counter = 1;
 
-        // Check if slug exists (but ignore current record)
-        while (
-            static::where('slug', $slug)
-                ->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))
-                ->exists()
-        ) {
-            $slug = $baseSlug . '-' . $counter;
-            $counter++;
-        }
+        do {
+            // Generate random 5-digit number
+            $randomNumber = random_int(10000, 99999);
+
+            // Example: company-name-48291
+            $slug = $baseSlug.'-'.$randomNumber;
+
+            $exists = static::where('slug', $slug)
+                ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+                ->exists();
+
+        } while ($exists);
 
         return $slug;
     }

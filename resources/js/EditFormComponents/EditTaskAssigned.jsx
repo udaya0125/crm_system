@@ -51,12 +51,12 @@ const EditTaskAssigned = ({
         defaultValues: {
             title: "",
             description: "",
-            assigned_to: "", // Changed from user_id to assigned_to
+            assigned_to: "", 
         },
         mode: "onChange",
     });
 
-    // Watch description for validation feedback
+    // Watch description for validation feedback 
     const descriptionValue = watch("description");
 
     // Find current assignee's details from users array
@@ -281,9 +281,8 @@ const EditTaskAssigned = ({
                     </div>
 
                     <div className="mb-4">
-
                         {/* Description */}
-                        
+
                         <label
                             className="block text-gray-700 text-sm font-bold mb-2"
                             htmlFor="description"

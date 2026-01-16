@@ -118,7 +118,7 @@ const Company = () => {
                     error.name === "CanceledError" ||
                     error.name === "AbortError"
                 ) {
-                    return; // Request was cancelled, ignore error
+                    return; // Request was cancelled, ignore error & exit
                 }
                 console.error("Fetching error", error);
                 setError("Failed to load companies. Please try again.");
@@ -138,7 +138,7 @@ const Company = () => {
         };
     }, [reloadTrigger]);
 
-    console.log("All Company Data:", allCompany);
+    // console.log("All Company Data:", allCompany);
     const handleDelete = useCallback(async (id) => {
         if (
             !window.confirm(

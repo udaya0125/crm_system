@@ -65,7 +65,7 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
             setFileError("");
             clearErrors("contractFile");
 
-            // Validate file size immediately
+            // Validate file size immediately - max 2MB
             if (file.size > 2 * 1024 * 1024) {
                 const errorMsg = "File size too large. Maximum size is 2MB.";
                 setFileError(errorMsg);
@@ -77,7 +77,7 @@ const Contract = ({ data, updateData, prevStep, onSubmit, companyId }) => {
                 return;
             }
 
-            // Validate file type - ONLY PDF and IMAGES allowed
+            // Validate file type - ONLY PDF and IMAGES allowed (JPG, PNG, GIF, SVG)
             const allowedTypes = [
                 "application/pdf",
                 "image/jpeg",

@@ -21,9 +21,9 @@ import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import parse from "html-react-parser";
 
 const ToDOPage = () => {
-    const [allTodo, setAllTodo] = React.useState([]);
-    const [reloadTrigger, setReloadTrigger] = React.useState(false);
-    const [loading, setLoading] = React.useState(false);
+    const [allTodo, setAllTodo] = useState([]);
+    const [reloadTrigger, setReloadTrigger] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedTodo, setSelectedTodo] = useState(null);

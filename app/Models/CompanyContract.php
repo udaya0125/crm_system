@@ -8,7 +8,7 @@ class CompanyContract extends Model
 {
     //
     protected $fillable = [
-       'image','company_id'
+        'image', 'company_id',
     ];
 
     public function company()

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { router } from "@inertiajs/react";
 import toast from "react-hot-toast";
 
 const EditContract = ({
@@ -46,7 +45,9 @@ const EditContract = ({
     useEffect(() => {
         if (!initialized && existingData && existingData.id) {
             setExistingContract(existingData);
-            const name = existingData.image ? getFileNameFromPath(existingData.image) : "";
+            const name = existingData.image
+                ? getFileNameFromPath(existingData.image)
+                : "";
             setFileName(name);
 
             updateData({
@@ -83,7 +84,8 @@ const EditContract = ({
         ];
 
         if (!allowed.includes(file.type)) {
-            const errorMsg = "Only PDF and image files (JPG, PNG, GIF, SVG) are allowed.";
+            const errorMsg =
+                "Only PDF and image files (JPG, PNG, GIF, SVG) are allowed.";
             setFileError(errorMsg);
             setError("contractFile", { type: "manual", message: errorMsg });
             toast.error(errorMsg);
@@ -145,7 +147,8 @@ const EditContract = ({
         }
 
         if (contractFile && contractFile.size > 2 * 1024 * 1024) {
-            const errorMsg = "File size exceeds 2MB limit. Please select a smaller file.";
+            const errorMsg =
+                "File size exceeds 2MB limit. Please select a smaller file.";
             setFileError(errorMsg);
             setError("contractFile", { type: "manual", message: errorMsg });
             toast.error(errorMsg);
@@ -176,13 +179,19 @@ const EditContract = ({
                         fd,
                         config
                     );
-                    toast.success("Contract updated successfully!", { id: submitToast });
+                    toast.success("Contract updated successfully!", {
+                        id: submitToast,
+                    });
                 } else {
                     await axios.post(route("ourcontract.store"), fd, config);
-                    toast.success("Contract uploaded successfully!", { id: submitToast });
+                    toast.success("Contract uploaded successfully!", {
+                        id: submitToast,
+                    });
                 }
             } else if (existingContract) {
-                toast.success("Contract information saved!", { id: submitToast });
+                toast.success("Contract information saved!", {
+                    id: submitToast,
+                });
             }
 
             updateData({
@@ -222,7 +231,8 @@ const EditContract = ({
     const getDisplayUrl = () => {
         if (existingContract?.image_url) return existingContract.image_url;
         if (existingContract?.image) {
-            if (existingContract.image.startsWith("http")) return existingContract.image;
+            if (existingContract.image.startsWith("http"))
+                return existingContract.image;
             return `${imgurl}/${existingContract.image}`;
         }
         return null;
@@ -241,10 +251,20 @@ const EditContract = ({
                 <div className="w-full max-w-md h-64 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-lg mb-4">
                     {isPdf ? (
                         <div className="flex flex-col items-center">
-                            <svg className="w-20 h-20 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                            <svg
+                                className="w-20 h-20 text-red-500"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                    clipRule="evenodd"
+                                />
                             </svg>
-                            <span className="mt-2 text-gray-700 font-medium">PDF Document</span>
+                            <span className="mt-2 text-gray-700 font-medium">
+                                PDF Document
+                            </span>
                         </div>
                     ) : (
                         <img
@@ -259,7 +279,9 @@ const EditContract = ({
                     <span className="text-sm font-medium text-gray-900 truncate max-w-xs block mx-auto">
                         {fileName}
                     </span>
-                    <span className="ml-1 text-gray-500 text-sm">({fileSizeMB} MB)</span>
+                    <span className="ml-1 text-gray-500 text-sm">
+                        ({fileSizeMB} MB)
+                    </span>
                 </div>
 
                 <button
@@ -275,16 +297,26 @@ const EditContract = ({
 
     const renderExistingContract = () => {
         const isPdf = existingContract?.image?.endsWith(".pdf");
-        
+
         return (
             <div className="flex flex-col justify-center items-center w-full h-full">
                 <div className="w-full max-w-md h-64 flex items-center justify-center bg-gray-100 border border-gray-300 rounded-lg mb-4">
                     {isPdf ? (
                         <div className="flex flex-col items-center">
-                            <svg className="w-20 h-20 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                            <svg
+                                className="w-20 h-20 text-red-500"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                    clipRule="evenodd"
+                                />
                             </svg>
-                            <span className="mt-2 text-gray-700 font-medium">PDF Document</span>
+                            <span className="mt-2 text-gray-700 font-medium">
+                                PDF Document
+                            </span>
                         </div>
                     ) : (
                         <img
@@ -293,12 +325,14 @@ const EditContract = ({
                             className="max-w-full max-h-56 object-contain rounded"
                             onError={(e) => {
                                 e.target.style.display = "none";
-                                if (e.target.nextSibling) e.target.nextSibling.style.display = "block";
+                                if (e.target.nextSibling)
+                                    e.target.nextSibling.style.display =
+                                        "block";
                             }}
                         />
                     )}
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4 mt-2 items-center justify-center flex-wrap">
                     {displayUrl && (
                         <a
@@ -342,14 +376,24 @@ const EditContract = ({
                         <label className="block text-sm font-medium text-gray-700">
                             Upload Contract Document *
                         </label>
-                        <span className="text-xs text-gray-500">PDF and Images only (Max 2MB)</span>
+                        <span className="text-xs text-gray-500">
+                            PDF and Images only (Max 2MB)
+                        </span>
                     </div>
 
                     {fileError && (
                         <div className="p-3 bg-red-50 border border-red-200 rounded-md">
                             <p className="text-sm text-red-600 flex items-center">
-                                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                <svg
+                                    className="w-4 h-4 mr-2"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                        clipRule="evenodd"
+                                    />
                                 </svg>
                                 {fileError}
                             </p>
@@ -389,14 +433,24 @@ const EditContract = ({
                                         />
                                     </svg>
 
-                                    {/* Upload the contract file by clicking the button below. */}
+                                    {/* Upload the contract file by clicking the button below & selecting a file. */}
                                     <div className="mt-4">
                                         <label
                                             htmlFor="contract-upload"
                                             className="cursor-pointer inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                         >
-                                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                            <svg
+                                                className="w-5 h-5 mr-2"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                                />
                                             </svg>
                                             Upload a file
                                         </label>
@@ -411,7 +465,8 @@ const EditContract = ({
                                         />
                                     </div>
                                     <p className="mt-4 text-sm text-gray-500 px-1">
-                                        Upload PDF or image files (JPG, PNG, GIF, SVG)
+                                        Upload PDF or image files (JPG, PNG,
+                                        GIF, SVG)
                                     </p>
                                     <p className="text-xs text-gray-400">
                                         Maximum file size: 2MB
@@ -423,20 +478,25 @@ const EditContract = ({
 
                     {existingContract && !contractFile && (
                         <p className="text-sm text-gray-500 text-center px-2">
-                            Current contract file is saved. Upload a new file to replace it.
+                            Current contract file is saved. Upload a new file to
+                            replace it.
                         </p>
                     )}
                 </div>
 
                 {errors.contractFile && !fileError && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-600">{errors.contractFile.message}</p>
+                        <p className="text-sm text-red-600">
+                            {errors.contractFile.message}
+                        </p>
                     </div>
                 )}
 
                 {errors.submit && (
                     <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-                        <p className="text-sm text-red-600">{errors.submit.message}</p>
+                        <p className="text-sm text-red-600">
+                            {errors.submit.message}
+                        </p>
                     </div>
                 )}
 
@@ -452,18 +512,39 @@ const EditContract = ({
 
                     <button
                         type="submit"
-                        disabled={(!existingContract && !contractFile) || submitting || fileError}
+                        disabled={
+                            (!existingContract && !contractFile) ||
+                            submitting ||
+                            fileError
+                        }
                         className={`px-6 py-2.5 text-white rounded-md transition-colors text-sm font-medium w-full sm:w-auto ${
-                            (!existingContract && !contractFile) || submitting || fileError
+                            (!existingContract && !contractFile) ||
+                            submitting ||
+                            fileError
                                 ? "bg-gray-400 cursor-not-allowed"
                                 : "bg-indigo-600 hover:bg-indigo-700"
                         }`}
                     >
                         {submitting ? (
                             <span className="flex items-center justify-center">
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                <svg
+                                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        className="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        strokeWidth="4"
+                                    />
+                                    <path
+                                        className="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
                                 </svg>
                                 Saving...
                             </span>

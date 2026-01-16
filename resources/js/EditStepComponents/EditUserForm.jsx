@@ -58,7 +58,7 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
         } catch (error) {
             if (error.response && error.response.data.errors) {
                 setApiErrors(error.response.data.errors);
-                // Set errors in react-hook-form
+                // Set errors in react-hook-form & throw to stop submission
                 Object.keys(error.response.data.errors).forEach((key) => {
                     setError(key, {
                         type: "server",
@@ -116,7 +116,6 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
                 {/* Name */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -175,7 +174,9 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
                             errors.role ? "border-red-500" : "border-gray-300"
                         }`}
                     >
-                        <option disabled value="">Select Role</option>
+                        <option disabled value="">
+                            Select Role
+                        </option>
                         <option value="admin">Admin</option>
                         <option value="user">User</option>
                     </select>

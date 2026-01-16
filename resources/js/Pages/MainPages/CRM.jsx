@@ -29,7 +29,7 @@ const CRM = () => {
         }));
     };
 
-    // Special function to handle company creation and capture the ID
+    // Special function to handle company creation and capture the ID 
     const updateCompanyData = (data, createdCompanyId = null) => {
         updateData("company", data);
 
@@ -112,9 +112,7 @@ const CRM = () => {
                                 currentStep={step}
                                 goToStep={goToStep}
                             />
-                            <div className="">
-                                {renderStep()}
-                            </div>
+                            <div className="">{renderStep()}</div>
                         </div>
                     </div>
                 </div>
@@ -124,6 +122,7 @@ const CRM = () => {
 };
 
 export default CRM;
+
 
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import Contract from "@/StepsComponents.jsx/Contract";
@@ -392,3 +391,4 @@ export default CRM;
 // };
 
 // export default CRM;
+

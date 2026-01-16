@@ -22,7 +22,7 @@ const AdminNavBar = ({ onMenuToggle }) => {
         }
     };
 
-    // Close menu when clicking outside or pressing Escape
+    // Close menu when clicking outside or pressing Escape key
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (

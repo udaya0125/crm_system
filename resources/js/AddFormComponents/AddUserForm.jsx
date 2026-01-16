@@ -3,7 +3,6 @@ import { useForm } from "react-hook-form";
 import axios from "axios";
 import { X } from "lucide-react";
 
-
 const PasswordInput = ({
     name,
     label,
@@ -113,7 +112,7 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
 
     const watchPassword = watch("password");
 
-    // Add password confirmation validation
+    // Add password confirmation validation logic
     const validatePasswordConfirmation = (value) => {
         if (value !== watchPassword) {
             return "Passwords do not match";
@@ -121,7 +120,7 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
         return true;
     };
 
-    // Handle Create User
+    // Handle Create User API Call
     const handleCreate = async (formData) => {
         try {
             await axios.post(route("ouruser.store"), formData, {
@@ -145,7 +144,7 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
         }
     };
 
-    // Handle Form Submit
+    // Handle Form Submit                                                                               
     const onSubmit = async (data) => {
         const formData = new FormData();
 
@@ -164,7 +163,7 @@ const AddUserForm = ({ onSuccess, onCancel }) => {
 
             await handleCreate(formData);
 
-            // Reset form and call success callback
+            // Reset form and call success callback     
             reset();
             onSuccess();
         } catch (error) {

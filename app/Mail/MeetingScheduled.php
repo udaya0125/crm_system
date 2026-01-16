@@ -14,6 +14,7 @@ class MeetingScheduled extends Mailable
     use Queueable, SerializesModels;
 
     public $meeting;
+
     public $company;
 
     /**
@@ -31,7 +32,7 @@ class MeetingScheduled extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'New Meeting Scheduled - ' . $this->company->company_name,
+            subject: 'New Meeting Scheduled - '.$this->company->company_name,
         );
     }
 

@@ -19,8 +19,8 @@ const EditMeeting = ({
     const [isInPerson, setIsInPerson] = useState(false);
     const [hasPhoneDetails, setHasPhoneDetails] = useState(false);
     const [hasMeetingLocation, setHasMeetingLocation] = useState(false);
-    
-    // Track if user has interacted with the form
+
+    // Track if user has interacted with the form fields
     const [touchedFields, setTouchedFields] = useState({});
 
     const {
@@ -60,9 +60,9 @@ const EditMeeting = ({
 
     // Track field interactions
     const handleFieldBlur = (fieldName) => {
-        setTouchedFields(prev => ({
+        setTouchedFields((prev) => ({
             ...prev,
-            [fieldName]: true
+            [fieldName]: true,
         }));
     };
 
@@ -74,7 +74,7 @@ const EditMeeting = ({
         setIsInPerson(inPerson);
         setHasPhoneDetails(!!existingData?.phone_details);
         setHasMeetingLocation(!!existingData?.meeting_location);
-        
+
         // Clear errors when switching meeting types
         if (meetingType === "phone") {
             clearErrors("meetingLocation");
@@ -174,22 +174,31 @@ const EditMeeting = ({
         }
 
         // Mark all fields as touched before validation
-        const allFields = ['meetingDate', 'meetingTime', 'meetingType', 'attendees', 'keyDiscussionPoints'];
-        if (isPhone) allFields.push('phoneDetails');
-        if (isInPerson) allFields.push('meetingLocation');
-        
+        const allFields = [
+            "meetingDate",
+            "meetingTime",
+            "meetingType",
+            "attendees",
+            "keyDiscussionPoints",
+        ];
+        if (isPhone) allFields.push("phoneDetails");
+        if (isInPerson) allFields.push("meetingLocation");
+
         const newTouched = {};
-        allFields.forEach(field => {
+        allFields.forEach((field) => {
             newTouched[field] = true;
         });
         setTouchedFields(newTouched);
 
         // Perform manual validation for conditional fields
         let isFormValid = true;
-        
+
         // Validate phone details if meeting type is phone
         if (meetingType === "phone") {
-            const phoneValidation = validatePhoneDetails(formData.phoneDetails, meetingType);
+            const phoneValidation = validatePhoneDetails(
+                formData.phoneDetails,
+                meetingType
+            );
             if (phoneValidation !== true) {
                 setError("phoneDetails", {
                     type: "manual",
@@ -200,10 +209,13 @@ const EditMeeting = ({
                 clearErrors("phoneDetails");
             }
         }
-        
+
         // Validate meeting location if meeting type is in-person
         if (meetingType === "in-person") {
-            const locationValidation = validateMeetingLocation(formData.meetingLocation, meetingType);
+            const locationValidation = validateMeetingLocation(
+                formData.meetingLocation,
+                meetingType
+            );
             if (locationValidation !== true) {
                 setError("meetingLocation", {
                     type: "manual",
@@ -214,10 +226,10 @@ const EditMeeting = ({
                 clearErrors("meetingLocation");
             }
         }
-        
+
         // Trigger validation for all other fields
         const otherFieldsValid = await trigger();
-        
+
         if (!isFormValid || !otherFieldsValid) {
             toast.error("Please fill in all required fields correctly");
             return;
@@ -427,7 +439,7 @@ const EditMeeting = ({
                                     } else if (e.target.value === "in-person") {
                                         clearErrors("phoneDetails");
                                     }
-                                }
+                                },
                             })}
                             onBlur={() => handleFieldBlur("meetingType")}
                             className={getInputClassName("meetingType")}
@@ -454,9 +466,13 @@ const EditMeeting = ({
                             <input
                                 type="text"
                                 {...register("meetingLocation", {
-                                    required: isInPerson ? "Location is required for in-person meetings" : false,
+                                    required: isInPerson
+                                        ? "Location is required for in-person meetings"
+                                        : false,
                                 })}
-                                onBlur={() => handleFieldBlur("meetingLocation")}
+                                onBlur={() =>
+                                    handleFieldBlur("meetingLocation")
+                                }
                                 placeholder="Meeting venue or address"
                                 className={getInputClassName("meetingLocation")}
                             />
@@ -479,7 +495,9 @@ const EditMeeting = ({
                             <input
                                 type="text"
                                 {...register("phoneDetails", {
-                                    required: isPhone ? "Phone details are required for phone meetings" : false,
+                                    required: isPhone
+                                        ? "Phone details are required for phone meetings"
+                                        : false,
                                 })}
                                 onBlur={() => handleFieldBlur("phoneDetails")}
                                 placeholder="Enter phone number or call details"
@@ -549,8 +567,12 @@ const EditMeeting = ({
                                     onChange={(content) => {
                                         field.onChange(content);
                                         // Mark as touched when user starts typing
-                                        if (!touchedFields.keyDiscussionPoints) {
-                                            handleFieldBlur("keyDiscussionPoints");
+                                        if (
+                                            !touchedFields.keyDiscussionPoints
+                                        ) {
+                                            handleFieldBlur(
+                                                "keyDiscussionPoints"
+                                            );
                                         }
                                         // Clear error when user starts typing
                                         if (errors.keyDiscussionPoints) {

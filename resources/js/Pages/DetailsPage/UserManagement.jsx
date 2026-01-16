@@ -22,7 +22,7 @@ const UserManagement = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // Use Effect
+    // Use Effect - Fetch Users
     useEffect(() => {
         const fetchUser = async () => {
             try {

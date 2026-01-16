@@ -21,7 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'role'
+        'role',
     ];
 
     /**
@@ -47,9 +47,7 @@ class User extends Authenticatable
         ];
     }
 
-
-    
-     // A user has many task lists
+    // A user has many task lists
     public function taskLists()
     {
         return $this->hasMany(TaskList::class);
@@ -61,8 +59,7 @@ class User extends Authenticatable
         return $this->hasManyThrough(Task::class, TaskList::class);
     }
 
-
-     public function assignedTasks()
+    public function assignedTasks()
     {
         return $this->hasMany(TaskList::class, 'assigned_to');
     }
