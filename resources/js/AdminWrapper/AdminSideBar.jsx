@@ -30,8 +30,11 @@ const AdminSideBar = ({
     const { auth } = usePage().props;
     const user = auth?.user;
 
-    // Check The Role of the User
+    // Check The Role of the User whether the role is admin
     const isAdmin = user?.role === "admin";
+
+    // Check The Role of the User whether the role is user
+    const isUser = user?.role === "user";
 
     return (
         <>
