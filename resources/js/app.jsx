@@ -6,7 +6,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
 
-const appName = import.meta.env.VITE_APP_NAME || 'Sale Support';
+const appName = import.meta.env.VITE_APP_NAME || 'CRM';
 
 createInertiaApp({
     title: (title) => `${title} CRM`,
