@@ -327,6 +327,83 @@ const AdminSideBar = ({
                             </Link>
                         </>
                     )}
+
+                    {/* //-----------------------------------------
+                        // Client Link for Both Admin and User
+                        //----------------------------------------- */}
+                    <Link
+                        href="/client"
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/client")
+                                    ? "bg-gray-200 text-gray-600"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "Client" : ""}
+                    >
+                        <CheckSquare
+                            className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/client")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                Client
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Client
+                            </div>
+                        )}
+                    </Link>
+
+
+                    {/* //-----------------------------------------
+                        // Expiration Link for Both Admin and User
+                        //----------------------------------------- */}
+                    <Link
+                        href="/expiration"
+                        className={`
+                            flex items-center rounded-lg transition-colors duration-200 group relative
+                            ${isCollapsed ? "p-3 justify-center" : "p-3"}
+                            ${
+                                isActive("/expiration")
+                                    ? "bg-gray-200 text-gray-600"
+                                    : "text-gray-600 hover:bg-gray-50"
+                            }
+                        `}
+                        title={isCollapsed ? "Expiration" : ""}
+                    >
+                        <CheckSquare
+                            className={`
+                            ${isCollapsed ? "w-5 h-5" : "w-5 h-5"}
+                            ${
+                                isActive("/expiration")
+                                    ? "text-gray-600"
+                                    : "text-gray-500 group-hover:text-gray-700"
+                            }
+                        `}
+                        />
+                        {!isCollapsed && (
+                            <span className="ml-3 font-medium whitespace-nowrap">
+                                Expiration
+                            </span>
+                        )}
+                        {isCollapsed && (
+                            <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                                Expiration
+                            </div>
+                        )}
+                    </Link>
                 </div>
             </div>
         </>

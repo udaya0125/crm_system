@@ -9,6 +9,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskListController;
 use App\Http\Controllers\TodoController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\ExpirationController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -53,6 +55,36 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('MainPages/Company');
         
     });
+
+    Route::get('/client', function(){
+        return Inertia::render('ClientDetails/Client');
+        
+    });
+
+
+    Route::get('/expiration', function(){
+        return Inertia::render('ClientDetails/Expiration');
+        
+    });
+
+    // -----------------------------------------
+    // CLIENT CRUD
+    // -----------------------------------------
+
+    Route::get('/ourclients', [ClientController::class, 'index'])->name('ourclients.index');
+    Route::post('/ourclients', [ClientController::class, 'store'])->name('ourclients.store');
+    Route::put('/ourclients/{id}', [ClientController::class, 'update'])->name('ourclients.update');
+    Route::delete('/ourclients/{id}', [ClientController::class, 'destroy'])->name('ourclients.destroy');
+
+
+    // -----------------------------------------
+    // EXPIRATION CRUD
+    // -----------------------------------------
+
+    Route::get('/ourexpirations', [ExpirationController::class, 'index'])->name('ourexpirations.index');
+    Route::post('/ourexpirations', [ExpirationController::class, 'store'])->name('ourexpirations.store');
+    Route::put('/ourexpirations/{id}', [ExpirationController::class, 'update'])->name('ourexpirations.update');
+    Route::delete('/ourexpirations/{id}', [ExpirationController::class, 'destroy'])->name('ourexpirations.destroy');
 
 
     // -----------------------------------------
