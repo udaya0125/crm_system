@@ -5,4 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+})->purpose('Display an inspiring quote')->hourly();
+
+// Schedule expiration checks to run daily at 9:00 AM
+Schedule::command('expirations:check')->dailyAt('09:00');

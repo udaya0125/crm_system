@@ -1335,10 +1335,10 @@ const Task = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setSelectedTask(task)}
-                                className={`p-2 rounded transition-colors flex items-center justify-center ${
+                                className={`p-2  transition-colors flex items-center justify-center ${
                                     selectedTask?.id === task.id
-                                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        ? " text-blue-700 "
+                                        : " text-gray-700 "
                                 }`}
                                 title="View task details"
                             >
@@ -1349,7 +1349,7 @@ const Task = () => {
                             {!isCompleted && user.role === "user" && (
                                 <button
                                     onClick={() => handleEdit(task)}
-                                    className="p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
+                                    className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                                     title="Edit task"
                                 >
                                     <Edit size={16} />

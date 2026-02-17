@@ -11,6 +11,7 @@ use App\Http\Controllers\TaskListController;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ExpirationController;
+use App\Http\Controllers\NotificationController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -30,8 +31,16 @@ Route::middleware('auth')->group(function () {
     // -----------------------------------------
     // DASHBOARD PAGE
     // -----------------------------------------
+
+    Route::get('/dashboard', function(){
+        return Inertia::render('ClientDetails/Dashboard');
+    });
+
+    // -----------------------------------------
+    // CRM PAGE
+    // -----------------------------------------
     
-    Route::get('/', function(){
+    Route::get('/crm', function(){
         return Inertia::render('MainPages/CRM');
     });
 
@@ -154,6 +163,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/ourtodo', [TodoController::class, 'store'])->name('ourtodo.store');
     Route::put('/ourtodo/{id}', [TodoController::class, 'update'])->name('ourtodo.update');
     Route::delete('/ourtodo/{id}', [TodoController::class, 'destroy'])->name('ourtodo.destroy');
+
+
+
+    // --------------------------------------------------------------------------
+    // Notification routes for Dashboard
+    // --------------------------------------------------------------------------
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications', [NotificationController::class, 'clearAll'])->name('notifications.clearAll');
 
 });
 

@@ -236,6 +236,8 @@
 
 // export default AddTodo;
 
+
+
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -395,8 +397,8 @@ const AddTodo = ({ onClose, handleAdd }) => {
                             </div>
                         )}
 
-                        {/* First Row - Title */}
-                        <div className="grid grid-cols-1 gap-4">
+                        {/* First Row - Title and Due Date on same line */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {/* Title Field */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -423,6 +425,21 @@ const AddTodo = ({ onClose, handleAdd }) => {
                                 {errors.title && (
                                     <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
                                 )}
+                            </div>
+
+                            {/* Due Date Field */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Due Date
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        {...register("due_date")}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
                             </div>
                         </div>
 
@@ -456,21 +473,6 @@ const AddTodo = ({ onClose, handleAdd }) => {
                                     </div>
                                 </div>
                             ))}
-                        </div>
-
-                        {/* Third Row - Due Date */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1 mt-16 lg:mt-10">
-                                Due Date
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="date"
-                                    {...register("due_date")}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    disabled={isSubmitting}
-                                />
-                            </div>
                         </div>
 
                         {/* Form Actions */}

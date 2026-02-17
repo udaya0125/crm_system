@@ -618,38 +618,85 @@ const EditTodo = ({
                             </div>
                         )}
 
-                        {/* Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Title <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    {...register("title", {
-                                        required: "Title is required",
-                                        minLength: {
-                                            value: 3,
-                                            message:
-                                                "Title must be at least 3 characters",
-                                        },
-                                        maxLength: {
-                                            value: 200,
-                                            message:
-                                                "Title must be less than 200 characters",
-                                        },
-                                    })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                        errors.title ? 'border-red-500' : 'border-gray-300'
-                                    }`}
-                                    placeholder="Enter todo title"
-                                    disabled={isSubmitting}
-                                />
+                        {/* First Row - Title and Due Date on same line */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Title Field */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Title <span className="text-red-500">*</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="text"
+                                        {...register("title", {
+                                            required: "Title is required",
+                                            minLength: {
+                                                value: 3,
+                                                message:
+                                                    "Title must be at least 3 characters",
+                                            },
+                                            maxLength: {
+                                                value: 200,
+                                                message:
+                                                    "Title must be less than 200 characters",
+                                            },
+                                        })}
+                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                            errors.title ? 'border-red-500' : 'border-gray-300'
+                                        }`}
+                                        placeholder="Enter todo title"
+                                        disabled={isSubmitting}
+                                    />
+                                </div>
+                                {errors.title && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                                )}
                             </div>
-                            {errors.title && (
-                                <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
-                            )}
+
+                            {/* Due Date Field */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Due Date
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="date"
+                                        {...register("due_date")}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        disabled={isSubmitting}
+                                        min={new Date().toISOString().split("T")[0]}
+                                    />
+                                </div>
+                            </div>
                         </div>
+
+                        {/* Original Descriptions Section */}
+                        {/* {originalDescriptions.length > 0 && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Original Descriptions
+                                </label>
+                                <div className="space-y-4">
+                                    {originalDescriptions.map((desc, index) => (
+                                        <div key={desc.id} className="relative">
+                                            <div className="flex items-start gap-2">
+                                                <div className="flex-1 relative">
+                                                    <div className="absolute -left-1 top-2 text-gray-400">
+                                                        <Lock size={16} />
+                                                    </div>
+                                                    <div className="pl-6 bg-gray-50 rounded-lg border border-gray-200 p-3">
+                                                        <div 
+                                                            className="prose max-w-none"
+                                                            dangerouslySetInnerHTML={{ __html: desc.description }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )} */}
 
                         {/* New Descriptions Section */}
                         <div>
@@ -727,59 +774,40 @@ const EditTodo = ({
                             </div>
                         </div>
 
-                        {/* Due Date and Status Row */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start ">
-                            {/* Due Date */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1 ">
-                                    Due Date
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        type="date"
-                                        {...register("due_date")}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        disabled={isSubmitting}
-                                        min={new Date().toISOString().split("T")[0]}
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Status */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Status
-                                </label>
-                                <div className="relative">
-                                    <Controller
-                                        name="is_completed"
-                                        control={control}
-                                        render={({ field }) => (
-                                            <select
-                                                {...field}
-                                                value={
-                                                    field.value
-                                                        ? "completed"
-                                                        : "incomplete"
-                                                }
-                                                onChange={(e) =>
-                                                    field.onChange(
-                                                        e.target.value === "completed"
-                                                    )
-                                                }
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                                disabled={isSubmitting}
-                                            >
-                                                <option value="incomplete">
-                                                    Incomplete
-                                                </option>
-                                                <option value="completed">
-                                                    Completed
-                                                </option>
-                                            </select>
-                                        )}
-                                    />
-                                </div>
+                        {/* Status Row - Now with reduced width */}
+                        <div className="md:w-1/2 mb-4 ">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Status
+                            </label>
+                            <div className="relative">
+                                <Controller
+                                    name="is_completed"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <select
+                                            {...field}
+                                            value={
+                                                field.value
+                                                    ? "completed"
+                                                    : "incomplete"
+                                            }
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value === "completed"
+                                                )
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            disabled={isSubmitting}
+                                        >
+                                            <option value="incomplete">
+                                                Incomplete
+                                            </option>
+                                            <option value="completed">
+                                                Completed
+                                            </option>
+                                        </select>
+                                    )}
+                                />
                             </div>
                         </div>
 

@@ -1043,10 +1043,10 @@ const ToDOPage = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setSelectedTodo(todo)}
-                                className={`p-2 rounded transition-colors flex items-center justify-center ${
+                                className={`p-2  transition-colors flex items-center justify-center ${
                                     selectedTodo?.id === todo.id
-                                        ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                        ? " text-blue-700"
+                                        : " text-gray-700 "
                                 }`}
                                 title="View todo details"
                             >
@@ -1057,7 +1057,7 @@ const ToDOPage = () => {
                             {!isCompleted && (
                                 <button
                                     onClick={() => handleEdit(todo)}
-                                    className="p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
+                                    className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                                     title="Edit todo"
                                 >
                                     <Edit size={16} />
@@ -1066,7 +1066,7 @@ const ToDOPage = () => {
 
                             <button
                                 onClick={() => handleDelete(todo.id)}
-                                className="p-2 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
+                                className="text-red-600 hover:text-red-900 transition duration-200"
                                 title="Delete todo"
                             >
                                 <Trash2 size={16} />
