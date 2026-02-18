@@ -9,90 +9,99 @@ use Carbon\Carbon;
 
 class CheckExpirations extends Command
 {
-    protected $signature = 'expirations:check';
-    protected $description = 'Check for expiring items and send notifications';
+    protected $signature   = 'expirations:check';
+    protected $description = 'Check for expiring items and create notifications';
 
-    public function handle()
+    public function handle(): int
     {
-        $today = Carbon::today();
+        $today       = Carbon::today();
         $expirations = Expiration::with('client')->get();
-        $notificationCount = 0;
+        $notifyCount = 0;
 
         foreach ($expirations as $expiration) {
-            $expirationDate = Carbon::parse($expiration->expiration_date);
-            $daysUntilExpiration = $today->diffInDays($expirationDate, false);
+            $expirationDate      = Carbon::parse($expiration->expiration_date);
+            $daysUntilExpiration = (int) $today->diffInDays($expirationDate, false);
 
-            // Skip if already expired
+            // Skip already expired
             if ($daysUntilExpiration < 0) {
                 continue;
             }
 
-            $clientName = $expiration->client ? $expiration->client->name : 'Unknown Client';
+            $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
 
-            // Less than 7 days - send daily notification
-            if ($daysUntilExpiration <= 7 && $daysUntilExpiration >= 0) {
-                if ($this->createDailyNotification($expiration, $clientName, $daysUntilExpiration)) {
-                    $notificationCount++;
+            // ── Less than 7 days → notify EVERY DAY ──────────────────
+            if ($daysUntilExpiration <= 7) {
+                if ($this->createUrgentDailyNotification($expiration, $clientName, $daysUntilExpiration)) {
+                    $notifyCount++;
                 }
             }
-            // Less than 1 month (30 days) - send notification once
+            // ── Less than 30 days → notify ONCE ──────────────────────
             elseif ($daysUntilExpiration <= 30) {
-                if ($this->createMonthlyNotification($expiration, $clientName, $daysUntilExpiration)) {
-                    $notificationCount++;
+                if ($this->createWarningNotificationOnce($expiration, $clientName, $daysUntilExpiration)) {
+                    $notifyCount++;
                 }
             }
         }
 
-        $this->info("Checked expirations. Created {$notificationCount} notifications.");
+        $this->info("Done. {$notifyCount} new notification(s) created.");
         return 0;
     }
 
-    private function createDailyNotification($expiration, $clientName, $daysLeft)
-    {
-        $today = Carbon::today()->format('Y-m-d');
-        
-        // Check if notification already sent today
-        $existingNotification = Notification::where('message', 'like', "%'{$expiration->title}' for {$clientName}%")
-            ->whereDate('created_at', $today)
-            ->where('message', 'like', '%expiring in ' . $daysLeft . ' day%')
-            ->first();
+    // ---------------------------------------------------------------
+    // Less than 7 days → new notification every day on login
+    // Unique key: expiration title + client + today's date
+    // ---------------------------------------------------------------
+    private function createUrgentDailyNotification(
+        Expiration $expiration,
+        string $clientName,
+        int $daysLeft
+    ): bool {
+        $dayText = $daysLeft === 1 ? 'day' : 'days';
+        $prefix  = $daysLeft <= 3 ? '🔴 URGENT: ' : '⚠️ ';
+        $message = "{$prefix}'{$expiration->title}' for {$clientName} is expiring in {$daysLeft} {$dayText}!";
 
-        if (!$existingNotification) {
-            $dayText = $daysLeft === 1 ? 'day' : 'days';
-            $urgency = $daysLeft <= 3 ? '🔴 URGENT: ' : '⚠️ ';
-            
-            $message = "{$urgency}'{$expiration->title}' for {$clientName} is expiring in {$daysLeft} {$dayText}!";
-            
-            Notification::create([
-                'message' => $message,
-                'is_read' => false,
-            ]);
+        // Check if this exact message was already created today
+        $alreadySentToday = Notification::where('message', $message)
+            ->whereDate('created_at', Carbon::today())
+            ->exists();
 
-            return true;
+        if ($alreadySentToday) {
+            return false;
         }
 
-        return false;
+        Notification::create([
+            'message' => $message,
+            'is_read' => false,
+        ]);
+
+        return true;
     }
 
-    private function createMonthlyNotification($expiration, $clientName, $daysLeft)
-    {
-        // Check if notification already sent for this expiration in the last 7 days
-        $recentNotification = Notification::where('message', 'like', "%'{$expiration->title}' for {$clientName}%")
-            ->where('created_at', '>=', Carbon::now()->subDays(7))
-            ->where('message', 'like', '%expiring in%')
-            ->first();
+    // ---------------------------------------------------------------
+    // Less than 30 days → notify only ONCE (never repeat)
+    // Unique key: expiration title + client name in message
+    // ---------------------------------------------------------------
+    private function createWarningNotificationOnce(
+        Expiration $expiration,
+        string $clientName,
+        int $daysLeft
+    ): bool {
+        // Use a fixed unique marker so it never duplicates regardless of daysLeft changing
+        $uniqueMarker = "⏰ '{$expiration->title}' for {$clientName} is expiring in";
 
-        if (!$recentNotification) {
-            $message = "⏰ '{$expiration->title}' for {$clientName} is expiring in {$daysLeft} days. Consider renewing soon.";
-            
-            Notification::create([
-                'message' => $message,
-                'is_read' => false,
-            ]);
+        // If any warning already exists for this expiration, skip
+        $alreadyNotified = Notification::where('message', 'like', "{$uniqueMarker}%")
+            ->exists();
 
-            return true;
+        if ($alreadyNotified) {
+            return false;
         }
 
-        return false;
+        Notification::create([
+            'message' => "{$uniqueMarker} {$daysLeft} days. Consider renewing soon.",
+            'is_read' => false,
+        ]);
+
+        return true;
     }
 }

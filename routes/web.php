@@ -26,6 +26,10 @@ use App\Http\Controllers\NotificationController;
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/', function(){
+        return Inertia::render('ClientDetails/Welcome');
+    });
+
 Route::middleware('auth')->group(function () {
 
     // -----------------------------------------

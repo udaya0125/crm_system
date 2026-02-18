@@ -82,7 +82,7 @@ class ExpirationController extends Controller
     private function createExpirationNotification($expiration, $action)
     {
         $expiration->load('client');
-        $clientName = $expiration->client ? $expiration->client->name : 'Unknown Client';
+        $clientName = $expiration->client ? $expiration->client->organization_name : 'Unknown Client';
         
         $message = '';
         
@@ -117,7 +117,7 @@ class ExpirationController extends Controller
                 continue;
             }
 
-            $clientName = $expiration->client ? $expiration->client->name : 'Unknown Client';
+            $clientName = $expiration->client ? $expiration->client->organization_name : 'Unknown Client';
 
             // Less than 7 days - send daily notification
             if ($daysUntilExpiration <= 7 && $daysUntilExpiration >= 0) {
