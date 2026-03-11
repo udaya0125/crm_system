@@ -88,6 +88,12 @@ const Dashboard = () => {
     const columns = useMemo(
         () => [
             {
+                Header: "SN",
+                accessor: (row, i) => i + 1,
+                id: "rowIndex",
+                width: 60,
+            },
+            {
                 Header: "Title",
                 accessor: "title",
                 Cell: ({ value }) => (
