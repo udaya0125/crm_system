@@ -80,6 +80,12 @@ Route::middleware('auth')->group(function () {
         
     });
 
+
+    Route::get('/client-management', function(){
+        return Inertia::render('ClientDetails/ClientManagement');
+        
+    });
+
     // -----------------------------------------
     // CLIENT CRUD
     // -----------------------------------------
