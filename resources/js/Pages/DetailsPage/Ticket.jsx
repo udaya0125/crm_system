@@ -1,32 +1,33 @@
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Plus } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 
-const ClientManagement = () => {
-    const [allUser, setAllUser] = useState([]);
+const Ticket = () => {
+    const [allTickets, setAllTickets] = useState([]);
     const [reloadTrigger, setReloadTrigger] = useState(false);
-    const [editingUser, setEditingUser] = useState(null);
+    const [editingTicket, setEditingTicket] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
 
-    // For fetching the user data
+
+        // For fetching the ticket data
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchTickets = async () => {
             try {
-                const response = await axios.get(route("users.index"));
-                setAllUser(response.data);
+                const response = await axios.get(route("ourtickets.index"));
+                setAllTickets(response.data);
             } catch (error) {
                 console.error("fetching error ", error);
             }
         };
 
-        fetchUser();
+        fetchTickets();
     }, [reloadTrigger]);
 
-    // For delete the user
+    // For delete the ticket
     const handleDelete = async (id) => {
         try {
             const response = await axios.delete(
-                route("users.destroy", { id: id }),
+                route("ourtickets.destroy", { id: id })
             );
             console.log(response.data);
             setReloadTrigger((prev) => !prev);
@@ -36,8 +37,8 @@ const ClientManagement = () => {
     };
 
     // handleedit
-    const handleEdit = (user) => {
-        setEditingUser(user);
+    const handleEdit = (ticket) => {
+        setEditingTicket(ticket);
     };
 
     // Handlapdate after the  edit
@@ -45,18 +46,18 @@ const ClientManagement = () => {
         try {
             formData.append("_method", "PUT");
             const response = await axios.post(
-                route("users.update", { id }),
+                route("ourtickets.update", { id }),
                 formData,
                 {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
-                },
+                }
             );
             setReloadTrigger((prev) => !prev);
             return response.data;
         } catch (error) {
-            console.log("Error updating user", error);
+            console.log("Error updating ticket", error);
             throw error;
         }
     };
@@ -84,4 +85,4 @@ const ClientManagement = () => {
     );
 };
 
-export default ClientManagement;
+export default Ticket;

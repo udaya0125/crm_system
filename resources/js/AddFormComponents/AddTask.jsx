@@ -318,6 +318,7 @@ import { useForm, Controller } from "react-hook-form";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { X, User, UserPlus } from "lucide-react";
+import Select from "react-select";
 
 const AddTask = ({ onAddTask, onClose, taskLists }) => {
     const {
@@ -326,6 +327,7 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
         formState: { errors, isSubmitting },
         reset,
         watch,
+        setValue,
     } = useForm({
         defaultValues: {
             title: "",
@@ -414,6 +416,46 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
             console.error("Error formatting date:", error);
             return null;
         }
+    };
+
+    // Transform taskLists into options for react-select
+    const taskListOptions = taskLists?.map(list => ({
+        value: list.id,
+        label: list.title
+    })) || [];
+
+    // Custom styles for react-select
+    const selectStyles = {
+        control: (base, state) => ({
+            ...base,
+            minHeight: '42px',
+            borderColor: errors.task_list_id ? '#ef4444' : '#d1d5db',
+            boxShadow: 'none',
+            '&:hover': {
+                borderColor: '#3b82f6'
+            },
+            ...(state.isFocused && {
+                borderColor: '#3b82f6',
+                boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.5)'
+            })
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#e5e7eb' : 'white',
+            color: state.isSelected ? 'white' : '#1f2937',
+            cursor: 'pointer',
+            '&:active': {
+                backgroundColor: state.isSelected ? '#3b82f6' : '#d1d5db'
+            }
+        }),
+        menu: (base) => ({
+            ...base,
+            zIndex: 50
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: '#9ca3af'
+        })
     };
 
     // Handle form submission
@@ -525,7 +567,7 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                 {/* Task List Selection - Updated Layout */}
                 <div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Task List Dropdown */}
+                        {/* Task List Dropdown with React Select */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Task List <span className="text-red-500">*</span>
@@ -536,22 +578,25 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                     control={control}
                                     rules={{ required: "Task list is required" }}
                                     render={({ field }) => (
-                                        <select
+                                        <Select
                                             {...field}
-                                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                                errors.task_list_id ? 'border-red-500' : 'border-gray-300'
-                                            }`}
-                                            disabled={isSubmitting}
-                                            required
-                                        >
-                                            <option value="">Select a Task List</option>
-                                            {taskLists &&
-                                                taskLists.map((list) => (
-                                                    <option key={list.id} value={list.id}>
-                                                        {list.title}
-                                                    </option>
-                                                ))}
-                                        </select>
+                                            options={taskListOptions}
+                                            styles={selectStyles}
+                                            placeholder="Select a Task List"
+                                            isDisabled={isSubmitting}
+                                            isClearable={false}
+                                            isSearchable={true}
+                                            value={taskListOptions.find(option => option.value === field.value) || null}
+                                            onChange={(selectedOption) => {
+                                                field.onChange(selectedOption ? selectedOption.value : '');
+                                            }}
+                                            onBlur={field.onBlur}
+                                            getOptionLabel={(option) => option.label}
+                                            getOptionValue={(option) => option.value}
+                                            className="react-select-container"
+                                            classNamePrefix="react-select"
+                                            noOptionsMessage={() => "No task lists available"}
+                                        />
                                     )}
                                 />
                             </div>

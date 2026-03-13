@@ -1,11 +1,111 @@
-import React from 'react'
+import React from "react";
 
 const AddClientManagement = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+    const [submitting, setSubmitting] = useState(false);
+    const [userForm, setUserForm] = useState({
+        fullname: "",
+        email: "",
+        image: "",
+        address: "",
+        role: "",
+        status: "",
+        date: "",
+        auth: "",
+    });
 
-export default AddClientManagement
+    //  Use Effect
+    useEffect(() => {
+        if (editingUser) {
+            setUserForm({
+                ...editingUser,
+                image: null,
+            });
+            setShowForm(true);
+        } else {
+            setUserForm({
+                fullname: "",
+                email: "",
+                image: "",
+                address: "",
+                role: "",
+                status: "",
+                date: "",
+                auth: "",
+            });
+        }
+    }, [editingUser]);
+
+    // Handle Create User
+    const handleCreate = async (formData) => {
+        try {
+            await axios.post(route("users.store"), formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            setReloadTrigger((prev) => !prev);
+        } catch (error) {
+            console.log("Error creating user", error);
+            throw error;
+        }
+    };
+
+    // Handle Submit - now clearly separated paths
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        // Append all form data except image if it's empty
+        for (const key in userForm) {
+            if (userForm[key] !== null && userForm[key] !== "") {
+                formData.append(key, userForm[key]);
+            }
+        }
+        try {
+            setSubmitting(true);
+
+            if (editingUser) {
+                // Editing existing user
+                await handleUpdate(formData, editingUser.id);
+            } else {
+                // Creating new user
+                await handleCreate(formData);
+            }
+            setUserForm({
+                fullname: "",
+                email: "",
+                address: "",
+                role: "",
+                status: "",
+                date: "",
+                auth: "",
+                image: null,
+            });
+
+            setShowForm(false);
+            setEditingUser(null);
+        } catch (error) {
+            console.log("Error saving data", error);
+        } finally {
+            setSubmitting(false);
+        }
+    };
+
+    // handle  change for image and the others
+
+    const handleChange = (e) => {
+        const { name, value, type, files } = e.target;
+        setUserForm((prev) => ({
+            ...prev,
+            [name]: type === "file" ? files[0] : value,
+        }));
+    };
+
+    return (
+        <div>
+            <h2>Add Client</h2>
+        </div>
+    );
+};
+
+export default AddClientManagement;
