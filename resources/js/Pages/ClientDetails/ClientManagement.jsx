@@ -1,6 +1,6 @@
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Plus } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ClientManagement = () => {
     const [allUser, setAllUser] = useState([]);
@@ -63,6 +63,7 @@ const ClientManagement = () => {
     return (
         <>
             <AdminWrapper>
+                <div className="container mx-auto py-4">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-4xl font-bold tracking-widest text-stone-800 uppercase">
@@ -78,6 +79,7 @@ const ClientManagement = () => {
                         <Plus size={18} />
                         Create
                     </button>
+                </div>
                 </div>
             </AdminWrapper>
         </>

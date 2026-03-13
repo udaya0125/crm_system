@@ -92,21 +92,25 @@
 
 
 import AdminWrapper from '@/AdminWrapper/AdminWrapper';
-import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Search, X } from 'lucide-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import AddProjectForm from '@/AddFormComponents/AddProjectForm';
 import MyTable from '@/TableComponents/MyTable';
 import TaskManagementModal from './TaskManagementModal';
 
-
 const ProjectManagement = () => {
     const [allProjects, setAllProjects] = useState([]);
+    const [filteredProjects, setFilteredProjects] = useState([]);
     const [reloadTrigger, setReloadTrigger] = useState(false);
     const [editingProject, setEditingProject] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [selectedProjectForTasks, setSelectedProjectForTasks] = useState(null);
     const [showTaskModal, setShowTaskModal] = useState(false);
+
+    // Search and filter states
+    const [searchTerm, setSearchTerm] = useState('');
+    const [priorityFilter, setPriorityFilter] = useState('all');
 
     // Fetch projects
     useEffect(() => {
@@ -122,6 +126,35 @@ const ProjectManagement = () => {
 
         fetchProjects();
     }, [reloadTrigger]);
+
+    // Filter projects based on search term and priority
+    useEffect(() => {
+        let filtered = [...allProjects];
+
+        // Apply search filter (title and client)
+        if (searchTerm.trim() !== '') {
+            const term = searchTerm.toLowerCase();
+            filtered = filtered.filter(project => 
+                project.project_title?.toLowerCase().includes(term) ||
+                project.client_name?.toLowerCase().includes(term)
+            );
+        }
+
+        // Apply priority filter
+        if (priorityFilter !== 'all') {
+            filtered = filtered.filter(project => 
+                project.priority?.toLowerCase() === priorityFilter.toLowerCase()
+            );
+        }
+
+        setFilteredProjects(filtered);
+    }, [allProjects, searchTerm, priorityFilter]);
+
+    // Clear all filters
+    const clearFilters = () => {
+        setSearchTerm('');
+        setPriorityFilter('all');
+    };
 
     // Delete project
     const handleDelete = async (id) => {
@@ -243,33 +276,6 @@ const ProjectManagement = () => {
             Header: 'Service',
             accessor: 'service_type',
         },
-        // {
-        //     Header: 'Tasks',
-        //     accessor: 'project_description',
-        //     Cell: ({ value }) => {
-        //         try {
-        //             const tasks = JSON.parse(value || '[]');
-        //             const completed = tasks.filter(t => t.completed).length;
-        //             return (
-        //                 <div className="flex flex-col min-w-[100px]">
-        //                     <span className="text-xs text-stone-600">
-        //                         {completed}/{tasks.length} tasks
-        //                     </span>
-        //                     {tasks.length > 0 && (
-        //                         <div className="w-20 bg-stone-200 rounded-full h-1.5 mt-1">
-        //                             <div
-        //                                 className="bg-indigo-500 h-1.5 rounded-full"
-        //                                 style={{ width: `${(completed / tasks.length) * 100}%` }}
-        //                             />
-        //                         </div>
-        //                     )}
-        //                 </div>
-        //             );
-        //         } catch {
-        //             return <span className="text-xs text-stone-400">No tasks</span>;
-        //         }
-        //     },
-        // },
         {
             Header: 'Deadline',
             accessor: 'deadline',
@@ -353,7 +359,9 @@ const ProjectManagement = () => {
                             Project Management
                         </h1>
                         <p className="text-sm text-stone-500 mt-1 tracking-wide">
-                            {allProjects.length} project{allProjects.length !== 1 ? "s" : ""} total
+                            {filteredProjects.length} project{filteredProjects.length !== 1 ? "s" : ""} total
+                            {filteredProjects.length !== allProjects.length && 
+                                ` (filtered from ${allProjects.length})`}
                         </p>
                     </div>
                     <button
@@ -368,6 +376,70 @@ const ProjectManagement = () => {
                     </button>
                 </div>
 
+                {/* Search and Filter Bar */}
+                <div className="mb-6 flex flex-col sm:flex-row gap-4">
+                    {/* Search Input */}
+                    <div className="flex-1 relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search size={18} className="text-stone-400" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by project title or client name..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full pl-10 pr-10 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm('')}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            >
+                                <X size={18} className="text-stone-400 hover:text-stone-600" />
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Priority Filter */}
+                    <div className="sm:w-64">
+                        <select
+                            value={priorityFilter}
+                            onChange={(e) => setPriorityFilter(e.target.value)}
+                            className="w-full px-4 py-2.5 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+                        >
+                            <option value="all">All Priorities</option>
+                            <option value="high">High Priority</option>
+                            <option value="medium">Medium Priority</option>
+                            <option value="low">Low Priority</option>
+                        </select>
+                    </div>
+
+                    {/* Clear Filters Button (shown only when filters are active) */}
+                    {(searchTerm || priorityFilter !== 'all') && (
+                        <button
+                            onClick={clearFilters}
+                            className="px-4 py-2.5 text-sm text-stone-600 hover:text-stone-900 border border-stone-200 rounded-lg hover:bg-stone-50 transition-colors flex items-center gap-2"
+                        >
+                            <X size={16} />
+                            Clear Filters
+                        </button>
+                    )}
+                </div>
+
+                {/* No Results Message */}
+                {filteredProjects.length === 0 && allProjects.length > 0 && (
+                    <div className="flex flex-col items-center justify-center py-12 text-stone-400 bg-stone-50 rounded-lg mb-4">
+                        <p className="text-lg font-medium tracking-wide">No matching projects</p>
+                        <p className="text-sm mt-1">Try adjusting your search or filter criteria.</p>
+                        <button
+                            onClick={clearFilters}
+                            className="mt-4 text-indigo-600 hover:text-indigo-800 text-sm font-medium"
+                        >
+                            Clear all filters
+                        </button>
+                    </div>
+                )}
+
                 {/* Projects Table */}
                 {allProjects.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-24 text-stone-400">
@@ -375,10 +447,12 @@ const ProjectManagement = () => {
                         <p className="text-sm mt-1">Click "Create" to add your first project.</p>
                     </div>
                 ) : (
-                    <MyTable
-                        columns={columns} 
-                        data={allProjects} 
-                    />
+                    filteredProjects.length > 0 && (
+                        <MyTable
+                            columns={columns} 
+                            data={filteredProjects} 
+                        />
+                    )
                 )}
             </AdminWrapper>
 
