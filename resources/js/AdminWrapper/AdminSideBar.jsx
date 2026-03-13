@@ -1032,6 +1032,24 @@ const AdminSideBar = ({
                                 )}
                                 {isCollapsed && <Tooltip>Ticket</Tooltip>}
                             </Link>
+
+
+                            <Link
+                                href="/project-management"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/project-management")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/project-management"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Project Management
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Project Management</Tooltip>}
+                            </Link>
                         </div>
                     </div>
                   

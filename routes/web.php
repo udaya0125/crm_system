@@ -13,6 +13,7 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ExpirationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ProjectManagementController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -84,6 +85,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/client-management', function(){
         return Inertia::render('ClientDetails/ClientManagement');
+        
+    });
+
+    Route::get('/project-management', function(){
+        return Inertia::render('ClientDetails/ProjectManagement');
         
     });
 
@@ -305,6 +311,11 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
     Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
+
+    Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
+    Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
+    Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
+    Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
     
 
 require __DIR__.'/auth.php';
