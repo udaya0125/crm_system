@@ -1014,6 +1014,24 @@ const AdminSideBar = ({
                                 )}
                                 {isCollapsed && <Tooltip>Client Management</Tooltip>}
                             </Link>
+
+
+                            <Link
+                                href="/ticket"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/ticket")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/ticket"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Ticket
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Ticket</Tooltip>}
+                            </Link>
                         </div>
                     </div>
                   

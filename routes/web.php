@@ -12,6 +12,7 @@ use App\Http\Controllers\TodoController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ExpirationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TicketController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -83,6 +84,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/client-management', function(){
         return Inertia::render('ClientDetails/ClientManagement');
+        
+    });
+
+
+
+    Route::get('/ticket', function(){
+        return Inertia::render('DetailsPage/Ticket');
         
     });
 
@@ -291,6 +299,12 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     //     return Inertia::render('MainPages/SalesSystem');
         
     // });
+
+
+    Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
+    Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+    Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
+    Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
     
 
 require __DIR__.'/auth.php';
