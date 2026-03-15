@@ -14,6 +14,7 @@ use App\Http\Controllers\ExpirationController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ProjectManagementController;
+use App\Http\Controllers\FinanceTrackingController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -97,6 +98,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/ticket', function(){
         return Inertia::render('DetailsPage/Ticket');
+        
+    });
+
+    Route::get('/payment-finance-tracking', function(){
+        return Inertia::render('ClientDetails/FinanceTracking');
         
     });
 
@@ -316,6 +322,10 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
     Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
     Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
-    
+
+    Route::get('/ourfinance', [FinanceTrackingController::class, 'index'])->name('ourfinance.index');
+    Route::post('/ourfinance', [FinanceTrackingController::class, 'store'])->name('ourfinance.store');
+    Route::put('/ourfinance/{id}', [FinanceTrackingController::class, 'update'])->name('ourfinance.update');
+    Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
 
 require __DIR__.'/auth.php';

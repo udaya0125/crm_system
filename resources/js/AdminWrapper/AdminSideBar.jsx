@@ -1050,6 +1050,25 @@ const AdminSideBar = ({
                                 )}
                                 {isCollapsed && <Tooltip>Project Management</Tooltip>}
                             </Link>
+
+
+                            <Link
+                                href="/payment-finance-tracking"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/payment-finance-tracking"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Finance Tracking
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Payment & Finance Tracking</Tooltip>}
+                            </Link>
+
                         </div>
                     </div>
                   
