@@ -15,9 +15,8 @@ class HostingManagement extends Model
         'hosting_provider',
     ];
 
-         public function client()
+    public function client()
     {
         return $this->belongsTo(Client::class);
     }
-
 }
