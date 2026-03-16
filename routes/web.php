@@ -15,6 +15,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ProjectManagementController;
 use App\Http\Controllers\FinanceTrackingController;
+use App\Http\Controllers\DomainManagementController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -103,6 +104,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payment-finance-tracking', function(){
         return Inertia::render('ClientDetails/FinanceTracking');
+        
+    });
+
+
+    Route::get('/domain-tracking', function(){
+        return Inertia::render('ClientDetails/DomainManagement');
         
     });
 
@@ -327,5 +334,11 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::post('/ourfinance', [FinanceTrackingController::class, 'store'])->name('ourfinance.store');
     Route::put('/ourfinance/{id}', [FinanceTrackingController::class, 'update'])->name('ourfinance.update');
     Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
+
+
+    Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
+    Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
+    Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
+    Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
 
 require __DIR__.'/auth.php';

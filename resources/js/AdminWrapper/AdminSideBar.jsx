@@ -1051,8 +1051,41 @@ const AdminSideBar = ({
                                 {isCollapsed && <Tooltip>Project Management</Tooltip>}
                             </Link>
 
-
                             <Link
+                                href="/domain-tracking"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/domain-tracking")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/domain-tracking"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Domain Management
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Domain Management</Tooltip>}
+                            </Link>
+
+                             <Link
+                                href="/hosting-tracking"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/hosting-tracking")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/hosting-tracking"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Hosting Management
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Hosting Management</Tooltip>}
+                            </Link>
+
+                             <Link
                                 href="/payment-finance-tracking"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
@@ -1068,6 +1101,7 @@ const AdminSideBar = ({
                                 )}
                                 {isCollapsed && <Tooltip>Payment & Finance Tracking</Tooltip>}
                             </Link>
+
 
                         </div>
                     </div>
