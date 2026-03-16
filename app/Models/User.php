@@ -94,5 +94,10 @@ class User extends Authenticatable
         return $this->hasMany(ProjectManagement::class, 'assigned_team');
     }
 
-    
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'assigned_technician');
+    }
+
+
 }
