@@ -113,6 +113,11 @@ Route::middleware('auth')->group(function () {
         
     });
 
+    Route::get('/hosting-tracking', function(){
+        return Inertia::render('ClientDetails/HostingManagement');
+        
+    });
+
     // -----------------------------------------
     // CLIENT CRUD
     // -----------------------------------------

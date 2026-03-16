@@ -23,4 +23,9 @@ class Client extends Model
     {
         return $this->hasMany(DomainManagement::class);
     }
+
+    public function hostingManagements()
+    {
+        return $this->hasMany(HostingManagement::class);
+    }
 }
