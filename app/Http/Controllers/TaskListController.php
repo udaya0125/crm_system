@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\TaskList;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -76,6 +77,12 @@ class TaskListController extends Controller
         // Load relationships for response
         $taskList->load(['creator', 'assignedUser']);
 
+        // Create notification for new task list assignment
+        Notification::create([
+            'message' => "{$user->name} assigned task list '{$taskList->title}' to {$assignedUser->name}",
+            'is_read' => false,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Task assigned successfully',
@@ -112,15 +119,26 @@ class TaskListController extends Controller
             'user_id' => 'sometimes|required|exists:users,id',
         ]);
 
+        // Track assignment changes
+        $oldAssignedUser = $taskList->assignedUser;
+        $assignmentChanged = false;
+        $newAssignedUser = null;
+
         // Update assigned user if provided
         if (isset($validated['user_id'])) {
-            $assignedUser = User::find($validated['user_id']);
-            if (! $assignedUser) {
+            $newAssignedUser = User::find($validated['user_id']);
+            if (! $newAssignedUser) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Assigned user not found',
                 ], 404);
             }
+            
+            // Check if assignment changed
+            if ($taskList->assigned_to !== $validated['user_id']) {
+                $assignmentChanged = true;
+            }
+            
             $taskList->assigned_to = $validated['user_id'];
         }
 
@@ -130,6 +148,22 @@ class TaskListController extends Controller
 
         // Load relationships for response
         $taskList->load(['creator', 'assignedUser']);
+
+        // Create notification for updated task list
+        if ($assignmentChanged && $newAssignedUser) {
+            // Task list was reassigned to a different user
+            Notification::create([
+                'message' => "{$user->name} reassigned task list '{$taskList->title}' from {$oldAssignedUser->name} to {$newAssignedUser->name}",
+                'is_read' => false,
+            ]);
+        } else {
+            // Task list was updated but not reassigned
+            $assignedUserName = $taskList->assignedUser->name;
+            Notification::create([
+                'message' => "{$user->name} updated task list '{$taskList->title}' assigned to {$assignedUserName}",
+                'is_read' => false,
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -161,9 +195,19 @@ class TaskListController extends Controller
             ], 404);
         }
 
+        // Store info before deletion
+        $taskListTitle = $taskList->title;
+        $assignedUserName = $taskList->assignedUser->name;
+
         // Delete related tasks first
         $taskList->tasks()->delete();
         $taskList->delete();
+
+        // Create notification for deleted task list
+        Notification::create([
+            'message' => "{$user->name} deleted task list '{$taskListTitle}' that was assigned to {$assignedUserName}",
+            'is_read' => false,
+        ]);
 
         return response()->json([
             'success' => true,

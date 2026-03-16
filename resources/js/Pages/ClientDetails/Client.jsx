@@ -159,14 +159,14 @@ const Client = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                            className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                             title="Edit client"
                         >
                             <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                            className="text-red-600 hover:text-red-900 transition duration-200"
                             title="Delete client"
                         >
                             <Trash2 size={16} />

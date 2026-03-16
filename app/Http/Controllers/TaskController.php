@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -98,6 +99,12 @@ class TaskController extends Controller
             }
         }
 
+        // Create notification for new task
+        Notification::create([
+            'message' => "{$user->name} created a new task: {$task->title} in {$taskList->name}",
+            'is_read' => false,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Task created successfully',
@@ -141,6 +148,10 @@ class TaskController extends Controller
             }
         }
 
+        // Track completion status change
+        $wasCompleted = $task->is_completed;
+        $isNowCompleted = $validated['is_completed'] ?? $task->is_completed;
+
         // Parse due_date
         $dueDate = null;
         $dueTime = null;
@@ -154,7 +165,7 @@ class TaskController extends Controller
         // Update task
         $taskData = [
             'title' => $validated['title'] ?? $task->title,
-            'is_completed' => $validated['is_completed'] ?? $task->is_completed,
+            'is_completed' => $isNowCompleted,
             'due_date' => $dueDate ?? $task->due_date,
             'due_time' => $dueTime ?? $task->due_time,
             'task_list_id' => $validated['task_list_id'] ?? $task->task_list_id,
@@ -180,6 +191,20 @@ class TaskController extends Controller
             }
         }
 
+        // Create notification for updated task
+        $taskList = $task->taskList;
+        $notificationMessage = "{$user->name} updated the task: {$task->title}";
+        
+        // Special message if task was just completed
+        if (!$wasCompleted && $isNowCompleted) {
+            $notificationMessage = "{$user->name} completed the task: {$task->title}";
+        }
+
+        Notification::create([
+            'message' => $notificationMessage,
+            'is_read' => false,
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Task updated successfully',
@@ -203,8 +228,18 @@ class TaskController extends Controller
             ], 403);
         }
 
+        // Store task title and list name before deletion
+        $taskTitle = $task->title;
+        $taskListName = $task->taskList->name;
+
         $task->descriptions()->delete();
         $task->delete();
+
+        // Create notification for deleted task
+        Notification::create([
+            'message' => "{$user->name} deleted the task: {$taskTitle} from {$taskListName}",
+            'is_read' => false,
+        ]);
 
         return response()->json([
             'success' => true,

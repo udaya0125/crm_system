@@ -454,6 +454,7 @@ import { useForm, Controller } from "react-hook-form";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { X } from "lucide-react";
+import Select from "react-select"; // Add this import
 
 const EditTaskAssigned = ({
     editingTaskList,
@@ -465,6 +466,52 @@ const EditTaskAssigned = ({
 }) => {
     const { props } = usePage();
     const user = props.auth.user;
+
+    // Transform users data for react-select format
+    const userOptions = React.useMemo(() => {
+        if (!Array.isArray(users)) return [];
+        return users.map(user => ({
+            value: user.id,
+            label: `${user.name} (${user.email})`
+        }));
+    }, [users]);
+
+    // Custom styles for react-select
+    const customSelectStyles = {
+        control: (base, state) => ({
+            ...base,
+            borderColor: state.isFocused ? '#3b82f6' : '#d1d5db',
+            boxShadow: state.isFocused ? '0 0 0 2px rgba(59, 130, 246, 0.5)' : 'none',
+            '&:hover': {
+                borderColor: '#3b82f6'
+            },
+            minHeight: '42px',
+            borderRadius: '0.5rem',
+        }),
+        option: (base, { isFocused, isSelected }) => ({
+            ...base,
+            backgroundColor: isSelected ? '#3b82f6' : isFocused ? '#e5e7eb' : 'white',
+            color: isSelected ? 'white' : '#374151',
+            cursor: 'pointer',
+            '&:active': {
+                backgroundColor: isSelected ? '#2563eb' : '#d1d5db'
+            }
+        }),
+        menu: (base) => ({
+            ...base,
+            borderRadius: '0.5rem',
+            overflow: 'hidden',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: '#9ca3af'
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: '#374151'
+        })
+    };
 
     // Add useEffect to lock body scroll when form mounts
     useEffect(() => {
@@ -706,45 +753,97 @@ const EditTaskAssigned = ({
                     )}
 
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        {/* Task Title */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Task Title <span className="text-red-500">*</span>
-                            </label>
-                            <Controller
-                                name="title"
-                                control={control}
-                                rules={{
-                                    required: "Task title is required",
-                                    maxLength: {
-                                        value: 100,
-                                        message:
-                                            "Title must be less than 100 characters",
-                                    },
-                                }}
-                                render={({ field }) => (
-                                    <input
-                                        className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                            errors.title ? 'border-red-500' : 'border-gray-300'
-                                        }`}
-                                        type="text"
-                                        {...field}
-                                        placeholder="Enter task title"
-                                        disabled={isSubmitting}
-                                        aria-invalid={
-                                            errors.title ? "true" : "false"
-                                        }
-                                    />
+                        {/* Task Title and Assign to User - Flex Row */}
+                        <div className="flex gap-4">
+                            {/* Task Title - Takes 50% width */}
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Task Title <span className="text-red-500">*</span>
+                                </label>
+                                <Controller
+                                    name="title"
+                                    control={control}
+                                    rules={{
+                                        required: "Task title is required",
+                                        maxLength: {
+                                            value: 100,
+                                            message:
+                                                "Title must be less than 100 characters",
+                                        },
+                                    }}
+                                    render={({ field }) => (
+                                        <input
+                                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                                                errors.title ? 'border-red-500' : 'border-gray-300'
+                                            }`}
+                                            type="text"
+                                            {...field}
+                                            placeholder="Enter task title"
+                                            disabled={isSubmitting}
+                                            aria-invalid={
+                                                errors.title ? "true" : "false"
+                                            }
+                                        />
+                                    )}
+                                />
+                                {errors.title && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.title.message}
+                                    </p>
                                 )}
-                            />
-                            {errors.title && (
-                                <p className="mt-1 text-sm text-red-600">
-                                    {errors.title.message}
-                                </p>
-                            )}
+                            </div>
+
+                            {/* Assign to User - Takes 50% width */}
+                            <div className="flex-1">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Assign to User <span className="text-red-500">*</span>
+                                </label>
+                                <Controller
+                                    name="assigned_to"
+                                    control={control}
+                                    rules={{ required: "Please select a user" }}
+                                    render={({ field }) => (
+                                        <Select
+                                            options={userOptions}
+                                            value={userOptions.find(option => option.value === field.value) || null}
+                                            onChange={(selectedOption) => {
+                                                field.onChange(selectedOption ? selectedOption.value : '');
+                                            }}
+                                            onBlur={field.onBlur}
+                                            placeholder="Select a user..."
+                                            isDisabled={isSubmitting}
+                                            isClearable={true}
+                                            isSearchable={true}
+                                            styles={{
+                                                ...customSelectStyles,
+                                                control: (base, state) => ({
+                                                    ...customSelectStyles.control(base, state),
+                                                    borderColor: errors.assigned_to ? '#ef4444' : base.borderColor,
+                                                })
+                                            }}
+                                            className={errors.assigned_to ? 'react-select-error' : ''}
+                                            classNamePrefix="react-select"
+                                            noOptionsMessage={() => "No users available"}
+                                            loadingMessage={() => "Loading users..."}
+                                        />
+                                    )}
+                                />
+                                {errors.assigned_to && (
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.assigned_to.message}
+                                    </p>
+                                )}
+                                
+                                {/* Show current assignee info if available */}
+                                {/* {currentAssignee && (
+                                    <p className="mt-2 text-xs text-gray-500">
+                                        Currently assigned to: {currentAssignee.name} ({currentAssignee.email})
+                                    </p>
+                                )} */}
+                            </div>
                         </div>
 
-                        {/* Description */}
+                        {/* Description - Full Width */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Description
@@ -801,71 +900,6 @@ const EditTaskAssigned = ({
                             {errors.description && (
                                 <p className="mt-1 text-sm text-red-600">
                                     {errors.description.message}
-                                </p>
-                            )}
-                        </div>
-
-                        {/* Assign to User */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Assign to User <span className="text-red-500">*</span>
-                            </label>
-                            <div className="relative">
-                                <Controller
-                                    name="assigned_to"
-                                    control={control}
-                                    rules={{ required: "Please select a user" }}
-                                    render={({ field }) => (
-                                        <select
-                                            className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none ${
-                                                errors.assigned_to
-                                                    ? 'border-red-500'
-                                                    : 'border-gray-300'
-                                            }`}
-                                            value={field.value}
-                                            onChange={field.onChange}
-                                            onBlur={field.onBlur}
-                                            disabled={isSubmitting}
-                                            aria-invalid={
-                                                errors.assigned_to ? "true" : "false"
-                                            }
-                                        >
-                                            <option value="">Select a user</option>
-                                            {Array.isArray(users) &&
-                                            users.length > 0 ? (
-                                                users.map((user) => (
-                                                    <option
-                                                        key={user.id}
-                                                        value={user.id}
-                                                    >
-                                                        {user.name} ({user.email})
-                                                    </option>
-                                                ))
-                                            ) : (
-                                                <option value="" disabled>
-                                                    No users available
-                                                </option>
-                                            )}
-                                        </select>
-                                    )}
-                                />
-                                {/* Custom dropdown arrow */}
-                                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </div>
-                            </div>
-                            {errors.assigned_to && (
-                                <p className="mt-1 text-sm text-red-600">
-                                    {errors.assigned_to.message}
-                                </p>
-                            )}
-                            
-                            {/* Show current assignee info if available */}
-                            {currentAssignee && (
-                                <p className="mt-2 text-xs text-gray-500">
-                                    Currently assigned to: {currentAssignee.name} ({currentAssignee.email})
                                 </p>
                             )}
                         </div>

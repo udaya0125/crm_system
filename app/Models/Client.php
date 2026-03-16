@@ -18,4 +18,14 @@ class Client extends Model
     {
         return $this->hasMany(Expiration::class);
     }
+
+    public function domainManagements()
+    {
+        return $this->hasMany(DomainManagement::class);
+    }
+
+    public function hostingManagements()
+    {
+        return $this->hasMany(HostingManagement::class);
+    }
 }

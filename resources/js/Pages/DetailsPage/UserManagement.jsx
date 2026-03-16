@@ -424,6 +424,7 @@ import {
     Plus,
     SquarePen,
     Trash,
+    Trash2,
 } from "lucide-react";
 import axios from "axios";
 import AddUserForm from "@/AddFormComponents/AddUserForm";
@@ -503,7 +504,7 @@ const UserManagement = () => {
                             className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                         >
                             <SquarePen
-                                size={21}
+                                size={16}
                                 className="inline-block mr-1"
                             />
                         </button>
@@ -511,7 +512,7 @@ const UserManagement = () => {
                             onClick={() => handleDelete(row.original.id)}
                             className="text-red-600 hover:text-red-900 transition duration-200"
                         >
-                            <Trash size={21} className="inline-block mr-1" />
+                            <Trash2 size={16} className="inline-block mr-1" />
                         </button>
                     </div>
                 ),

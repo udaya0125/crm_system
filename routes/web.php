@@ -11,6 +11,11 @@ use App\Http\Controllers\TaskListController;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ExpirationController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\ProjectManagementController;
+use App\Http\Controllers\FinanceTrackingController;
+use App\Http\Controllers\DomainManagementController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -25,13 +30,25 @@ use App\Http\Controllers\ExpirationController;
 //     return Inertia::render('Dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/', function(){
+        return Inertia::render('ClientDetails/Welcome');
+    });
+
 Route::middleware('auth')->group(function () {
 
     // -----------------------------------------
     // DASHBOARD PAGE
     // -----------------------------------------
+
+    Route::get('/dashboard', function(){
+        return Inertia::render('ClientDetails/Dashboard');
+    });
+
+    // -----------------------------------------
+    // CRM PAGE
+    // -----------------------------------------
     
-    Route::get('/', function(){
+    Route::get('/crm', function(){
         return Inertia::render('MainPages/CRM');
     });
 
@@ -64,6 +81,40 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/expiration', function(){
         return Inertia::render('ClientDetails/Expiration');
+        
+    });
+
+
+    Route::get('/client-management', function(){
+        return Inertia::render('ClientDetails/ClientManagement');
+        
+    });
+
+    Route::get('/project-management', function(){
+        return Inertia::render('ClientDetails/ProjectManagement');
+        
+    });
+
+
+
+    Route::get('/ticket', function(){
+        return Inertia::render('DetailsPage/Ticket');
+        
+    });
+
+    Route::get('/payment-finance-tracking', function(){
+        return Inertia::render('ClientDetails/FinanceTracking');
+        
+    });
+
+
+    Route::get('/domain-tracking', function(){
+        return Inertia::render('ClientDetails/DomainManagement');
+        
+    });
+
+    Route::get('/hosting-tracking', function(){
+        return Inertia::render('ClientDetails/HostingManagement');
         
     });
 
@@ -154,6 +205,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/ourtodo', [TodoController::class, 'store'])->name('ourtodo.store');
     Route::put('/ourtodo/{id}', [TodoController::class, 'update'])->name('ourtodo.update');
     Route::delete('/ourtodo/{id}', [TodoController::class, 'destroy'])->name('ourtodo.destroy');
+
+
+
+    // --------------------------------------------------------------------------
+    // Notification routes for Dashboard
+    // --------------------------------------------------------------------------
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::patch('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+    Route::delete('/notifications', [NotificationController::class, 'clearAll'])->name('notifications.clearAll');
 
 });
 
@@ -260,6 +323,27 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     //     return Inertia::render('MainPages/SalesSystem');
         
     // });
-    
+
+
+    Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
+    Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+    Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
+    Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
+
+    Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
+    Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
+    Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
+    Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
+
+    Route::get('/ourfinance', [FinanceTrackingController::class, 'index'])->name('ourfinance.index');
+    Route::post('/ourfinance', [FinanceTrackingController::class, 'store'])->name('ourfinance.store');
+    Route::put('/ourfinance/{id}', [FinanceTrackingController::class, 'update'])->name('ourfinance.update');
+    Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
+
+
+    Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
+    Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
+    Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
+    Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
 
 require __DIR__.'/auth.php';
