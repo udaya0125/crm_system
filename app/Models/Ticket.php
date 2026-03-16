@@ -15,7 +15,7 @@ class Ticket extends Model
         'problem_description',
         'priority',
         'assigned_technician',
-        'status'
+        'status',
     ];
 
     protected static function boot()
@@ -23,9 +23,14 @@ class Ticket extends Model
         parent::boot();
 
         static::created(function ($ticket) {
-            $ticket->ticket_id = 'TCK-' . str_pad($ticket->id, 3, '0', STR_PAD_LEFT);
+            $ticket->ticket_id = 'TCK-'.str_pad($ticket->id, 3, '0', STR_PAD_LEFT);
             $ticket->save();
         });
     }
-}
 
+    // 🔹 Relation with User
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_technician');
+    }
+}
