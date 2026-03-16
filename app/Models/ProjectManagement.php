@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectManagement extends Model
 {
-       protected $table = 'project_management'; // Make sure this matches your table name
-    
+    protected $table = 'project_management'; // Make sure this matches your table name
+
     protected $fillable = [
         'project_id',
         'client_name',
@@ -18,7 +18,7 @@ class ProjectManagement extends Model
         'assigned_team',
         'priority',
         'status',
-        'completion'
+        'completion',
     ];
 
     protected static function boot()
@@ -26,7 +26,7 @@ class ProjectManagement extends Model
         parent::boot();
 
         static::created(function ($project) {
-            $project->project_id = 'PRJ-' . str_pad($project->id, 3, '0', STR_PAD_LEFT);
+            $project->project_id = 'PRJ-'.str_pad($project->id, 3, '0', STR_PAD_LEFT);
             $project->save();
         });
     }
@@ -36,18 +36,24 @@ class ProjectManagement extends Model
         return $this->hasMany(ProjectDescription::class, 'project_management_id');
     }
 
+    // 🔹 Relation with User
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_team');
+    }
+
     // Helper method to get tasks as array
     public function getTasksAttribute()
     {
         return $this->descriptions()
             ->orderBy('sort')
             ->get()
-            ->map(function($desc) {
+            ->map(function ($desc) {
                 return [
                     'id' => $desc->id,
                     'text' => $desc->description,
                     'completed' => $desc->completed ?? false,
-                    'sort' => $desc->sort
+                    'sort' => $desc->sort,
                 ];
             })
             ->toArray();

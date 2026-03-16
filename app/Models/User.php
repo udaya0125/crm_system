@@ -88,5 +88,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(Company::class);
     }
+
+    public function projects()
+    {
+        return $this->hasMany(ProjectManagement::class, 'assigned_team');
+    }
+
     
 }
