@@ -16,6 +16,7 @@ use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ProjectManagementController;
 use App\Http\Controllers\FinanceTrackingController;
 use App\Http\Controllers\DomainManagementController;
+use App\Http\Controllers\HostingManagementController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -341,9 +342,14 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
 
 
-    Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
-    Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
-    Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
-    Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
+        Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
+        Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
+        Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
+        Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
+
+        Route::get('/ourhostings', [HostingManagementController::class, 'index'])->name('ourhostings.index');
+        Route::post('/ourhostings', [HostingManagementController::class, 'store'])->name('ourhostings.store');
+        Route::put('/ourhostings/{id}', [HostingManagementController::class, 'update'])->name('ourhostings.update');
+        Route::delete('/ourhostings/{id}', [HostingManagementController::class, 'destroy'])->name('ourhostings.destroy');
 
 require __DIR__.'/auth.php';
