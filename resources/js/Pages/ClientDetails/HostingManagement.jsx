@@ -111,10 +111,15 @@ const HostingManagement = () => {
                 Header: "ID",
                 accessor: "id",
             },
+            // {
+            //     Header: "Client Name",
+            //     accessor: "client_name",
+            //     Cell: ({ value }) => value || "N/A",
+            // },
             {
-                Header: "Client Name",
-                accessor: "client_name",
-                Cell: ({ value }) => value || "N/A",
+                Header: "Client",
+                accessor: (row) => row.client?.organization_name ?? row.client?.name ?? "—",
+                id: "client",
             },
             {
                 Header: "Hosting Plan",
