@@ -18,6 +18,8 @@ class ProjectManagement extends Model
         'assigned_team',
         'priority',
         'status',
+        'user_remarks',
+        'admin_remarks',
         'completion',
     ];
 

@@ -31,6 +31,9 @@
     margin-bottom: 0.5rem;
 }
 
+.ql-container {
+  min-height: 80px;
+}
 
 
 /* Custom Scrollbar Styles */

@@ -52,6 +52,8 @@ class ProjectManagementController extends Controller
             'start_date' => 'required|date',
             'deadline' => 'required|date',
             'assigned_team' => 'nullable|string|max:255',
+            'user_remarks' => 'nullable|string|max:255',
+            'admin_remarks' => 'nullable|string|max:255',
             'priority' => 'required|string',
             'status' => 'required|string',
             'completion' => 'nullable|integer|min:0|max:100',
@@ -65,6 +67,8 @@ class ProjectManagementController extends Controller
             'start_date' => $request->start_date,
             'deadline' => $request->deadline,
             'assigned_team' => $request->assigned_team,
+            'user_remarks' => $request->user_remarks,
+            'admin_remarks' => $request->admin_remarks,
             'priority' => $request->priority,
             'status' => $request->status,
             'completion' => $request->completion ?? 0
@@ -107,6 +111,8 @@ class ProjectManagementController extends Controller
             'start_date' => 'sometimes|date',
             'deadline' => 'sometimes|date',
             'assigned_team' => 'nullable|string|max:255',
+            'user_remarks' => 'nullable|string|max:255',
+            'admin_remarks' => 'nullable|string|max:255',
             'priority' => 'sometimes|string',
             'status' => 'sometimes|string',
             'completion' => 'nullable|integer|min:0|max:100',
@@ -116,7 +122,7 @@ class ProjectManagementController extends Controller
         // Update project fields
         $updateData = [];
         $fields = ['client_name', 'project_title', 'service_type', 'start_date', 
-                  'deadline', 'assigned_team', 'priority', 'status', 'completion'];
+                  'deadline', 'assigned_team', 'user_remarks', 'admin_remarks', 'priority', 'status', 'completion'];
         
         foreach ($fields as $field) {
             if ($request->has($field)) {
