@@ -6,9 +6,9 @@
 //     ListFilter,
 //     Building,
 //     User2,
-//     CheckSquare, 
-//     Users, 
-//     ClipboardList, 
+//     CheckSquare,
+//     Users,
+//     ClipboardList,
 //     ListTodo,
 // } from "lucide-react";
 
@@ -366,7 +366,6 @@
 //                         )}
 //                     </Link>
 
-
 //                     {/* //-----------------------------------------
 //                         // Expiration Link for Both Admin and User
 //                         //----------------------------------------- */}
@@ -412,8 +411,6 @@
 
 // export default AdminSideBar;
 
-
-
 import React, { useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
@@ -430,7 +427,15 @@ import {
     FiClipboard,
     FiHome,
 } from "react-icons/fi";
-import { Building, LayoutDashboard, ListFilter, CheckSquare, Users, ClipboardList, ListTodo } from "lucide-react";
+import {
+    Building,
+    LayoutDashboard,
+    ListFilter,
+    CheckSquare,
+    Users,
+    ClipboardList,
+    ListTodo,
+} from "lucide-react";
 
 const AdminSideBar = ({
     isMobileOpen,
@@ -440,7 +445,7 @@ const AdminSideBar = ({
 }) => {
     const { url } = usePage();
     const currentPath = url.split("/")[1];
-    
+
     // Dropdown states
     const [isLeadManagementOpen, setIsLeadManagementOpen] = useState(false);
     const [isTaskManagementOpen, setIsTaskManagementOpen] = useState(false);
@@ -466,7 +471,7 @@ const AdminSideBar = ({
 
     // Check if any route in a group is active
     const isGroupActive = (routes) => {
-        return routes.some(route => {
+        return routes.some((route) => {
             const routePath = route.replace("/", "");
             return currentPath === routePath || url.startsWith(route + "/");
         });
@@ -500,7 +505,8 @@ const AdminSideBar = ({
     const handleClientMouseLeave = () => setIsClientHovered(false);
 
     // Common link styles
-    const linkBaseClasses = "flex items-center rounded-lg transition-colors duration-200 group relative";
+    const linkBaseClasses =
+        "flex items-center rounded-lg transition-colors duration-200 group relative";
     const linkCollapsedClasses = isCollapsed ? "p-3 justify-center" : "p-3";
     const linkActiveClasses = (href) =>
         isActive(href)
@@ -567,8 +573,15 @@ const AdminSideBar = ({
                         style={{ borderColor: "#e5e7eb" }}
                     >
                         {!isCollapsed && (
-                            <Link href="/dashboard" className="text-xl font-bold text-gray-800 whitespace-nowrap">
-                                <img src="/images/logo2.png" alt="Logo" className="h-10 w-auto" />
+                            <Link
+                                href="/dashboard"
+                                className="text-xl font-bold text-gray-800 whitespace-nowrap"
+                            >
+                                <img
+                                    src="/images/logo2.png"
+                                    alt="Logo"
+                                    className="h-10 w-auto"
+                                />
                             </Link>
                         )}
                         <div className="flex items-center space-x-1">
@@ -608,7 +621,9 @@ const AdminSideBar = ({
                                 `}
                             >
                                 <LayoutDashboard
-                                    className={iconClasses(isActive("/dashboard"))}
+                                    className={iconClasses(
+                                        isActive("/dashboard"),
+                                    )}
                                 />
                                 {!isCollapsed && (
                                     <span className="ml-3 font-medium whitespace-nowrap">
@@ -633,10 +648,19 @@ const AdminSideBar = ({
                                 <div className="space-y-1">
                                     <button
                                         onClick={toggleLeadManagement}
-                                        className={dropdownButtonClasses(isGroupActive(["/crm", "/company"]))}
+                                        className={dropdownButtonClasses(
+                                            isGroupActive(["/crm", "/company"]),
+                                        )}
                                     >
                                         <div className="flex items-center">
-                                            <ListFilter className={iconClasses(isGroupActive(["/crm", "/company"]))} />
+                                            <ListFilter
+                                                className={iconClasses(
+                                                    isGroupActive([
+                                                        "/crm",
+                                                        "/company",
+                                                    ]),
+                                                )}
+                                            />
                                             <span className="ml-3 font-medium whitespace-nowrap">
                                                 CRM
                                             </span>
@@ -691,7 +715,9 @@ const AdminSideBar = ({
                                     <button
                                         onClick={() => {
                                             if (isCollapsed) {
-                                                setIsLeadHovered(!isLeadHovered);
+                                                setIsLeadHovered(
+                                                    !isLeadHovered,
+                                                );
                                             }
                                         }}
                                         className={`
@@ -699,10 +725,17 @@ const AdminSideBar = ({
                                             ${isGroupActive(["/crm", "/company"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                         `}
                                     >
-                                        <ListFilter className={iconClasses(isGroupActive(["/crm", "/company"]))} />
+                                        <ListFilter
+                                            className={iconClasses(
+                                                isGroupActive([
+                                                    "/crm",
+                                                    "/company",
+                                                ]),
+                                            )}
+                                        />
                                         {/* <Tooltip>Company</Tooltip> */}
                                     </button>
-                                    
+
                                     {/* Collapsed dropdown - appears on hover */}
                                     {isLeadHovered && (
                                         <div
@@ -717,7 +750,9 @@ const AdminSideBar = ({
                                                     ${isActive("/crm") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
                                             >
-                                                <span className="whitespace-nowrap">CRM</span>
+                                                <span className="whitespace-nowrap">
+                                                    CRM
+                                                </span>
                                             </Link>
                                             <Link
                                                 href="/company"
@@ -726,7 +761,9 @@ const AdminSideBar = ({
                                                     ${isActive("/company") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
                                             >
-                                                <span className="whitespace-nowrap">Companies</span>
+                                                <span className="whitespace-nowrap">
+                                                    Companies
+                                                </span>
                                             </Link>
                                         </div>
                                     )}
@@ -739,10 +776,24 @@ const AdminSideBar = ({
                                 <div className="space-y-1">
                                     <button
                                         onClick={toggleTaskManagement}
-                                        className={dropdownButtonClasses(isGroupActive(["/tasks", "/todo", "/task-assignments"]))}
+                                        className={dropdownButtonClasses(
+                                            isGroupActive([
+                                                "/tasks",
+                                                "/todo",
+                                                "/task-assignments",
+                                            ]),
+                                        )}
                                     >
                                         <div className="flex items-center">
-                                            <FiBookOpen className={iconClasses(isGroupActive(["/tasks", "/todo", "/task-assignments"]))} />
+                                            <FiBookOpen
+                                                className={iconClasses(
+                                                    isGroupActive([
+                                                        "/tasks",
+                                                        "/todo",
+                                                        "/task-assignments",
+                                                    ]),
+                                                )}
+                                            />
                                             <span className="ml-3 font-medium whitespace-nowrap">
                                                 Report
                                             </span>
@@ -813,7 +864,9 @@ const AdminSideBar = ({
                                     <button
                                         onClick={() => {
                                             if (isCollapsed) {
-                                                setIsTaskHovered(!isTaskHovered);
+                                                setIsTaskHovered(
+                                                    !isTaskHovered,
+                                                );
                                             }
                                         }}
                                         className={`
@@ -821,10 +874,18 @@ const AdminSideBar = ({
                                             ${isGroupActive(["/tasks", "/todo", "/task-assignments"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                         `}
                                     >
-                                        <FiBookOpen className={iconClasses(isGroupActive(["/tasks", "/todo", "/task-assignments"]))} />
+                                        <FiBookOpen
+                                            className={iconClasses(
+                                                isGroupActive([
+                                                    "/tasks",
+                                                    "/todo",
+                                                    "/task-assignments",
+                                                ]),
+                                            )}
+                                        />
                                         {/* <Tooltip>Report</Tooltip> */}
                                     </button>
-                                    
+
                                     {/* Collapsed dropdown - appears on hover */}
                                     {isTaskHovered && (
                                         <div
@@ -839,7 +900,9 @@ const AdminSideBar = ({
                                                     ${isActive("/tasks") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
                                             >
-                                                <span className="whitespace-nowrap">Task Management</span>
+                                                <span className="whitespace-nowrap">
+                                                    Task Management
+                                                </span>
                                             </Link>
                                             <Link
                                                 href="/todo"
@@ -848,7 +911,9 @@ const AdminSideBar = ({
                                                     ${isActive("/todo") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
                                             >
-                                                <span className="whitespace-nowrap">To Do List</span>
+                                                <span className="whitespace-nowrap">
+                                                    To Do List
+                                                </span>
                                             </Link>
                                             {isAdmin && (
                                                 <Link
@@ -858,7 +923,9 @@ const AdminSideBar = ({
                                                         ${isActive("/task-assignments") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                     `}
                                                 >
-                                                    <span className="whitespace-nowrap">Task Assignments</span>
+                                                    <span className="whitespace-nowrap">
+                                                        Task Assignments
+                                                    </span>
                                                 </Link>
                                             )}
                                         </div>
@@ -877,14 +944,18 @@ const AdminSideBar = ({
                                         `}
                                     >
                                         <FiUsers
-                                            className={iconClasses(isActive("/user-management"))}
+                                            className={iconClasses(
+                                                isActive("/user-management"),
+                                            )}
                                         />
                                         {!isCollapsed && (
                                             <span className="ml-3 font-medium whitespace-nowrap">
                                                 User Management
                                             </span>
                                         )}
-                                        {isCollapsed && <Tooltip>User Management</Tooltip>}
+                                        {isCollapsed && (
+                                            <Tooltip>User Management</Tooltip>
+                                        )}
                                     </Link>
                                 </>
                             )}
@@ -895,10 +966,22 @@ const AdminSideBar = ({
                                 <div className="space-y-1">
                                     <button
                                         onClick={toggleClientManagement}
-                                        className={dropdownButtonClasses(isGroupActive(["/client", "/expiration"]))}
+                                        className={dropdownButtonClasses(
+                                            isGroupActive([
+                                                "/client",
+                                                "/expiration",
+                                            ]),
+                                        )}
                                     >
                                         <div className="flex items-center">
-                                            <FiCheckSquare className={iconClasses(isGroupActive(["/client", "/expiration"]))} />
+                                            <FiCheckSquare
+                                                className={iconClasses(
+                                                    isGroupActive([
+                                                        "/client",
+                                                        "/expiration",
+                                                    ]),
+                                                )}
+                                            />
                                             <span className="ml-3 font-medium whitespace-nowrap">
                                                 Company
                                             </span>
@@ -953,7 +1036,9 @@ const AdminSideBar = ({
                                     <button
                                         onClick={() => {
                                             if (isCollapsed) {
-                                                setIsClientHovered(!isClientHovered);
+                                                setIsClientHovered(
+                                                    !isClientHovered,
+                                                );
                                             }
                                         }}
                                         className={`
@@ -961,16 +1046,27 @@ const AdminSideBar = ({
                                             ${isGroupActive(["/client", "/expiration"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                         `}
                                     >
-                                        <FiCheckSquare className={iconClasses(isGroupActive(["/client", "/expiration"]))} />
+                                        <FiCheckSquare
+                                            className={iconClasses(
+                                                isGroupActive([
+                                                    "/client",
+                                                    "/expiration",
+                                                ]),
+                                            )}
+                                        />
                                         {/* <Tooltip>Company</Tooltip> */}
                                     </button>
-                                    
+
                                     {/* Collapsed dropdown - appears on hover */}
                                     {isClientHovered && (
                                         <div
                                             className="fixed left-10 top-64 ml-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1"
-                                            onMouseEnter={handleClientMouseEnter}
-                                            onMouseLeave={handleClientMouseLeave}
+                                            onMouseEnter={
+                                                handleClientMouseEnter
+                                            }
+                                            onMouseLeave={
+                                                handleClientMouseLeave
+                                            }
                                         >
                                             <Link
                                                 href="/client"
@@ -979,7 +1075,9 @@ const AdminSideBar = ({
                                                     ${isActive("/client") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
                                             >
-                                                <span className="whitespace-nowrap">Clients</span>
+                                                <span className="whitespace-nowrap">
+                                                    Clients
+                                                </span>
                                             </Link>
                                             <Link
                                                 href="/expiration"
@@ -988,13 +1086,12 @@ const AdminSideBar = ({
                                                     ${isActive("/expiration") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
                                             >
-                                                <span className="whitespace-nowrap">Expirations</span>
+                                                <span className="whitespace-nowrap">
+                                                    Expirations
+                                                </span>
                                             </Link>
                                         </div>
                                     )}
-
-
-                                    
                                 </div>
                             )}
 
@@ -1005,16 +1102,19 @@ const AdminSideBar = ({
                                 `}
                             >
                                 <LayoutDashboard
-                                    className={iconClasses(isActive("/client-management"))}
+                                    className={iconClasses(
+                                        isActive("/client-management"),
+                                    )}
                                 />
                                 {!isCollapsed && (
                                     <span className="ml-3 font-medium whitespace-nowrap">
                                         Client Management
                                     </span>
                                 )}
-                                {isCollapsed && <Tooltip>Client Management</Tooltip>}
+                                {isCollapsed && (
+                                    <Tooltip>Client Management</Tooltip>
+                                )}
                             </Link>
-
 
                             <Link
                                 href="/ticket"
@@ -1033,7 +1133,6 @@ const AdminSideBar = ({
                                 {isCollapsed && <Tooltip>Ticket</Tooltip>}
                             </Link>
 
-
                             <Link
                                 href="/project-management"
                                 className={`
@@ -1041,14 +1140,18 @@ const AdminSideBar = ({
                                 `}
                             >
                                 <LayoutDashboard
-                                    className={iconClasses(isActive("/project-management"))}
+                                    className={iconClasses(
+                                        isActive("/project-management"),
+                                    )}
                                 />
                                 {!isCollapsed && (
                                     <span className="ml-3 font-medium whitespace-nowrap">
                                         Project Management
                                     </span>
                                 )}
-                                {isCollapsed && <Tooltip>Project Management</Tooltip>}
+                                {isCollapsed && (
+                                    <Tooltip>Project Management</Tooltip>
+                                )}
                             </Link>
 
                             <Link
@@ -1058,54 +1161,107 @@ const AdminSideBar = ({
                                 `}
                             >
                                 <LayoutDashboard
-                                    className={iconClasses(isActive("/domain-tracking"))}
+                                    className={iconClasses(
+                                        isActive("/domain-tracking"),
+                                    )}
                                 />
                                 {!isCollapsed && (
                                     <span className="ml-3 font-medium whitespace-nowrap">
                                         Domain Management
                                     </span>
                                 )}
-                                {isCollapsed && <Tooltip>Domain Management</Tooltip>}
+                                {isCollapsed && (
+                                    <Tooltip>Domain Management</Tooltip>
+                                )}
                             </Link>
 
-                             <Link
+                            <Link
                                 href="/hosting-tracking"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/hosting-tracking")}
                                 `}
                             >
                                 <LayoutDashboard
-                                    className={iconClasses(isActive("/hosting-tracking"))}
+                                    className={iconClasses(
+                                        isActive("/hosting-tracking"),
+                                    )}
                                 />
                                 {!isCollapsed && (
                                     <span className="ml-3 font-medium whitespace-nowrap">
                                         Hosting Management
                                     </span>
                                 )}
-                                {isCollapsed && <Tooltip>Hosting Management</Tooltip>}
+                                {isCollapsed && (
+                                    <Tooltip>Hosting Management</Tooltip>
+                                )}
                             </Link>
 
-                             <Link
+                            <Link
                                 href="/payment-finance-tracking"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
                                 `}
                             >
                                 <LayoutDashboard
-                                    className={iconClasses(isActive("/payment-finance-tracking"))}
+                                    className={iconClasses(
+                                        isActive("/payment-finance-tracking"),
+                                    )}
                                 />
                                 {!isCollapsed && (
                                     <span className="ml-3 font-medium whitespace-nowrap">
                                         Finance Tracking
                                     </span>
                                 )}
-                                {isCollapsed && <Tooltip>Payment & Finance Tracking</Tooltip>}
+                                {isCollapsed && (
+                                    <Tooltip>
+                                        Payment & Finance Tracking
+                                    </Tooltip>
+                                )}
                             </Link>
 
+                            <Link
+                                href="/leads"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/leads")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/leads"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Leads
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Leads</Tooltip>}
+                            </Link>
 
+                            <Link
+                                href="/contract-renewal-management"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/contract-renewal-management")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(
+                                        isActive(
+                                            "/contract-renewal-management",
+                                        ),
+                                    )}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Renewal Management
+                                    </span>
+                                )}
+                                {isCollapsed && (
+                                    <Tooltip>
+                                        Contract Renewal Management
+                                    </Tooltip>
+                                )}
+                            </Link>
                         </div>
                     </div>
-                  
                 </div>
             </div>
         </>

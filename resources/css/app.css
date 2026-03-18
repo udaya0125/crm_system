@@ -35,6 +35,42 @@
   min-height: 80px;
 }
 
+/* Add this to your global CSS file (e.g., App.css or index.css) */
+
+/* Quill editor custom styles */
+.quill-wrapper {
+  margin-bottom: 20px;
+}
+
+.quill-wrapper .ql-container {
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  font-family: inherit;
+  font-size: 0.875rem;
+  min-height: 150px;
+}
+
+.quill-wrapper .ql-toolbar {
+  border-top-left-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+.quill-wrapper .ql-editor {
+  min-height: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.quill-wrapper .ql-editor.ql-blank::before {
+  color: #9ca3af;
+  font-style: normal;
+  left: 12px;
+  right: 12px;
+}
 
 /* Custom Scrollbar Styles */
 

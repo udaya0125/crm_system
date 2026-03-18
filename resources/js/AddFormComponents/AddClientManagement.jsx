@@ -1,118 +1,1238 @@
-import React from "react";
+// import React from "react";
 
-const AddClientManagement = () => {
+// const AddClientManagement = ({reloadTrigger,setReloadTrigger}) => {
+//     const [submitting, setSubmitting] = useState(false);
+//     const [allLeads, setAllLeads] = useState([]);
+//     const [clientForm, setClientForm] = useState({
+//         client_id: "",
+//         company_name: "",
+//         contact_person: "",
+//         phone: "",
+//         email: "",
+//         address: "",
+//         service_type: "",
+//         account_manager: "",
+//         total_projects: "",
+//         total_revenue: "",
+//         payment_status: "",
+//     });
+
+//     //  Use Effect
+//     useEffect(() => {
+//         if (editingClient) {
+//             setClientForm({
+//                 ...editingClient,
+//                 image: null,
+//             });
+//             setShowForm(true);
+//         } else {
+//             setClientForm({
+//                 client_id: "",
+//                 company_name: "",
+//                 contact_person: "",
+//                 phone: "",
+//                 email: "",
+//                 address: "",
+//                 service_type: "",
+//                 account_manager: "",
+//                 total_projects: "",
+//                 total_revenue: "",
+//                 payment_status: "",
+//             });
+//         }
+//     }, [editingClient]);
+
+//         // Fetch leads
+//     useEffect(() => {
+//         const fetchLeads = async () => {
+//             try {
+//                 const response = await axios.get(route("ourleads.index"));
+//                 // Controller returns { success, data } — so use response.data.data
+//                 setAllLeads(response.data.data);
+//             } catch (error) {
+//                 console.error("Fetching error:", error);
+//             }
+//         };
+
+//         fetchLeads();
+//     }, [reloadTrigger]);
+
+//     // Handle Create Client
+//     const handleCreate = async (formData) => {
+//         try {
+//             await axios.post(route("clients.store"), formData, {
+//                 headers: {
+//                     "Content-Type": "multipart/form-data",
+//                 },
+//             });
+
+//             setReloadTrigger((prev) => !prev);
+//         } catch (error) {
+//             console.log("Error creating client", error);
+//             throw error;
+//         }
+//     };
+
+//     // Handle Submit - now clearly separated paths
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+//         const formData = new FormData();
+//         // Append all form data except image if it's empty
+//         for (const key in clientForm) {
+//             if (clientForm[key] !== null && clientForm[key] !== "") {
+//                 formData.append(key, clientForm[key]);
+//             }
+//         }
+//         try {
+//             setSubmitting(true);
+
+//             if (editingClient) {
+//                 // Editing existing client
+//                 await handleUpdate(formData, editingClient.id);
+//             } else {
+//                 // Creating new client
+//                 await handleCreate(formData);
+//             }
+//             setClientForm({
+//                 client_id: "",
+//                 company_name: "",
+//                 contact_person: "",
+//                 phone: "",
+//                 email: "",
+//                 address: "",
+//                 service_type: "",
+//                 account_manager: "",
+//                 total_projects: "",
+//                 total_revenue: "",
+//                 payment_status: "",
+//             });
+
+//             setShowForm(false);
+//             setEditingClient(null);
+//         } catch (error) {
+//             console.log("Error saving data", error);
+//         } finally {
+//             setSubmitting(false);
+//         }
+//     };
+
+//     // handle  change for image and the others
+
+//     const handleChange = (e) => {
+//         const { name, value, type, files } = e.target;
+//         setClientForm((prev) => ({
+//             ...prev,
+//             [name]: type === "file" ? files[0] : value,
+//         }));
+//     };
+
+//     return (
+//         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+//             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
+//                 <div className="flex justify-between items-center mb-6 bg-white pb-4 border-b">
+//                     <h2 className="text-2xl font-bold">Add New Gallery Item</h2>
+//                     <button
+//                         type="button"
+//                         className="p-2 hover:bg-gray-100 rounded-full transition"
+//                     >
+//                         <X size={24} />
+//                     </button>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default AddClientManagement;
+
+// import React, { useEffect, useState } from "react";
+// import { X } from "lucide-react";
+// import axios from "axios";
+// import Select from "react-select";
+
+// const AddClientManagement = ({
+//     reloadTrigger,
+//     setReloadTrigger,
+//     editingClient,
+//     setEditingClient,
+//     setShowForm,
+//     handleUpdate,
+// }) => {
+//     const [submitting, setSubmitting] = useState(false);
+//     const [allLeads, setAllLeads] = useState([]);
+//     const [selectedLead, setSelectedLead] = useState(null);
+//     const [selectedCompany, setSelectedCompany] = useState(null);
+//     const [leadError, setLeadError] = useState("");
+//     const [clientForm, setClientForm] = useState({
+//         lead_id: "",
+//         company_name: "",
+//         contact_person: "",
+//         phone: "",
+//         email: "",
+//         address: "",
+//         service_type: "",
+//         account_manager: "",
+//         total_projects: "",
+//         total_revenue: "",
+//         payment_status: "",
+//     });
+
+//     // Populate form when editing
+//     useEffect(() => {
+//         if (editingClient) {
+//             setClientForm({
+//                 lead_id: editingClient.lead_id || "",
+//                 company_name: editingClient.company_name || "",
+//                 contact_person: editingClient.contact_person || "",
+//                 phone: editingClient.phone || "",
+//                 email: editingClient.email || "",
+//                 address: editingClient.address || "",
+//                 service_type: editingClient.service_type || "",
+//                 account_manager: editingClient.account_manager || "",
+//                 total_projects: editingClient.total_projects || "",
+//                 total_revenue: editingClient.total_revenue || "",
+//                 payment_status: editingClient.payment_status || "",
+//             });
+//         } else {
+//             resetForm();
+//         }
+//     }, [editingClient]);
+
+//     // Pre-select lead + company when editing and leads are loaded
+//     useEffect(() => {
+//         if (editingClient && allLeads.length > 0) {
+//             const match = allLeads.find(
+//                 (lead) => String(lead.id) === String(editingClient.lead_id)
+//             );
+//             if (match) {
+//                 setSelectedLead(buildOption(match));
+//                 setSelectedCompany(
+//                     match.company_name
+//                         ? { value: match.company_name, label: match.company_name }
+//                         : null
+//                 );
+//             }
+//         }
+//     }, [allLeads, editingClient]);
+
+//     // Fetch leads
+//     useEffect(() => {
+//         const fetchLeads = async () => {
+//             try {
+//                 const response = await axios.get(route("ourleads.index"));
+//                 setAllLeads(response.data.data ?? []);
+//             } catch (error) {
+//                 console.error("Fetching leads error:", error);
+//             }
+//         };
+//         fetchLeads();
+//     }, [reloadTrigger]);
+
+//     // Helper: build a react-select option from a lead object
+//     const buildOption = (lead) => ({
+//         value: lead.id,
+//         label: lead.client_name,
+//         company_name: lead.company_name || "",
+//         phone: lead.phone || "",
+//         email: lead.email || "",
+//     });
+
+//     // Lead options
+//     const leadOptions = allLeads.map(buildOption);
+
+//     // Company options derived from the same leads list
+//     const companyOptions = allLeads
+//         .map((lead) => ({
+//             value: lead.company_name || "",
+//             label: lead.company_name || "",
+//         }))
+//         .filter((opt) => opt.value !== "");
+
+//     const resetForm = () => {
+//         setClientForm({
+//             lead_id: "",
+//             company_name: "",
+//             contact_person: "",
+//             phone: "",
+//             email: "",
+//             address: "",
+//             service_type: "",
+//             account_manager: "",
+//             total_projects: "",
+//             total_revenue: "",
+//             payment_status: "",
+//         });
+//         setSelectedLead(null);
+//         setSelectedCompany(null);
+//         setLeadError("");
+//     };
+
+//     // Search by both client_name (label) AND company_name
+//     const filterOption = (option, inputValue) => {
+//         if (!inputValue) return true;
+//         const search = inputValue.toLowerCase();
+//         return (
+//             option.label?.toLowerCase().includes(search) ||
+//             option.data?.company_name?.toLowerCase().includes(search)
+//         );
+//     };
+
+//     const handleLeadChange = (option) => {
+//         setSelectedLead(option);
+//         setLeadError("");
+//         if (option) {
+//             const matchedCompany = companyOptions.find(
+//                 (c) => c.value === option.company_name
+//             );
+//             setSelectedCompany(matchedCompany || null);
+//             setClientForm((prev) => ({
+//                 ...prev,
+//                 lead_id: option.value,
+//                 company_name: option.company_name || "",
+//             }));
+//         } else {
+//             setSelectedCompany(null);
+//             setClientForm((prev) => ({
+//                 ...prev,
+//                 lead_id: "",
+//                 company_name: "",
+//             }));
+//         }
+//     };
+
+//     const handleCompanyChange = (option) => {
+//         setSelectedCompany(option);
+//         setClientForm((prev) => ({
+//             ...prev,
+//             company_name: option ? option.value : "",
+//         }));
+//     };
+
+//     const handleChange = (e) => {
+//         const { name, value } = e.target;
+//         setClientForm((prev) => ({ ...prev, [name]: value }));
+//     };
+
+//     const handleCreate = async (formData) => {
+//         await axios.post(route("ourclientmanagement.store"), formData, {
+//             headers: { "Content-Type": "multipart/form-data" },
+//         });
+//         setReloadTrigger((prev) => !prev);
+//     };
+
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+
+//         if (!selectedLead) {
+//             setLeadError("Please select a lead.");
+//             return;
+//         }
+
+//         const formData = new FormData();
+//         for (const key in clientForm) {
+//             if (clientForm[key] !== null && clientForm[key] !== "") {
+//                 formData.append(key, clientForm[key]);
+//             }
+//         }
+
+//         try {
+//             setSubmitting(true);
+//             if (editingClient) {
+//                 await handleUpdate(formData, editingClient.id);
+//             } else {
+//                 await handleCreate(formData);
+//             }
+//             resetForm();
+//             setShowForm(false);
+//             setEditingClient(null);
+//         } catch (error) {
+//             console.error("Error saving client:", error);
+//         } finally {
+//             setSubmitting(false);
+//         }
+//     };
+
+//     const handleClose = () => {
+//         resetForm();
+//         setEditingClient(null);
+//         setShowForm(false);
+//     };
+
+//     // Shared react-select styles
+//     const selectStyles = (hasError = false) => ({
+//         control: (base, state) => ({
+//             ...base,
+//             borderColor: hasError
+//                 ? "#ef4444"
+//                 : state.isFocused
+//                 ? "#6366f1"
+//                 : "#e5e7eb",
+//             borderRadius: "0.5rem",
+//             boxShadow: state.isFocused
+//                 ? hasError
+//                     ? "0 0 0 2px rgba(239,68,68,0.2)"
+//                     : "0 0 0 2px rgba(99,102,241,0.25)"
+//                 : "none",
+//             fontSize: "0.875rem",
+//             minHeight: "38px",
+//             backgroundColor: "white",
+//             "&:hover": {
+//                 borderColor: hasError ? "#ef4444" : "#6366f1",
+//             },
+//         }),
+//         option: (base, state) => ({
+//             ...base,
+//             backgroundColor: state.isSelected
+//                 ? "#6366f1"
+//                 : state.isFocused
+//                 ? "#eef2ff"
+//                 : "white",
+//             color: state.isSelected ? "white" : "#1c1917",
+//             fontSize: "0.875rem",
+//             cursor: "pointer",
+//             paddingTop: "8px",
+//             paddingBottom: "8px",
+//         }),
+//         singleValue: (base) => ({
+//             ...base,
+//             color: "#1c1917",
+//             fontSize: "0.875rem",
+//         }),
+//         placeholder: (base) => ({
+//             ...base,
+//             color: "#9ca3af",
+//             fontSize: "0.875rem",
+//         }),
+//         menuPortal: (base) => ({
+//             ...base,
+//             zIndex: 9999,
+//         }),
+//         menu: (base) => ({
+//             ...base,
+//             borderRadius: "0.5rem",
+//             boxShadow:
+//                 "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
+//         }),
+//         clearIndicator: (base) => ({
+//             ...base,
+//             color: "#9ca3af",
+//             padding: "0 6px",
+//             "&:hover": { color: "#ef4444" },
+//             cursor: "pointer",
+//         }),
+//         dropdownIndicator: (base) => ({
+//             ...base,
+//             color: "#9ca3af",
+//             padding: "0 8px",
+//             "&:hover": { color: "#6366f1" },
+//         }),
+//         indicatorSeparator: (base) => ({
+//             ...base,
+//             backgroundColor: "#e5e7eb",
+//         }),
+//         input: (base) => ({
+//             ...base,
+//             color: "#1c1917",
+//         }),
+//     });
+
+//     // Lead option shows client name + company sublabel
+//     const formatLeadOptionLabel = ({ label, company_name }) => (
+//         <div className="py-0.5">
+//             <div className="font-medium text-stone-800 text-sm">{label}</div>
+//             {company_name && (
+//                 <div className="text-xs text-gray-400 mt-0.5">{company_name}</div>
+//             )}
+//         </div>
+//     );
+
+//     const inputClass =
+//         "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition";
+//     const labelClass =
+//         "block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1";
+
+//     return (
+//         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+//             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
+
+//                 {/* Header */}
+//                 <div className="flex justify-between items-center mb-6 pb-4 border-b sticky top-0 bg-white z-10">
+//                     <h2 className="text-2xl font-bold text-stone-800">
+//                         {editingClient ? "Edit Client" : "Add New Client"}
+//                     </h2>
+//                     <button
+//                         type="button"
+//                         onClick={handleClose}
+//                         className="p-2 hover:bg-gray-100 rounded-full transition"
+//                     >
+//                         <X size={24} />
+//                     </button>
+//                 </div>
+
+//                 <form onSubmit={handleSubmit} className="space-y-4">
+
+//                     {/* Lead Selection */}
+//                     <div>
+//                         <label className={labelClass}>Select Lead *</label>
+//                         <Select
+//                             options={leadOptions}
+//                             value={selectedLead}
+//                             onChange={handleLeadChange}
+//                             formatOptionLabel={formatLeadOptionLabel}
+//                             filterOption={filterOption}
+//                             styles={selectStyles(!!leadError)}
+//                             placeholder="Search by name or company..."
+//                             isClearable
+//                             isSearchable
+//                             noOptionsMessage={() => "No leads found"}
+//                             menuPortal={document.body}
+//                             menuPosition="fixed"
+//                         />
+//                         {leadError && (
+//                             <p className="mt-1 text-xs text-red-500">{leadError}</p>
+//                         )}
+//                     </div>
+
+//                     {/* Company Name & Contact Person */}
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                         <div>
+//                             <label className={labelClass}>Company Name *</label>
+//                             <Select
+//                                 options={companyOptions}
+//                                 value={selectedCompany}
+//                                 onChange={handleCompanyChange}
+//                                 styles={selectStyles()}
+//                                 placeholder="Select company..."
+//                                 isClearable
+//                                 isSearchable
+//                                 noOptionsMessage={() => "No companies found"}
+//                                 menuPortal={document.body}
+//                                 menuPosition="fixed"
+//                             />
+//                         </div>
+//                         <div>
+//                             <label className={labelClass}>Contact Person</label>
+//                             <input
+//                                 type="text"
+//                                 name="contact_person"
+//                                 value={clientForm.contact_person}
+//                                 onChange={handleChange}
+//                                 placeholder="Contact person"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                     </div>
+
+//                     {/* Phone & Email */}
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                         <div>
+//                             <label className={labelClass}>Phone</label>
+//                             <input
+//                                 type="text"
+//                                 name="phone"
+//                                 value={clientForm.phone}
+//                                 onChange={handleChange}
+//                                 placeholder="Phone number"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                         <div>
+//                             <label className={labelClass}>Email</label>
+//                             <input
+//                                 type="email"
+//                                 name="email"
+//                                 value={clientForm.email}
+//                                 onChange={handleChange}
+//                                 placeholder="Email address"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                     </div>
+
+//                     {/* Address */}
+//                     <div>
+//                         <label className={labelClass}>Address</label>
+//                         <textarea
+//                             name="address"
+//                             value={clientForm.address}
+//                             onChange={handleChange}
+//                             placeholder="Full address"
+//                             rows={2}
+//                             className={inputClass}
+//                         />
+//                     </div>
+
+//                     {/* Service Type & Account Manager */}
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                         <div>
+//                             <label className={labelClass}>Service Type</label>
+//                             <input
+//                                 type="text"
+//                                 name="service_type"
+//                                 value={clientForm.service_type}
+//                                 onChange={handleChange}
+//                                 placeholder="e.g. Web Development"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                         <div>
+//                             <label className={labelClass}>Account Manager</label>
+//                             <input
+//                                 type="text"
+//                                 name="account_manager"
+//                                 value={clientForm.account_manager}
+//                                 onChange={handleChange}
+//                                 placeholder="Manager name"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                     </div>
+
+//                     {/* Total Projects & Total Revenue */}
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+//                         <div>
+//                             <label className={labelClass}>Total Projects</label>
+//                             <input
+//                                 type="number"
+//                                 name="total_projects"
+//                                 value={clientForm.total_projects}
+//                                 onChange={handleChange}
+//                                 placeholder="0"
+//                                 min="0"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                         <div>
+//                             <label className={labelClass}>Total Revenue</label>
+//                             <input
+//                                 type="number"
+//                                 name="total_revenue"
+//                                 value={clientForm.total_revenue}
+//                                 onChange={handleChange}
+//                                 placeholder="0.00"
+//                                 min="0"
+//                                 step="0.01"
+//                                 className={inputClass}
+//                             />
+//                         </div>
+//                     </div>
+
+//                     {/* Payment Status */}
+//                     <div>
+//                         <label className={labelClass}>Payment Status</label>
+//                         <select
+//                             name="payment_status"
+//                             value={clientForm.payment_status}
+//                             onChange={handleChange}
+//                             className={inputClass}
+//                         >
+//                             <option value="">-- Select Status --</option>
+//                             <option value="Paid">Paid</option>
+//                             <option value="Pending">Pending</option>
+//                             <option value="Overdue">Overdue</option>
+//                             <option value="Partial">Partial</option>
+//                         </select>
+//                     </div>
+
+//                     {/* Action Buttons */}
+//                     <div className="flex justify-end gap-3 pt-4 border-t">
+//                         <button
+//                             type="button"
+//                             onClick={handleClose}
+//                             className="px-5 py-2 rounded-full text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition"
+//                         >
+//                             Cancel
+//                         </button>
+//                         <button
+//                             type="submit"
+//                             disabled={submitting}
+//                             className="px-6 py-2 rounded-full text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+//                         >
+//                             {submitting
+//                                 ? "Saving..."
+//                                 : editingClient
+//                                 ? "Update Client"
+//                                 : "Create Client"}
+//                         </button>
+//                     </div>
+//                 </form>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default AddClientManagement;
+
+import React, { useEffect, useState } from "react";
+import { X } from "lucide-react";
+import axios from "axios";
+import Select from "react-select";
+
+const AddClientManagement = ({
+    reloadTrigger,
+    setReloadTrigger,
+    editingClient,
+    setEditingClient,
+    setShowForm,
+    handleUpdate,
+}) => {
     const [submitting, setSubmitting] = useState(false);
-    const [userForm, setUserForm] = useState({
-        fullname: "",
+    const [allLeads, setAllLeads] = useState([]);
+    const [selectedLead, setSelectedLead] = useState(null);
+    const [selectedCompany, setSelectedCompany] = useState(null);
+    const [selectedPaymentStatus, setSelectedPaymentStatus] = useState(null);
+    const [leadError, setLeadError] = useState("");
+    const [clientForm, setClientForm] = useState({
+        lead_id: "",
+        company_name: "",
+        contact_person: "",
+        phone: "",
         email: "",
-        image: "",
         address: "",
-        role: "",
-        status: "",
-        date: "",
-        auth: "",
+        service_type: "",
+        account_manager: "",
+        total_projects: "",
+        total_revenue: "",
+        payment_status: "",
     });
 
-    //  Use Effect
+    // Payment status options
+    const paymentStatusOptions = [
+        { value: "Paid", label: "Paid" },
+        { value: "Pending", label: "Pending" },
+        { value: "Overdue", label: "Overdue" },
+        { value: "Partial", label: "Partial" },
+    ];
+
+    // Populate form when editing
     useEffect(() => {
-        if (editingUser) {
-            setUserForm({
-                ...editingUser,
-                image: null,
+        if (editingClient) {
+            setClientForm({
+                lead_id: editingClient.lead_id || "",
+                company_name: editingClient.company_name || "",
+                contact_person: editingClient.contact_person || "",
+                phone: editingClient.phone || "",
+                email: editingClient.email || "",
+                address: editingClient.address || "",
+                service_type: editingClient.service_type || "",
+                account_manager: editingClient.account_manager || "",
+                total_projects: editingClient.total_projects || "",
+                total_revenue: editingClient.total_revenue || "",
+                payment_status: editingClient.payment_status || "",
             });
-            setShowForm(true);
+
+            // Set payment status if it exists
+            if (editingClient.payment_status) {
+                const statusOption = paymentStatusOptions.find(
+                    (option) => option.value === editingClient.payment_status,
+                );
+                setSelectedPaymentStatus(statusOption || null);
+            }
         } else {
-            setUserForm({
-                fullname: "",
-                email: "",
-                image: "",
-                address: "",
-                role: "",
-                status: "",
-                date: "",
-                auth: "",
-            });
+            resetForm();
         }
-    }, [editingUser]);
+    }, [editingClient]);
 
-    // Handle Create User
-    const handleCreate = async (formData) => {
-        try {
-            await axios.post(route("users.store"), formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+    // Pre-select lead + company when editing and leads are loaded
+    useEffect(() => {
+        if (editingClient && allLeads.length > 0) {
+            const match = allLeads.find(
+                (lead) => String(lead.id) === String(editingClient.lead_id),
+            );
+            if (match) {
+                setSelectedLead(buildOption(match));
+                // Pre-select the saved company_name on edit
+                setSelectedCompany(
+                    editingClient.company_name
+                        ? {
+                              value: editingClient.company_name,
+                              label: editingClient.company_name,
+                          }
+                        : null,
+                );
+            }
+        }
+    }, [allLeads, editingClient]);
 
-            setReloadTrigger((prev) => !prev);
-        } catch (error) {
-            console.log("Error creating user", error);
-            throw error;
+    // Fetch leads
+    // useEffect(() => {
+    //     const fetchLeads = async () => {
+    //         try {
+    //             const response = await axios.get(route("ourleads.index"));
+    //             setAllLeads(response.data.data ?? []);
+    //         } catch (error) {
+    //             console.error("Fetching leads error:", error);
+    //         }
+    //     };
+    //     fetchLeads();
+    // }, [reloadTrigger]);
+
+    // Fetch leads - only those with status "Won" (case-insensitive)
+    useEffect(() => {
+        const fetchLeads = async () => {
+            try {
+                const response = await axios.get(route("ourleads.index"));
+                // Filter leads to only show those with status "Won" (case-insensitive)
+                const allLeads = response.data.data ?? [];
+                const wonLeads = allLeads.filter(
+                    (lead) =>
+                        lead.status && lead.status.toLowerCase() === "won",
+                );
+                setAllLeads(wonLeads);
+            } catch (error) {
+                console.error("Fetching leads error:", error);
+            }
+        };
+        fetchLeads();
+    }, [reloadTrigger]);
+
+    // Helper: build a react-select option from a lead object
+    const buildOption = (lead) => ({
+        value: lead.id,
+        label: lead.client_name,
+        company_name: lead.company_name || "",
+        phone: lead.phone || "",
+        email: lead.email || "",
+    });
+
+    // All lead options
+    const leadOptions = allLeads.map(buildOption);
+
+    // Company options — ONLY the company affiliated to the selected lead
+    const companyOptions =
+        selectedLead && selectedLead.company_name
+            ? [
+                  {
+                      value: selectedLead.company_name,
+                      label: selectedLead.company_name,
+                  },
+              ]
+            : [];
+
+    const resetForm = () => {
+        setClientForm({
+            lead_id: "",
+            company_name: "",
+            contact_person: "",
+            phone: "",
+            email: "",
+            address: "",
+            service_type: "",
+            account_manager: "",
+            total_projects: "",
+            total_revenue: "",
+            payment_status: "",
+        });
+        setSelectedLead(null);
+        setSelectedCompany(null);
+        setSelectedPaymentStatus(null);
+        setLeadError("");
+    };
+
+    // Search leads by client_name AND company_name
+    const filterOption = (option, inputValue) => {
+        if (!inputValue) return true;
+        const search = inputValue.toLowerCase();
+        return (
+            option.label?.toLowerCase().includes(search) ||
+            option.data?.company_name?.toLowerCase().includes(search)
+        );
+    };
+
+    // Selecting a lead only sets lead_id — company stays empty for manual selection
+    const handleLeadChange = (option) => {
+        setSelectedLead(option);
+        setLeadError("");
+        if (option) {
+            setSelectedCompany(null); // reset company; user must pick manually
+            setClientForm((prev) => ({
+                ...prev,
+                lead_id: option.value,
+                company_name: "", // not auto-filled
+            }));
+        } else {
+            // Lead cleared — reset company too
+            setSelectedCompany(null);
+            setClientForm((prev) => ({
+                ...prev,
+                lead_id: "",
+                company_name: "",
+            }));
         }
     };
 
-    // Handle Submit - now clearly separated paths
+    const handleCompanyChange = (option) => {
+        setSelectedCompany(option);
+        setClientForm((prev) => ({
+            ...prev,
+            company_name: option ? option.value : "",
+        }));
+    };
+
+    const handlePaymentStatusChange = (option) => {
+        setSelectedPaymentStatus(option);
+        setClientForm((prev) => ({
+            ...prev,
+            payment_status: option ? option.value : "",
+        }));
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setClientForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleCreate = async (formData) => {
+        await axios.post(route("ourclientmanagement.store"), formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        setReloadTrigger((prev) => !prev);
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        if (!selectedLead) {
+            setLeadError("Please select a lead.");
+            return;
+        }
+
         const formData = new FormData();
-        // Append all form data except image if it's empty
-        for (const key in userForm) {
-            if (userForm[key] !== null && userForm[key] !== "") {
-                formData.append(key, userForm[key]);
+        for (const key in clientForm) {
+            if (clientForm[key] !== null && clientForm[key] !== "") {
+                formData.append(key, clientForm[key]);
             }
         }
+
         try {
             setSubmitting(true);
-
-            if (editingUser) {
-                // Editing existing user
-                await handleUpdate(formData, editingUser.id);
+            if (editingClient) {
+                await handleUpdate(formData, editingClient.id);
             } else {
-                // Creating new user
                 await handleCreate(formData);
             }
-            setUserForm({
-                fullname: "",
-                email: "",
-                address: "",
-                role: "",
-                status: "",
-                date: "",
-                auth: "",
-                image: null,
-            });
-
+            resetForm();
             setShowForm(false);
-            setEditingUser(null);
+            setEditingClient(null);
         } catch (error) {
-            console.log("Error saving data", error);
+            console.error("Error saving client:", error);
         } finally {
             setSubmitting(false);
         }
     };
 
-    // handle  change for image and the others
-
-    const handleChange = (e) => {
-        const { name, value, type, files } = e.target;
-        setUserForm((prev) => ({
-            ...prev,
-            [name]: type === "file" ? files[0] : value,
-        }));
+    const handleClose = () => {
+        resetForm();
+        setEditingClient(null);
+        setShowForm(false);
     };
+
+    // Shared react-select styles — accepts optional error flag
+    const selectStyles = (hasError = false) => ({
+        control: (base, state) => ({
+            ...base,
+            borderColor: hasError
+                ? "#ef4444"
+                : state.isFocused
+                  ? "#6366f1"
+                  : "#e5e7eb",
+            borderRadius: "0.5rem",
+            boxShadow: state.isFocused
+                ? hasError
+                    ? "0 0 0 2px rgba(239,68,68,0.2)"
+                    : "0 0 0 2px rgba(99,102,241,0.25)"
+                : "none",
+            fontSize: "0.875rem",
+            minHeight: "38px",
+            backgroundColor: "white",
+            "&:hover": {
+                borderColor: hasError ? "#ef4444" : "#6366f1",
+            },
+        }),
+        option: (base, state) => ({
+            ...base,
+            backgroundColor: state.isSelected
+                ? "#6366f1"
+                : state.isFocused
+                  ? "#eef2ff"
+                  : "white",
+            color: state.isSelected ? "white" : "#1c1917",
+            fontSize: "0.875rem",
+            cursor: "pointer",
+            paddingTop: "8px",
+            paddingBottom: "8px",
+        }),
+        singleValue: (base) => ({
+            ...base,
+            color: "#1c1917",
+            fontSize: "0.875rem",
+        }),
+        placeholder: (base) => ({
+            ...base,
+            color: "#9ca3af",
+            fontSize: "0.875rem",
+        }),
+        menuPortal: (base) => ({
+            ...base,
+            zIndex: 9999,
+        }),
+        menu: (base) => ({
+            ...base,
+            borderRadius: "0.5rem",
+            boxShadow:
+                "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)",
+        }),
+        clearIndicator: (base) => ({
+            ...base,
+            color: "#9ca3af",
+            padding: "0 6px",
+            "&:hover": { color: "#ef4444" },
+            cursor: "pointer",
+        }),
+        dropdownIndicator: (base) => ({
+            ...base,
+            color: "#9ca3af",
+            padding: "0 8px",
+            "&:hover": { color: "#6366f1" },
+        }),
+        indicatorSeparator: (base) => ({
+            ...base,
+            backgroundColor: "#e5e7eb",
+        }),
+        input: (base) => ({
+            ...base,
+            color: "#1c1917",
+        }),
+    });
+
+    // Lead option: only client name, no company name
+    const formatLeadOptionLabel = ({ label }) => (
+        <div className="py-0.5">
+            <div className="font-medium text-stone-800 text-sm">{label}</div>
+        </div>
+    );
+
+    const inputClass =
+        "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition";
+    const labelClass =
+        "block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1";
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
-                <div className="flex justify-between items-center mb-6 bg-white pb-4 border-b">
-                    <h2 className="text-2xl font-bold">Add New Gallery Item</h2>
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6 pb-4 border-b sticky top-0 bg-white z-10">
+                    <h2 className="text-2xl font-bold text-stone-800">
+                        {editingClient ? "Edit Client" : "Add New Client"}
+                    </h2>
                     <button
                         type="button"
+                        onClick={handleClose}
                         className="p-2 hover:bg-gray-100 rounded-full transition"
                     >
                         <X size={24} />
                     </button>
                 </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Lead Selection and Company Name - Same Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Select Lead *</label>
+                            <Select
+                                options={leadOptions}
+                                value={selectedLead}
+                                onChange={handleLeadChange}
+                                formatOptionLabel={formatLeadOptionLabel}
+                                filterOption={filterOption}
+                                styles={selectStyles(!!leadError)}
+                                placeholder="Search by name or company..."
+                                isClearable
+                                isSearchable
+                                noOptionsMessage={() => "No leads found"}
+                                menuPortal={document.body}
+                                menuPosition="fixed"
+                            />
+                            {leadError && (
+                                <p className="mt-1 text-xs text-red-500">
+                                    {leadError}
+                                </p>
+                            )}
+                        </div>
+                        <div>
+                            <label className={labelClass}>Company Name</label>
+                            <Select
+                                options={companyOptions}
+                                value={selectedCompany}
+                                onChange={handleCompanyChange}
+                                styles={selectStyles()}
+                                placeholder={
+                                    selectedLead
+                                        ? "Select company..."
+                                        : "Select a lead first..."
+                                }
+                                isClearable
+                                isSearchable
+                                isDisabled={!selectedLead}
+                                noOptionsMessage={() =>
+                                    "No company affiliated to this lead"
+                                }
+                                menuPortal={document.body}
+                                menuPosition="fixed"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Contact Person and Phone - Same Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Contact Person</label>
+                            <input
+                                type="text"
+                                name="contact_person"
+                                value={clientForm.contact_person}
+                                onChange={handleChange}
+                                placeholder="Contact person"
+                                className={inputClass}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Phone</label>
+                            <input
+                                type="text"
+                                name="phone"
+                                value={clientForm.phone}
+                                onChange={handleChange}
+                                placeholder="Phone number"
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Email and Address - Same Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={clientForm.email}
+                                onChange={handleChange}
+                                placeholder="Email address"
+                                className={inputClass}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Address</label>
+                            <input
+                                type="text"
+                                name="address"
+                                value={clientForm.address}
+                                onChange={handleChange}
+                                placeholder="Full address"
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Service Type & Account Manager - Same Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Service Type</label>
+                            <input
+                                type="text"
+                                name="service_type"
+                                value={clientForm.service_type}
+                                onChange={handleChange}
+                                placeholder="e.g. Web Development"
+                                className={inputClass}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>
+                                Account Manager
+                            </label>
+                            <input
+                                type="text"
+                                name="account_manager"
+                                value={clientForm.account_manager}
+                                onChange={handleChange}
+                                placeholder="Manager name"
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Total Projects & Total Revenue - Same Row */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Total Projects</label>
+                            <input
+                                type="number"
+                                name="total_projects"
+                                value={clientForm.total_projects}
+                                onChange={handleChange}
+                                placeholder="0"
+                                min="0"
+                                className={inputClass}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Total Revenue</label>
+                            <input
+                                type="number"
+                                name="total_revenue"
+                                value={clientForm.total_revenue}
+                                onChange={handleChange}
+                                placeholder="0.00"
+                                min="0"
+                                step="0.01"
+                                className={inputClass}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Payment Status - Now using react-select */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Payment Status</label>
+                            <Select
+                                options={paymentStatusOptions}
+                                value={selectedPaymentStatus}
+                                onChange={handlePaymentStatusChange}
+                                styles={selectStyles()}
+                                placeholder="-- Select Status --"
+                                isClearable
+                                isSearchable={false}
+                                menuPortal={document.body}
+                                menuPosition="fixed"
+                            />
+                        </div>
+                        <div>{/* Empty div for spacing */}</div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-3 pt-4 border-t">
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="px-5 py-2 rounded-full text-sm font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 transition"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="px-6 py-2 rounded-full text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            {submitting
+                                ? "Saving..."
+                                : editingClient
+                                  ? "Update Client"
+                                  : "Create Client"}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

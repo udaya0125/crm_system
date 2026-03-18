@@ -18,9 +18,8 @@ class Lead extends Model
         'assigned_salesperson',
         'next_followup_date',
         'notes',
-        'status'
+        'status',
     ];
-
 
     protected static function boot()
     {
@@ -32,4 +31,8 @@ class Lead extends Model
         });
     }
 
+    public function client()
+    {
+        return $this->hasMany(ClientManagement::class, 'lead_id');
+    }
 }

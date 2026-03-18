@@ -17,6 +17,8 @@ use App\Http\Controllers\ProjectManagementController;
 use App\Http\Controllers\FinanceTrackingController;
 use App\Http\Controllers\DomainManagementController;
 use App\Http\Controllers\HostingManagementController;
+use App\Http\Controllers\LeadController;
+use App\Http\Controllers\ClientManagementController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -116,6 +118,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/hosting-tracking', function(){
         return Inertia::render('ClientDetails/HostingManagement');
+        
+    });
+
+
+    Route::get('/leads', function(){
+        return Inertia::render('ClientDetails/Leads');
         
     });
 
@@ -351,5 +359,15 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
         Route::post('/ourhostings', [HostingManagementController::class, 'store'])->name('ourhostings.store');
         Route::put('/ourhostings/{id}', [HostingManagementController::class, 'update'])->name('ourhostings.update');
         Route::delete('/ourhostings/{id}', [HostingManagementController::class, 'destroy'])->name('ourhostings.destroy');
+
+        Route::get('/ourleads', [LeadController::class, 'index'])->name('ourleads.index');
+        Route::post('/ourleads', [LeadController::class, 'store'])->name('ourleads.store');
+        Route::put('/ourleads/{id}', [LeadController::class, 'update'])->name('ourleads.update');
+        Route::delete('/ourleads/{id}', [LeadController::class, 'destroy'])->name('ourleads.destroy');
+
+        Route::get('/ourclientmanagement', [ClientManagementController::class, 'index'])->name('ourclientmanagement.index');
+        Route::post('/ourclientmanagement', [ClientManagementController::class, 'store'])->name('ourclientmanagement.store');
+        Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
+        Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
 
 require __DIR__.'/auth.php';
