@@ -21,6 +21,7 @@ class ClientManagement extends Model
         'payment_status',
     ];
 
+    
     // Define relationship to Lead
     public function lead()
     {
