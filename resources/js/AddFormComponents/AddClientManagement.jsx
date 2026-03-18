@@ -724,7 +724,7 @@ const AddClientManagement = ({
             // Set payment status if it exists
             if (editingClient.payment_status) {
                 const statusOption = paymentStatusOptions.find(
-                    (option) => option.value === editingClient.payment_status,
+                    option => option.value === editingClient.payment_status
                 );
                 setSelectedPaymentStatus(statusOption || null);
             }
@@ -766,25 +766,24 @@ const AddClientManagement = ({
     //     };
     //     fetchLeads();
     // }, [reloadTrigger]);
-
+    
     // Fetch leads - only those with status "Won" (case-insensitive)
-    useEffect(() => {
-        const fetchLeads = async () => {
-            try {
-                const response = await axios.get(route("ourleads.index"));
-                // Filter leads to only show those with status "Won" (case-insensitive)
-                const allLeads = response.data.data ?? [];
-                const wonLeads = allLeads.filter(
-                    (lead) =>
-                        lead.status && lead.status.toLowerCase() === "won",
-                );
-                setAllLeads(wonLeads);
-            } catch (error) {
-                console.error("Fetching leads error:", error);
-            }
-        };
-        fetchLeads();
-    }, [reloadTrigger]);
+useEffect(() => {
+    const fetchLeads = async () => {
+        try {
+            const response = await axios.get(route("ourleads.index"));
+            // Filter leads to only show those with status "Won" (case-insensitive)
+            const allLeads = response.data.data ?? [];
+            const wonLeads = allLeads.filter(lead => 
+                lead.status && lead.status.toLowerCase() === "won"
+            );
+            setAllLeads(wonLeads);
+        } catch (error) {
+            console.error("Fetching leads error:", error);
+        }
+    };
+    fetchLeads();
+}, [reloadTrigger]);
 
     // Helper: build a react-select option from a lead object
     const buildOption = (lead) => ({
