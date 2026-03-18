@@ -20,5 +20,16 @@ class Lead extends Model
         'notes',
         'status'
     ];
-    
+
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($project) {
+            $project->lead_id = 'LEAD-'.str_pad($project->id, 3, '0', STR_PAD_LEFT);
+            $project->save();
+        });
+    }
+
 }
