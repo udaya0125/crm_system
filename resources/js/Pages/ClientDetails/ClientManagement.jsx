@@ -92,8 +92,9 @@
 import AddClientManagement from "@/AddFormComponents/AddClientManagement";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Plus } from "lucide-react";
-import React, { useEffect, useState } from "react";
-
+import React, { useEffect, useState, useMemo } from "react";
+import axios from "axios";
+import MyTable from "@/TableComponents/MyTable";
 
 const ClientManagement = () => {
     const [allClients, setAllClients] = useState([]);
@@ -105,9 +106,9 @@ const ClientManagement = () => {
         const fetchClients = async () => {
             try {
                 const response = await axios.get(
-                    route("ourclientmanagement.index") // fixed route name
+                    route("ourclientmanagement.index")
                 );
-                setAllClients(response.data.data); // fixed: was response.data
+                setAllClients(response.data.data);
             } catch (error) {
                 console.error("Fetching error:", error);
             }
@@ -141,6 +142,77 @@ const ClientManagement = () => {
         return response.data;
     };
 
+    // Define columns for react-table
+    const columns = useMemo(
+        () => [
+            {
+                Header: "Company",
+                accessor: "company_name",
+                Cell: ({ value }) => (
+                    <span className="font-medium text-stone-800">{value}</span>
+                ),
+            },
+            {
+                Header: "Contact",
+                accessor: "contact_person",
+                Cell: ({ value }) => (
+                    <span className="text-gray-600">{value || "—"}</span>
+                ),
+            },
+            {
+                Header: "Phone",
+                accessor: "phone",
+                Cell: ({ value }) => (
+                    <span className="text-gray-600">{value || "—"}</span>
+                ),
+            },
+            {
+                Header: "Service",
+                accessor: "service_type",
+                Cell: ({ value }) => (
+                    <span className="text-gray-600">{value || "—"}</span>
+                ),
+            },
+            {
+                Header: "Payment",
+                accessor: "payment_status",
+                Cell: ({ value }) => {
+                    let bgColor = "bg-yellow-100 text-yellow-700";
+                    if (value === "Paid") bgColor = "bg-green-100 text-green-700";
+                    if (value === "Overdue") bgColor = "bg-red-100 text-red-700";
+                    
+                    return (
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${bgColor}`}>
+                            {value || "—"}
+                        </span>
+                    );
+                },
+            },
+            {
+                Header: "Actions",
+                accessor: "id",
+                disableSortBy: true,
+                Cell: ({ row }) => (
+                    <div className="text-right space-x-2">
+                        <button
+                            onClick={() => handleEdit(row.original)}
+                            className="text-indigo-600 hover:underline text-xs font-medium"
+                        >
+                            Edit
+                        </button>
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="text-red-500 hover:underline text-xs font-medium"
+                        >
+                            Delete
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        []
+    );
+
     return (
         <AdminWrapper>
             <div className="container mx-auto py-4">
@@ -161,79 +233,13 @@ const ClientManagement = () => {
                 </div>
 
                 {/* Client Table */}
-                <div className="overflow-x-auto rounded-xl border border-gray-200">
-                    <table className="w-full text-sm text-left">
-                        <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
-                            <tr>
-                                <th className="px-4 py-3">Company</th>
-                                <th className="px-4 py-3">Contact</th>
-                                <th className="px-4 py-3">Phone</th>
-                                <th className="px-4 py-3">Service</th>
-                                <th className="px-4 py-3">Payment</th>
-                                <th className="px-4 py-3 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {allClients.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={6}
-                                        className="text-center py-10 text-gray-400"
-                                    >
-                                        No clients found.
-                                    </td>
-                                </tr>
-                            ) : (
-                                allClients.map((client) => (
-                                    <tr
-                                        key={client.id}
-                                        className="hover:bg-gray-50 transition"
-                                    >
-                                        <td className="px-4 py-3 font-medium text-stone-800">
-                                            {client.company_name}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-600">
-                                            {client.contact_person || "—"}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-600">
-                                            {client.phone || "—"}
-                                        </td>
-                                        <td className="px-4 py-3 text-gray-600">
-                                            {client.service_type || "—"}
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <span
-                                                className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                                                    client.payment_status === "Paid"
-                                                        ? "bg-green-100 text-green-700"
-                                                        : client.payment_status === "Overdue"
-                                                        ? "bg-red-100 text-red-700"
-                                                        : "bg-yellow-100 text-yellow-700"
-                                                }`}
-                                            >
-                                                {client.payment_status || "—"}
-                                            </span>
-                                        </td>
-                                        <td className="px-4 py-3 text-right space-x-2">
-                                            <button
-                                                onClick={() => handleEdit(client)}
-                                                className="text-indigo-600 hover:underline text-xs font-medium"
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(client.id)}
-                                                className="text-red-500 hover:underline text-xs font-medium"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                {allClients.length === 0 ? (
+                    <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-blue-100">
+                        No clients found.
+                    </div>
+                ) : (
+                    <MyTable columns={columns} data={allClients} />
+                )}
             </div>
 
             {/* Modal */}
