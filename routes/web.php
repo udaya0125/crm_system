@@ -127,6 +127,10 @@ Route::middleware('auth')->group(function () {
         
     });
 
+    Route::get('/contract-renewal-management', function(){
+        return Inertia::render('ClientDetails/ContractRenewalManagement');
+    });
+
     // -----------------------------------------
     // CLIENT CRUD
     // -----------------------------------------
@@ -334,15 +338,27 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     // });
 
 
+
+    // ---------------------------------------------------------
+    // TICKET MANAGEMENT CRUD for the Tech Support Team
+    // ---------------------------------------------------------
     Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
     Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
     Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
 
+    // ---------------------------------------------------------
+    // PROJECT MANAGEMENT CRUD for the Development Team
+    // ---------------------------------------------------------
+
     Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
     Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
     Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
     Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
+
+    // ---------------------------------------------------------
+    // FINANCE TRACKING CRUD for the Finance Team
+    // ---------------------------------------------------------
 
     Route::get('/ourfinance', [FinanceTrackingController::class, 'index'])->name('ourfinance.index');
     Route::post('/ourfinance', [FinanceTrackingController::class, 'store'])->name('ourfinance.store');
@@ -350,24 +366,32 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
 
 
-        Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
-        Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
-        Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
-        Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
+    // ---------------------------------------------------------
+    // DOMAIN MANAGEMENT CRUD for the Development Team
+    // ---------------------------------------------------------
 
-        Route::get('/ourhostings', [HostingManagementController::class, 'index'])->name('ourhostings.index');
-        Route::post('/ourhostings', [HostingManagementController::class, 'store'])->name('ourhostings.store');
-        Route::put('/ourhostings/{id}', [HostingManagementController::class, 'update'])->name('ourhostings.update');
-        Route::delete('/ourhostings/{id}', [HostingManagementController::class, 'destroy'])->name('ourhostings.destroy');
+    Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
+    Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
+    Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
+    Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
 
-        Route::get('/ourleads', [LeadController::class, 'index'])->name('ourleads.index');
-        Route::post('/ourleads', [LeadController::class, 'store'])->name('ourleads.store');
-        Route::put('/ourleads/{id}', [LeadController::class, 'update'])->name('ourleads.update');
-        Route::delete('/ourleads/{id}', [LeadController::class, 'destroy'])->name('ourleads.destroy');
+    Route::get('/ourhostings', [HostingManagementController::class, 'index'])->name('ourhostings.index');
+    Route::post('/ourhostings', [HostingManagementController::class, 'store'])->name('ourhostings.store');
+    Route::put('/ourhostings/{id}', [HostingManagementController::class, 'update'])->name('ourhostings.update');
+    Route::delete('/ourhostings/{id}', [HostingManagementController::class, 'destroy'])->name('ourhostings.destroy');
 
-        Route::get('/ourclientmanagement', [ClientManagementController::class, 'index'])->name('ourclientmanagement.index');
-        Route::post('/ourclientmanagement', [ClientManagementController::class, 'store'])->name('ourclientmanagement.store');
-        Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
-        Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
+    // ---------------------------------------------------------
+    // LEAD MANAGEMENT CRUD for the Sales Team
+    // ---------------------------------------------------------
+
+    Route::get('/ourleads', [LeadController::class, 'index'])->name('ourleads.index');
+    Route::post('/ourleads', [LeadController::class, 'store'])->name('ourleads.store');
+    Route::put('/ourleads/{id}', [LeadController::class, 'update'])->name('ourleads.update');
+    Route::delete('/ourleads/{id}', [LeadController::class, 'destroy'])->name('ourleads.destroy');
+
+    Route::get('/ourclientmanagement', [ClientManagementController::class, 'index'])->name('ourclientmanagement.index');
+    Route::post('/ourclientmanagement', [ClientManagementController::class, 'store'])->name('ourclientmanagement.store');
+    Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
+    Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
 
 require __DIR__.'/auth.php';

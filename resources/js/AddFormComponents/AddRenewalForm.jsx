@@ -1,16 +1,19 @@
-import React from "react";
+import axios from "axios";
+import { X } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
-const AddRenewalForm = ({editingRenewal,setEditingRenewal}) => {
+const AddRenewalForm = ({ editingRenewal, setEditingRenewal, setShowForm }) => {
     const [submitting, setSubmitting] = useState(false);
     const [renewalForm, setRenewalForm] = useState({
-        fullname: "",
-        email: "",
-        image: "",
-        address: "",
-        role: "",
+        contract_id: "",
+        client_name: "",
+        service_type: "",
+        start_date: "",
+        expiry_date: "",
+        amount: "",
+        renewal_period: "",
+        responsible_staff: "",
         status: "",
-        date: "",
-        auth: "",
     });
 
     //  Use Effect
@@ -23,14 +26,15 @@ const AddRenewalForm = ({editingRenewal,setEditingRenewal}) => {
             setShowForm(true);
         } else {
             setRenewalForm({
-                fullname: "",
-                email: "",
-                image: "",
-                address: "",
-                role: "",
+                contract_id: "",
+                client_name: "",
+                service_type: "",
+                start_date: "",
+                expiry_date: "",
+                amount: "",
+                renewal_period: "",
+                responsible_staff: "",
                 status: "",
-                date: "",
-                auth: "",
             });
         }
     }, [editingRenewal]);
@@ -72,14 +76,15 @@ const AddRenewalForm = ({editingRenewal,setEditingRenewal}) => {
                 await handleCreate(formData);
             }
             setRenewalForm({
-                fullname: "",
-                email: "",
-                address: "",
-                role: "",
+                contract_id: "",
+                client_name: "",
+                service_type: "",
+                start_date: "",
+                expiry_date: "",
+                amount: "",
+                renewal_period: "",
+                responsible_staff: "",
                 status: "",
-                date: "",
-                auth: "",
-                image: null,
             });
 
             setShowForm(false);
@@ -107,6 +112,10 @@ const AddRenewalForm = ({editingRenewal,setEditingRenewal}) => {
                     <h2 className="text-2xl font-bold">Add New Renewal</h2>
                     <button
                         type="button"
+                        onClick={() => {
+                            setShowForm(false);
+                            setEditingRenewal(null);
+                        }}
                         className="p-2 hover:bg-gray-100 rounded-full transition"
                     >
                         <X size={24} />

@@ -1,6 +1,8 @@
+import AddRenewalForm from "@/AddFormComponents/AddRenewalForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+import axios from "axios";
 import { Plus } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 const ContractRenewalManagement = () => {
         const [allRenewal, setAllRenewal] = useState([]);
@@ -80,6 +82,13 @@ const ContractRenewalManagement = () => {
                             Create
                         </button>
                     </div>
+                    {showAddForm && (
+                        <AddRenewalForm
+                            editingRenewal={editingRenewal}
+                            setShowForm={setShowAddForm}
+                            setEditingRenewal={setEditingRenewal}
+                        />
+                    )}
                 </div>
             </AdminWrapper>
         </>

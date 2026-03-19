@@ -4,7 +4,6 @@
 // import { Plus } from "lucide-react";
 // import React, { useEffect, useState } from "react";
 
-
 // const DomainManagement = () => {
 //     const [allDomain, setAllDomain] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
@@ -154,7 +153,6 @@
 
 // export default DomainManagement;
 
-
 import AddDomainForm from "@/AddFormComponents/AddDomainForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
@@ -200,7 +198,7 @@ const DomainManagement = () => {
             const response = await axios.post(
                 route("ourdomains.update", { id }),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                { headers: { "Content-Type": "multipart/form-data" } },
             );
             setReloadTrigger((prev) => !prev);
             return response.data;
@@ -227,12 +225,20 @@ const DomainManagement = () => {
                 Header: "Domain",
                 accessor: "domain_name",
                 Cell: ({ value }) => (
-                    <span className="font-medium text-indigo-700">{value}</span>
+                    <a
+                        href={`https://${value}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-indigo-700 hover:text-indigo-900 hover:underline"
+                    >
+                        {value}
+                    </a>
                 ),
             },
             {
                 Header: "Client",
-                accessor: (row) => row.client?.organization_name ?? row.client?.name ?? "—",
+                accessor: (row) =>
+                    row.client?.organization_name ?? row.client?.name ?? "—",
                 id: "client",
             },
             {
@@ -251,11 +257,13 @@ const DomainManagement = () => {
                 Header: "Auto Renewal",
                 accessor: "auto_renewal_status",
                 Cell: ({ value }) => (
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        value === "active"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-red-100 text-red-600"
-                    }`}>
+                    <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            value === "active"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-red-100 text-red-600"
+                        }`}
+                    >
                         {value}
                     </span>
                 ),
@@ -286,7 +294,7 @@ const DomainManagement = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     return (
@@ -307,10 +315,7 @@ const DomainManagement = () => {
                 </div>
 
                 {/* MyTable Component */}
-                <MyTable
-                    columns={columns} 
-                    data={allDomain} 
-                />
+                <MyTable columns={columns} data={allDomain} />
             </div>
 
             {/* Add/Edit Domain Form */}
