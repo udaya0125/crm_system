@@ -68,6 +68,7 @@ const ClientDashboard = () => {
     const [allClients, setAllClients] = useState([]);
     const [allTickets, setAllTickets] = useState([]);
     const [allDomain, setAllDomain] = useState([]);
+    const [allHosting, setAllHosting] = useState([]);
     const [loading, setLoading] = useState(true);
     const [financeLoading, setFinanceLoading] = useState(true);
     const [clientsLoading, setClientsLoading] = useState(true);
@@ -145,7 +146,15 @@ const ClientDashboard = () => {
         };
         fetchDomain();
 
-        
+        const fetchHosting = async () => {
+            try {
+                const response = await axios.get(route("ourhostings.index"));
+                setAllHosting(response.data.data);
+            } catch (error) {
+                console.error("fetching error ", error);
+            }
+        };
+        fetchHosting();
     }, [reloadTrigger]);
 
     const getTaskProgress = (projectDescription) => {
@@ -1101,6 +1110,148 @@ const ClientDashboard = () => {
                                                             —
                                                         </span>
                                                     )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+            {/* Hosting Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <h2 className="font-semibold text-gray-800">
+                        Hosting Renewals Due Soon
+                    </h2>
+                    <button
+                        onClick={() => setReloadTrigger((v) => v + 1)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                        ↻ Refresh
+                    </button>
+                </div>
+
+                {allHosting.filter((h) => {
+                    if (!h.renewal_date) return false;
+                    const diff =
+                        (new Date(h.renewal_date) - new Date()) /
+                        (1000 * 60 * 60 * 24);
+                    return diff <= 30;
+                }).length === 0 ? (
+                    <div className="py-16 text-center text-gray-400 text-sm">
+                        No hosting renewals due within 30 days.
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        #
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Client
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Hosting Provider
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Hosting Plan
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Disk Usage
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Renewal Date
+                                    </th>
+                                    <th className="px-6 py-3 text-left font-medium">
+                                        Days Left
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {allHosting
+                                    .filter((h) => {
+                                        if (!h.renewal_date) return false;
+                                        const diff =
+                                            (new Date(h.renewal_date) -
+                                                new Date()) /
+                                            (1000 * 60 * 60 * 24);
+                                        return diff <= 30;
+                                    })
+                                    .sort(
+                                        (a, b) =>
+                                            new Date(a.renewal_date) -
+                                            new Date(b.renewal_date),
+                                    )
+                                    .map((hosting, idx) => {
+                                        const daysLeft = Math.ceil(
+                                            (new Date(hosting.renewal_date) -
+                                                new Date()) /
+                                                (1000 * 60 * 60 * 24),
+                                        );
+                                        const isExpired = daysLeft < 0;
+                                        const isCritical =
+                                            daysLeft <= 7 && daysLeft >= 0;
+
+                                        return (
+                                            <tr
+                                                key={hosting.id}
+                                                className="hover:bg-gray-50 transition-colors"
+                                            >
+                                                <td className="px-6 py-4 text-gray-400">
+                                                    {idx + 1}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-gray-900">
+                                                        {hosting.client
+                                                            ?.company_name ?? (
+                                                            <span className="text-gray-300">
+                                                                —
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">
+                                                    {hosting.hosting_provider ?? (
+                                                        <span className="text-gray-300">
+                                                            —
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">
+                                                    {hosting.hosting_plan ?? (
+                                                        <span className="text-gray-300">
+                                                            —
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">
+                                                    {hosting.disk_usage ?? (
+                                                        <span className="text-gray-300">
+                                                            —
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-500">
+                                                    {hosting.renewal_date}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span
+                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
+                                                            isExpired
+                                                                ? "bg-red-100 text-red-700 border-red-200"
+                                                                : isCritical
+                                                                  ? "bg-orange-100 text-orange-700 border-orange-200"
+                                                                  : "bg-amber-100 text-amber-700 border-amber-200"
+                                                        }`}
+                                                    >
+                                                        {isExpired
+                                                            ? `Expired ${Math.abs(daysLeft)}d ago`
+                                                            : `${daysLeft}d left`}
+                                                    </span>
                                                 </td>
                                             </tr>
                                         );
