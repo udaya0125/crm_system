@@ -394,4 +394,11 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
     Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
 
+
+
+
+      Route::get('/client-dashboard', function(){
+        return Inertia::render('Dashboard/ClientDashboard');
+    });
+
 require __DIR__.'/auth.php';
