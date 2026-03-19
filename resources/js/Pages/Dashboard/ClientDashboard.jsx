@@ -104,6 +104,8 @@ const ClientDashboard = () => {
             }
         };
         fetchClients();
+
+        
     }, [reloadTrigger]);
 
     const getTaskProgress = (projectDescription) => {
@@ -122,7 +124,7 @@ const ClientDashboard = () => {
 
     const completedProjects = allProjects.filter(
         (project) =>
-            project.status?.toLowerCase().replace(/\s+/g, "-") === "completed",
+            project.status?.toLowerCase().replace(/\s+/g, "-") !== "completed",
     );
 
     // Finance summary calculations
