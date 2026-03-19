@@ -40,6 +40,21 @@ const PAYMENT_STATUS_STYLES = {
     partial: "bg-blue-100 text-blue-700 border border-blue-200",
 };
 
+const TICKET_STATUS_STYLES = {
+    open: "bg-blue-100 text-blue-700 border border-blue-200",
+    "in-progress": "bg-amber-100 text-amber-700 border border-amber-200",
+    resolved: "bg-emerald-100 text-emerald-700 border border-emerald-200",
+    closed: "bg-gray-100 text-gray-500 border border-gray-200",
+    pending: "bg-orange-100 text-orange-700 border border-orange-200",
+};
+
+const TICKET_PRIORITY_STYLES = {
+    high: "bg-red-50 text-red-600 border border-red-200",
+    medium: "bg-orange-50 text-orange-600 border border-orange-200",
+    low: "bg-gray-100 text-gray-500 border border-gray-200",
+    urgent: "bg-red-100 text-red-700 border border-red-200",
+};
+
 const formatCurrency = (amount) =>
     new Intl.NumberFormat("en-US", {
         style: "currency",
@@ -51,9 +66,11 @@ const ClientDashboard = () => {
     const [allProjects, setAllProjects] = useState([]);
     const [allTracking, setAllTracking] = useState([]);
     const [allClients, setAllClients] = useState([]);
+    const [allTickets, setAllTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [financeLoading, setFinanceLoading] = useState(true);
     const [clientsLoading, setClientsLoading] = useState(true);
+    const [ticketsLoading, setTicketsLoading] = useState(true);
     const [reloadTrigger, setReloadTrigger] = useState(0);
 
     useEffect(() => {
@@ -105,7 +122,18 @@ const ClientDashboard = () => {
         };
         fetchClients();
 
-        
+        const fetchTickets = async () => {
+            setTicketsLoading(true);
+            try {
+                const response = await axios.get(route("ourtickets.index"));
+                setAllTickets(response.data.data);
+            } catch (error) {
+                console.error("fetching error ", error);
+            } finally {
+                setTicketsLoading(false);
+            }
+        };
+        fetchTickets();
     }, [reloadTrigger]);
 
     const getTaskProgress = (projectDescription) => {
@@ -147,6 +175,22 @@ const ClientDashboard = () => {
         (sum, c) => sum + Number(c.total_projects ?? 0),
         0,
     );
+
+    // Tickets — exclude closed
+    const visibleTickets = allTickets.filter(
+        (t) => t.status?.toLowerCase() !== "closed",
+    );
+
+    // Ticket summary counts
+    const openTickets = visibleTickets.filter(
+        (t) => t.status?.toLowerCase() === "open",
+    ).length;
+    const inProgressTickets = visibleTickets.filter(
+        (t) => t.status?.toLowerCase() === "in-progress",
+    ).length;
+    const resolvedTickets = visibleTickets.filter(
+        (t) => t.status?.toLowerCase() === "resolved",
+    ).length;
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
@@ -224,31 +268,19 @@ const ClientDashboard = () => {
                                                     {project.client_name}
                                                 </div>
                                             </td>
+                                            <td className="px-6 py-4 text-gray-600">{project.service_type}</td>
+                                            <td className="px-6 py-4 text-gray-500">{project.start_date}</td>
+                                            <td className="px-6 py-4 text-gray-500">{project.deadline}</td>
                                             <td className="px-6 py-4 text-gray-600">
-                                                {project.service_type}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500">
-                                                {project.start_date}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500">
-                                                {project.deadline}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {project.assigned_team ?? (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
+                                                {project.assigned_team ?? <span className="text-gray-300">—</span>}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_STYLES[priorityKey] ?? "bg-gray-100 text-gray-500"}`}
-                                                >
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_STYLES[priorityKey] ?? "bg-gray-100 text-gray-500"}`}>
                                                     {project.priority}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-500"}`}
-                                                >
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-500"}`}>
                                                     {project.status}
                                                 </span>
                                             </td>
@@ -257,9 +289,7 @@ const ClientDashboard = () => {
                                                     <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                                         <div
                                                             className="h-full bg-blue-500 rounded-full transition-all"
-                                                            style={{
-                                                                width: `${project.completion ?? 0}%`,
-                                                            }}
+                                                            style={{ width: `${project.completion ?? 0}%` }}
                                                         />
                                                     </div>
                                                     <span className="text-xs text-gray-500 w-8">
@@ -269,10 +299,7 @@ const ClientDashboard = () => {
                                             </td>
                                             <td className="px-6 py-4 text-xs text-gray-500">
                                                 {taskProgress ? (
-                                                    <span>
-                                                        {taskProgress.completed}/{taskProgress.total}{" "}
-                                                        done
-                                                    </span>
+                                                    <span>{taskProgress.completed}/{taskProgress.total} done</span>
                                                 ) : (
                                                     <span className="text-gray-300">—</span>
                                                 )}
@@ -298,38 +325,27 @@ const ClientDashboard = () => {
                     </button>
                 </div>
 
-                {/* Finance Summary Cards */}
                 {!financeLoading && allTracking.length > 0 && (
                     <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-100">
                         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500 mb-1">Total Invoiced</p>
-                            <p className="text-lg font-semibold text-gray-800">
-                                {formatCurrency(totalInvoiced)}
-                            </p>
+                            <p className="text-lg font-semibold text-gray-800">{formatCurrency(totalInvoiced)}</p>
                         </div>
                         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500 mb-1">Total Paid</p>
-                            <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(totalPaid)}
-                            </p>
+                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(totalPaid)}</p>
                         </div>
                         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500 mb-1">Outstanding</p>
-                            <p className="text-lg font-semibold text-amber-600">
-                                {formatCurrency(totalOutstanding)}
-                            </p>
+                            <p className="text-lg font-semibold text-amber-600">{formatCurrency(totalOutstanding)}</p>
                         </div>
                     </div>
                 )}
 
                 {financeLoading ? (
-                    <div className="py-16 text-center text-gray-400 text-sm">
-                        Loading finance records…
-                    </div>
+                    <div className="py-16 text-center text-gray-400 text-sm">Loading finance records…</div>
                 ) : allTracking.length === 0 ? (
-                    <div className="py-16 text-center text-gray-400 text-sm">
-                        No finance records found.
-                    </div>
+                    <div className="py-16 text-center text-gray-400 text-sm">No finance records found.</div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -367,45 +383,24 @@ const ClientDashboard = () => {
                                             : 0;
 
                                         return (
-                                            <tr
-                                                key={finance.id}
-                                                className="hover:bg-gray-50 transition-colors"
-                                            >
+                                            <tr key={finance.id} className="hover:bg-gray-50 transition-colors">
                                                 <td className="px-6 py-4 text-gray-400">{idx + 1}</td>
                                                 <td className="px-6 py-4">
-                                                    <div className="font-medium text-gray-900">
-                                                        {finance.client}
-                                                    </div>
+                                                    <div className="font-medium text-gray-900">{finance.client}</div>
                                                 </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {finance.project}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {finance.invoice_date}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {finance.due_date}
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-gray-800">
-                                                    {formatCurrency(finance.amount)}
-                                                </td>
-                                                <td className="px-6 py-4 text-emerald-600 font-medium">
-                                                    {formatCurrency(finance.paid_amount)}
-                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">{finance.project}</td>
+                                                <td className="px-6 py-4 text-gray-500">{finance.invoice_date}</td>
+                                                <td className="px-6 py-4 text-gray-500">{finance.due_date}</td>
+                                                <td className="px-6 py-4 font-medium text-gray-800">{formatCurrency(finance.amount)}</td>
+                                                <td className="px-6 py-4 text-emerald-600 font-medium">{formatCurrency(finance.paid_amount)}</td>
                                                 <td className="px-6 py-4">
-                                                    <span
-                                                        className={`font-medium ${balance > 0 ? "text-amber-600" : "text-gray-400"}`}
-                                                    >
+                                                    <span className={`font-medium ${balance > 0 ? "text-amber-600" : "text-gray-400"}`}>
                                                         {formatCurrency(balance)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${FINANCE_STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}
-                                                    >
-                                                        {FINANCE_STATUS_LABELS[statusKey] ??
-                                                            finance.status ??
-                                                            "—"}
+                                                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${FINANCE_STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}>
+                                                        {FINANCE_STATUS_LABELS[statusKey] ?? finance.status ?? "—"}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
@@ -416,9 +411,7 @@ const ClientDashboard = () => {
                                                                 style={{ width: `${paymentPct}%` }}
                                                             />
                                                         </div>
-                                                        <span className="text-xs text-gray-500 w-8">
-                                                            {paymentPct}%
-                                                        </span>
+                                                        <span className="text-xs text-gray-500 w-8">{paymentPct}%</span>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -431,7 +424,7 @@ const ClientDashboard = () => {
             </div>
 
             {/* Clients Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="font-semibold text-gray-800">Clients</h2>
                     <button
@@ -442,38 +435,27 @@ const ClientDashboard = () => {
                     </button>
                 </div>
 
-                {/* Clients Summary Cards */}
                 {!clientsLoading && allClients.length > 0 && (
                     <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-100">
                         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500 mb-1">Total Clients</p>
-                            <p className="text-lg font-semibold text-gray-800">
-                                {allClients.length}
-                            </p>
+                            <p className="text-lg font-semibold text-gray-800">{allClients.length}</p>
                         </div>
                         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500 mb-1">Total Projects</p>
-                            <p className="text-lg font-semibold text-blue-600">
-                                {totalProjectsCount}
-                            </p>
+                            <p className="text-lg font-semibold text-blue-600">{totalProjectsCount}</p>
                         </div>
                         <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
                             <p className="text-xs text-gray-500 mb-1">Total Revenue</p>
-                            <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(totalRevenue)}
-                            </p>
+                            <p className="text-lg font-semibold text-emerald-600">{formatCurrency(totalRevenue)}</p>
                         </div>
                     </div>
                 )}
 
                 {clientsLoading ? (
-                    <div className="py-16 text-center text-gray-400 text-sm">
-                        Loading clients…
-                    </div>
+                    <div className="py-16 text-center text-gray-400 text-sm">Loading clients…</div>
                 ) : allClients.length === 0 ? (
-                    <div className="py-16 text-center text-gray-400 text-sm">
-                        No clients found.
-                    </div>
+                    <div className="py-16 text-center text-gray-400 text-sm">No clients found.</div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
@@ -493,83 +475,169 @@ const ClientDashboard = () => {
                             </thead>
                             <tbody className="divide-y divide-gray-100">
                                 {allClients
-                                    .filter(
-                                        (c) =>
-                                            c.payment_status?.toLowerCase() !== "paid",
-                                    )
+                                    .filter((c) => c.payment_status?.toLowerCase() !== "paid")
                                     .map((client, idx) => {
-                                    const paymentStatusKey =
-                                        client.payment_status?.toLowerCase();
+                                        const paymentStatusKey = client.payment_status?.toLowerCase();
+
+                                        return (
+                                            <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                                                <td className="px-6 py-4 text-gray-400">{idx + 1}</td>
+                                                <td className="px-6 py-4">
+                                                    <div className="font-medium text-gray-900">{client.company_name}</div>
+                                                    {client.address && (
+                                                        <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[160px]">
+                                                            {client.address}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-700">
+                                                    {client.contact_person ?? <span className="text-gray-300">—</span>}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {client.email ? (
+                                                        <a href={`mailto:${client.email}`} className="text-blue-600 hover:underline">
+                                                            {client.email}
+                                                        </a>
+                                                    ) : (
+                                                        <span className="text-gray-300">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">
+                                                    {client.phone ?? <span className="text-gray-300">—</span>}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">
+                                                    {client.service_type ?? <span className="text-gray-300">—</span>}
+                                                </td>
+                                                <td className="px-6 py-4 text-gray-600">
+                                                    {client.account_manager ?? <span className="text-gray-300">—</span>}
+                                                </td>
+                                                <td className="px-6 py-4 text-center text-gray-700 font-medium">
+                                                    {client.total_projects ?? <span className="text-gray-300">—</span>}
+                                                </td>
+                                                <td className="px-6 py-4 font-medium text-gray-800">
+                                                    {client.total_revenue != null ? (
+                                                        formatCurrency(client.total_revenue)
+                                                    ) : (
+                                                        <span className="text-gray-300">—</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {client.payment_status ? (
+                                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${PAYMENT_STATUS_STYLES[paymentStatusKey] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}>
+                                                            {client.payment_status}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-300">—</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+
+            {/* Tickets Table */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                    <h2 className="font-semibold text-gray-800">Support Tickets</h2>
+                    <button
+                        onClick={() => setReloadTrigger((v) => v + 1)}
+                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                        ↻ Refresh
+                    </button>
+                </div>
+
+                {/* Tickets Summary Cards */}
+                {!ticketsLoading && visibleTickets.length > 0 && (
+                    <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-100">
+                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+                            <p className="text-xs text-gray-500 mb-1">Open</p>
+                            <p className="text-lg font-semibold text-blue-600">{openTickets}</p>
+                        </div>
+                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+                            <p className="text-xs text-gray-500 mb-1">In Progress</p>
+                            <p className="text-lg font-semibold text-amber-600">{inProgressTickets}</p>
+                        </div>
+                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
+                            <p className="text-xs text-gray-500 mb-1">Resolved</p>
+                            <p className="text-lg font-semibold text-emerald-600">{resolvedTickets}</p>
+                        </div>
+                    </div>
+                )}
+
+                {ticketsLoading ? (
+                    <div className="py-16 text-center text-gray-400 text-sm">Loading tickets…</div>
+                ) : visibleTickets.length === 0 ? (
+                    <div className="py-16 text-center text-gray-400 text-sm">No active tickets found.</div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
+                                    <th className="px-6 py-3 text-left font-medium">#</th>
+                                    <th className="px-6 py-3 text-left font-medium">Ticket ID</th>
+                                    <th className="px-6 py-3 text-left font-medium">Client</th>
+                                    <th className="px-6 py-3 text-left font-medium">Issue Type</th>
+                                    <th className="px-6 py-3 text-left font-medium">Device</th>
+                                    <th className="px-6 py-3 text-left font-medium">Description</th>
+                                    <th className="px-6 py-3 text-left font-medium">Priority</th>
+                                    <th className="px-6 py-3 text-left font-medium">Technician</th>
+                                    <th className="px-6 py-3 text-left font-medium">Status</th>
+                                    <th className="px-6 py-3 text-left font-medium">Created</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {visibleTickets.map((ticket, idx) => {
+                                    const statusKey = ticket.status?.toLowerCase().replace(/\s+/g, "-");
+                                    const priorityKey = ticket.priority?.toLowerCase();
 
                                     return (
-                                        <tr
-                                            key={client.id}
-                                            className="hover:bg-gray-50 transition-colors"
-                                        >
+                                        <tr key={ticket.id} className="hover:bg-gray-50 transition-colors">
                                             <td className="px-6 py-4 text-gray-400">{idx + 1}</td>
                                             <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {client.company_name}
-                                                </div>
-                                                {client.address && (
-                                                    <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[160px]">
-                                                        {client.address}
-                                                    </div>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-700">
-                                                {client.contact_person ?? (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
+                                                <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                                                    {ticket.ticket_id ?? `#${ticket.id}`}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {client.email ? (
-                                                    <a
-                                                        href={`mailto:${client.email}`}
-                                                        className="text-blue-600 hover:underline"
-                                                    >
-                                                        {client.email}
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
+                                                <div className="font-medium text-gray-900">{ticket.client_name}</div>
                                             </td>
                                             <td className="px-6 py-4 text-gray-600">
-                                                {client.phone ?? (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
+                                                {ticket.issue_type ?? <span className="text-gray-300">—</span>}
                                             </td>
                                             <td className="px-6 py-4 text-gray-600">
-                                                {client.service_type ?? (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
+                                                {ticket.device_type ?? <span className="text-gray-300">—</span>}
                                             </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {client.account_manager ?? (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-center text-gray-700 font-medium">
-                                                {client.total_projects ?? (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 font-medium text-gray-800">
-                                                {client.total_revenue != null
-                                                    ? formatCurrency(client.total_revenue)
-                                                    : <span className="text-gray-300">—</span>
-                                                }
+                                            <td className="px-6 py-4 text-gray-500 max-w-[200px]">
+                                                <span className="line-clamp-2 block truncate" title={ticket.problem_description}>
+                                                    {ticket.problem_description ?? <span className="text-gray-300">—</span>}
+                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
-                                                {client.payment_status ? (
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${PAYMENT_STATUS_STYLES[paymentStatusKey] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}
-                                                    >
-                                                        {client.payment_status}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-gray-300">—</span>
-                                                )}
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${TICKET_PRIORITY_STYLES[priorityKey] ?? "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                                    {ticket.priority ?? "—"}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-600">
+                                                {ticket.technician_name ?? <span className="text-gray-300">Unassigned</span>}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${TICKET_STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-500 border border-gray-200"}`}>
+                                                    {ticket.status ?? "—"}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
+                                                {ticket.created_at
+                                                    ? new Date(ticket.created_at).toLocaleDateString("en-US", {
+                                                          month: "short",
+                                                          day: "numeric",
+                                                          year: "numeric",
+                                                      })
+                                                    : <span className="text-gray-300">—</span>}
                                             </td>
                                         </tr>
                                     );
