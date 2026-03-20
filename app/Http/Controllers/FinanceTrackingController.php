@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\FinanceTracking;
+use App\Models\UserLog;
 
 class FinanceTrackingController extends Controller
 {
@@ -16,7 +17,7 @@ class FinanceTrackingController extends Controller
 
         return response()->json([
             'status' => true,
-            'data' => $finances
+            'data'   => $finances
         ]);
     }
 
@@ -26,29 +27,35 @@ class FinanceTrackingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'client' => 'required|string|max:255',
-            'project' => 'required|string|max:255',
+            'client'       => 'required|string|max:255',
+            'project'      => 'required|string|max:255',
             'invoice_date' => 'required|date',
-            'due_date' => 'required|date',
-            'amount' => 'required|numeric',
-            'paid_amount' => 'nullable|numeric',
-            'status' => 'nullable|string'
+            'due_date'     => 'required|date',
+            'amount'       => 'required|numeric',
+            'paid_amount'  => 'nullable|numeric',
+            'status'       => 'nullable|string'
         ]);
 
         $finance = FinanceTracking::create([
-            'client' => $request->client,
-            'project' => $request->project,
+            'client'       => $request->client,
+            'project'      => $request->project,
             'invoice_date' => $request->invoice_date,
-            'due_date' => $request->due_date,
-            'amount' => $request->amount,
-            'paid_amount' => $request->paid_amount ?? 0,
-            'status' => $request->status ?? 'pending',
+            'due_date'     => $request->due_date,
+            'amount'       => $request->amount,
+            'paid_amount'  => $request->paid_amount ?? 0,
+            'status'       => $request->status ?? 'pending',
+        ]);
+
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Created finance record: {$finance->project} for {$finance->client}",
         ]);
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Finance record created successfully',
-            'data' => $finance
+            'data'    => $finance
         ]);
     }
 
@@ -60,42 +67,56 @@ class FinanceTrackingController extends Controller
         $finance = FinanceTracking::findOrFail($id);
 
         $request->validate([
-            'client' => 'required|string|max:255',
-            'project' => 'required|string|max:255',
+            'client'       => 'required|string|max:255',
+            'project'      => 'required|string|max:255',
             'invoice_date' => 'required|date',
-            'due_date' => 'required|date',
-            'amount' => 'required|numeric',
-            'paid_amount' => 'nullable|numeric',
-            'status' => 'nullable|string'
+            'due_date'     => 'required|date',
+            'amount'       => 'required|numeric',
+            'paid_amount'  => 'nullable|numeric',
+            'status'       => 'nullable|string'
         ]);
 
         $finance->update([
-            'client' => $request->client,
-            'project' => $request->project,
+            'client'       => $request->client,
+            'project'      => $request->project,
             'invoice_date' => $request->invoice_date,
-            'due_date' => $request->due_date,
-            'amount' => $request->amount,
-            'paid_amount' => $request->paid_amount ?? 0,
-            'status' => $request->status
+            'due_date'     => $request->due_date,
+            'amount'       => $request->amount,
+            'paid_amount'  => $request->paid_amount ?? 0,
+            'status'       => $request->status
+        ]);
+
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Updated finance record: {$finance->project} for {$finance->client}",
         ]);
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Finance record updated successfully',
-            'data' => $finance
+            'data'    => $finance
         ]);
     }
 
     /**
      * Delete finance record
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $finance = FinanceTracking::findOrFail($id);
+        $project = $finance->project;
+        $client  = $finance->client;
         $finance->delete();
 
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Deleted finance record: {$project} for {$client}",
+        ]);
+
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Finance record deleted successfully'
         ]);
     }
