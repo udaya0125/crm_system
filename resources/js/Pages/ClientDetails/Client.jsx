@@ -5,12 +5,14 @@
 // import { Edit, Plus, Trash2, Building } from "lucide-react";
 // import { Head } from "@inertiajs/react";
 // import MyTable from "@/TableComponents/MyTable";
+// import EditClientForm from "@/EditFormComponents/EditClientForm";
 
 // const Client = () => {
 //     const [allClients, setAllClients] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
 //     const [editingClient, setEditingClient] = useState(null);
-//     const [showModal, setShowModal] = useState(false);
+//     const [showAddModal, setShowAddModal] = useState(false);
+//     const [showEditModal, setShowEditModal] = useState(false);
 //     const [loading, setLoading] = useState(true);
 
 //     // For fetching the client data
@@ -52,7 +54,7 @@
 //     // Handle edit
 //     const handleEdit = (client) => {
 //         setEditingClient(client);
-//         setShowModal(true);
+//         setShowEditModal(true);
 //     };
 
 //     // Handle update after the edit
@@ -91,19 +93,20 @@
 
 //     // Handle successful form submission
 //     const handleFormSuccess = () => {
-//         setShowModal(false);
+//         setShowAddModal(false);
+//         setShowEditModal(false);
 //         setEditingClient(null);
 //         setReloadTrigger((prev) => !prev);
 //     };
 
 //     // Close all modals
 //     const closeModals = () => {
-//         setShowModal(false);
+//         setShowAddModal(false);
+//         setShowEditModal(false);
 //         setEditingClient(null);
 //     };
 
 //     // Define table columns
-//     // Replace the columns definition in Client.jsx with this:
 //     const columns = useMemo(
 //         () => [
 //             {
@@ -131,26 +134,8 @@
 //                 ),
 //             },
 //             {
-//                 Header: "Mobile",
-//                 accessor: "mobile",
-//                 Cell: ({ value }) => (
-//                     <div className="text-sm text-gray-900">
-//                         {value ? (
-//                             <a
-//                                 href={`tel:${value}`}
-//                                 className="text-blue-500 hover:underline"
-//                             >
-//                                 {value}
-//                             </a>
-//                         ) : (
-//                             "N/A"
-//                         )}
-//                     </div>
-//                 ),
-//             },
-//             {
-//                 Header: "Email",
-//                 accessor: "email",
+//                 Header: "Branch",
+//                 accessor: "branchname",
 //                 Cell: ({ value }) => (
 //                     <div className="text-sm text-gray-900">
 //                         {value || "N/A"}
@@ -158,8 +143,17 @@
 //                 ),
 //             },
 //             {
-//                 Header: "City",
-//                 accessor: "city",
+//                 Header: "Email",
+//                 accessor: "code",
+//                 Cell: ({ value }) => (
+//                     <div className="text-sm text-gray-900">
+//                         {value || "N/A"}
+//                     </div>
+//                 ),
+//             },
+//             {
+//                 Header: "Pan Number",
+//                 accessor: "pannumber",
 //                 Cell: ({ value }) => (
 //                     <div className="text-sm text-gray-900">
 //                         {value || "N/A"}
@@ -218,7 +212,7 @@
 //                     </h1>
 //                     <button
 //                         onClick={() => {
-//                             setShowModal(true);
+//                             setShowAddModal(true);
 //                             setEditingClient(null);
 //                         }}
 //                         className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
@@ -255,8 +249,8 @@
 //                     </div>
 //                 )}
 
-//                 {/* Client Modal */}
-//                 {showModal && (
+//                 {/* Add Client Modal */}
+//                 {showAddModal && (
 //                     <div className="fixed inset-0 z-50 overflow-y-auto">
 //                         {/* Backdrop */}
 //                         <div
@@ -268,10 +262,30 @@
 //                         <div className="flex items-center justify-center min-h-screen p-4">
 //                             <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-auto">
 //                                 <AddClientForm
-//                                     editingClient={editingClient}
-//                                     setEditingClient={setEditingClient}
-//                                     handleUpdate={handleUpdate}
 //                                     handleCreate={handleCreate}
+//                                     onSuccess={handleFormSuccess}
+//                                     onCancel={closeModals}
+//                                 />
+//                             </div>
+//                         </div>
+//                     </div>
+//                 )}
+
+//                 {/* Edit Client Modal */}
+//                 {showEditModal && editingClient && (
+//                     <div className="fixed inset-0 z-50 overflow-y-auto">
+//                         {/* Backdrop */}
+//                         <div
+//                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+//                             onClick={closeModals}
+//                         />
+
+//                         {/* Modal Content */}
+//                         <div className="flex items-center justify-center min-h-screen p-4">
+//                             <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-auto">
+//                                 <EditClientForm
+//                                     editingClient={editingClient}
+//                                     handleUpdate={handleUpdate}
 //                                     onSuccess={handleFormSuccess}
 //                                     onCancel={closeModals}
 //                                 />
@@ -286,12 +300,11 @@
 
 // export default Client;
 
-
 import AddClientForm from "@/AddFormComponents/AddClientForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import axios from "axios";
 import React, { useEffect, useState, useMemo } from "react";
-import { Edit, Plus, Trash2, Building } from "lucide-react";
+import { Edit, Plus, Trash2, Building, Search, X } from "lucide-react";
 import { Head } from "@inertiajs/react";
 import MyTable from "@/TableComponents/MyTable";
 import EditClientForm from "@/EditFormComponents/EditClientForm";
@@ -303,6 +316,7 @@ const Client = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showEditModal, setShowEditModal] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState("");
 
     // For fetching the client data
     useEffect(() => {
@@ -321,6 +335,14 @@ const Client = () => {
 
         fetchClient();
     }, [reloadTrigger]);
+
+    // Filter clients by name
+    const filteredClients = useMemo(() => {
+        if (!searchQuery.trim()) return allClients;
+        return allClients.filter((client) =>
+            client.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [allClients, searchQuery]);
 
     // For delete the client
     const handleDelete = async (id) => {
@@ -423,26 +445,8 @@ const Client = () => {
                 ),
             },
             {
-                Header: "Mobile",
-                accessor: "mobile",
-                Cell: ({ value }) => (
-                    <div className="text-sm text-gray-900">
-                        {value ? (
-                            <a
-                                href={`tel:${value}`}
-                                className="text-blue-500 hover:underline"
-                            >
-                                {value}
-                            </a>
-                        ) : (
-                            "N/A"
-                        )}
-                    </div>
-                ),
-            },
-            {
-                Header: "Email",
-                accessor: "email",
+                Header: "Branch",
+                accessor: "branchname",
                 Cell: ({ value }) => (
                     <div className="text-sm text-gray-900">
                         {value || "N/A"}
@@ -450,8 +454,17 @@ const Client = () => {
                 ),
             },
             {
-                Header: "City",
-                accessor: "city",
+                Header: "Code",
+                accessor: "code",
+                Cell: ({ value }) => (
+                    <div className="text-sm text-gray-900">
+                        {value || "N/A"}
+                    </div>
+                ),
+            },
+            {
+                Header: "Pan Number",
+                accessor: "pannumber",
                 Cell: ({ value }) => (
                     <div className="text-sm text-gray-900">
                         {value || "N/A"}
@@ -520,6 +533,29 @@ const Client = () => {
                     </button>
                 </div>
 
+                {/* Search Bar */}
+                <div className="relative max-w-sm">
+                    <Search
+                        size={16}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                    />
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search by name..."
+                        className="w-full pl-9 pr-9 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            <X size={14} />
+                        </button>
+                    )}
+                </div>
+
                 {/* Loading State */}
                 {loading && (
                     <div className="text-center py-16">
@@ -531,16 +567,20 @@ const Client = () => {
                 {/* Clients Table - Only show when not loading */}
                 {!loading && (
                     <div className="mt-8">
-                        {allClients.length > 0 ? (
-                            <MyTable columns={columns} data={allClients} />
+                        {filteredClients.length > 0 ? (
+                            <MyTable columns={columns} data={filteredClients} />
                         ) : (
                             <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
                                 <Building className="w-12 h-12 mx-auto text-gray-400 mb-3" />
                                 <p className="text-gray-500 text-lg">
-                                    No clients found
+                                    {searchQuery
+                                        ? `No clients found matching "${searchQuery}"`
+                                        : "No clients found"}
                                 </p>
                                 <p className="text-gray-400 text-sm mt-1">
-                                    Add your first client to get started
+                                    {searchQuery
+                                        ? "Try a different search term"
+                                        : "Add your first client to get started"}
                                 </p>
                             </div>
                         )}
@@ -550,13 +590,10 @@ const Client = () => {
                 {/* Add Client Modal */}
                 {showAddModal && (
                     <div className="fixed inset-0 z-50 overflow-y-auto">
-                        {/* Backdrop */}
                         <div
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={closeModals}
                         />
-
-                        {/* Modal Content */}
                         <div className="flex items-center justify-center min-h-screen p-4">
                             <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-auto">
                                 <AddClientForm
@@ -572,13 +609,10 @@ const Client = () => {
                 {/* Edit Client Modal */}
                 {showEditModal && editingClient && (
                     <div className="fixed inset-0 z-50 overflow-y-auto">
-                        {/* Backdrop */}
                         <div
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={closeModals}
                         />
-
-                        {/* Modal Content */}
                         <div className="flex items-center justify-center min-h-screen p-4">
                             <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-auto">
                                 <EditClientForm

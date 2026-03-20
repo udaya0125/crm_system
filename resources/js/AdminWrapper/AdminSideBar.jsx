@@ -643,7 +643,7 @@ const AdminSideBar = ({
                             )}
 
                             {/* Company Management Dropdown (formerly CRM & Company) */}
-                            {!isCollapsed ? (
+                            {/* {!isCollapsed ? (
                                 // Expanded view
                                 <div className="space-y-1">
                                     <button
@@ -672,10 +672,10 @@ const AdminSideBar = ({
                                         )}
                                     </button>
 
-                                    {/* Dropdown Content */}
+                                   
                                     {isLeadManagementOpen && (
                                         <div className="ml-9 space-y-0.5">
-                                            {/*CRM Link */}
+                                            
                                             <Link
                                                 href="/crm"
                                                 className={`
@@ -689,7 +689,7 @@ const AdminSideBar = ({
                                                 </span>
                                             </Link>
 
-                                            {/* Companies Link */}
+                                            
                                             <Link
                                                 href="/company"
                                                 className={`
@@ -733,10 +733,9 @@ const AdminSideBar = ({
                                                 ]),
                                             )}
                                         />
-                                        {/* <Tooltip>Company</Tooltip> */}
+                                      
                                     </button>
 
-                                    {/* Collapsed dropdown - appears on hover */}
                                     {isLeadHovered && (
                                         <div
                                             className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1"
@@ -763,6 +762,131 @@ const AdminSideBar = ({
                                             >
                                                 <span className="whitespace-nowrap">
                                                     Companies
+                                                </span>
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
+                            )} */}
+
+                            {!isCollapsed ? (
+                                // Expanded view
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={toggleLeadManagement}
+                                        className={dropdownButtonClasses(
+                                            isGroupActive([
+                                                "/leads",
+                                                "/client-management",
+                                            ]),
+                                        )}
+                                    >
+                                        <div className="flex items-center">
+                                            <ListFilter
+                                                className={iconClasses(
+                                                    isGroupActive([
+                                                        "/leads",
+                                                        "/client-management",
+                                                    ]),
+                                                )}
+                                            />
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                CRM
+                                            </span>
+                                        </div>
+                                        {isLeadManagementOpen ? (
+                                            <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
+                                        ) : (
+                                            <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
+                                        )}
+                                    </button>
+
+                                    {isLeadManagementOpen && (
+                                        <div className="ml-9 space-y-0.5">
+                                            <Link
+                                                href="/leads"
+                                                className={`
+                                                    flex items-center p-2.5 rounded-lg transition-colors duration-200
+                                                    ${isActive("/leads") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Leads
+                                                </span>
+                                            </Link>
+
+                                            <Link
+                                                href="/client-management"
+                                                className={`
+                                                    flex items-center p-2.5 rounded-lg transition-colors duration-200
+                                                    ${isActive("/client-management") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Client Management
+                                                </span>
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                // Collapsed view with hover dropdown
+                                <div
+                                    className="relative"
+                                    onMouseEnter={handleLeadMouseEnter}
+                                    onMouseLeave={handleLeadMouseLeave}
+                                >
+                                    <button
+                                        onClick={() => {
+                                            if (isCollapsed) {
+                                                setIsLeadHovered(
+                                                    !isLeadHovered,
+                                                );
+                                            }
+                                        }}
+                                        className={`
+                                            flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
+                                            ${isGroupActive(["/leads", "/client-management"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                        `}
+                                    >
+                                        <ListFilter
+                                            className={iconClasses(
+                                                isGroupActive([
+                                                    "/leads",
+                                                    "/client-management",
+                                                ]),
+                                            )}
+                                        />
+                                    </button>
+
+                                    {isLeadHovered && (
+                                        <div
+                                            className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1"
+                                            onMouseEnter={handleLeadMouseEnter}
+                                            onMouseLeave={handleLeadMouseLeave}
+                                        >
+                                            <Link
+                                                href="/leads"
+                                                className={`
+                                                    flex items-center px-3 py-2.5 text-sm transition-colors duration-200
+                                                    ${isActive("/leads") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Leads
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                href="/client-management"
+                                                className={`
+                                                    flex items-center px-3 py-2.5 text-sm transition-colors duration-200
+                                                    ${isActive("/client-management") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Client Management
                                                 </span>
                                             </Link>
                                         </div>
@@ -933,33 +1057,6 @@ const AdminSideBar = ({
                                 </div>
                             )}
 
-                            {/* Admin Links */}
-                            {isAdmin && (
-                                <>
-                                    {/* User Management Link */}
-                                    <Link
-                                        href="/user-management"
-                                        className={`
-                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/user-management")}
-                                        `}
-                                    >
-                                        <FiUsers
-                                            className={iconClasses(
-                                                isActive("/user-management"),
-                                            )}
-                                        />
-                                        {!isCollapsed && (
-                                            <span className="ml-3 font-medium whitespace-nowrap">
-                                                User Management
-                                            </span>
-                                        )}
-                                        {isCollapsed && (
-                                            <Tooltip>User Management</Tooltip>
-                                        )}
-                                    </Link>
-                                </>
-                            )}
-
                             {/* Company Dropdown (formerly Client & Expiration) */}
                             {!isCollapsed ? (
                                 // Expanded view
@@ -1036,6 +1133,18 @@ const AdminSideBar = ({
                                                     Hosting Management
                                                 </span>
                                             </Link>
+                                            <Link
+                                                href="/domain-tracking"
+                                                className={`
+                                                    flex items-center p-2.5 rounded-lg transition-colors duration-200
+                                                    ${isActive("/domain-tracking") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Domain Management
+                                                </span>
+                                            </Link>
                                         </div>
                                     )}
                                 </div>
@@ -1056,7 +1165,7 @@ const AdminSideBar = ({
                                         }}
                                         className={`
                                             flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
-                                            ${isGroupActive(["/client", "/expiration", "/hosting-tracking"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                            ${isGroupActive(["/client", "/expiration", "/hosting-tracking", "/domain-tracking"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                         `}
                                     >
                                         <FiCheckSquare
@@ -1065,6 +1174,7 @@ const AdminSideBar = ({
                                                     "/client",
                                                     "/expiration",
                                                     "/hosting-tracking",
+                                                    "/domain-tracking",
                                                 ]),
                                             )}
                                         />
@@ -1115,12 +1225,23 @@ const AdminSideBar = ({
                                                     Hosting Management
                                                 </span>
                                             </Link>
+                                            <Link
+                                                href="/domain-tracking"
+                                                className={`
+                                                    flex items-center px-3 py-2.5 text-sm transition-colors duration-200
+                                                    ${isActive("/domain-tracking") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Domain Management
+                                                </span>
+                                            </Link>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            <Link
+                            {/* <Link
                                 href="/client-management"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-management")}
@@ -1138,6 +1259,46 @@ const AdminSideBar = ({
                                 )}
                                 {isCollapsed && (
                                     <Tooltip>Client Management</Tooltip>
+                                )}
+                            </Link> */}
+
+                            {/* <Link
+                                href="/leads"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/leads")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(isActive("/leads"))}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Leads
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Leads</Tooltip>}
+                            </Link> */}
+
+                            <Link
+                                href="/payment-finance-tracking"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(
+                                        isActive("/payment-finance-tracking"),
+                                    )}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Finance Tracking
+                                    </span>
+                                )}
+                                {isCollapsed && (
+                                    <Tooltip>
+                                        Payment & Finance Tracking
+                                    </Tooltip>
                                 )}
                             </Link>
 
@@ -1180,88 +1341,6 @@ const AdminSideBar = ({
                             </Link>
 
                             <Link
-                                href="/domain-tracking"
-                                className={`
-                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/domain-tracking")}
-                                `}
-                            >
-                                <LayoutDashboard
-                                    className={iconClasses(
-                                        isActive("/domain-tracking"),
-                                    )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Domain Management
-                                    </span>
-                                )}
-                                {isCollapsed && (
-                                    <Tooltip>Domain Management</Tooltip>
-                                )}
-                            </Link>
-
-                            <Link
-                                href="/hosting-tracking"
-                                className={`
-                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/hosting-tracking")}
-                                `}
-                            >
-                                <LayoutDashboard
-                                    className={iconClasses(
-                                        isActive("/hosting-tracking"),
-                                    )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Hosting Management
-                                    </span>
-                                )}
-                                {isCollapsed && (
-                                    <Tooltip>Hosting Management</Tooltip>
-                                )}
-                            </Link>
-
-                            <Link
-                                href="/payment-finance-tracking"
-                                className={`
-                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
-                                `}
-                            >
-                                <LayoutDashboard
-                                    className={iconClasses(
-                                        isActive("/payment-finance-tracking"),
-                                    )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Finance Tracking
-                                    </span>
-                                )}
-                                {isCollapsed && (
-                                    <Tooltip>
-                                        Payment & Finance Tracking
-                                    </Tooltip>
-                                )}
-                            </Link>
-
-                            <Link
-                                href="/leads"
-                                className={`
-                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/leads")}
-                                `}
-                            >
-                                <LayoutDashboard
-                                    className={iconClasses(isActive("/leads"))}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Leads
-                                    </span>
-                                )}
-                                {isCollapsed && <Tooltip>Leads</Tooltip>}
-                            </Link>
-
-                            <Link
                                 href="/contract-renewal-management"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/contract-renewal-management")}
@@ -1285,6 +1364,54 @@ const AdminSideBar = ({
                                     </Tooltip>
                                 )}
                             </Link>
+
+                            {/* Admin Links */}
+                            {isAdmin && (
+                                <>
+                                    {/* User Management Link */}
+                                    <Link
+                                        href="/user-management"
+                                        className={`
+                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/user-management")}
+                                        `}
+                                    >
+                                        <FiUsers
+                                            className={iconClasses(
+                                                isActive("/user-management"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                User Management
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>User Management</Tooltip>
+                                        )}
+                                    </Link>
+
+                                    <Link
+                                        href="/activity-log"
+                                        className={`
+                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/activity-log")}
+                                        `}
+                                    >
+                                        <FiUsers
+                                            className={iconClasses(
+                                                isActive("/activity-log"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Activity Log
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>Activity Log</Tooltip>
+                                        )}
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
