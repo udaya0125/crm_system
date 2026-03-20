@@ -231,6 +231,24 @@ Route::middleware('auth')->group(function () {
     Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
     Route::delete('/notifications', [NotificationController::class, 'clearAll'])->name('notifications.clearAll');
 
+
+    // // -----------------------------------------
+    // // USER MANAGEMENT CRUD
+    // // -----------------------------------------
+    // Route::get('/ouruser', [UserController::class, 'index'])->name('ouruser.index');
+    // Route::post('/ouruser', [UserController::class, 'store'])->name('ouruser.store');
+    // Route::put('/ouruser/{id}', [UserController::class, 'update'])->name('ouruser.update');
+    // Route::delete('/ouruser/{id}', [UserController::class, 'destroy'])->name('ouruser.destroy');
+
+        // -----------------------------------------
+    // OUR USERS MANAGEMENT CRUD
+    // -----------------------------------------
+
+    Route::get('/ourusers', [UserController::class, 'index'])->name('ourusers.index');
+    Route::post('/ourusers', [UserController::class, 'store'])->name('ourusers.store');
+    Route::put('/ourusers/{id}', [UserController::class, 'update'])->name('ourusers.update');
+    Route::delete('/ourusers/{id}', [UserController::class, 'destroy'])->name('ourusers.destroy');
+
 });
 
 
@@ -247,13 +265,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         return Inertia::render('DetailsPage/UserManagement');
     });
 
-    // -----------------------------------------
-    // USER MANAGEMENT CRUD
-    // -----------------------------------------
-    Route::get('/ouruser', [UserController::class, 'index'])->name('ouruser.index');
-    Route::post('/ouruser', [UserController::class, 'store'])->name('ouruser.store');
-    Route::put('/ouruser/{id}', [UserController::class, 'update'])->name('ouruser.update');
-    Route::delete('/ouruser/{id}', [UserController::class, 'destroy'])->name('ouruser.destroy');
+
 
     // -----------------------------------------
     // TASK ASSIGNMENT PAGE
@@ -272,14 +284,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/ourtasklist/{id}', [TaskListController::class, 'update'])->name('ourtasklist.update');
     Route::delete('/ourtasklist/{id}', [TaskListController::class, 'destroy'])->name('ourtasklist.destroy');
 
-    // -----------------------------------------
-    // OUR USERS MANAGEMENT CRUD
-    // -----------------------------------------
 
-    Route::get('/ourusers', [UserController::class, 'index'])->name('ourusers.index');
-    Route::post('/ourusers', [UserController::class, 'store'])->name('ourusers.store');
-    Route::put('/ourusers/{id}', [UserController::class, 'update'])->name('ourusers.update');
-    Route::delete('/ourusers/{id}', [UserController::class, 'destroy'])->name('ourusers.destroy');
     
 });
 
