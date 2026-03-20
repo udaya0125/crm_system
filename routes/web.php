@@ -240,7 +240,9 @@ Route::middleware('auth')->group(function () {
     // Route::put('/ouruser/{id}', [UserController::class, 'update'])->name('ouruser.update');
     // Route::delete('/ouruser/{id}', [UserController::class, 'destroy'])->name('ouruser.destroy');
 
-        // -----------------------------------------
+
+
+    // -----------------------------------------
     // OUR USERS MANAGEMENT CRUD
     // -----------------------------------------
 
@@ -402,8 +404,8 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
 
 
 
-      Route::get('/client-dashboard', function(){
-        return Inertia::render('Dashboard/ClientDashboard');
+      Route::get('/ticket-dashboard', function(){
+        return Inertia::render('Dashboard/TicketDashboard');
     });
 
 require __DIR__.'/auth.php';
