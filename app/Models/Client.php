@@ -8,10 +8,22 @@ class Client extends Model
 {
     //
     protected $fillable = [
-        'organization_name',
-        'contact_person',
-        'contact_phone',
+        'type',
+        'name',
+        'branchname',
+        'code',
+        'pannumber',
+        'country',
+        'state',
+        'city',
+        'street',
+        'telone',
+        'teltwo',
+        'mobile',
         'email',
+        'website',
+        'activestatus',
+        'ledgername',
     ];
 
     public function expirations()

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
+import MyTable from "@/TableComponents/MyTable";
+
 
 const STATUS_STYLES = {
     completed: "bg-emerald-100 text-emerald-700 border border-emerald-200",
@@ -136,6 +138,7 @@ const ClientDashboard = () => {
             }
         };
         fetchTickets();
+        
         const fetchDomain = async () => {
             try {
                 const response = await axios.get(route("ourdomains.index"));
@@ -176,45 +179,508 @@ const ClientDashboard = () => {
             project.status?.toLowerCase().replace(/\s+/g, "-") !== "completed",
     );
 
-    // Finance summary calculations
-    const totalInvoiced = allTracking.reduce(
-        (sum, f) => sum + Number(f.amount ?? 0),
-        0,
-    );
-    const totalPaid = allTracking.reduce(
-        (sum, f) => sum + Number(f.paid_amount ?? 0),
-        0,
-    );
-    const totalOutstanding = totalInvoiced - totalPaid;
-
-    // Clients summary calculations
-    const totalRevenue = allClients.reduce(
-        (sum, c) => sum + Number(c.total_revenue ?? 0),
-        0,
-    );
-    const totalProjectsCount = allClients.reduce(
-        (sum, c) => sum + Number(c.total_projects ?? 0),
-        0,
-    );
-
     // Tickets — exclude closed
     const visibleTickets = allTickets.filter(
         (t) => t.status?.toLowerCase() !== "closed",
     );
 
-    // Ticket summary counts
-    const openTickets = visibleTickets.filter(
-        (t) => t.status?.toLowerCase() === "open",
-    ).length;
-    const inProgressTickets = visibleTickets.filter(
-        (t) => t.status?.toLowerCase() === "in-progress",
-    ).length;
-    const resolvedTickets = visibleTickets.filter(
-        (t) => t.status?.toLowerCase() === "resolved",
-    ).length;
+
+    // Projects Table Columns
+    const projectColumns = useMemo(() => [
+        {
+            Header: "#",
+            accessor: (row, idx) => idx + 1,
+        },
+        {
+            Header: "Project",
+            accessor: (row) => (
+                <div>
+                    <div className="font-medium text-gray-900">
+                        {row.project_title}
+                    </div>
+                    <div className="text-xs text-gray-400 mt-0.5">
+                        {row.client_name}
+                    </div>
+                </div>
+            ),
+        },
+        {
+            Header: "Service",
+            accessor: "service_type",
+        },
+        {
+            Header: "Start",
+            accessor: "start_date",
+        },
+        {
+            Header: "Deadline",
+            accessor: "deadline",
+        },
+        {
+            Header: "Team",
+            accessor: (row) => row.assigned_team_name ?? "—",
+        },
+        {
+            Header: "Priority",
+            accessor: (row) => {
+                const priorityKey = row.priority?.toLowerCase();
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                            PRIORITY_STYLES[priorityKey] ?? 
+                            "bg-gray-100 text-gray-500"
+                        }`}
+                    >
+                        {row.priority}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Status",
+            accessor: (row) => {
+                const statusKey = row.status
+                    ?.toLowerCase()
+                    .replace(/\s+/g, "-");
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                            STATUS_STYLES[statusKey] ?? 
+                            "bg-gray-100 text-gray-500"
+                        }`}
+                    >
+                        {row.status}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Progress",
+            accessor: (row) => (
+                <div className="flex items-center gap-2">
+                    <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                            className="h-full bg-blue-500 rounded-full transition-all"
+                            style={{
+                                width: `${row.completion ?? 0}%`,
+                            }}
+                        />
+                    </div>
+                    <span className="text-xs text-gray-500 w-8">
+                        {row.completion ?? 0}%
+                    </span>
+                </div>
+            ),
+        },
+        {
+            Header: "Tasks",
+            accessor: (row) => {
+                const taskProgress = getTaskProgress(row.project_description);
+                return taskProgress ? (
+                    <span>
+                        {taskProgress.completed}/{taskProgress.total} done
+                    </span>
+                ) : (
+                    <span className="text-gray-300">—</span>
+                );
+            },
+        },
+    ], []);
+
+    // Finance Table Columns
+    const financeColumns = useMemo(() => [
+        {
+            Header: "#",
+            accessor: (row, idx) => idx + 1,
+        },
+        {
+            Header: "Client",
+            accessor: (row) => (
+                <div className="font-medium text-gray-900">{row.client}</div>
+            ),
+        },
+        {
+            Header: "Project",
+            accessor: "project",
+        },
+        {
+            Header: "Invoice Date",
+            accessor: "invoice_date",
+        },
+        {
+            Header: "Due Date",
+            accessor: "due_date",
+        },
+        {
+            Header: "Amount",
+            accessor: (row) => (
+                <span className="font-medium text-gray-800">
+                    {formatCurrency(row.amount)}
+                </span>
+            ),
+        },
+        {
+            Header: "Paid",
+            accessor: (row) => (
+                <span className="text-emerald-600 font-medium">
+                    {formatCurrency(row.paid_amount)}
+                </span>
+            ),
+        },
+        {
+            Header: "Balance",
+            accessor: (row) => {
+                const balance = Number(row.amount ?? 0) - Number(row.paid_amount ?? 0);
+                return (
+                    <span className={`font-medium ${balance > 0 ? "text-amber-600" : "text-gray-400"}`}>
+                        {formatCurrency(balance)}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Status",
+            accessor: (row) => {
+                const statusKey = row.status?.toLowerCase();
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
+                            FINANCE_STATUS_STYLES[statusKey] ?? 
+                            "bg-gray-100 text-gray-600 border border-gray-200"
+                        }`}
+                    >
+                        {FINANCE_STATUS_LABELS[statusKey] ?? row.status ?? "—"}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Payment",
+            accessor: (row) => {
+                const paymentPct = row.amount
+                    ? Math.min(
+                          100,
+                          Math.round(
+                              (Number(row.paid_amount ?? 0) / Number(row.amount)) * 100
+                          )
+                      )
+                    : 0;
+                return (
+                    <div className="flex items-center gap-2">
+                        <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                                className="h-full bg-emerald-500 rounded-full transition-all"
+                                style={{ width: `${paymentPct}%` }}
+                            />
+                        </div>
+                        <span className="text-xs text-gray-500 w-8">
+                            {paymentPct}%
+                        </span>
+                    </div>
+                );
+            },
+        },
+    ], []);
+
+    // Clients Table Columns
+    const clientColumns = useMemo(() => [
+        {
+            Header: "#",
+            accessor: (row, idx) => idx + 1,
+        },
+        {
+            Header: "Company",
+            accessor: (row) => (
+                <div>
+                    <div className="font-medium text-gray-900">
+                        {row.company_name}
+                    </div>
+                    {row.address && (
+                        <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[160px]">
+                            {row.address}
+                        </div>
+                    )}
+                </div>
+            ),
+        },
+        {
+            Header: "Contact Person",
+            accessor: (row) => row.contact_person ?? "—",
+        },
+        {
+            Header: "Email",
+            accessor: (row) => 
+                row.email ? (
+                    <a href={`mailto:${row.email}`} className="text-blue-600 hover:underline">
+                        {row.email}
+                    </a>
+                ) : "—",
+        },
+        {
+            Header: "Phone",
+            accessor: (row) => row.phone ?? "—",
+        },
+        {
+            Header: "Service Type",
+            accessor: (row) => row.service_type ?? "—",
+        },
+        {
+            Header: "Account Manager",
+            accessor: (row) => row.account_manager ?? "—",
+        },
+        {
+            Header: "Projects",
+            accessor: (row) => (
+                <span className="font-medium">{row.total_projects ?? "—"}</span>
+            ),
+        },
+        {
+            Header: "Revenue",
+            accessor: (row) => (
+                <span className="font-medium text-gray-800">
+                    {row.total_revenue != null ? formatCurrency(row.total_revenue) : "—"}
+                </span>
+            ),
+        },
+        {
+            Header: "Payment Status",
+            accessor: (row) => {
+                const paymentStatusKey = row.payment_status?.toLowerCase();
+                return row.payment_status ? (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${
+                            PAYMENT_STATUS_STYLES[paymentStatusKey] ?? 
+                            "bg-gray-100 text-gray-600 border border-gray-200"
+                        }`}
+                    >
+                        {row.payment_status}
+                    </span>
+                ) : "—";
+            },
+        },
+    ], []);
+
+    // Tickets Table Columns
+    const ticketColumns = useMemo(() => [
+        {
+            Header: "#",
+            accessor: (row, idx) => idx + 1,
+        },
+        {
+            Header: "Ticket ID",
+            accessor: (row) => (
+                <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                    {row.ticket_id ?? `#${row.id}`}
+                </span>
+            ),
+        },
+        {
+            Header: "Client",
+            accessor: (row) => (
+                <div className="font-medium text-gray-900">{row.client_name}</div>
+            ),
+        },
+        {
+            Header: "Issue Type",
+            accessor: (row) => row.issue_type ?? "—",
+        },
+        {
+            Header: "Device",
+            accessor: (row) => row.device_type ?? "—",
+        },
+        {
+            Header: "Description",
+            accessor: (row) => (
+                <span className="block truncate max-w-[200px]" title={row.problem_description}>
+                    {row.problem_description ?? "—"}
+                </span>
+            ),
+        },
+        {
+            Header: "Priority",
+            accessor: (row) => {
+                const priorityKey = row.priority?.toLowerCase();
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+                            TICKET_PRIORITY_STYLES[priorityKey] ?? 
+                            "bg-gray-100 text-gray-500 border border-gray-200"
+                        }`}
+                    >
+                        {row.priority ?? "—"}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Technician",
+            accessor: (row) => row.technician_name ?? <span className="text-gray-300">Unassigned</span>,
+        },
+        {
+            Header: "Status",
+            accessor: (row) => {
+                const statusKey = row.status?.toLowerCase().replace(/\s+/g, "-");
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${
+                            TICKET_STATUS_STYLES[statusKey] ?? 
+                            "bg-gray-100 text-gray-500 border border-gray-200"
+                        }`}
+                    >
+                        {row.status ?? "—"}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Created",
+            accessor: (row) => 
+                row.created_at ? (
+                    new Date(row.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                    })
+                ) : "—",
+        },
+    ], []);
+
+    // Domains Table Columns
+    const domainColumns = useMemo(() => [
+        {
+            Header: "#",
+            accessor: (row, idx) => idx + 1,
+        },
+        {
+            Header: "Domain",
+            accessor: (row) => (
+                <div className="font-medium text-gray-900">{row.domain_name}</div>
+            ),
+        },
+        {
+            Header: "Client",
+            accessor: (row) => row.client?.organization_name ?? row.client?.name ?? "—",
+        },
+        {
+            Header: "Registrar",
+            accessor: "register",
+        },
+        {
+            Header: "Purchase Date",
+            accessor: "purchase_date",
+        },
+        {
+            Header: "Expiry Date",
+            accessor: "expiry_date",
+        },
+        {
+            Header: "Days Left",
+            accessor: (row) => {
+                if (!row.expiry_date) return "—";
+                const daysLeft = Math.ceil(
+                    (new Date(row.expiry_date) - new Date()) / (1000 * 60 * 60 * 24)
+                );
+                const isExpired = daysLeft < 0;
+                const isCritical = daysLeft <= 7 && daysLeft >= 0;
+
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
+                            isExpired
+                                ? "bg-red-100 text-red-700 border-red-200"
+                                : isCritical
+                                ? "bg-orange-100 text-orange-700 border-orange-200"
+                                : "bg-amber-100 text-amber-700 border-amber-200"
+                        }`}
+                    >
+                        {isExpired
+                            ? `Expired ${Math.abs(daysLeft)}d ago`
+                            : `${daysLeft}d left`}
+                    </span>
+                );
+            },
+        },
+        {
+            Header: "Auto Renewal",
+            accessor: (row) => (
+                <span
+                    className={`px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${
+                        row.auto_renewal_status?.toLowerCase() === "active"
+                            ? "bg-emerald-100 text-emerald-700 border-emerald-200"
+                            : "bg-gray-100 text-gray-500 border-gray-200"
+                    }`}
+                >
+                    {row.auto_renewal_status ?? "—"}
+                </span>
+            ),
+        },
+        {
+            Header: "DNS Provider",
+            accessor: (row) => row.dns_provider ?? "—",
+        },
+    ], []);
+
+    // Hosting Table Columns
+    const hostingColumns = useMemo(() => [
+        {
+            Header: "#",
+            accessor: (row, idx) => idx + 1,
+        },
+        {
+            Header: "Client",
+            accessor: (row) => (
+                <div className="font-medium text-gray-900">
+                    {row.client?.organization_name ?? row.client?.name ?? "—"}
+                </div>
+            ),
+        },
+        {
+            Header: "Hosting Provider",
+            accessor: (row) => row.hosting_provider ?? "—",
+        },
+        {
+            Header: "Hosting Plan",
+            accessor: (row) => row.hosting_plan ?? "—",
+        },
+        {
+            Header: "Disk Usage",
+            accessor: (row) => row.disk_usage ?? "—",
+        },
+        {
+            Header: "Renewal Date",
+            accessor: "renewal_date",
+        },
+        {
+            Header: "Days Left",
+            accessor: (row) => {
+                if (!row.renewal_date) return "—";
+                const daysLeft = Math.ceil(
+                    (new Date(row.renewal_date) - new Date()) / (1000 * 60 * 60 * 24)
+                );
+                const isExpired = daysLeft < 0;
+                const isCritical = daysLeft <= 7 && daysLeft >= 0;
+
+                return (
+                    <span
+                        className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
+                            isExpired
+                                ? "bg-red-100 text-red-700 border-red-200"
+                                : isCritical
+                                ? "bg-orange-100 text-orange-700 border-orange-200"
+                                : "bg-amber-100 text-amber-700 border-amber-200"
+                        }`}
+                    >
+                        {isExpired
+                            ? `Expired ${Math.abs(daysLeft)}d ago`
+                            : `${daysLeft}d left`}
+                    </span>
+                );
+            },
+        },
+    ], []);
 
     return (
-        <div className="min-h-screen bg-gray-50 p-6">
+        <div className="min-h-screen ">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold text-gray-900 mb-1">
@@ -231,12 +697,6 @@ const ClientDashboard = () => {
                     <h2 className="font-semibold text-gray-800">
                         Completed Projects
                     </h2>
-                    <button
-                        onClick={() => setReloadTrigger((v) => v + 1)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                        ↻ Refresh
-                    </button>
                 </div>
 
                 {loading ? (
@@ -248,135 +708,7 @@ const ClientDashboard = () => {
                         No completed projects found.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Project
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Service
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Start
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Deadline
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Team
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Priority
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Progress
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Tasks
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {completedProjects.map((project, idx) => {
-                                    const taskProgress = getTaskProgress(
-                                        project.project_description,
-                                    );
-                                    const statusKey = project.status
-                                        ?.toLowerCase()
-                                        .replace(/\s+/g, "-");
-                                    const priorityKey =
-                                        project.priority?.toLowerCase();
-
-                                    return (
-                                        <tr
-                                            key={project.id}
-                                            className="hover:bg-gray-50 transition-colors"
-                                        >
-                                            <td className="px-6 py-4 text-gray-400">
-                                                {idx + 1}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {project.project_title}
-                                                </div>
-                                                <div className="text-xs text-gray-400 mt-0.5">
-                                                    {project.client_name}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {project.service_type}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500">
-                                                {project.start_date}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500">
-                                                {project.deadline}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {project.assigned_team ?? (
-                                                    <span className="text-gray-300">
-                                                        —
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${PRIORITY_STYLES[priorityKey] ?? "bg-gray-100 text-gray-500"}`}
-                                                >
-                                                    {project.priority}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-500"}`}
-                                                >
-                                                    {project.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                                        <div
-                                                            className="h-full bg-blue-500 rounded-full transition-all"
-                                                            style={{
-                                                                width: `${project.completion ?? 0}%`,
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="text-xs text-gray-500 w-8">
-                                                        {project.completion ??
-                                                            0}
-                                                        %
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-xs text-gray-500">
-                                                {taskProgress ? (
-                                                    <span>
-                                                        {taskProgress.completed}
-                                                        /{taskProgress.total}{" "}
-                                                        done
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-gray-300">
-                                                        —
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                    <MyTable columns={projectColumns} data={completedProjects} />
                 )}
             </div>
 
@@ -386,43 +718,7 @@ const ClientDashboard = () => {
                     <h2 className="font-semibold text-gray-800">
                         Finance Tracking
                     </h2>
-                    <button
-                        onClick={() => setReloadTrigger((v) => v + 1)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                        ↻ Refresh
-                    </button>
                 </div>
-
-                {!financeLoading && allTracking.length > 0 && (
-                    <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-100">
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Total Invoiced
-                            </p>
-                            <p className="text-lg font-semibold text-gray-800">
-                                {formatCurrency(totalInvoiced)}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Total Paid
-                            </p>
-                            <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(totalPaid)}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Outstanding
-                            </p>
-                            <p className="text-lg font-semibold text-amber-600">
-                                {formatCurrency(totalOutstanding)}
-                            </p>
-                        </div>
-                    </div>
-                )}
-
                 {financeLoading ? (
                     <div className="py-16 text-center text-gray-400 text-sm">
                         Loading finance records…
@@ -432,143 +728,10 @@ const ClientDashboard = () => {
                         No finance records found.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Client
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Project
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Invoice Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Due Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Amount
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Paid
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Balance
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Payment
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {allTracking
-                                    .filter(
-                                        (f) =>
-                                            f.status?.toLowerCase() !== "paid",
-                                    )
-                                    .map((finance, idx) => {
-                                        const balance =
-                                            Number(finance.amount ?? 0) -
-                                            Number(finance.paid_amount ?? 0);
-                                        const statusKey =
-                                            finance.status?.toLowerCase();
-                                        const paymentPct = finance.amount
-                                            ? Math.min(
-                                                  100,
-                                                  Math.round(
-                                                      (Number(
-                                                          finance.paid_amount ??
-                                                              0,
-                                                      ) /
-                                                          Number(
-                                                              finance.amount,
-                                                          )) *
-                                                          100,
-                                                  ),
-                                              )
-                                            : 0;
-
-                                        return (
-                                            <tr
-                                                key={finance.id}
-                                                className="hover:bg-gray-50 transition-colors"
-                                            >
-                                                <td className="px-6 py-4 text-gray-400">
-                                                    {idx + 1}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium text-gray-900">
-                                                        {finance.client}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {finance.project}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {finance.invoice_date}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {finance.due_date}
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-gray-800">
-                                                    {formatCurrency(
-                                                        finance.amount,
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-emerald-600 font-medium">
-                                                    {formatCurrency(
-                                                        finance.paid_amount,
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`font-medium ${balance > 0 ? "text-amber-600" : "text-gray-400"}`}
-                                                    >
-                                                        {formatCurrency(
-                                                            balance,
-                                                        )}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${FINANCE_STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}
-                                                    >
-                                                        {FINANCE_STATUS_LABELS[
-                                                            statusKey
-                                                        ] ??
-                                                            finance.status ??
-                                                            "—"}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className="w-24 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                                            <div
-                                                                className="h-full bg-emerald-500 rounded-full transition-all"
-                                                                style={{
-                                                                    width: `${paymentPct}%`,
-                                                                }}
-                                                            />
-                                                        </div>
-                                                        <span className="text-xs text-gray-500 w-8">
-                                                            {paymentPct}%
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                            </tbody>
-                        </table>
-                    </div>
+                    <MyTable 
+                        columns={financeColumns} 
+                        data={allTracking.filter(f => f.status?.toLowerCase() !== "paid")} 
+                    />
                 )}
             </div>
 
@@ -576,42 +739,8 @@ const ClientDashboard = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="font-semibold text-gray-800">Clients</h2>
-                    <button
-                        onClick={() => setReloadTrigger((v) => v + 1)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                        ↻ Refresh
-                    </button>
                 </div>
 
-                {!clientsLoading && allClients.length > 0 && (
-                    <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-100">
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Total Clients
-                            </p>
-                            <p className="text-lg font-semibold text-gray-800">
-                                {allClients.length}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Total Projects
-                            </p>
-                            <p className="text-lg font-semibold text-blue-600">
-                                {totalProjectsCount}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Total Revenue
-                            </p>
-                            <p className="text-lg font-semibold text-emerald-600">
-                                {formatCurrency(totalRevenue)}
-                            </p>
-                        </div>
-                    </div>
-                )}
 
                 {clientsLoading ? (
                     <div className="py-16 text-center text-gray-400 text-sm">
@@ -622,197 +751,21 @@ const ClientDashboard = () => {
                         No clients found.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Company
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Contact Person
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Email
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Phone
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Service Type
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Account Manager
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Projects
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Revenue
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Payment Status
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {allClients
-                                    .filter(
-                                        (c) =>
-                                            c.payment_status?.toLowerCase() !==
-                                            "paid",
-                                    )
-                                    .map((client, idx) => {
-                                        const paymentStatusKey =
-                                            client.payment_status?.toLowerCase();
-
-                                        return (
-                                            <tr
-                                                key={client.id}
-                                                className="hover:bg-gray-50 transition-colors"
-                                            >
-                                                <td className="px-6 py-4 text-gray-400">
-                                                    {idx + 1}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium text-gray-900">
-                                                        {client.company_name}
-                                                    </div>
-                                                    {client.address && (
-                                                        <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[160px]">
-                                                            {client.address}
-                                                        </div>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-700">
-                                                    {client.contact_person ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    {client.email ? (
-                                                        <a
-                                                            href={`mailto:${client.email}`}
-                                                            className="text-blue-600 hover:underline"
-                                                        >
-                                                            {client.email}
-                                                        </a>
-                                                    ) : (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {client.phone ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {client.service_type ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {client.account_manager ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-center text-gray-700 font-medium">
-                                                    {client.total_projects ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 font-medium text-gray-800">
-                                                    {client.total_revenue !=
-                                                    null ? (
-                                                        formatCurrency(
-                                                            client.total_revenue,
-                                                        )
-                                                    ) : (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    {client.payment_status ? (
-                                                        <span
-                                                            className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${PAYMENT_STATUS_STYLES[paymentStatusKey] ?? "bg-gray-100 text-gray-600 border border-gray-200"}`}
-                                                        >
-                                                            {
-                                                                client.payment_status
-                                                            }
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                            </tbody>
-                        </table>
-                    </div>
+                    <MyTable 
+                        columns={clientColumns} 
+                        data={allClients.filter(c => c.payment_status?.toLowerCase() !== "paid")} 
+                    />
                 )}
             </div>
 
             {/* Tickets Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="font-semibold text-gray-800">
                         Support Tickets
                     </h2>
-                    <button
-                        onClick={() => setReloadTrigger((v) => v + 1)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                        ↻ Refresh
-                    </button>
                 </div>
 
-                {/* Tickets Summary Cards */}
-                {!ticketsLoading && visibleTickets.length > 0 && (
-                    <div className="grid grid-cols-3 gap-4 px-6 py-4 bg-gray-50 border-b border-gray-100">
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">Open</p>
-                            <p className="text-lg font-semibold text-blue-600">
-                                {openTickets}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                In Progress
-                            </p>
-                            <p className="text-lg font-semibold text-amber-600">
-                                {inProgressTickets}
-                            </p>
-                        </div>
-                        <div className="bg-white rounded-lg border border-gray-200 px-4 py-3">
-                            <p className="text-xs text-gray-500 mb-1">
-                                Resolved
-                            </p>
-                            <p className="text-lg font-semibold text-emerald-600">
-                                {resolvedTickets}
-                            </p>
-                        </div>
-                    </div>
-                )}
 
                 {ticketsLoading ? (
                     <div className="py-16 text-center text-gray-400 text-sm">
@@ -823,157 +776,16 @@ const ClientDashboard = () => {
                         No active tickets found.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Ticket ID
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Client
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Issue Type
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Device
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Description
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Priority
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Technician
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Created
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {visibleTickets.map((ticket, idx) => {
-                                    const statusKey = ticket.status
-                                        ?.toLowerCase()
-                                        .replace(/\s+/g, "-");
-                                    const priorityKey =
-                                        ticket.priority?.toLowerCase();
-
-                                    return (
-                                        <tr
-                                            key={ticket.id}
-                                            className="hover:bg-gray-50 transition-colors"
-                                        >
-                                            <td className="px-6 py-4 text-gray-400">
-                                                {idx + 1}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
-                                                    {ticket.ticket_id ??
-                                                        `#${ticket.id}`}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="font-medium text-gray-900">
-                                                    {ticket.client_name}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {ticket.issue_type ?? (
-                                                    <span className="text-gray-300">
-                                                        —
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {ticket.device_type ?? (
-                                                    <span className="text-gray-300">
-                                                        —
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500 max-w-[200px]">
-                                                <span
-                                                    className="line-clamp-2 block truncate"
-                                                    title={
-                                                        ticket.problem_description
-                                                    }
-                                                >
-                                                    {ticket.problem_description ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize ${TICKET_PRIORITY_STYLES[priorityKey] ?? "bg-gray-100 text-gray-500 border border-gray-200"}`}
-                                                >
-                                                    {ticket.priority ?? "—"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-600">
-                                                {ticket.technician_name ?? (
-                                                    <span className="text-gray-300">
-                                                        Unassigned
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-xs font-medium capitalize whitespace-nowrap ${TICKET_STATUS_STYLES[statusKey] ?? "bg-gray-100 text-gray-500 border border-gray-200"}`}
-                                                >
-                                                    {ticket.status ?? "—"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                                                {ticket.created_at ? (
-                                                    new Date(
-                                                        ticket.created_at,
-                                                    ).toLocaleDateString(
-                                                        "en-US",
-                                                        {
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            year: "numeric",
-                                                        },
-                                                    )
-                                                ) : (
-                                                    <span className="text-gray-300">
-                                                        —
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                    <MyTable columns={ticketColumns} data={visibleTickets} />
                 )}
             </div>
 
             {/* Domain Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="font-semibold text-gray-800">
                         Domains Expiring Soon
                     </h2>
-                    <button
-                        onClick={() => setReloadTrigger((v) => v + 1)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                        ↻ Refresh
-                    </button>
                 </div>
 
                 {allDomain.filter((d) => {
@@ -987,150 +799,32 @@ const ClientDashboard = () => {
                         No domains expiring within 30 days.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Domain
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Client
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Registrar
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Purchase Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Expiry Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Days Left
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Auto Renewal
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        DNS Provider
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {allDomain
-                                    .filter((d) => {
-                                        if (!d.expiry_date) return false;
-                                        const diff =
-                                            (new Date(d.expiry_date) -
-                                                new Date()) /
-                                            (1000 * 60 * 60 * 24);
-                                        return diff <= 30;
-                                    })
-                                    .sort(
-                                        (a, b) =>
-                                            new Date(a.expiry_date) -
-                                            new Date(b.expiry_date),
-                                    )
-                                    .map((domain, idx) => {
-                                        const daysLeft = Math.ceil(
-                                            (new Date(domain.expiry_date) -
-                                                new Date()) /
-                                                (1000 * 60 * 60 * 24),
-                                        );
-                                        const isExpired = daysLeft < 0;
-                                        const isCritical =
-                                            daysLeft <= 7 && daysLeft >= 0;
-
-                                        return (
-                                            <tr
-                                                key={domain.id}
-                                                className="hover:bg-gray-50 transition-colors"
-                                            >
-                                                <td className="px-6 py-4 text-gray-400">
-                                                    {idx + 1}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium text-gray-900">
-                                                        {domain.domain_name}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {domain.client
-                                                        ?.company_name ??
-                                                        domain.client_id ?? (
-                                                            <span className="text-gray-300">
-                                                                —
-                                                            </span>
-                                                        )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {domain.register}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {domain.purchase_date}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {domain.expiry_date}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                                                            isExpired
-                                                                ? "bg-red-100 text-red-700 border-red-200"
-                                                                : isCritical
-                                                                  ? "bg-orange-100 text-orange-700 border-orange-200"
-                                                                  : "bg-amber-100 text-amber-700 border-amber-200"
-                                                        }`}
-                                                    >
-                                                        {isExpired
-                                                            ? `Expired ${Math.abs(daysLeft)}d ago`
-                                                            : `${daysLeft}d left`}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border capitalize ${
-                                                            domain.auto_renewal_status?.toLowerCase() ===
-                                                            "active"
-                                                                ? "bg-emerald-100 text-emerald-700 border-emerald-200"
-                                                                : "bg-gray-100 text-gray-500 border-gray-200"
-                                                        }`}
-                                                    >
-                                                        {domain.auto_renewal_status ??
-                                                            "—"}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {domain.dns_provider ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                            </tbody>
-                        </table>
-                    </div>
+                    <MyTable 
+                        columns={domainColumns} 
+                        data={allDomain
+                            .filter((d) => {
+                                if (!d.expiry_date) return false;
+                                const diff =
+                                    (new Date(d.expiry_date) - new Date()) /
+                                    (1000 * 60 * 60 * 24);
+                                return diff <= 30;
+                            })
+                            .sort(
+                                (a, b) =>
+                                    new Date(a.expiry_date) -
+                                    new Date(b.expiry_date),
+                            )
+                        } 
+                    />
                 )}
             </div>
+
             {/* Hosting Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mt-8">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
                     <h2 className="font-semibold text-gray-800">
                         Hosting Renewals Due Soon
                     </h2>
-                    <button
-                        onClick={() => setReloadTrigger((v) => v + 1)}
-                        className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                        ↻ Refresh
-                    </button>
                 </div>
 
                 {allHosting.filter((h) => {
@@ -1144,121 +838,23 @@ const ClientDashboard = () => {
                         No hosting renewals due within 30 days.
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        #
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Client
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Hosting Provider
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Hosting Plan
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Disk Usage
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Renewal Date
-                                    </th>
-                                    <th className="px-6 py-3 text-left font-medium">
-                                        Days Left
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {allHosting
-                                    .filter((h) => {
-                                        if (!h.renewal_date) return false;
-                                        const diff =
-                                            (new Date(h.renewal_date) -
-                                                new Date()) /
-                                            (1000 * 60 * 60 * 24);
-                                        return diff <= 30;
-                                    })
-                                    .sort(
-                                        (a, b) =>
-                                            new Date(a.renewal_date) -
-                                            new Date(b.renewal_date),
-                                    )
-                                    .map((hosting, idx) => {
-                                        const daysLeft = Math.ceil(
-                                            (new Date(hosting.renewal_date) -
-                                                new Date()) /
-                                                (1000 * 60 * 60 * 24),
-                                        );
-                                        const isExpired = daysLeft < 0;
-                                        const isCritical =
-                                            daysLeft <= 7 && daysLeft >= 0;
-
-                                        return (
-                                            <tr
-                                                key={hosting.id}
-                                                className="hover:bg-gray-50 transition-colors"
-                                            >
-                                                <td className="px-6 py-4 text-gray-400">
-                                                    {idx + 1}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="font-medium text-gray-900">
-                                                        {hosting.client
-                                                            ?.company_name ?? (
-                                                            <span className="text-gray-300">
-                                                                —
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {hosting.hosting_provider ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {hosting.hosting_plan ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-600">
-                                                    {hosting.disk_usage ?? (
-                                                        <span className="text-gray-300">
-                                                            —
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-gray-500">
-                                                    {hosting.renewal_date}
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span
-                                                        className={`px-2 py-0.5 rounded-full text-xs font-medium border ${
-                                                            isExpired
-                                                                ? "bg-red-100 text-red-700 border-red-200"
-                                                                : isCritical
-                                                                  ? "bg-orange-100 text-orange-700 border-orange-200"
-                                                                  : "bg-amber-100 text-amber-700 border-amber-200"
-                                                        }`}
-                                                    >
-                                                        {isExpired
-                                                            ? `Expired ${Math.abs(daysLeft)}d ago`
-                                                            : `${daysLeft}d left`}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        );
-                                    })}
-                            </tbody>
-                        </table>
-                    </div>
+                    <MyTable 
+                        columns={hostingColumns} 
+                        data={allHosting
+                            .filter((h) => {
+                                if (!h.renewal_date) return false;
+                                const diff =
+                                    (new Date(h.renewal_date) - new Date()) /
+                                    (1000 * 60 * 60 * 24);
+                                return diff <= 30;
+                            })
+                            .sort(
+                                (a, b) =>
+                                    new Date(a.renewal_date) -
+                                    new Date(b.renewal_date),
+                            )
+                        } 
+                    />
                 )}
             </div>
         </div>

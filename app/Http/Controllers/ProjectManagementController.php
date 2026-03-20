@@ -13,9 +13,8 @@ class ProjectManagementController extends Controller
      */
     public function index()
     {
-        $projects = ProjectManagement::with('descriptions')->latest()->get();
+        $projects = ProjectManagement::with(['descriptions', 'assignedUser'])->latest()->get();
         
-        // Transform the data to include tasks in the expected format
         $transformedProjects = $projects->map(function($project) {
             $projectArray = $project->toArray();
             
@@ -28,8 +27,8 @@ class ProjectManagementController extends Controller
                 ];
             })->toArray();
             
-            // Add tasks as project_description (JSON string)
             $projectArray['project_description'] = json_encode($tasks);
+            $projectArray['assigned_team_name'] = $project->assignedUser?->name ?? '—';
             
             return $projectArray;
         });
@@ -57,7 +56,7 @@ class ProjectManagementController extends Controller
             'priority' => 'required|string',
             'status' => 'required|string',
             'completion' => 'nullable|integer|min:0|max:100',
-            'project_description' => 'nullable|json' // Accept JSON string
+            'project_description' => 'nullable|json'
         ]);
 
         $project = ProjectManagement::create([
@@ -90,10 +89,14 @@ class ProjectManagementController extends Controller
             }
         }
 
+        $project->load(['descriptions', 'assignedUser']);
+        $projectData = $project->toArray();
+        $projectData['assigned_team_name'] = $project->assignedUser?->name ?? '—';
+
         return response()->json([
             'status' => true,
             'message' => 'Project created successfully',
-            'data' => $project->load('descriptions')
+            'data' => $projectData
         ]);
     }
 
@@ -119,7 +122,6 @@ class ProjectManagementController extends Controller
             'project_description' => 'nullable|json'
         ]);
 
-        // Update project fields
         $updateData = [];
         $fields = ['client_name', 'project_title', 'service_type', 'start_date', 
                   'deadline', 'assigned_team', 'user_remarks', 'admin_remarks', 'priority', 'status', 'completion'];
@@ -134,10 +136,8 @@ class ProjectManagementController extends Controller
 
         // Update tasks from project_description
         if ($request->has('project_description')) {
-            // Delete existing descriptions
             $project->descriptions()->delete();
             
-            // Create new ones
             $tasks = json_decode($request->project_description, true);
             
             if (is_array($tasks)) {
@@ -152,10 +152,14 @@ class ProjectManagementController extends Controller
             }
         }
 
+        $project->load(['descriptions', 'assignedUser']);
+        $projectData = $project->toArray();
+        $projectData['assigned_team_name'] = $project->assignedUser?->name ?? '—';
+
         return response()->json([
             'status' => true,
             'message' => 'Project updated successfully',
-            'data' => $project->load('descriptions')
+            'data' => $projectData
         ]);
     }
 

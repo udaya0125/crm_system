@@ -8,64 +8,88 @@ use Illuminate\Http\Request;
 class ClientController extends Controller
 {
     /**
-     * Display all clients
+     * Display a listing of clients
      */
     public function index()
     {
         $clients = Client::latest()->get();
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'data' => $clients
         ]);
     }
 
     /**
-     * Store a new client
+     * Store a newly created client
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'organization_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'contact_phone' => 'required|string|max:20',
+        $validated = $request->validate([
+            'type' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'branchname' => 'nullable|string|max:255',
+            'code' => 'nullable|string|max:100',
+            'pannumber' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+            'street' => 'nullable|string|max:255',
+            'telone' => 'nullable|string|max:20',
+            'teltwo' => 'nullable|string|max:20',
+            'mobile' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
+            'website' => 'nullable|string|max:255',
+            'activestatus' => 'nullable|string|max:255',
+            'ledgername' => 'nullable|string|max:255',
         ]);
 
-        $client = Client::create($request->all());
+        $client = Client::create($validated);
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Client created successfully',
             'data' => $client
-        ], 201);
+        ]);
     }
 
     /**
-     * Update client
+     * Update the specified client
      */
     public function update(Request $request, $id)
     {
         $client = Client::findOrFail($id);
 
-        $request->validate([
-            'organization_name' => 'required|string|max:255',
-            'contact_person' => 'required|string|max:255',
-            'contact_phone' => 'required|string|max:20',
+        $validated = $request->validate([
+            'type' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
+            'branchname' => 'nullable|string|max:255',
+            'code' => 'nullable|string|max:100',
+            'pannumber' => 'nullable|string|max:100',
+            'country' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'city' => 'nullable|string|max:100',
+            'street' => 'nullable|string|max:255',
+            'telone' => 'nullable|string|max:20',
+            'teltwo' => 'nullable|string|max:20',
+            'mobile' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:255',
+            'website' => 'nullable|string|max:255',
+            'activestatus' => 'nullable|string|max:255',
+            'ledgername' => 'nullable|string|max:255',
         ]);
 
-        $client->update($request->all());
+        $client->update($validated);
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Client updated successfully',
             'data' => $client
         ]);
     }
 
     /**
-     * Delete client
+     * Remove the specified client
      */
     public function destroy($id)
     {
@@ -73,7 +97,7 @@ class ClientController extends Controller
         $client->delete();
 
         return response()->json([
-            'status' => true,
+            'success' => true,
             'message' => 'Client deleted successfully'
         ]);
     }

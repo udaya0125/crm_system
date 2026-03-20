@@ -198,6 +198,10 @@ const ProjectManagement = () => {
             ),
         },
         {
+            Header: 'Team',
+            accessor: (row) => row.assigned_team_name  ?? "—",
+        },
+        {
             Header: 'Priority',
             accessor: 'priority',
             Cell: ({ value }) => (

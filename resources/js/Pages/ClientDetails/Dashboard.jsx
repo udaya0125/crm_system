@@ -10,6 +10,7 @@ import {
     AlertTriangle,
 } from "lucide-react";
 import MyTable from "@/TableComponents/MyTable";
+import ClientDashboard from "../Dashboard/ClientDashboard";
 
 const Dashboard = () => {
     const [allExpiration, setAllExpiration] = useState([]);
@@ -203,7 +204,9 @@ const Dashboard = () => {
                                         />
                                     )}
                                 </div>
+                                 <ClientDashboard/>
                             </div>
+                           
                         )}
 
                         {isUser && (
