@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\UserLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -27,20 +28,26 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|string',
+            'role'     => 'required|string',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
         $user = User::create($validated);
 
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Created user: {$user->name}",
+        ]);
+
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'User created successfully',
-            'user' => $user,
+            'user'    => $user,
         ], 201);
     }
 
@@ -52,10 +59,10 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,'.$id,
+            'name'     => 'sometimes|string|max:255',
+            'email'    => 'sometimes|email|unique:users,email,'.$id,
             'password' => 'nullable|string|min:6',
-            'role' => 'sometimes|string',
+            'role'     => 'sometimes|string',
         ]);
 
         // Keep old password if not provided
@@ -67,24 +74,36 @@ class UserController extends Controller
 
         $user->update($validated);
 
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Updated user: {$user->name}",
+        ]);
+
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'User updated successfully',
-            'user' => $user,
+            'user'    => $user,
         ]);
     }
 
     /**
      * Remove the specified user
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $user = User::findOrFail($id);
-
+        $userName = $user->name;
         $user->delete();
 
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Deleted user: {$userName}",
+        ]);
+
         return response()->json([
-            'status' => 'success',
+            'status'  => 'success',
             'message' => 'User deleted successfully',
         ]);
     }
