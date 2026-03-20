@@ -405,7 +405,7 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
 
 
       Route::get('/ticket-dashboard', function(){
-        return Inertia::render('Dashboard/HostingDashboard');
+        return Inertia::render('Dashboard/ProjectDashboard');
     });
 
 require __DIR__.'/auth.php';
