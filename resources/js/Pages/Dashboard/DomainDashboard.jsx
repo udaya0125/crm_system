@@ -148,6 +148,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { Link } from "@inertiajs/react";
 
 const DomainDashboard = () => {
     const [allDomain, setAllDomain] = useState([]);
@@ -224,13 +225,13 @@ const DomainDashboard = () => {
             </div>
 
             {/* Action buttons */}
-            <div className="grid grid-cols-2 border-t border-gray-100">
-                <button className="py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors border-r border-gray-100">
-                    My Domains
-                </button>
-                <button className="py-3 text-sm font-medium text-sky-600 hover:bg-sky-50 transition-colors">
-                    Add Domain
-                </button>
+            <div className="grid grid-cols-1 border-t border-gray-100">
+                <Link
+                    href="/domain-tracking"
+                    className="py-3 text-center text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                >
+                    View Details
+                </Link>
             </div>
         </div>
     );
