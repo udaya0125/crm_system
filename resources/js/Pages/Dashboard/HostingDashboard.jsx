@@ -1,4 +1,5 @@
 import MyTable from "@/TableComponents/MyTable";
+import axios from "axios";
 import React, { use, useEffect, useMemo, useState } from "react";
 
 const HostingDashboard = () => {
