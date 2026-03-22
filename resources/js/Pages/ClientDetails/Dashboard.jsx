@@ -13,6 +13,11 @@ import MyTable from "@/TableComponents/MyTable";
 import ClientDashboard from "../Dashboard/ClientDashboard";
 import BackToTop from "@/AdminWrapper/BackToTop";
 import TicketDashboard from "../Dashboard/TicketDashboard";
+import DomainDashboard from "../Dashboard/DomainDashboard";
+import ProjectDashboard from "../Dashboard/ProjectDashboard";
+import ExpiryDashboard from "../Dashboard/ExpiryDashboard";
+import FinanceDashboard from "../Dashboard/FinanceDashboard";
+import HostingDashboard from "../Dashboard/HostingDashboard";
 
 const Dashboard = () => {
     const [loading, setLoading] = useState(false);
@@ -34,8 +39,34 @@ const Dashboard = () => {
     const user = usePage().props.auth.user;
     const isAdmin = user?.role === "admin";
     const isManager = user?.role === "manager";
-    const isAdminOrManager = isAdmin || isManager;
+    const isSalesTeam = user?.role === "salesteam";
+    const isProjectManager = user?.role === "projectmanager";
+    const isDeveloper = user?.role === "developer";
+    const isTechnician = user?.role === "technician";
+    const isAccountant = user?.role === "accountant";
+    const isSupport = user?.role === "support";
     const isUser = user?.role === "user";
+
+    // Admin and the Manager can see all the dashboard
+    // saleteam can see
+    // projectmanager can see
+    // developer can see task created and assigned to them, and project progress
+    // technician can see
+    // accountant can see  finance dashboard, and invoice management
+    // support can see
+    // user can see
+
+    // Role options for React Select
+    // const roleOptions = [
+    //     { value: "admin", label: "Admin" },
+    //     { value: "salesteam", label: "Sales Team" },
+    //     { value: "projectmanager", label: "Project Manager" },
+    //     { value: "developer", label: "Developer" },
+    //     { value: "technician", label: "Technician" },
+    //     { value: "accountant", label: "Accountant" },
+    //     { value: "support", label: "Support" },
+    //     { value: "user", label: "User" },
+    // ];
 
     // Loading spinner component
     const LoadingSpinner = () => (
@@ -60,6 +91,39 @@ const Dashboard = () => {
                                     <h2 className="text-2xl font-semibold text-gray-800 mb-6">
                                         Admin Dashboard
                                     </h2>
+                                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+                                    <ClientDashboard />
+                                    <DomainDashboard />
+                                    <ProjectDashboard />
+                                    <ExpiryDashboard />
+                                    <FinanceDashboard />
+                                    <HostingDashboard />
+                                    <TicketDashboard />
+                                    </div>
+                                </>
+                            )}
+
+                            {isManager && (
+                                <>
+                                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                                        Manager Dashboard
+                                    </h2>
+                                    
+                                </>
+                            )}
+
+
+                             {isProjectManager && (
+                                <>
+                                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                                        Project Manager Dashboard
+                                    </h2>
+                                    <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+                                    <ProjectDashboard />
+                                    <ExpiryDashboard />
+                                    <DomainDashboard />
+                                    <HostingDashboard />
+                                    </div>
                                 </>
                             )}
 
@@ -112,7 +176,7 @@ const Dashboard = () => {
                                     </div>
                                 </>
                             )}
-                            <TicketDashboard />
+
                             <BackToTop />
                         </>
                     )}
