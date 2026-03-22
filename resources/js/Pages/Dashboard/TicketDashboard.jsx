@@ -51,7 +51,7 @@ const TicketDashboard = () => {
             {
                 Header: "Ticket ID",
                 accessor: (row) => (
-                    <span className="font-mono text-xs bg-gray-100 text-gray-700 px-2 py-0.5 rounded">
+                    <span className="font-mono text-xs  text-gray-700 px-2 py-0.5 ">
                         {row.ticket_id ?? `#${row.id}`}
                     </span>
                 ),

@@ -19,23 +19,25 @@ use App\Http\Controllers\DomainManagementController;
 use App\Http\Controllers\HostingManagementController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ClientManagementController;
+use App\Http\Controllers\UserLogController;
 
-// Route::get('/', function () {
-//     return Inertia::render('Welcome', [
-//         'canLogin' => Route::has('login'),
-//         'canRegister' => Route::has('register'),
-//         'laravelVersion' => Application::VERSION,
-//         'phpVersion' => PHP_VERSION,
-//     ]);
-// });
 
-// Route::get('/dashboard', function () {
-//     return Inertia::render('Dashboard');
-// })->middleware(['auth', 'verified'])->name('dashboard');
+  
 
-Route::get('/', function(){
+    // -----------------------------------------
+    // WELCOME PAGE
+    // -----------------------------------------
+
+    Route::get('/', function(){
         return Inertia::render('ClientDetails/Welcome');
     });
+
+
+    // **************************************************************
+    // Only authenticated users can access the following routes
+    // **************************************************************
+
+
 
 Route::middleware('auth')->group(function () {
 
@@ -75,6 +77,7 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('MainPages/Company');
         
     });
+
 
     Route::get('/client', function(){
         return Inertia::render('ClientDetails/Client');
@@ -232,16 +235,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/notifications', [NotificationController::class, 'clearAll'])->name('notifications.clearAll');
 
 
-    // // -----------------------------------------
-    // // USER MANAGEMENT CRUD
-    // // -----------------------------------------
-    // Route::get('/ouruser', [UserController::class, 'index'])->name('ouruser.index');
-    // Route::post('/ouruser', [UserController::class, 'store'])->name('ouruser.store');
-    // Route::put('/ouruser/{id}', [UserController::class, 'update'])->name('ouruser.update');
-    // Route::delete('/ouruser/{id}', [UserController::class, 'destroy'])->name('ouruser.destroy');
-
-
-
     // -----------------------------------------
     // OUR USERS MANAGEMENT CRUD
     // -----------------------------------------
@@ -252,21 +245,22 @@ Route::middleware('auth')->group(function () {
     Route::delete('/ourusers/{id}', [UserController::class, 'destroy'])->name('ourusers.destroy');
 
 });
+    
 
-
-    //-----------------------------------------
+    // *********************************************************************
     // Only admin can access user management
-    //-----------------------------------------
+    // *********************************************************************
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
+
 
     // -----------------------------------------
     // USER MANAGEMENT PAGE
     // -----------------------------------------
+    
     Route::get('/user-management', function () {
         return Inertia::render('DetailsPage/UserManagement');
     });
-
 
 
     // -----------------------------------------
@@ -287,13 +281,92 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::delete('/ourtasklist/{id}', [TaskListController::class, 'destroy'])->name('ourtasklist.destroy');
 
 
+    // -----------------------------------------
+    // ACTIVITY LOG PAGE
+    // -----------------------------------------
+
+    Route::get('/activity-log', function () {
+        return Inertia::render('DetailsPage/ActivityLog');
+    });
+
+
+    // -----------------------------------------
+    // USER LOG MANAGEMENT CRUD
+    // -----------------------------------------
+
+    Route::get('/ourlogs', [UserLogController::class, 'index'])->name('ourlogs.index');
     
 });
 
+  
+    // ****************************************************************
+    // Only project manager and admin can access task management
+    // ****************************************************************
 
-    //-----------------------------------------
+Route::middleware(['auth', 'role: projectmanager,admin'])->group(function () {
+
+
+});
+
+
+    // ************************************************************
+    // Only sales team and admin can access task management
+    // ************************************************************
+
+
+Route::middleware(['auth', 'role: salesteam,admin'])->group(function () {
+
+
+});
+
+
+    // **********************************************************
+    // Only developer and admin can access task management
+    // **********************************************************
+
+
+Route::middleware(['auth', 'role: developer,admin'])->group(function () {
+
+
+});
+
+
+    // *************************************************************
+    // Only Technician and admin can access task management
+    // *************************************************************
+
+
+Route::middleware(['auth', 'role: technician,admin'])->group(function () {
+
+
+});
+
+
+    // ************************************************************
+    // Only Accountant and admin can access task management
+    // ************************************************************
+
+
+Route::middleware(['auth', 'role: accountant,admin'])->group(function () {
+
+
+});
+
+
+    // ***********************************************************
+    // Only support and admin can access task management
+    // ***********************************************************
+
+
+Route::middleware(['auth', 'role: support,admin'])->group(function () {
+
+
+});
+
+    // *********************************************************************
     // Only user can access task list viewing
-    //-----------------------------------------
+    // *********************************************************************
+
 
 Route::middleware(['auth', 'role:user,admin'])->group(function () {
 
@@ -405,7 +478,7 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
 
 
       Route::get('/ticket-dashboard', function(){
-        return Inertia::render('Dashboard/ProjectDashboard');
+        return Inertia::render('Dashboard/FinanceDashboard');
     });
 
 require __DIR__.'/auth.php';

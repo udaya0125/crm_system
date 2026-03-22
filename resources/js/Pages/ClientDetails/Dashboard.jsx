@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import MyTable from "@/TableComponents/MyTable";
 import ClientDashboard from "../Dashboard/ClientDashboard";
+import BackToTop from "@/AdminWrapper/BackToTop";
+import TicketDashboard from "../Dashboard/TicketDashboard";
 
 const Dashboard = () => {
     const [allExpiration, setAllExpiration] = useState([]);
@@ -255,6 +257,9 @@ const Dashboard = () => {
                                 </div>
                             </>
                         )}
+                        <TicketDashboard/>
+                        <BackToTop/>
+
                     </>
                 )}
             </AdminWrapper>
