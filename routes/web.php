@@ -20,9 +20,9 @@ use App\Http\Controllers\HostingManagementController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ClientManagementController;
 use App\Http\Controllers\UserLogController;
+use App\Http\Controllers\ServiceContractController;
+use App\Http\Controllers\PasswordController;
 
-
-  
 
     // -----------------------------------------
     // WELCOME PAGE
@@ -243,6 +243,13 @@ Route::middleware('auth')->group(function () {
     Route::post('/ourusers', [UserController::class, 'store'])->name('ourusers.store');
     Route::put('/ourusers/{id}', [UserController::class, 'update'])->name('ourusers.update');
     Route::delete('/ourusers/{id}', [UserController::class, 'destroy'])->name('ourusers.destroy');
+
+
+    // -----------------------------------------
+    // USER PROFILE MANAGEMENT
+    // -----------------------------------------
+
+    Route::post('/password/verify', [PasswordController::class, 'verify'])->name('password.verify');
 
 });
     
