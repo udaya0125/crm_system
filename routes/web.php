@@ -475,9 +475,14 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
 
 
+    Route::get('/service-contracts', [ServiceContractController::class, 'index'])->name('service-contracts.index');
+    Route::post('/service-contracts', [ServiceContractController::class, 'store'])->name('service-contracts.store');
+    Route::put('/service-contracts/{id}', [ServiceContractController::class, 'update'])->name('service-contracts.update');
+    Route::delete('/service-contracts/{id}', [ServiceContractController::class, 'destroy'])->name('service-contracts.destroy');
 
 
-      Route::get('/ticket-dashboard', function(){
+
+    Route::get('/ticket-dashboard', function(){
         return Inertia::render('Dashboard/ExpiryDashboard');
     });
 

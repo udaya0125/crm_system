@@ -41,7 +41,7 @@ class Client extends Model
         return $this->hasMany(HostingManagement::class);
     }
 
-     public function serviceContracts()
+    public function serviceContracts()
     {
         return $this->hasMany(ServiceContract::class);
     }
