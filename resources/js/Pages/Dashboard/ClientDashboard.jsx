@@ -161,10 +161,9 @@
 
 // export default ClientDashboard;
 
-
-
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { Link } from "@inertiajs/react";
 
 const ClientDashboard = () => {
     const [allClients, setAllClients] = useState([]);
@@ -214,7 +213,8 @@ const ClientDashboard = () => {
                                 {unpaidClients.length}
                             </span>
                             <span className="text-sm font-medium text-rose-600">
-                                Unpaid Client{unpaidClients.length !== 1 ? "s" : ""}
+                                Unpaid Client
+                                {unpaidClients.length !== 1 ? "s" : ""}
                             </span>
                         </div>
                     )}
@@ -242,13 +242,13 @@ const ClientDashboard = () => {
             </div>
 
             {/* Action buttons */}
-            <div className="grid grid-cols-2 border-t border-gray-100">
-                <button className="py-3 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors border-r border-gray-100">
-                    My Clients
-                </button>
-                <button className="py-3 text-sm font-medium text-rose-600 hover:bg-rose-50 transition-colors">
-                    Add Client
-                </button>
+            <div className="grid grid-cols-1 border-t border-gray-100">
+                <Link
+                    href="/clients"
+                    className="py-3 text-center text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+                >
+                    View Details
+                </Link>
             </div>
         </div>
     );
