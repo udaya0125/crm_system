@@ -244,7 +244,7 @@ const ClientDashboard = () => {
             {/* Action buttons */}
             <div className="grid grid-cols-1 border-t border-gray-100">
                 <Link
-                    href="/clients"
+                    href="/client"
                     className="py-3 text-center text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
                 >
                     View Details
