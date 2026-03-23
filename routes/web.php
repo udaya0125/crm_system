@@ -143,6 +143,11 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('ClientDetails/Payment');    
     });
 
+
+    Route::get('/client-details', function(){
+        return Inertia::render('ClientDetails/ClientDetails');    
+    });
+
     // -----------------------------------------
     // CLIENT CRUD
     // -----------------------------------------

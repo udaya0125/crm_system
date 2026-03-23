@@ -1332,6 +1332,29 @@ const AdminSideBar = ({
                             </Link> */}
 
                             <Link
+                                href="/client-details"
+                                className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-details")}
+                                `}
+                            >
+                                <LayoutDashboard
+                                    className={iconClasses(
+                                        isActive("/client-details"),
+                                    )}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Client Details
+                                    </span>
+                                )}
+                                {isCollapsed && (
+                                    <Tooltip>
+                                        Client Details
+                                    </Tooltip>
+                                )}
+                            </Link>
+
+                            <Link
                                 href="/payment-finance-tracking"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}

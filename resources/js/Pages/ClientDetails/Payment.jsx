@@ -182,7 +182,7 @@ const Payment = () => {
                 Header: "Amount",
                 accessor: "amount",
                 Cell: ({ value }) => (
-                    <span>₱{parseFloat(value).toLocaleString()}</span>
+                    <span>NPR {parseFloat(value).toLocaleString()}</span>
                 ),
             },
             {
