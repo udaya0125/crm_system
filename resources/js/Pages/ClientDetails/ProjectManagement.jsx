@@ -1,5 +1,5 @@
 import AdminWrapper from '@/AdminWrapper/AdminWrapper';
-import { Plus, Pencil, Trash2, Eye, Search, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Eye, Search, X, Edit } from 'lucide-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import AddProjectForm from '@/AddFormComponents/AddProjectForm';
@@ -243,21 +243,21 @@ const ProjectManagement = () => {
                 <div className="flex items-center justify-center gap-2">
                     <button
                         onClick={() => handleViewTasks(row.original)}
-                        className="p-1.5 rounded-lg hover:bg-emerald-100 text-emerald-600 transition-colors"
+                        className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors"
                         title="View/Manage Tasks"
                     >
                         <Eye size={15} />
                     </button>
                     <button
                         onClick={() => handleEdit(row.original)}
-                        className="p-1.5 rounded-lg hover:bg-indigo-100 text-indigo-600 transition-colors"
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                         title="Edit Project"
                     >
-                        <Pencil size={15} />
+                        <Edit size={15} />
                     </button>
                     <button
                         onClick={() => handleDelete(row.original.id)}
-                        className="p-1.5 rounded-lg hover:bg-red-100 text-red-500 transition-colors"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                         title="Delete Project"
                     >
                         <Trash2 size={15} />
