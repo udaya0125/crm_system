@@ -87,6 +87,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import MyTable from '@/TableComponents/MyTable';
+import { Trash2 } from 'lucide-react';
 
 
 const ServiceContracts = () => {
@@ -235,9 +236,9 @@ const ServiceContracts = () => {
             Cell: ({ row }) => (
                 <button
                     onClick={() => openDeleteModal(row.original.id)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-red-50 text-red-600 border border-red-200 rounded-lg text-xs font-medium hover:bg-red-100 transition"
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                 >
-                    Delete
+                    <Trash2 size={16} />
                 </button>
             ),
             disableSortBy: true,
