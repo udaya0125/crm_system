@@ -78,6 +78,7 @@
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
+import { Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "react-toastify";
 
@@ -211,9 +212,9 @@ const Payment = () => {
                 Cell: ({ row }) => (
                     <button
                         onClick={() => openDeleteModal(row.original.id)}
-                        className="text-red-500 hover:text-red-700 text-xs font-medium border border-red-200 hover:border-red-400 px-3 py-1 rounded transition"
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                     >
-                        Delete
+                        <Trash2 size={16} />
                     </button>
                 ),
             },
