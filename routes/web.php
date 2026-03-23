@@ -210,9 +210,9 @@ Route::middleware('auth')->group(function () {
    
     Route::get('/ourtask', [TaskController::class, 'index'])->name('ourtask.index');
 
-    Route::get('/tasks', function () {
-        return Inertia::render('DetailsPage/Task');
-    });
+    // Route::get('/tasks', function () {
+    //     return Inertia::render('DetailsPage/Task');
+    // });
 
     // -----------------------------------------
     // TO DO PAGE
@@ -283,9 +283,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // TASK ASSIGNMENT PAGE
     // -----------------------------------------
 
-    Route::get('/task-assignments', function () {
-        return Inertia::render('DetailsPage/TaskAssigned');
-    });
+    // Route::get('/task-assignments', function () {
+    //     return Inertia::render('DetailsPage/TaskAssigned');
+    // });
 
     // -----------------------------------------
     // TASK LIST MANAGEMENT CRUD
