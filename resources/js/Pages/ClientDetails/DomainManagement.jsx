@@ -157,7 +157,7 @@ import AddDomainForm from "@/AddFormComponents/AddDomainForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const DomainManagement = () => {
@@ -280,15 +280,15 @@ const DomainManagement = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="px-3 py-1 bg-amber-500 text-white rounded-lg text-xs hover:bg-amber-600 transition"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                         >
-                            Edit
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs hover:bg-red-600 transition"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                         >
-                            Delete
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),
