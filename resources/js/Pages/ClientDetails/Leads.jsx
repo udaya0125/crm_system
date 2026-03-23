@@ -93,7 +93,7 @@ import AddLeadForm from "@/AddFormComponents/AddLeadForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const Leads = () => {
@@ -211,15 +211,15 @@ const Leads = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="text-xs px-3 py-1.5 rounded-full bg-amber-100 text-amber-700 hover:bg-amber-200 transition font-medium"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                         >
-                            Edit
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="text-xs px-3 py-1.5 rounded-full bg-red-100 text-red-600 hover:bg-red-200 transition font-medium"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                         >
-                            Delete
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),
