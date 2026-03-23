@@ -169,7 +169,6 @@
 
 // export default FinanceTracking;\
 
-
 // import AddFinanceTrackingForm from "@/AddFormComponents/AddFinanceTrackingForm";
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import axios from "axios";
@@ -205,7 +204,7 @@
 //     const calculateAgingReport = (trackingData) => {
 //         const today = new Date();
 //         today.setHours(0, 0, 0, 0);
-        
+
 //         const report = {
 //             "0-30 days": { total: 0, count: 0, invoices: [] },
 //             "31-60 days": { total: 0, count: 0, invoices: [] },
@@ -219,10 +218,10 @@
 //             if (balance > 0 && item.due_date) {
 //                 const dueDate = new Date(item.due_date);
 //                 dueDate.setHours(0, 0, 0, 0);
-                
+
 //                 // Calculate days overdue (only if due date is in the past)
 //                 const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
-                
+
 //                 if (daysOverdue > 0) {
 //                     // Categorize based on days overdue
 //                     if (daysOverdue <= 30) {
@@ -359,12 +358,12 @@
 //                                 Total Overdue: ${totalOverdue.toLocaleString()}
 //                             </span>
 //                         </div> */}
-                        
+
 //                         {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 //                             {Object.entries(agingReport).map(([period, data]) => (
 //                                 data.count > 0 && (
-//                                     <div 
-//                                         key={period} 
+//                                     <div
+//                                         key={period}
 //                                         className={`rounded-xl border p-4 ${agingColors[period]}`}
 //                                     >
 //                                         <div className="flex justify-between items-start mb-3">
@@ -378,8 +377,7 @@
 //                                                 {data.count} {data.count === 1 ? 'invoice' : 'invoices'}
 //                                             </span>
 //                                         </div>
-                                        
-                                     
+
 //                                         <div className="space-y-2 mt-3">
 //                                             {data.invoices.slice(0, 3).map(invoice => (
 //                                                 <div key={invoice.id} className="text-xs flex justify-between items-center bg-white/30 p-2 rounded">
@@ -440,10 +438,10 @@
 //                                         const dueDate = new Date(item.due_date);
 //                                         const today = new Date();
 //                                         today.setHours(0, 0, 0, 0);
-//                                         const daysOverdue = balance > 0 && dueDate < today 
+//                                         const daysOverdue = balance > 0 && dueDate < today
 //                                             ? Math.floor((today - dueDate) / (1000 * 60 * 60 * 24))
 //                                             : 0;
-                                        
+
 //                                         return (
 //                                             <tr key={item.id} className="hover:bg-stone-50 transition-colors">
 //                                                 <td className="px-4 py-3 font-mono text-indigo-600 font-medium">{item.invoice_id}</td>
@@ -514,7 +512,6 @@
 
 // export default FinanceTracking;
 
-
 import AddFinanceTrackingForm from "@/AddFormComponents/AddFinanceTrackingForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
@@ -531,7 +528,7 @@ const FinanceTracking = () => {
         "0-30 days": { total: 0, count: 0, invoices: [] },
         "31-60 days": { total: 0, count: 0, invoices: [] },
         "61-90 days": { total: 0, count: 0, invoices: [] },
-        "90+ days": { total: 0, count: 0, invoices: [] }
+        "90+ days": { total: 0, count: 0, invoices: [] },
     });
 
     useEffect(() => {
@@ -551,22 +548,24 @@ const FinanceTracking = () => {
     const calculateAgingReport = (trackingData) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        
+
         const report = {
             "0-30 days": { total: 0, count: 0, invoices: [] },
             "31-60 days": { total: 0, count: 0, invoices: [] },
             "61-90 days": { total: 0, count: 0, invoices: [] },
-            "90+ days": { total: 0, count: 0, invoices: [] }
+            "90+ days": { total: 0, count: 0, invoices: [] },
         };
 
-        trackingData.forEach(item => {
+        trackingData.forEach((item) => {
             const balance = Number(item.balance);
             if (balance > 0 && item.due_date) {
                 const dueDate = new Date(item.due_date);
                 dueDate.setHours(0, 0, 0, 0);
-                
-                const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
-                
+
+                const daysOverdue = Math.floor(
+                    (today - dueDate) / (1000 * 60 * 60 * 24),
+                );
+
                 if (daysOverdue > 0) {
                     if (daysOverdue <= 30) {
                         report["0-30 days"].total += balance;
@@ -577,7 +576,7 @@ const FinanceTracking = () => {
                             client: item.client,
                             amount: balance,
                             due_date: item.due_date,
-                            days: daysOverdue
+                            days: daysOverdue,
                         });
                     } else if (daysOverdue <= 60) {
                         report["31-60 days"].total += balance;
@@ -588,7 +587,7 @@ const FinanceTracking = () => {
                             client: item.client,
                             amount: balance,
                             due_date: item.due_date,
-                            days: daysOverdue
+                            days: daysOverdue,
                         });
                     } else if (daysOverdue <= 90) {
                         report["61-90 days"].total += balance;
@@ -599,7 +598,7 @@ const FinanceTracking = () => {
                             client: item.client,
                             amount: balance,
                             due_date: item.due_date,
-                            days: daysOverdue
+                            days: daysOverdue,
                         });
                     } else {
                         report["90+ days"].total += balance;
@@ -610,7 +609,7 @@ const FinanceTracking = () => {
                             client: item.client,
                             amount: balance,
                             due_date: item.due_date,
-                            days: daysOverdue
+                            days: daysOverdue,
                         });
                     }
                 }
@@ -640,7 +639,7 @@ const FinanceTracking = () => {
             const response = await axios.post(
                 route("ourfinance.update", { id }),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                { headers: { "Content-Type": "multipart/form-data" } },
             );
             setReloadTrigger((prev) => !prev);
             return response.data;
@@ -660,126 +659,163 @@ const FinanceTracking = () => {
         paid: "bg-emerald-100 text-emerald-700",
         pending: "bg-amber-100 text-amber-700",
         overdue: "bg-red-100 text-red-700",
-        partially_paid: "bg-blue-100 text-blue-700"
+        partially_paid: "bg-blue-100 text-blue-700",
     };
 
     const agingColors = {
         "0-30 days": "bg-amber-50 border-amber-200",
         "31-60 days": "bg-orange-50 border-orange-200",
         "61-90 days": "bg-rose-50 border-rose-200",
-        "90+ days": "bg-red-50 border-red-200"
+        "90+ days": "bg-red-50 border-red-200",
     };
 
-    const totalOverdue = Object.values(agingReport).reduce((sum, category) => sum + category.total, 0);
+    const totalOverdue = Object.values(agingReport).reduce(
+        (sum, category) => sum + category.total,
+        0,
+    );
 
     // Define columns for MyTable
-    const columns = useMemo(() => [
-        {
-            Header: 'Invoice ID',
-            accessor: 'invoice_id',
-            Cell: ({ value }) => (
-                <span className="font-mono text-indigo-600 font-medium">{value}</span>
-            )
-        },
-        {
-            Header: 'Client',
-            accessor: 'client',
-            Cell: ({ value }) => <span className="text-stone-700">{value}</span>
-        },
-        {
-            Header: 'Project',
-            accessor: 'project',
-            Cell: ({ value }) => <span className="text-stone-600">{value}</span>
-        },
-        {
-            Header: 'Invoice Date',
-            accessor: 'invoice_date',
-            Cell: ({ value }) => <span className="text-stone-500">{value}</span>
-        },
-        {
-            Header: 'Due Date',
-            accessor: 'due_date',
-            Cell: ({ value }) => <span className="text-stone-500">{value}</span>
-        },
-        {
-            Header: 'Amount',
-            accessor: 'amount',
-            Cell: ({ value }) => (
-                <span className="font-medium text-stone-800">NPR {Number(value).toLocaleString()}</span>
-            )
-        },
-        {
-            Header: 'Paid',
-            accessor: 'paid_amount',
-            Cell: ({ value }) => (
-                <span className="text-emerald-600">NPR {Number(value).toLocaleString()}</span>
-            )
-        },
-        {
-            Header: 'Balance',
-            accessor: 'balance',
-            Cell: ({ value }) => (
-                <span className="text-rose-600">NPR {Number(value).toLocaleString()}</span>
-            )
-        },
-        {
-            Header: 'Status',
-            accessor: 'status',
-            Cell: ({ value }) => (
-                <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${statusStyles[value] ?? "bg-stone-100 text-stone-600"}`}>
-                    {value}
-                </span>
-            )
-        },
-        {
-            Header: 'Days Overdue',
-            accessor: (row) => {
-                const balance = Number(row.balance);
-                const dueDate = new Date(row.due_date);
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                const daysOverdue = balance > 0 && dueDate < today 
-                    ? Math.floor((today - dueDate) / (1000 * 60 * 60 * 24))
-                    : 0;
-                return daysOverdue;
+    const columns = useMemo(
+        () => [
+            {
+                Header: "s/n",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
             },
-            Cell: ({ value }) => {
-                if (value > 0) {
-                    return (
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            value <= 30 ? 'bg-amber-100 text-amber-700' :
-                            value <= 60 ? 'bg-orange-100 text-orange-700' :
-                            value <= 90 ? 'bg-rose-100 text-rose-700' :
-                            'bg-red-100 text-red-700'
-                        }`}>
-                            {value} days
-                        </span>
-                    );
-                }
-                return <span className="text-stone-400">-</span>;
-            }
-        },
-        {
-            Header: 'Actions',
-            accessor: 'id',
-            Cell: ({ row }) => (
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => handleEdit(row.original)}
-                        className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
+            {
+                Header: "Invoice ID",
+                accessor: "invoice_id",
+                Cell: ({ value }) => (
+                    <span className="font-mono text-indigo-600 font-medium">
+                        {value}
+                    </span>
+                ),
+            },
+            {
+                Header: "Client",
+                accessor: "client",
+                Cell: ({ value }) => (
+                    <span className="text-stone-700">{value}</span>
+                ),
+            },
+            {
+                Header: "Project",
+                accessor: "project",
+                Cell: ({ value }) => (
+                    <span className="text-stone-600">{value}</span>
+                ),
+            },
+            {
+                Header: "Invoice Date",
+                accessor: "invoice_date",
+                Cell: ({ value }) => (
+                    <span className="text-stone-500">{value}</span>
+                ),
+            },
+            {
+                Header: "Due Date",
+                accessor: "due_date",
+                Cell: ({ value }) => (
+                    <span className="text-stone-500">{value}</span>
+                ),
+            },
+            {
+                Header: "Amount",
+                accessor: "amount",
+                Cell: ({ value }) => (
+                    <span className="font-medium text-stone-800">
+                        NPR {Number(value).toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                Header: "Paid",
+                accessor: "paid_amount",
+                Cell: ({ value }) => (
+                    <span className="text-emerald-600">
+                        NPR {Number(value).toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                Header: "Balance",
+                accessor: "balance",
+                Cell: ({ value }) => (
+                    <span className="text-rose-600">
+                        NPR {Number(value).toLocaleString()}
+                    </span>
+                ),
+            },
+            {
+                Header: "Status",
+                accessor: "status",
+                Cell: ({ value }) => (
+                    <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${statusStyles[value] ?? "bg-stone-100 text-stone-600"}`}
                     >
-                        <Edit size={15} />
-                    </button>
-                    <button
-                        onClick={() => handleDelete(row.original.id)}
-                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition"
-                    >
-                        <Trash2 size={15} />
-                    </button>
-                </div>
-            )
-        }
-    ], []);
+                        {value}
+                    </span>
+                ),
+            },
+            {
+                Header: "Days Overdue",
+                accessor: (row) => {
+                    const balance = Number(row.balance);
+                    const dueDate = new Date(row.due_date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const daysOverdue =
+                        balance > 0 && dueDate < today
+                            ? Math.floor(
+                                  (today - dueDate) / (1000 * 60 * 60 * 24),
+                              )
+                            : 0;
+                    return daysOverdue;
+                },
+                Cell: ({ value }) => {
+                    if (value > 0) {
+                        return (
+                            <span
+                                className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                                    value <= 30
+                                        ? "bg-amber-100 text-amber-700"
+                                        : value <= 60
+                                          ? "bg-orange-100 text-orange-700"
+                                          : value <= 90
+                                            ? "bg-rose-100 text-rose-700"
+                                            : "bg-red-100 text-red-700"
+                                }`}
+                            >
+                                {value} days
+                            </span>
+                        );
+                    }
+                    return <span className="text-stone-400">-</span>;
+                },
+            },
+            {
+                Header: "Actions",
+                accessor: "id",
+                Cell: ({ row }) => (
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => handleEdit(row.original)}
+                            className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
+                        >
+                            <Edit size={15} />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                        >
+                            <Trash2 size={15} />
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        [],
+    );
 
     return (
         <AdminWrapper>
