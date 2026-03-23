@@ -519,7 +519,7 @@ import AddFinanceTrackingForm from "@/AddFormComponents/AddFinanceTrackingForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
-import { Edit2, Trash2, Clock } from "lucide-react";
+import { Edit2, Trash2, Clock, Edit } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const FinanceTracking = () => {
@@ -766,13 +766,13 @@ const FinanceTracking = () => {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => handleEdit(row.original)}
-                        className="p-1.5 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
+                        className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
                     >
-                        <Edit2 size={15} />
+                        <Edit size={15} />
                     </button>
                     <button
                         onClick={() => handleDelete(row.original.id)}
-                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition"
+                        className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition"
                     >
                         <Trash2 size={15} />
                     </button>
