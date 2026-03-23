@@ -2,7 +2,7 @@ import AddHostingForm from "@/AddFormComponents/AddHostingForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Edit, Pencil, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const HostingManagement = () => {
@@ -169,14 +169,14 @@ const HostingManagement = () => {
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                             title="Edit"
                         >
-                            <Pencil size={16} />
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                             title="Delete"
                         >
                             <Trash2 size={16} />
