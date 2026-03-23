@@ -1392,7 +1392,7 @@ const AdminSideBar = ({
                                 )}
                             </Link> */}
 
-                            <Link
+                            {/* <Link
                                 href="/contract-renewal-management"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/contract-renewal-management")}
@@ -1415,7 +1415,7 @@ const AdminSideBar = ({
                                         Contract Renewal Management
                                     </Tooltip>
                                 )}
-                            </Link>
+                            </Link> */}
 
                              {/* User Management Link */}
                                     <Link
