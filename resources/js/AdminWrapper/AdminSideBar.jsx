@@ -1365,6 +1365,51 @@ const AdminSideBar = ({
                                 )}
                             </Link>
 
+                             {/* User Management Link */}
+                                    <Link
+                                        href="/service-contracts"
+                                        className={`
+                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/service-contracts")}
+                                        `}
+                                    >
+                                        <FiUsers
+                                            className={iconClasses(
+                                                isActive("/service-contracts"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Service Contracts
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>Service Contracts</Tooltip>
+                                        )}
+                                    </Link>
+
+
+                                     {/* User Management Link */}
+                                    <Link
+                                        href="/payment-management"
+                                        className={`
+                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-management")}
+                                        `}
+                                    >
+                                        <FiUsers
+                                            className={iconClasses(
+                                                isActive("/payment-management"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Payment
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>Payment </Tooltip>
+                                        )}
+                                    </Link>
+
                             {/* Admin Links */}
                             {isAdmin && (
                                 <>

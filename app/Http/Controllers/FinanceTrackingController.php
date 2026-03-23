@@ -27,6 +27,7 @@ class FinanceTrackingController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'invoice_id'  => 'nullable|string|max:255|unique:finance_trackings,invoice_id',
             'client'       => 'required|string|max:255',
             'project'      => 'required|string|max:255',
             'invoice_date' => 'required|date',
@@ -36,14 +37,17 @@ class FinanceTrackingController extends Controller
             'status'       => 'nullable|string'
         ]);
 
+        $paidAmount = $request->paid_amount ?? 0;
         $finance = FinanceTracking::create([
-            'client'       => $request->client,
-            'project'      => $request->project,
-            'invoice_date' => $request->invoice_date,
-            'due_date'     => $request->due_date,
-            'amount'       => $request->amount,
-            'paid_amount'  => $request->paid_amount ?? 0,
-            'status'       => $request->status ?? 'pending',
+            'invoice_id'  => $request->invoice_id,
+            'client'      => $request->client,
+            'project'     => $request->project,
+            'invoice_date'=> $request->invoice_date,
+            'due_date'    => $request->due_date,
+            'amount'      => $request->amount,
+            'paid_amount' => $paidAmount,
+            'balance'     => $request->amount - $paidAmount,
+            'status'      => $request->status ?? 'pending',
         ]);
 
         UserLog::create([
@@ -67,6 +71,7 @@ class FinanceTrackingController extends Controller
         $finance = FinanceTracking::findOrFail($id);
 
         $request->validate([
+            'invoice_id'  => 'nullable|string|max:255|unique:finance_trackings,invoice_id,' . $id,
             'client'       => 'required|string|max:255',
             'project'      => 'required|string|max:255',
             'invoice_date' => 'required|date',
@@ -76,14 +81,17 @@ class FinanceTrackingController extends Controller
             'status'       => 'nullable|string'
         ]);
 
+        $paidAmount = $request->paid_amount ?? 0;
         $finance->update([
-            'client'       => $request->client,
-            'project'      => $request->project,
-            'invoice_date' => $request->invoice_date,
-            'due_date'     => $request->due_date,
-            'amount'       => $request->amount,
-            'paid_amount'  => $request->paid_amount ?? 0,
-            'status'       => $request->status
+            'invoice_id'  => $request->invoice_id,
+            'client'      => $request->client,
+            'project'     => $request->project,
+            'invoice_date'=> $request->invoice_date,
+            'due_date'    => $request->due_date,
+            'amount'      => $request->amount,
+            'paid_amount' => $paidAmount,
+            'balance'     => $request->amount - $paidAmount,
+            'status'      => $request->status,
         ]);
 
         UserLog::create([

@@ -22,6 +22,7 @@ use App\Http\Controllers\ClientManagementController;
 use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\ServiceContractController;
 use App\Http\Controllers\PasswordController;
+use App\Http\Controllers\PaymentController;
 
 
     // -----------------------------------------
@@ -132,6 +133,14 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/contract-renewal-management', function(){
         return Inertia::render('ClientDetails/ContractRenewalManagement');
+    });
+
+    Route::get('/service-contracts', function(){
+        return Inertia::render('ClientDetails/ServiceContracts');    
+    });
+
+    Route::get('/payment-management', function(){
+        return Inertia::render('ClientDetails/Payment');    
     });
 
     // -----------------------------------------
@@ -482,13 +491,18 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
 
 
-    Route::get('/service-contracts', [ServiceContractController::class, 'index'])->name('service-contracts.index');
-    Route::post('/service-contracts', [ServiceContractController::class, 'store'])->name('service-contracts.store');
-    Route::put('/service-contracts/{id}', [ServiceContractController::class, 'update'])->name('service-contracts.update');
-    Route::delete('/service-contracts/{id}', [ServiceContractController::class, 'destroy'])->name('service-contracts.destroy');
+    Route::get('/ourservicecontracts', [ServiceContractController::class, 'index'])->name('ourservicecontracts.index');
+    Route::delete('/ourservicecontracts/{id}', [ServiceContractController::class, 'destroy'])->name('ourservicecontracts.destroy');
+    Route::post('/ourservicecontracts', [ServiceContractController::class, 'store'])->name('ourservicecontracts.store');
+    Route::put('/ourservicecontracts/{id}', [ServiceContractController::class, 'update'])->name('ourservicecontracts.update');
+
+    Route::get('/ourpayments', [PaymentController::class, 'index'])->name('ourpayments.index');
+    Route::put('/ourpayments/{id}', [PaymentController::class, 'update'])->name('ourpayments.update');
+    Route::post('/ourpayments', [PaymentController::class, 'store'])->name('ourpayments.store');
+    Route::delete('/ourpayments/{id}', [PaymentController::class, 'destroy'])->name('ourpayments.destroy');
 
 
-
+       
     Route::get('/ticket-dashboard', function(){
         return Inertia::render('Dashboard/ExpiryDashboard');
     });

@@ -19,21 +19,21 @@ class FinanceTracking extends Model
         'status',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
+    // protected static function boot()
+    // {
+    //     parent::boot();
 
-        static::creating(function ($financeTracking) {
-            $financeTracking->balance = ($financeTracking->amount ?? 0) - ($financeTracking->paid_amount ?? 0);
-        });
+    //     static::creating(function ($financeTracking) {
+    //         $financeTracking->balance = ($financeTracking->amount ?? 0) - ($financeTracking->paid_amount ?? 0);
+    //     });
 
-        static::created(function ($financeTracking) {
-            $financeTracking->invoice_id = 'INV-'.str_pad($financeTracking->id, 3, '0', STR_PAD_LEFT);
-            $financeTracking->save();
-        });
+    //     static::created(function ($financeTracking) {
+    //         $financeTracking->invoice_id = 'INV-'.str_pad($financeTracking->id, 3, '0', STR_PAD_LEFT);
+    //         $financeTracking->save();
+    //     });
 
-        static::updating(function ($financeTracking) {
-            $financeTracking->balance = ($financeTracking->amount ?? 0) - ($financeTracking->paid_amount ?? 0);
-        });
-    }
+    //     static::updating(function ($financeTracking) {
+    //         $financeTracking->balance = ($financeTracking->amount ?? 0) - ($financeTracking->paid_amount ?? 0);
+    //     });
+    // }
 }
