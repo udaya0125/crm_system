@@ -91,7 +91,7 @@
 
 import AddClientManagement from "@/AddFormComponents/AddClientManagement";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import MyTable from "@/TableComponents/MyTable";
@@ -193,18 +193,18 @@ const ClientManagement = () => {
                 accessor: "id",
                 disableSortBy: true,
                 Cell: ({ row }) => (
-                    <div className="text-right space-x-2">
+                    <div className=" space-x-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="text-indigo-600 hover:underline text-xs font-medium"
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
                         >
-                            Edit
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="text-red-500 hover:underline text-xs font-medium"
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
                         >
-                            Delete
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),
