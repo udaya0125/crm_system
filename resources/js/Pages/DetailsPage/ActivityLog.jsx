@@ -37,13 +37,10 @@ const ActivityLog = () => {
 
     const columns = useMemo(
         () => [
-            {
-                Header: "#",
-                id: "row_number",
-                Cell: ({ row }) => (
-                    <span className="text-gray-400 text-sm">{row.index + 1}</span>
-                ),
-                disableSortBy: true,
+             {
+                Header: "s/n",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
             },
             {
                 Header: "Name",

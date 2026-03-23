@@ -216,10 +216,10 @@ const DomainManagement = () => {
     // Define columns for MyTable
     const columns = useMemo(
         () => [
-            {
-                Header: "#",
-                accessor: (row, index) => index + 1,
-                id: "serial",
+             {
+                Header: "s/n",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
             },
             {
                 Header: "Domain",

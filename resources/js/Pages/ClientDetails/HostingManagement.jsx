@@ -108,8 +108,9 @@ const HostingManagement = () => {
     const columns = React.useMemo(
         () => [
             {
-                Header: "ID",
-                accessor: "id",
+                Header: "s/n",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
             },
             // {
             //     Header: "Client Name",
@@ -201,9 +202,9 @@ const HostingManagement = () => {
                             <h1 className="text-4xl font-bold tracking-widest text-stone-800 uppercase">
                                 Hosting Management
                             </h1>
-                            <p className="text-gray-600 mt-2">
+                            {/* <p className="text-gray-600 mt-2">
                                 Manage all your hosting plans and subscriptions
-                            </p>
+                            </p> */}
                         </div>
                         <button
                             onClick={() => {
