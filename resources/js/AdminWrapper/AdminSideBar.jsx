@@ -933,7 +933,7 @@ const AdminSideBar = ({
                                     {isTaskManagementOpen && (
                                         <div className="ml-9 space-y-0.5">
                                             {/* Tasks Link */}
-                                            <Link
+                                            {/* <Link
                                                 href="/tasks"
                                                 className={`
                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
@@ -944,7 +944,7 @@ const AdminSideBar = ({
                                                 <span className="text-sm whitespace-nowrap">
                                                     Task Management
                                                 </span>
-                                            </Link>
+                                            </Link> */}
 
                                             {/* Todo Link */}
                                             <Link
@@ -960,8 +960,35 @@ const AdminSideBar = ({
                                                 </span>
                                             </Link>
 
+                                            <Link
+                                                href="/ticket"
+                                                className={`
+                                                    flex items-center p-2.5 rounded-lg transition-colors duration-200
+                                                    ${isActive("/ticket") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Ticket Management
+                                                </span>
+                                            </Link>
+
+
+                                            <Link
+                                                href="/project-management"
+                                                className={`
+                                                    flex items-center p-2.5 rounded-lg transition-colors duration-200
+                                                    ${isActive("/project-management") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Project Management
+                                                </span>
+                                            </Link>
+
                                             {/* Task Assignments Link - Only for Admin */}
-                                            {isAdmin && (
+                                            {/* {isAdmin && (
                                                 <Link
                                                     href="/task-assignments"
                                                     className={`
@@ -974,7 +1001,7 @@ const AdminSideBar = ({
                                                         Task Assignments
                                                     </span>
                                                 </Link>
-                                            )}
+                                            )} */}
                                         </div>
                                     )}
                                 </div>
@@ -995,15 +1022,15 @@ const AdminSideBar = ({
                                         }}
                                         className={`
                                             flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
-                                            ${isGroupActive(["/tasks", "/todo", "/task-assignments"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                            ${isGroupActive(["/ticket", "/todo", "/project-management"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                         `}
                                     >
                                         <FiBookOpen
                                             className={iconClasses(
                                                 isGroupActive([
-                                                    "/tasks",
+                                                    "/ticket",
                                                     "/todo",
-                                                    "/task-assignments",
+                                                    "/project-management",
                                                 ]),
                                             )}
                                         />
@@ -1017,7 +1044,7 @@ const AdminSideBar = ({
                                             onMouseEnter={handleTaskMouseEnter}
                                             onMouseLeave={handleTaskMouseLeave}
                                         >
-                                            <Link
+                                            {/* <Link
                                                 href="/tasks"
                                                 className={`
                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
@@ -1027,7 +1054,7 @@ const AdminSideBar = ({
                                                 <span className="whitespace-nowrap">
                                                     Task Management
                                                 </span>
-                                            </Link>
+                                            </Link> */}
                                             <Link
                                                 href="/todo"
                                                 className={`
@@ -1039,7 +1066,32 @@ const AdminSideBar = ({
                                                     To Do List
                                                 </span>
                                             </Link>
-                                            {isAdmin && (
+
+                                            <Link
+                                                href="/ticket"
+                                                className={`
+                                                    flex items-center px-3 py-2.5 text-sm transition-colors duration-200
+                                                    ${isActive("/ticket") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Ticket
+                                                </span>
+                                            </Link>
+
+
+                                            <Link
+                                                href="/project-management"
+                                                className={`
+                                                    flex items-center px-3 py-2.5 text-sm transition-colors duration-200
+                                                    ${isActive("/project-management") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                                                `}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Project Management
+                                                </span>
+                                            </Link>
+                                            {/* {isAdmin && (
                                                 <Link
                                                     href="/task-assignments"
                                                     className={`
@@ -1051,7 +1103,7 @@ const AdminSideBar = ({
                                                         Task Assignments
                                                     </span>
                                                 </Link>
-                                            )}
+                                            )} */}
                                         </div>
                                     )}
                                 </div>
@@ -1302,7 +1354,7 @@ const AdminSideBar = ({
                                 )}
                             </Link>
 
-                            <Link
+                            {/* <Link
                                 href="/ticket"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/ticket")}
@@ -1317,9 +1369,9 @@ const AdminSideBar = ({
                                     </span>
                                 )}
                                 {isCollapsed && <Tooltip>Ticket</Tooltip>}
-                            </Link>
+                            </Link> */}
 
-                            <Link
+                            {/* <Link
                                 href="/project-management"
                                 className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/project-management")}
@@ -1338,7 +1390,7 @@ const AdminSideBar = ({
                                 {isCollapsed && (
                                     <Tooltip>Project Management</Tooltip>
                                 )}
-                            </Link>
+                            </Link> */}
 
                             <Link
                                 href="/contract-renewal-management"
