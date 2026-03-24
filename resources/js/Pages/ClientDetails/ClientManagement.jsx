@@ -229,6 +229,11 @@ const ClientManagement = () => {
     const columns = useMemo(
         () => [
             {
+                Header: "s/n",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
+            },
+            {
                 Header: "Company",
                 accessor: "company_name",
                 Cell: ({ value }) => (

@@ -241,7 +241,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Only project manager and admin can access task management
     // ****************************************************************
 
-Route::middleware(['auth', 'role: manager,admin'])->group(function () {
+Route::middleware(['auth', 'role:manager,admin'])->group(function () {
 
     Route::get('/domain-tracking', function(){
         return Inertia::render('ClientDetails/DomainManagement'); 
@@ -349,7 +349,7 @@ Route::middleware(['auth', 'role:developer,admin'])->group(function () {
     // *************************************************************
 
 
-Route::middleware(['auth', 'role: technician,admin'])->group(function () {
+Route::middleware(['auth', 'role:technician,admin'])->group(function () {
 
     Route::get('/ticket', function(){
         return Inertia::render('DetailsPage/Ticket'); 
@@ -370,7 +370,7 @@ Route::middleware(['auth', 'role: technician,admin'])->group(function () {
     // ************************************************************
 
 
-Route::middleware(['auth', 'role: accountant,admin'])->group(function () {
+Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
 
 
     Route::get('/leads', function(){

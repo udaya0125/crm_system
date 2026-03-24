@@ -256,6 +256,11 @@ const Leads = () => {
     const columns = useMemo(
         () => [
             {
+                Header: "s/n",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
+            },
+            {
                 Header: "Lead ID",
                 accessor: "lead_id",
                 Cell: ({ value }) => (
