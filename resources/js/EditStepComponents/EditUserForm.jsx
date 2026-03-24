@@ -318,13 +318,10 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
     // Role options for React Select
     const roleOptions = [
         { value: "admin", label: "Admin" },
-        { value: "salesteam", label: "Sales Team" },
-        { value: "projectmanager", label: "Project Manager" },
+        { value: "manager", label: "Manager" },
         { value: "developer", label: "Developer" },
         { value: "technician", label: "Technician" },
         { value: "accountant", label: "Accountant" },
-        { value: "support", label: "Support" },
-        { value: "user", label: "User" },
     ];
 
     // Add useEffect to lock body scroll when form mounts

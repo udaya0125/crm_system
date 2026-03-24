@@ -463,11 +463,13 @@ const AdminSideBar = ({
     // Check The Role of the User
     const isAdmin = user?.role === "admin";
     const isUser = user?.role === "user";
-    const isAdminOrTechnician = ["admin", "technician"].includes(user?.role);
-    const isAdminOrDeveloper = ["admin", "developer"].includes(user?.role);
-    const isAdminOrAccountant = ["admin", "accountant"].includes(user?.role);
-    const isAdminOrManager = ["admin", "manager"].includes(user?.role);
-    const isAdminOrUser = ["admin", "user"].includes(user?.role);
+    const isAdminOrTechnician = user?.role === "admin" || user?.role === "technician";
+    const isAdminOrDeveloper = user?.role === "admin" || user?.role === "developer";
+    const isAdminOrAccountant = user?.role === "admin" || user?.role === "accountant";
+    const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
+    const isAdminOrUser = user?.role === "admin" || user?.role === "user";
+
+    console.log("Current User Role:", user?.role);
 
     const isActive = (href) => {
         const path = href.replace("/", "");
@@ -1462,7 +1464,7 @@ const AdminSideBar = ({
                                             <Tooltip>Client Details</Tooltip>
                                         )}
                                     </Link>
-                                    
+
                                     {/* User Management Link */}
                                     <Link
                                         href="/payment-management"

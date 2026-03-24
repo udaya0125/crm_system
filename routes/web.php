@@ -326,7 +326,7 @@ Route::middleware(['auth', 'role: manager,admin'])->group(function () {
     // **********************************************************
 
 
-Route::middleware(['auth', 'role: developer,admin'])->group(function () {
+Route::middleware(['auth', 'role:developer,admin'])->group(function () {
 
     Route::get('/project-management', function(){
         return Inertia::render('ClientDetails/ProjectManagement');  
