@@ -466,9 +466,7 @@ const AdminSideBar = ({
     const isAdminOrTechnician = ["admin", "technician"].includes(user?.role);
     const isAdminOrDeveloper = ["admin", "developer"].includes(user?.role);
     const isAdminOrAccountant = ["admin", "accountant"].includes(user?.role);
-    const isAdminOrManager = ["admin", "manager"].includes(
-        user?.role,
-    );
+    const isAdminOrManager = ["admin", "manager"].includes(user?.role);
     const isAdminOrUser = ["admin", "user"].includes(user?.role);
 
     const isActive = (href) => {
@@ -1126,36 +1124,39 @@ const AdminSideBar = ({
                             {!isCollapsed ? (
                                 // Expanded view
                                 <div className="space-y-1">
-                                    <button
-                                        onClick={toggleClientManagement}
-                                        className={dropdownButtonClasses(
-                                            isGroupActive([
-                                                "/client",
-                                                "/expiration",
-                                                "/hosting-tracking",
-                                                "/domain-tracking",
-                                            ]),
-                                        )}
-                                    >
-                                        <div className="flex items-center">
-                                            <FiCheckSquare
-                                                className={iconClasses(
-                                                    isGroupActive([
-                                                        "/client",
-                                                        "/expiration",
-                                                    ]),
-                                                )}
-                                            />
-                                            <span className="ml-3 font-medium whitespace-nowrap">
-                                                Company
-                                            </span>
-                                        </div>
-                                        {isClientManagementOpen ? (
-                                            <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-                                        ) : (
-                                            <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-                                        )}
-                                    </button>
+                                    {isAdminOrManager && (
+                                        <button
+                                            onClick={toggleClientManagement}
+                                            className={dropdownButtonClasses(
+                                                isGroupActive([
+                                                    "/client",
+                                                    "/expiration",
+                                                    "/hosting-tracking",
+                                                    "/domain-tracking",
+                                                ]),
+                                            )}
+                                        >
+                                            <div className="flex items-center">
+                                                <FiCheckSquare
+                                                    className={iconClasses(
+                                                        isGroupActive([
+                                                            "/client",
+                                                            "/expiration",
+                                                        ]),
+                                                    )}
+                                                />
+                                                <span className="ml-3 font-medium whitespace-nowrap">
+                                                    Company
+                                                </span>
+                                            </div>
+
+                                            {isClientManagementOpen ? (
+                                                <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
+                                            ) : (
+                                                <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
+                                            )}
+                                        </button>
+                                    )}
 
                                     {/* Dropdown Content */}
                                     {isClientManagementOpen && (
