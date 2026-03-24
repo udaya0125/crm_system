@@ -54,9 +54,9 @@ Route::middleware('auth')->group(function () {
     // CRM PAGE
     // -----------------------------------------
     
-    Route::get('/crm', function(){
-        return Inertia::render('MainPages/CRM');
-    });
+    // Route::get('/crm', function(){
+    //     return Inertia::render('MainPages/CRM');
+    // });
 
     // -----------------------------------------
     // COMPANY DETAILS PAGE BY SLUG
@@ -74,95 +74,15 @@ Route::middleware('auth')->group(function () {
     // COMPANY PAGE
     // -----------------------------------------
 
-    Route::get('/company', function(){
-        return Inertia::render('MainPages/Company');
+    // Route::get('/company', function(){
+    //     return Inertia::render('MainPages/Company');
         
-    });
+    // });
 
 
-    Route::get('/client', function(){
-        return Inertia::render('ClientDetails/Client');
-        
-    });
-
-
-    Route::get('/expiration', function(){
-        return Inertia::render('ClientDetails/Expiration');
-        
-    });
-
-
-    Route::get('/client-management', function(){
-        return Inertia::render('ClientDetails/ClientManagement');
-        
-    });
-
-    Route::get('/project-management', function(){
-        return Inertia::render('ClientDetails/ProjectManagement');
-        
-    });
-
-
-
-
-
-    Route::get('/payment-finance-tracking', function(){
-        return Inertia::render('ClientDetails/FinanceTracking');
-        
-    });
-
-
-    Route::get('/domain-tracking', function(){
-        return Inertia::render('ClientDetails/DomainManagement');
-        
-    });
-
-    Route::get('/hosting-tracking', function(){
-        return Inertia::render('ClientDetails/HostingManagement');
-        
-    });
-
-
-    Route::get('/leads', function(){
-        return Inertia::render('ClientDetails/Leads');
-        
-    });
-
-    Route::get('/contract-renewal-management', function(){
-        return Inertia::render('ClientDetails/ContractRenewalManagement');
-    });
-
-    Route::get('/service-contracts', function(){
-        return Inertia::render('ClientDetails/ServiceContracts');    
-    });
-
-    Route::get('/payment-management', function(){
-        return Inertia::render('ClientDetails/Payment');    
-    });
-
-
-    Route::get('/client-details', function(){
-        return Inertia::render('ClientDetails/ClientDetails');    
-    });
-
-    // -----------------------------------------
-    // CLIENT CRUD
-    // -----------------------------------------
-
-    Route::get('/ourclients', [ClientController::class, 'index'])->name('ourclients.index');
-    Route::post('/ourclients', [ClientController::class, 'store'])->name('ourclients.store');
-    Route::put('/ourclients/{id}', [ClientController::class, 'update'])->name('ourclients.update');
-    Route::delete('/ourclients/{id}', [ClientController::class, 'destroy'])->name('ourclients.destroy');
-
-
-    // -----------------------------------------
-    // EXPIRATION CRUD
-    // -----------------------------------------
-
-    Route::get('/ourexpirations', [ExpirationController::class, 'index'])->name('ourexpirations.index');
-    Route::post('/ourexpirations', [ExpirationController::class, 'store'])->name('ourexpirations.store');
-    Route::put('/ourexpirations/{id}', [ExpirationController::class, 'update'])->name('ourexpirations.update');
-    Route::delete('/ourexpirations/{id}', [ExpirationController::class, 'destroy'])->name('ourexpirations.destroy');
+    // Route::get('/contract-renewal-management', function(){
+    //     return Inertia::render('ClientDetails/ContractRenewalManagement');
+    // });
 
 
     // -----------------------------------------
@@ -293,10 +213,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // TASK LIST MANAGEMENT CRUD
     // -----------------------------------------
 
-    Route::get('/ourtasklist', [TaskListController::class, 'index'])->name('ourtasklist.index');
-    Route::post('/ourtasklist', [TaskListController::class, 'store'])->name('ourtasklist.store');
-    Route::put('/ourtasklist/{id}', [TaskListController::class, 'update'])->name('ourtasklist.update');
-    Route::delete('/ourtasklist/{id}', [TaskListController::class, 'destroy'])->name('ourtasklist.destroy');
+    // Route::get('/ourtasklist', [TaskListController::class, 'index'])->name('ourtasklist.index');
+    // Route::post('/ourtasklist', [TaskListController::class, 'store'])->name('ourtasklist.store');
+    // Route::put('/ourtasklist/{id}', [TaskListController::class, 'update'])->name('ourtasklist.update');
+    // Route::delete('/ourtasklist/{id}', [TaskListController::class, 'destroy'])->name('ourtasklist.destroy');
 
 
     // -----------------------------------------
@@ -321,21 +241,84 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Only project manager and admin can access task management
     // ****************************************************************
 
-Route::middleware(['auth', 'role: project_manager,admin'])->group(function () {
+Route::middleware(['auth', 'role: manager,admin'])->group(function () {
+
+    Route::get('/domain-tracking', function(){
+        return Inertia::render('ClientDetails/DomainManagement'); 
+    });
+
+    Route::get('/hosting-tracking', function(){
+        return Inertia::render('ClientDetails/HostingManagement');   
+    });
+
+        Route::get('/expiration', function(){
+        return Inertia::render('ClientDetails/Expiration');
+    });
+
+        Route::get('/client', function(){
+        return Inertia::render('ClientDetails/Client');
+        
+    });
+
+    Route::get('/service-contracts', function(){
+        return Inertia::render('ClientDetails/ServiceContracts');    
+    });
+
+    Route::get('/payment-management', function(){
+        return Inertia::render('ClientDetails/Payment');    
+    });
 
 
+    Route::get('/client-details', function(){
+        return Inertia::render('ClientDetails/ClientDetails');    
+    });
+
+    
+    // -----------------------------------------
+    // CLIENT CRUD
+    // -----------------------------------------
+
+    Route::get('/ourclients', [ClientController::class, 'index'])->name('ourclients.index');
+    Route::post('/ourclients', [ClientController::class, 'store'])->name('ourclients.store');
+    Route::put('/ourclients/{id}', [ClientController::class, 'update'])->name('ourclients.update');
+    Route::delete('/ourclients/{id}', [ClientController::class, 'destroy'])->name('ourclients.destroy');
+
+
+    // ---------------------------------------------------------
+    // DOMAIN MANAGEMENT CRUD for the Development Team
+    // ---------------------------------------------------------
+
+    Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
+    Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
+    Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
+    Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
+
+    Route::get('/ourhostings', [HostingManagementController::class, 'index'])->name('ourhostings.index');
+    Route::post('/ourhostings', [HostingManagementController::class, 'store'])->name('ourhostings.store');
+    Route::put('/ourhostings/{id}', [HostingManagementController::class, 'update'])->name('ourhostings.update');
+    Route::delete('/ourhostings/{id}', [HostingManagementController::class, 'destroy'])->name('ourhostings.destroy');
+
+    // -----------------------------------------
+    // EXPIRATION CRUD
+    // -----------------------------------------
+
+    Route::get('/ourexpirations', [ExpirationController::class, 'index'])->name('ourexpirations.index');
+    Route::post('/ourexpirations', [ExpirationController::class, 'store'])->name('ourexpirations.store');
+    Route::put('/ourexpirations/{id}', [ExpirationController::class, 'update'])->name('ourexpirations.update');
+    Route::delete('/ourexpirations/{id}', [ExpirationController::class, 'destroy'])->name('ourexpirations.destroy');
+
+
+    Route::get('/ourservicecontracts', [ServiceContractController::class, 'index'])->name('ourservicecontracts.index');
+    Route::delete('/ourservicecontracts/{id}', [ServiceContractController::class, 'destroy'])->name('ourservicecontracts.destroy');
+    Route::post('/ourservicecontracts', [ServiceContractController::class, 'store'])->name('ourservicecontracts.store');
+    Route::put('/ourservicecontracts/{id}', [ServiceContractController::class, 'update'])->name('ourservicecontracts.update');
+
+    Route::get('/ourpayments', [PaymentController::class, 'index'])->name('ourpayments.index');
+    Route::put('/ourpayments/{id}', [PaymentController::class, 'update'])->name('ourpayments.update');
+    Route::post('/ourpayments', [PaymentController::class, 'store'])->name('ourpayments.store');
+    Route::delete('/ourpayments/{id}', [PaymentController::class, 'destroy'])->name('ourpayments.destroy');
 });
 
-
-    // ************************************************************
-    // Only sales team and admin can access task management
-    // ************************************************************
-
-
-Route::middleware(['auth', 'role: sales_team,admin'])->group(function () {
-
-
-});
 
 
     // **********************************************************
@@ -345,7 +328,19 @@ Route::middleware(['auth', 'role: sales_team,admin'])->group(function () {
 
 Route::middleware(['auth', 'role: developer,admin'])->group(function () {
 
+    Route::get('/project-management', function(){
+        return Inertia::render('ClientDetails/ProjectManagement');  
+    });
 
+    // ---------------------------------------------------------
+    // PROJECT MANAGEMENT CRUD for the Development Team
+    // ---------------------------------------------------------
+
+    Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
+    Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
+    Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
+    Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
+    
 });
 
 
@@ -367,8 +362,6 @@ Route::middleware(['auth', 'role: technician,admin'])->group(function () {
     Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
     Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
-
-
 });
 
 
@@ -380,19 +373,47 @@ Route::middleware(['auth', 'role: technician,admin'])->group(function () {
 Route::middleware(['auth', 'role: accountant,admin'])->group(function () {
 
 
+    Route::get('/leads', function(){
+        return Inertia::render('ClientDetails/Leads');
+        
+    });
+
+    Route::get('/payment-finance-tracking', function(){
+        return Inertia::render('ClientDetails/FinanceTracking');   
+    });
+
+    Route::get('/client-management', function(){
+        return Inertia::render('ClientDetails/ClientManagement');
+        
+    });
+
+    // ---------------------------------------------------------
+    // FINANCE TRACKING CRUD for the Finance Team
+    // ---------------------------------------------------------
+
+    Route::get('/ourfinance', [FinanceTrackingController::class, 'index'])->name('ourfinance.index');
+    Route::post('/ourfinance', [FinanceTrackingController::class, 'store'])->name('ourfinance.store');
+    Route::put('/ourfinance/{id}', [FinanceTrackingController::class, 'update'])->name('ourfinance.update');
+    Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
+
+    // ---------------------------------------------------------
+    // LEAD MANAGEMENT CRUD for the Sales Team
+    // ---------------------------------------------------------
+
+    Route::get('/ourleads', [LeadController::class, 'index'])->name('ourleads.index');
+    Route::post('/ourleads', [LeadController::class, 'store'])->name('ourleads.store');
+    Route::put('/ourleads/{id}', [LeadController::class, 'update'])->name('ourleads.update');
+    Route::delete('/ourleads/{id}', [LeadController::class, 'destroy'])->name('ourleads.destroy');
+
+    Route::get('/ourclientmanagement', [ClientManagementController::class, 'index'])->name('ourclientmanagement.index');
+    Route::post('/ourclientmanagement', [ClientManagementController::class, 'store'])->name('ourclientmanagement.store');
+    Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
+    Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
+
 
 });
 
 
-    // ***********************************************************
-    // Only support and admin can access task management
-    // ***********************************************************
-
-
-Route::middleware(['auth', 'role: support,admin'])->group(function () {
-
-
-});
 
     // *********************************************************************
     // Only user can access task list viewing
@@ -447,73 +468,9 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     //     return Inertia::render('MainPages/SalesSystem');
         
     // });
-
-
-
-
-
-    // ---------------------------------------------------------
-    // PROJECT MANAGEMENT CRUD for the Development Team
-    // ---------------------------------------------------------
-
-    Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
-    Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
-    Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
-    Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
-
-    // ---------------------------------------------------------
-    // FINANCE TRACKING CRUD for the Finance Team
-    // ---------------------------------------------------------
-
-    Route::get('/ourfinance', [FinanceTrackingController::class, 'index'])->name('ourfinance.index');
-    Route::post('/ourfinance', [FinanceTrackingController::class, 'store'])->name('ourfinance.store');
-    Route::put('/ourfinance/{id}', [FinanceTrackingController::class, 'update'])->name('ourfinance.update');
-    Route::delete('/ourfinance/{id}', [FinanceTrackingController::class, 'destroy'])->name('ourfinance.destroy');
-
-
-    // ---------------------------------------------------------
-    // DOMAIN MANAGEMENT CRUD for the Development Team
-    // ---------------------------------------------------------
-
-    Route::get('/ourdomains', [DomainManagementController::class, 'index'])->name('ourdomains.index');
-    Route::post('/ourdomains', [DomainManagementController::class, 'store'])->name('ourdomains.store');
-    Route::put('/ourdomains/{id}', [DomainManagementController::class, 'update'])->name('ourdomains.update');
-    Route::delete('/ourdomains/{id}', [DomainManagementController::class, 'destroy'])->name('ourdomains.destroy');
-
-    Route::get('/ourhostings', [HostingManagementController::class, 'index'])->name('ourhostings.index');
-    Route::post('/ourhostings', [HostingManagementController::class, 'store'])->name('ourhostings.store');
-    Route::put('/ourhostings/{id}', [HostingManagementController::class, 'update'])->name('ourhostings.update');
-    Route::delete('/ourhostings/{id}', [HostingManagementController::class, 'destroy'])->name('ourhostings.destroy');
-
-    // ---------------------------------------------------------
-    // LEAD MANAGEMENT CRUD for the Sales Team
-    // ---------------------------------------------------------
-
-    Route::get('/ourleads', [LeadController::class, 'index'])->name('ourleads.index');
-    Route::post('/ourleads', [LeadController::class, 'store'])->name('ourleads.store');
-    Route::put('/ourleads/{id}', [LeadController::class, 'update'])->name('ourleads.update');
-    Route::delete('/ourleads/{id}', [LeadController::class, 'destroy'])->name('ourleads.destroy');
-
-    Route::get('/ourclientmanagement', [ClientManagementController::class, 'index'])->name('ourclientmanagement.index');
-    Route::post('/ourclientmanagement', [ClientManagementController::class, 'store'])->name('ourclientmanagement.store');
-    Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
-    Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
-
-
-    Route::get('/ourservicecontracts', [ServiceContractController::class, 'index'])->name('ourservicecontracts.index');
-    Route::delete('/ourservicecontracts/{id}', [ServiceContractController::class, 'destroy'])->name('ourservicecontracts.destroy');
-    Route::post('/ourservicecontracts', [ServiceContractController::class, 'store'])->name('ourservicecontracts.store');
-    Route::put('/ourservicecontracts/{id}', [ServiceContractController::class, 'update'])->name('ourservicecontracts.update');
-
-    Route::get('/ourpayments', [PaymentController::class, 'index'])->name('ourpayments.index');
-    Route::put('/ourpayments/{id}', [PaymentController::class, 'update'])->name('ourpayments.update');
-    Route::post('/ourpayments', [PaymentController::class, 'store'])->name('ourpayments.store');
-    Route::delete('/ourpayments/{id}', [PaymentController::class, 'destroy'])->name('ourpayments.destroy');
-
-
        
-    Route::get('/ticket-dashboard', function(){
-        return Inertia::render('Dashboard/ExpiryDashboard');
-    });
+    // Route::get('/ticket-dashboard', function(){
+    //     return Inertia::render('Dashboard/ExpiryDashboard');
+    // });
 
 require __DIR__.'/auth.php';

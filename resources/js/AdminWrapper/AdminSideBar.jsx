@@ -466,9 +466,7 @@ const AdminSideBar = ({
     const isAdminOrTechnician = ["admin", "technician"].includes(user?.role);
     const isAdminOrDeveloper = ["admin", "developer"].includes(user?.role);
     const isAdminOrAccountant = ["admin", "accountant"].includes(user?.role);
-    const isAdminOrSupport = ["admin", "support"].includes(user?.role);
-    const isAdminOrSalesTeam = ["admin", "sales_team"].includes(user?.role);
-    const isAdminOrProjectManager = ["admin", "project_manager"].includes(
+    const isAdminOrManager = ["admin", "manager"].includes(
         user?.role,
     );
     const isAdminOrUser = ["admin", "user"].includes(user?.role);
