@@ -104,10 +104,7 @@ Route::middleware('auth')->group(function () {
 
 
 
-    Route::get('/ticket', function(){
-        return Inertia::render('DetailsPage/Ticket');
-        
-    });
+
 
     Route::get('/payment-finance-tracking', function(){
         return Inertia::render('ClientDetails/FinanceTracking');
@@ -324,7 +321,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Only project manager and admin can access task management
     // ****************************************************************
 
-Route::middleware(['auth', 'role: projectmanager,admin'])->group(function () {
+Route::middleware(['auth', 'role: project_manager,admin'])->group(function () {
 
 
 });
@@ -335,7 +332,7 @@ Route::middleware(['auth', 'role: projectmanager,admin'])->group(function () {
     // ************************************************************
 
 
-Route::middleware(['auth', 'role: salesteam,admin'])->group(function () {
+Route::middleware(['auth', 'role: sales_team,admin'])->group(function () {
 
 
 });
@@ -359,6 +356,18 @@ Route::middleware(['auth', 'role: developer,admin'])->group(function () {
 
 Route::middleware(['auth', 'role: technician,admin'])->group(function () {
 
+    Route::get('/ticket', function(){
+        return Inertia::render('DetailsPage/Ticket'); 
+    });
+
+    // ---------------------------------------------------------
+    // TICKET MANAGEMENT CRUD for the Tech Support Team
+    // ---------------------------------------------------------
+    Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
+    Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+    Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
+    Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
+
 
 });
 
@@ -369,6 +378,7 @@ Route::middleware(['auth', 'role: technician,admin'])->group(function () {
 
 
 Route::middleware(['auth', 'role: accountant,admin'])->group(function () {
+
 
 
 });
@@ -440,13 +450,7 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
 
 
 
-    // ---------------------------------------------------------
-    // TICKET MANAGEMENT CRUD for the Tech Support Team
-    // ---------------------------------------------------------
-    Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
-    Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
-    Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
-    Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
+
 
     // ---------------------------------------------------------
     // PROJECT MANAGEMENT CRUD for the Development Team

@@ -463,6 +463,15 @@ const AdminSideBar = ({
     // Check The Role of the User
     const isAdmin = user?.role === "admin";
     const isUser = user?.role === "user";
+    const isAdminOrTechnician = ["admin", "technician"].includes(user?.role);
+    const isAdminOrDeveloper = ["admin", "developer"].includes(user?.role);
+    const isAdminOrAccountant = ["admin", "accountant"].includes(user?.role);
+    const isAdminOrSupport = ["admin", "support"].includes(user?.role);
+    const isAdminOrSalesTeam = ["admin", "sales_team"].includes(user?.role);
+    const isAdminOrProjectManager = ["admin", "project_manager"].includes(
+        user?.role,
+    );
+    const isAdminOrUser = ["admin", "user"].includes(user?.role);
 
     const isActive = (href) => {
         const path = href.replace("/", "");
@@ -960,32 +969,35 @@ const AdminSideBar = ({
                                                 </span>
                                             </Link>
 
-                                            <Link
-                                                href="/ticket"
-                                                className={`
+                                            {isAdminOrTechnician && (
+                                                <Link
+                                                    href="/ticket"
+                                                    className={`
                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
                                                     ${isActive("/ticket") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
-                                            >
-                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-                                                <span className="text-sm whitespace-nowrap">
-                                                    Ticket Management
-                                                </span>
-                                            </Link>
+                                                >
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                    <span className="text-sm whitespace-nowrap">
+                                                        Ticket Management
+                                                    </span>
+                                                </Link>
+                                            )}
 
-
-                                            <Link
-                                                href="/project-management"
-                                                className={`
+                                            {isAdminOrDeveloper && (
+                                                <Link
+                                                    href="/project-management"
+                                                    className={`
                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
                                                     ${isActive("/project-management") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
-                                            >
-                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-                                                <span className="text-sm whitespace-nowrap">
-                                                    Project Management
-                                                </span>
-                                            </Link>
+                                                >
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                    <span className="text-sm whitespace-nowrap">
+                                                        Project Management
+                                                    </span>
+                                                </Link>
+                                            )}
 
                                             {/* Task Assignments Link - Only for Admin */}
                                             {/* {isAdmin && (
@@ -1067,30 +1079,33 @@ const AdminSideBar = ({
                                                 </span>
                                             </Link>
 
-                                            <Link
-                                                href="/ticket"
-                                                className={`
+                                            {isAdminOrTechnician && (
+                                                <Link
+                                                    href="/ticket"
+                                                    className={`
                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
                                                     ${isActive("/ticket") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
-                                            >
-                                                <span className="whitespace-nowrap">
-                                                    Ticket
-                                                </span>
-                                            </Link>
+                                                >
+                                                    <span className="whitespace-nowrap">
+                                                        Ticket
+                                                    </span>
+                                                </Link>
+                                            )}
 
-
-                                            <Link
-                                                href="/project-management"
-                                                className={`
+                                            {isAdminOrDeveloper && (
+                                                <Link
+                                                    href="/project-management"
+                                                    className={`
                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
                                                     ${isActive("/project-management") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
                                                 `}
-                                            >
-                                                <span className="whitespace-nowrap">
-                                                    Project Management
-                                                </span>
-                                            </Link>
+                                                >
+                                                    <span className="whitespace-nowrap">
+                                                        Project Management
+                                                    </span>
+                                                </Link>
+                                            )}
                                             {/* {isAdmin && (
                                                 <Link
                                                     href="/task-assignments"
@@ -1350,9 +1365,7 @@ const AdminSideBar = ({
                                     </span>
                                 )}
                                 {isCollapsed && (
-                                    <Tooltip>
-                                        Client Details
-                                    </Tooltip>
+                                    <Tooltip>Client Details</Tooltip>
                                 )}
                             </Link>
 
@@ -1442,50 +1455,47 @@ const AdminSideBar = ({
                                 )}
                             </Link> */}
 
-                             {/* User Management Link */}
-                                    <Link
-                                        href="/service-contracts"
-                                        className={`
+                            {/* User Management Link */}
+                            <Link
+                                href="/service-contracts"
+                                className={`
                                             ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/service-contracts")}
                                         `}
-                                    >
-                                        <FiUsers
-                                            className={iconClasses(
-                                                isActive("/service-contracts"),
-                                            )}
-                                        />
-                                        {!isCollapsed && (
-                                            <span className="ml-3 font-medium whitespace-nowrap">
-                                                Service Contracts
-                                            </span>
-                                        )}
-                                        {isCollapsed && (
-                                            <Tooltip>Service Contracts</Tooltip>
-                                        )}
-                                    </Link>
+                            >
+                                <FiUsers
+                                    className={iconClasses(
+                                        isActive("/service-contracts"),
+                                    )}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Service Contracts
+                                    </span>
+                                )}
+                                {isCollapsed && (
+                                    <Tooltip>Service Contracts</Tooltip>
+                                )}
+                            </Link>
 
-
-                                     {/* User Management Link */}
-                                    <Link
-                                        href="/payment-management"
-                                        className={`
+                            {/* User Management Link */}
+                            <Link
+                                href="/payment-management"
+                                className={`
                                             ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-management")}
                                         `}
-                                    >
-                                        <FiUsers
-                                            className={iconClasses(
-                                                isActive("/payment-management"),
-                                            )}
-                                        />
-                                        {!isCollapsed && (
-                                            <span className="ml-3 font-medium whitespace-nowrap">
-                                                Payment
-                                            </span>
-                                        )}
-                                        {isCollapsed && (
-                                            <Tooltip>Payment </Tooltip>
-                                        )}
-                                    </Link>
+                            >
+                                <FiUsers
+                                    className={iconClasses(
+                                        isActive("/payment-management"),
+                                    )}
+                                />
+                                {!isCollapsed && (
+                                    <span className="ml-3 font-medium whitespace-nowrap">
+                                        Payment
+                                    </span>
+                                )}
+                                {isCollapsed && <Tooltip>Payment </Tooltip>}
+                            </Link>
 
                             {/* Admin Links */}
                             {isAdmin && (
