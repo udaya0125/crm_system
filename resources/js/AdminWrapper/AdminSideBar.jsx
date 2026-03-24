@@ -902,9 +902,9 @@ const AdminSideBar = ({
                                         onClick={toggleTaskManagement}
                                         className={dropdownButtonClasses(
                                             isGroupActive([
-                                                "/tasks",
+                                                "/ticket",
                                                 "/todo",
-                                                "/task-assignments",
+                                                "/project-management",
                                             ]),
                                         )}
                                     >
@@ -912,9 +912,9 @@ const AdminSideBar = ({
                                             <FiBookOpen
                                                 className={iconClasses(
                                                     isGroupActive([
-                                                        "/tasks",
+                                                        "/ticket",
                                                         "/todo",
-                                                        "/task-assignments",
+                                                        "/project-management",
                                                     ]),
                                                 )}
                                             />
@@ -1119,6 +1119,8 @@ const AdminSideBar = ({
                                             isGroupActive([
                                                 "/client",
                                                 "/expiration",
+                                                "/hosting-tracking",
+                                                "/domain-tracking",
                                             ]),
                                         )}
                                     >

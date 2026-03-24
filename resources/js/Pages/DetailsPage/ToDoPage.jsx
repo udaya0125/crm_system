@@ -1,6 +1,5 @@
 // import axios from "axios";
 // import React, { useEffect, useMemo, useState } from "react";
-// import { useTable, useSortBy, usePagination } from "react-table";
 // import {
 //     ChevronUp,
 //     ChevronDown,
@@ -14,11 +13,13 @@
 //     Calendar,
 //     CheckCircle,
 //     Square,
+//     Plus,
 // } from "lucide-react";
 // import AddTodo from "@/AddFormComponents/AddTodo";
 // import EditTodo from "@/EditFormComponents/EditTodo";
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import parse from "html-react-parser";
+// import MyTable from "@/TableComponents/MyTable";
 
 // const ToDOPage = () => {
 //     const [allTodo, setAllTodo] = useState([]);
@@ -247,7 +248,7 @@
 //         );
 //     };
 
-//     // Define columns for react-table
+//     // Define columns for MyTable
 //     const columns = useMemo(
 //         () => [
 //             {
@@ -302,10 +303,10 @@
 //                         <div className="flex items-center gap-2">
 //                             <button
 //                                 onClick={() => setSelectedTodo(todo)}
-//                                 className={`p-2 rounded transition-colors flex items-center justify-center ${
+//                                 className={`p-2  transition-colors flex items-center justify-center ${
 //                                     selectedTodo?.id === todo.id
-//                                         ? "bg-blue-100 text-blue-700 hover:bg-blue-200"
-//                                         : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+//                                         ? " text-blue-700"
+//                                         : " text-gray-700 "
 //                                 }`}
 //                                 title="View todo details"
 //                             >
@@ -316,7 +317,7 @@
 //                             {!isCompleted && (
 //                                 <button
 //                                     onClick={() => handleEdit(todo)}
-//                                     className="p-2 rounded bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors flex items-center justify-center"
+//                                     className="text-indigo-600 hover:text-indigo-900 transition duration-200"
 //                                     title="Edit todo"
 //                                 >
 //                                     <Edit size={16} />
@@ -325,7 +326,7 @@
 
 //                             <button
 //                                 onClick={() => handleDelete(todo.id)}
-//                                 className="p-2 rounded bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center justify-center"
+//                                 className="text-red-600 hover:text-red-900 transition duration-200"
 //                                 title="Delete todo"
 //                             >
 //                                 <Trash2 size={16} />
@@ -337,32 +338,6 @@
 //             },
 //         ],
 //         [selectedTodo]
-//     );
-
-//     // Create table instance
-//     const {
-//         getTableProps,
-//         getTableBodyProps,
-//         headerGroups,
-//         page,
-//         prepareRow,
-//         canPreviousPage,
-//         canNextPage,
-//         pageOptions,
-//         pageCount,
-//         gotoPage,
-//         nextPage,
-//         previousPage,
-//         setPageSize,
-//         state: { pageIndex, pageSize },
-//     } = useTable(
-//         {
-//             columns,
-//             data: allTodo,
-//             initialState: { pageIndex: 0, pageSize: 10 },
-//         },
-//         useSortBy,
-//         usePagination
 //     );
 
 //     // Open add modal
@@ -383,7 +358,7 @@
 
 //     return (
 //         <AdminWrapper>
-//             <div className="">
+//             <div className="container mx-auto py-4">
 //                 {/* Header */}
 //                 <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 //                     <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
@@ -391,212 +366,42 @@
 //                     </h1>
 //                     <button
 //                         onClick={openAddModal}
-//                         className="bg-blue-600 hover:bg-blue-700 w-[150px] text-white font-semibold py-2.5 px-5 rounded-lg shadow transition duration-200 flex items-center gap-2"
+//                         className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm"
 //                     >
-//                         Add New ToDo
+//                         <Plus size={18} />
+//                         <span>Create</span>
 //                     </button>
 //                 </div>
 
-//                 {/* Todo List Table */}
-//                 <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-//                     {loading ? (
-//                         <div className="flex justify-center items-center h-64">
-//                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-//                         </div>
-//                     ) : (
-//                         <>
-//                             <div className="overflow-x-auto">
-//                                 <table
-//                                     {...getTableProps()}
-//                                     className="min-w-full divide-y divide-gray-200"
-//                                 >
-//                                     <thead className="bg-gray-100">
-//                                         {headerGroups.map((headerGroup) => (
-//                                             <tr
-//                                                 {...headerGroup.getHeaderGroupProps()}
-//                                             >
-//                                                 {headerGroup.headers.map(
-//                                                     (column) => (
-//                                                         <th
-//                                                             {...column.getHeaderProps(
-//                                                                 column.getSortByToggleProps()
-//                                                             )}
-//                                                             className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-//                                                             style={{
-//                                                                 width: column.width,
-//                                                             }}
-//                                                         >
-//                                                             <div className="flex items-center">
-//                                                                 {column.render(
-//                                                                     "Header"
-//                                                                 )}
-//                                                                 {column.isSorted ? (
-//                                                                     column.isSortedDesc ? (
-//                                                                         <ChevronDown
-//                                                                             size={
-//                                                                                 16
-//                                                                             }
-//                                                                             className="ml-1"
-//                                                                         />
-//                                                                     ) : (
-//                                                                         <ChevronUp
-//                                                                             size={
-//                                                                                 16
-//                                                                             }
-//                                                                             className="ml-1"
-//                                                                         />
-//                                                                     )
-//                                                                 ) : (
-//                                                                     ""
-//                                                                 )}
-//                                                             </div>
-//                                                         </th>
-//                                                     )
-//                                                 )}
-//                                             </tr>
-//                                         ))}
-//                                     </thead>
-//                                     <tbody
-//                                         {...getTableBodyProps()}
-//                                         className="bg-white divide-y divide-gray-200"
-//                                     >
-//                                         {page.length === 0 ? (
-//                                             <tr>
-//                                                 <td
-//                                                     colSpan={columns.length}
-//                                                     className="px-6 py-8 text-center text-gray-500"
-//                                                 >
-//                                                     <div className="flex flex-col items-center justify-center py-8">
-//                                                         <FileText
-//                                                             size={64}
-//                                                             className="text-gray-300 mb-4"
-//                                                         />
-//                                                         <p className="text-lg text-gray-500 mb-2">
-//                                                             No todos found
-//                                                         </p>
-//                                                         <p className="text-gray-400">
-//                                                             Add your first todo
-//                                                             to get started!
-//                                                         </p>
-//                                                     </div>
-//                                                 </td>
-//                                             </tr>
-//                                         ) : (
-//                                             page.map((row) => {
-//                                                 prepareRow(row);
-//                                                 const todo = row.original;
-
-//                                                 return (
-//                                                     <tr
-//                                                         {...row.getRowProps()}
-//                                                         className={`hover:bg-gray-50 transition-colors ${
-//                                                             selectedTodo?.id ===
-//                                                             todo.id
-//                                                                 ? "bg-blue-50"
-//                                                                 : ""
-//                                                         }`}
-//                                                     >
-//                                                         {row.cells.map(
-//                                                             (cell) => (
-//                                                                 <td
-//                                                                     {...cell.getCellProps()}
-//                                                                     className="px-6 py-4"
-//                                                                 >
-//                                                                     {cell.render(
-//                                                                         "Cell"
-//                                                                     )}
-//                                                                 </td>
-//                                                             )
-//                                                         )}
-//                                                     </tr>
-//                                                 );
-//                                             })
-//                                         )}
-//                                     </tbody>
-//                                 </table>
+//                 {/* Todo List Table - Using MyTable component */}
+//                 {loading ? (
+//                     <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-lg">
+//                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+//                     </div>
+//                 ) : (
+//                     <>
+//                         {allTodo.length === 0 ? (
+//                             <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+//                                 <FileText
+//                                     size={64}
+//                                     className="mx-auto text-gray-300 mb-4"
+//                                 />
+//                                 <p className="text-lg text-gray-500 mb-2">
+//                                     No todos found
+//                                 </p>
+//                                 <p className="text-gray-400">
+//                                     Add your first todo to get started!
+//                                 </p>
 //                             </div>
-
-//                             {/* Pagination */}
-//                             <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-t border-gray-200">
-//                                 <div className="flex items-center">
-//                                     <span className="text-sm text-gray-700 mr-2">
-//                                         Show
-//                                     </span>
-//                                     <select
-//                                         value={pageSize}
-//                                         onChange={(e) =>
-//                                             setPageSize(Number(e.target.value))
-//                                         }
-//                                         className="border border-gray-300 rounded-md px-2 py-1 text-sm"
-//                                     >
-//                                         {[5, 10, 20, 30, 50].map((size) => (
-//                                             <option key={size} value={size}>
-//                                                 {size}
-//                                             </option>
-//                                         ))}
-//                                     </select>
-//                                     <span className="text-sm text-gray-700 ml-2">
-//                                         entries
-//                                     </span>
-//                                 </div>
-//                                 <div className="flex items-center space-x-2">
-//                                     <button
-//                                         onClick={() => gotoPage(0)}
-//                                         disabled={!canPreviousPage}
-//                                         className={`p-1 rounded ${
-//                                             !canPreviousPage
-//                                                 ? "opacity-50 cursor-not-allowed"
-//                                                 : "hover:bg-gray-200"
-//                                         }`}
-//                                     >
-//                                         <ChevronLeft size={20} />
-//                                     </button>
-//                                     <button
-//                                         onClick={() => previousPage()}
-//                                         disabled={!canPreviousPage}
-//                                         className={`px-3 py-1 rounded ${
-//                                             !canPreviousPage
-//                                                 ? "opacity-50 cursor-not-allowed"
-//                                                 : "hover:bg-gray-200"
-//                                         }`}
-//                                     >
-//                                         Previous
-//                                     </button>
-//                                     <span className="text-sm text-gray-700">
-//                                         Page <strong>{pageIndex + 1}</strong> of{" "}
-//                                         <strong>{pageOptions.length}</strong>
-//                                     </span>
-//                                     <button
-//                                         onClick={() => nextPage()}
-//                                         disabled={!canNextPage}
-//                                         className={`px-3 py-1 rounded ${
-//                                             !canNextPage
-//                                                 ? "opacity-50 cursor-not-allowed"
-//                                                 : "hover:bg-gray-200"
-//                                         }`}
-//                                     >
-//                                         Next
-//                                     </button>
-//                                     <button
-//                                         onClick={() => gotoPage(pageCount - 1)}
-//                                         disabled={!canNextPage}
-//                                         className={`p-1 rounded ${
-//                                             !canNextPage
-//                                                 ? "opacity-50 cursor-not-allowed"
-//                                                 : "hover:bg-gray-200"
-//                                         }`}
-//                                     >
-//                                         <ChevronRight size={20} />
-//                                     </button>
-//                                 </div>
-//                             </div>
-//                         </>
-//                     )}
-//                 </div>
+//                         ) : (
+//                             <MyTable columns={columns} data={allTodo} />
+//                         )}
+//                     </>
+//                 )}
 
 //                 {/* Todo Details Section - Below the Table */}
 //                 {selectedTodo && (
-//                     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+//                     <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
 //                         {/* Todo Information */}
 //                         <div className="p-6">
 //                             <div>
@@ -1113,31 +918,12 @@ const ToDOPage = () => {
                     </button>
                 </div>
 
-                {/* Todo List Table - Using MyTable component */}
-                {loading ? (
-                    <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-lg">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-                    </div>
-                ) : (
-                    <>
-                        {allTodo.length === 0 ? (
-                            <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-                                <FileText
-                                    size={64}
-                                    className="mx-auto text-gray-300 mb-4"
-                                />
-                                <p className="text-lg text-gray-500 mb-2">
-                                    No todos found
-                                </p>
-                                <p className="text-gray-400">
-                                    Add your first todo to get started!
-                                </p>
-                            </div>
-                        ) : (
-                            <MyTable columns={columns} data={allTodo} />
-                        )}
-                    </>
-                )}
+                {/* Todo List Table - Using MyTable component with integrated loading */}
+                <MyTable 
+                    columns={columns} 
+                    data={allTodo} 
+                    loading={loading}
+                />
 
                 {/* Todo Details Section - Below the Table */}
                 {selectedTodo && (
