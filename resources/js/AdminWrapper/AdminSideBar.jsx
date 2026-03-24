@@ -777,34 +777,36 @@ const AdminSideBar = ({
                             {!isCollapsed ? (
                                 // Expanded view
                                 <div className="space-y-1">
-                                    <button
-                                        onClick={toggleLeadManagement}
-                                        className={dropdownButtonClasses(
-                                            isGroupActive([
-                                                "/leads",
-                                                "/client-management",
-                                            ]),
-                                        )}
-                                    >
-                                        <div className="flex items-center">
-                                            <ListFilter
-                                                className={iconClasses(
-                                                    isGroupActive([
-                                                        "/leads",
-                                                        "/client-management",
-                                                    ]),
-                                                )}
-                                            />
-                                            <span className="ml-3 font-medium whitespace-nowrap">
-                                                CRM
-                                            </span>
-                                        </div>
-                                        {isLeadManagementOpen ? (
-                                            <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-                                        ) : (
-                                            <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-                                        )}
-                                    </button>
+                                    {isAdminOrAccountant && (
+                                        <button
+                                            onClick={toggleLeadManagement}
+                                            className={dropdownButtonClasses(
+                                                isGroupActive([
+                                                    "/leads",
+                                                    "/client-management",
+                                                ]),
+                                            )}
+                                        >
+                                            <div className="flex items-center">
+                                                <ListFilter
+                                                    className={iconClasses(
+                                                        isGroupActive([
+                                                            "/leads",
+                                                            "/client-management",
+                                                        ]),
+                                                    )}
+                                                />
+                                                <span className="ml-3 font-medium whitespace-nowrap">
+                                                    CRM
+                                                </span>
+                                            </div>
+                                            {isLeadManagementOpen ? (
+                                                <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
+                                            ) : (
+                                                <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
+                                            )}
+                                        </button>
+                                    )}
 
                                     {isLeadManagementOpen && (
                                         <div className="ml-9 space-y-0.5">
@@ -1347,49 +1349,32 @@ const AdminSideBar = ({
                                 {isCollapsed && <Tooltip>Leads</Tooltip>}
                             </Link> */}
 
-                            <Link
-                                href="/client-details"
-                                className={`
-                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-details")}
-                                `}
-                            >
-                                <LayoutDashboard
-                                    className={iconClasses(
-                                        isActive("/client-details"),
-                                    )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Client Details
-                                    </span>
-                                )}
-                                {isCollapsed && (
-                                    <Tooltip>Client Details</Tooltip>
-                                )}
-                            </Link>
-
-                            <Link
-                                href="/payment-finance-tracking"
-                                className={`
+                            {isAdminOrAccountant && (
+                                <Link
+                                    href="/payment-finance-tracking"
+                                    className={`
                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
                                 `}
-                            >
-                                <LayoutDashboard
-                                    className={iconClasses(
-                                        isActive("/payment-finance-tracking"),
+                                >
+                                    <LayoutDashboard
+                                        className={iconClasses(
+                                            isActive(
+                                                "/payment-finance-tracking",
+                                            ),
+                                        )}
+                                    />
+                                    {!isCollapsed && (
+                                        <span className="ml-3 font-medium whitespace-nowrap">
+                                            Finance Tracking
+                                        </span>
                                     )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Finance Tracking
-                                    </span>
-                                )}
-                                {isCollapsed && (
-                                    <Tooltip>
-                                        Payment & Finance Tracking
-                                    </Tooltip>
-                                )}
-                            </Link>
+                                    {isCollapsed && (
+                                        <Tooltip>
+                                            Payment & Finance Tracking
+                                        </Tooltip>
+                                    )}
+                                </Link>
+                            )}
 
                             {/* <Link
                                 href="/ticket"
@@ -1454,51 +1439,73 @@ const AdminSideBar = ({
                                 )}
                             </Link> */}
 
-                            {/* User Management Link */}
-                            <Link
-                                href="/service-contracts"
-                                className={`
-                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/service-contracts")}
-                                        `}
-                            >
-                                <FiUsers
-                                    className={iconClasses(
-                                        isActive("/service-contracts"),
-                                    )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Service Contracts
-                                    </span>
-                                )}
-                                {isCollapsed && (
-                                    <Tooltip>Service Contracts</Tooltip>
-                                )}
-                            </Link>
-
-                            {/* User Management Link */}
-                            <Link
-                                href="/payment-management"
-                                className={`
-                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-management")}
-                                        `}
-                            >
-                                <FiUsers
-                                    className={iconClasses(
-                                        isActive("/payment-management"),
-                                    )}
-                                />
-                                {!isCollapsed && (
-                                    <span className="ml-3 font-medium whitespace-nowrap">
-                                        Payment
-                                    </span>
-                                )}
-                                {isCollapsed && <Tooltip>Payment </Tooltip>}
-                            </Link>
-
                             {/* Admin Links */}
                             {isAdmin && (
                                 <>
+                                    <Link
+                                        href="/client-details"
+                                        className={`
+                                    ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-details")}
+                                `}
+                                    >
+                                        <LayoutDashboard
+                                            className={iconClasses(
+                                                isActive("/client-details"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Client Details
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>Client Details</Tooltip>
+                                        )}
+                                    </Link>
+                                    
+                                    {/* User Management Link */}
+                                    <Link
+                                        href="/payment-management"
+                                        className={`
+                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-management")}
+                                        `}
+                                    >
+                                        <FiUsers
+                                            className={iconClasses(
+                                                isActive("/payment-management"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Payment
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>Payment </Tooltip>
+                                        )}
+                                    </Link>
+
+                                    {/* User Management Link */}
+                                    <Link
+                                        href="/service-contracts"
+                                        className={`
+                                            ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/service-contracts")}
+                                        `}
+                                    >
+                                        <FiUsers
+                                            className={iconClasses(
+                                                isActive("/service-contracts"),
+                                            )}
+                                        />
+                                        {!isCollapsed && (
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Service Contracts
+                                            </span>
+                                        )}
+                                        {isCollapsed && (
+                                            <Tooltip>Service Contracts</Tooltip>
+                                        )}
+                                    </Link>
                                     {/* User Management Link */}
                                     <Link
                                         href="/user-management"
