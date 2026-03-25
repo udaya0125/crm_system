@@ -468,7 +468,6 @@ const AdminSideBar = ({
     const isAdminOrDeveloper = user?.role === "admin" || user?.role === "developer";
     const isAdminOrAccountant = user?.role === "admin" || user?.role === "accountant";
     const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
-    const isAdminOrUser = user?.role === "admin" || user?.role === "user";
 
     console.log("Current User Role:", user?.role);
 
