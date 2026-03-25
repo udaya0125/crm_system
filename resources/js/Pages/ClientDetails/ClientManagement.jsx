@@ -8,11 +8,13 @@
 // const ClientManagement = () => {
 //     const [allClients, setAllClients] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
+//     const [loading, setLoading] = useState(false);
 //     const [editingClient, setEditingClient] = useState(null);
 //     const [showAddForm, setShowAddForm] = useState(false);
 
 //     useEffect(() => {
 //         const fetchClients = async () => {
+//             setLoading(true);
 //             try {
 //                 const response = await axios.get(
 //                     route("ourclientmanagement.index")
@@ -20,6 +22,8 @@
 //                 setAllClients(response.data.data);
 //             } catch (error) {
 //                 console.error("Fetching error:", error);
+//             } finally {
+//                 setLoading(false);
 //             }
 //         };
 //         fetchClients();
@@ -54,6 +58,11 @@
 //     // Define columns for react-table
 //     const columns = useMemo(
 //         () => [
+//             {
+//                 Header: "s/n",
+//                 accessor: "index",
+//                 Cell: ({ row }) => <span>{row.index + 1}</span>,
+//             },
 //             {
 //                 Header: "Company",
 //                 accessor: "company_name",
@@ -141,14 +150,12 @@
 //                     </button>
 //                 </div>
 
-//                 {/* Client Table */}
-//                 {allClients.length === 0 ? (
-//                     <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-blue-100">
-//                         No clients found.
-//                     </div>
-//                 ) : (
-//                     <MyTable columns={columns} data={allClients} />
-//                 )}
+//                 {/* Client Table with integrated loading */}
+//                 <MyTable 
+//                     columns={columns} 
+//                     data={allClients} 
+//                     loading={loading}
+//                 />
 //             </div>
 
 //             {/* Modal */}
@@ -170,6 +177,7 @@
 
 
 import AddClientManagement from "@/AddFormComponents/AddClientManagement";
+import EditClientManagement from "@/EditFormComponents/EditClientManagement";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
@@ -182,6 +190,7 @@ const ClientManagement = () => {
     const [loading, setLoading] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -212,7 +221,7 @@ const ClientManagement = () => {
 
     const handleEdit = (client) => {
         setEditingClient(client);
-        setShowAddForm(true);
+        setShowEditForm(true);
     };
 
     const handleUpdate = async (formData, id) => {
@@ -226,7 +235,6 @@ const ClientManagement = () => {
         return response.data;
     };
 
-    // Define columns for react-table
     const columns = useMemo(
         () => [
             {
@@ -269,7 +277,7 @@ const ClientManagement = () => {
                     let bgColor = "bg-yellow-100 text-yellow-700";
                     if (value === "Paid") bgColor = "bg-green-100 text-green-700";
                     if (value === "Overdue") bgColor = "bg-red-100 text-red-700";
-                    
+
                     return (
                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${bgColor}`}>
                             {value || "—"}
@@ -282,7 +290,7 @@ const ClientManagement = () => {
                 accessor: "id",
                 disableSortBy: true,
                 Cell: ({ row }) => (
-                    <div className=" space-x-2">
+                    <div className="space-x-2">
                         <button
                             onClick={() => handleEdit(row.original)}
                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
@@ -310,10 +318,7 @@ const ClientManagement = () => {
                         Clients
                     </h1>
                     <button
-                        onClick={() => {
-                            setEditingClient(null);
-                            setShowAddForm(true);
-                        }}
+                        onClick={() => setShowAddForm(true)}
                         className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
                         <Plus size={18} />
@@ -321,22 +326,30 @@ const ClientManagement = () => {
                     </button>
                 </div>
 
-                {/* Client Table with integrated loading */}
-                <MyTable 
-                    columns={columns} 
-                    data={allClients} 
+                <MyTable
+                    columns={columns}
+                    data={allClients}
                     loading={loading}
                 />
             </div>
 
-            {/* Modal */}
+            {/* Add Modal */}
             {showAddForm && (
                 <AddClientManagement
                     reloadTrigger={reloadTrigger}
                     setReloadTrigger={setReloadTrigger}
+                    setShowForm={setShowAddForm}
+                />
+            )}
+
+            {/* Edit Modal */}
+            {showEditForm && editingClient && (
+                <EditClientManagement
+                    reloadTrigger={reloadTrigger}
+                    setReloadTrigger={setReloadTrigger}
                     editingClient={editingClient}
                     setEditingClient={setEditingClient}
-                    setShowForm={setShowAddForm}
+                    setShowForm={setShowEditForm}
                     handleUpdate={handleUpdate}
                 />
             )}
