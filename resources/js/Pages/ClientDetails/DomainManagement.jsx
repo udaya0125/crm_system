@@ -8,16 +8,20 @@
 // const DomainManagement = () => {
 //     const [allDomain, setAllDomain] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
+//     const [loading, setLoading] = useState(false);
 //     const [editingDomain, setEditingDomain] = useState(null);
 //     const [showAddForm, setShowAddForm] = useState(false);
 
 //     useEffect(() => {
 //         const fetchDomain = async () => {
+//             setLoading(true);
 //             try {
 //                 const response = await axios.get(route("ourdomains.index"));
 //                 setAllDomain(response.data.data);
 //             } catch (error) {
 //                 console.error("fetching error ", error);
+//             } finally {
+//                 setLoading(false);
 //             }
 //         };
 //         fetchDomain();
@@ -61,7 +65,7 @@
 //     // Define columns for MyTable
 //     const columns = useMemo(
 //         () => [
-//              {
+//             {
 //                 Header: "s/n",
 //                 accessor: "index",
 //                 Cell: ({ row }) => <span>{row.index + 1}</span>,
@@ -159,8 +163,12 @@
 //                     </button>
 //                 </div>
 
-//                 {/* MyTable Component */}
-//                 <MyTable columns={columns} data={allDomain} />
+//                 {/* MyTable Component with integrated loading */}
+//                 <MyTable 
+//                     columns={columns} 
+//                     data={allDomain} 
+//                     loading={loading}
+//                 />
 //             </div>
 
 //             {/* Add/Edit Domain Form */}
@@ -180,6 +188,7 @@
 
 
 import AddDomainForm from "@/AddFormComponents/AddDomainForm";
+import EditDomainForm from "@/EditFormComponents/EditDomainForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
@@ -192,6 +201,7 @@ const DomainManagement = () => {
     const [loading, setLoading] = useState(false);
     const [editingDomain, setEditingDomain] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
 
     useEffect(() => {
         const fetchDomain = async () => {
@@ -219,7 +229,7 @@ const DomainManagement = () => {
 
     const handleEdit = (domain) => {
         setEditingDomain(domain);
-        setShowAddForm(true);
+        setShowEditForm(true);
     };
 
     const handleUpdate = async (formData, id) => {
@@ -238,12 +248,15 @@ const DomainManagement = () => {
         }
     };
 
-    const handleCloseForm = () => {
+    const handleCloseAdd = () => {
         setShowAddForm(false);
+    };
+
+    const handleCloseEdit = () => {
+        setShowEditForm(false);
         setEditingDomain(null);
     };
 
-    // Define columns for MyTable
     const columns = useMemo(
         () => [
             {
@@ -344,21 +357,27 @@ const DomainManagement = () => {
                     </button>
                 </div>
 
-                {/* MyTable Component with integrated loading */}
-                <MyTable 
-                    columns={columns} 
-                    data={allDomain} 
+                <MyTable
+                    columns={columns}
+                    data={allDomain}
                     loading={loading}
                 />
             </div>
 
-            {/* Add/Edit Domain Form */}
+            {/* Add Domain Form */}
             {showAddForm && (
                 <AddDomainForm
+                    setReloadTrigger={setReloadTrigger}
+                    onClose={handleCloseAdd}
+                />
+            )}
+
+            {/* Edit Domain Form */}
+            {showEditForm && editingDomain && (
+                <EditDomainForm
                     editingDomain={editingDomain}
                     handleUpdate={handleUpdate}
-                    setReloadTrigger={setReloadTrigger}
-                    onClose={handleCloseForm}
+                    onClose={handleCloseEdit}
                 />
             )}
         </AdminWrapper>
