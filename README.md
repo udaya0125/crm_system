@@ -186,8 +186,8 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## 🙋 Support
 
-For issues, questions, or feature requests, please open an [issue on GitHub](https://github.com/udaya0125/Sales-Support/issues) or contact the team at [SAIT Solution](https://saitsolution.com.np).
+For issues, questions, or feature requests, please open an [issue on GitHub](https://github.com/udaya0125/Sales-Support/issues) or contact to  [Udaya Adhikari](https://www.udaya-adhikari.com.np/).
 
 ---
 
-<p align="center">Made with ❤️ by <a href="https://saitsolution.com.np">SAIT Solution</a></p>
+<p align="center">Made with ❤️ by <a href="https://www.udaya-adhikari.com.np/">Udaya Adhikari</a></p>
