@@ -550,7 +550,7 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                     </div>
 
                                     {/* Profile and Settings links */}
-                                    <div className="py-1">
+                                    {/* <div className="py-1">
                                         <Link
                                             href="/profile"
                                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
@@ -558,14 +558,14 @@ const AdminNavBar = ({ onMenuToggle }) => {
                                             <UserCircle className="w-4 h-4 mr-3" />
                                             Profile
                                         </Link>
-                                        {/* <Link
+                                        <Link
                                             href="/settings"
                                             className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
                                         >
                                             <Settings className="w-4 h-4 mr-3" />
                                             Settings
-                                        </Link> */}
-                                    </div>
+                                        </Link>
+                                    </div> */}
 
                                     {/* Logout section */}
                                     <div className="border-t border-gray-100 pt-1">

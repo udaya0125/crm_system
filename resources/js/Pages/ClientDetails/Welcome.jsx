@@ -41,7 +41,7 @@
 //         .nav-logo img {
 //           height: 65px;
 //           width: auto;
-         
+
 //           opacity: 0.92;
 //         }
 
@@ -210,8 +210,6 @@
 
 // export default Welcome;
 
-
-
 import { Link, usePage } from "@inertiajs/react";
 import React from "react";
 
@@ -267,20 +265,38 @@ const Welcome = () => {
             `}</style>
 
             <div className="font-jost min-h-screen flex flex-col bg-white">
-
                 {/* ── NAVBAR ── */}
-                <nav className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-14 py-5"
-                    style={{ background: 'rgba(14, 14, 14, 0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(200, 169, 110, 0.12)' }}>
+                <nav
+                    className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center px-14 py-5"
+                    style={{
+                        background: "rgba(14, 14, 14, 0.92)",
+                        backdropFilter: "blur(16px)",
+                        borderBottom: "1px solid rgba(200, 169, 110, 0.12)",
+                    }}
+                >
                     <div>
-                        <img src="/images/logo2.png" alt="Sait" className="h-[65px] w-auto opacity-[0.92]" />
+                        <img
+                            src="/images/logo2.png"
+                            alt="Sait"
+                            className="h-[65px] w-auto opacity-[0.92]"
+                        />
                     </div>
                     <div className="hidden md:flex items-center gap-9">
-                        <a
-                            href="/login"
-                            className="nav-cta-btn font-jost font-normal text-[0.75rem] tracking-[0.2em] uppercase no-underline px-[26px] py-[10px] rounded-[2px]"
-                        >
-                            Sign In
-                        </a>
+                        {user ? (
+                            <a
+                                href="/dashboard"
+                                className="nav-cta-btn font-jost font-normal text-[0.75rem] tracking-[0.2em] uppercase no-underline px-[26px] py-[10px] rounded-[2px]"
+                            >
+                                Dashboard
+                            </a>
+                        ) : (
+                            <a
+                                href="/login"
+                                className="nav-cta-btn font-jost font-normal text-[0.75rem] tracking-[0.2em] uppercase no-underline px-[26px] py-[10px] rounded-[2px]"
+                            >
+                                Sign In
+                            </a>
+                        )}
                     </div>
                 </nav>
 
@@ -289,7 +305,9 @@ const Welcome = () => {
                     <div className="animate-fadeUp text-center max-w-[520px] px-8">
                         <h1 className="font-cormorant font-light card-title-size text-[#0e0e0e] leading-[1.1] mb-2 tracking-[-0.01em]">
                             Welcome to{" "}
-                            <em className="italic text-[#c8a96e]">CRM System</em>
+                            <em className="italic text-[#c8a96e]">
+                                CRM System
+                            </em>
                         </h1>
 
                         <p className="font-jost font-light text-[0.95rem] leading-[1.85] text-[#6b6b6b] mb-11 tracking-[0.02em]">
@@ -301,11 +319,17 @@ const Welcome = () => {
                         </p>
 
                         {user ? (
-                            <a href="/dashboard" className="btn-signin-custom font-jost font-normal text-[0.75rem] tracking-[0.22em] uppercase text-white no-underline px-12 py-4 rounded-[2px] inline-block">
+                            <a
+                                href="/dashboard"
+                                className="btn-signin-custom font-jost font-normal text-[0.75rem] tracking-[0.22em] uppercase text-white no-underline px-12 py-4 rounded-[2px] inline-block"
+                            >
                                 Dashboard
                             </a>
                         ) : (
-                            <a href="/login" className="btn-signin-custom font-jost font-normal text-[0.75rem] tracking-[0.22em] uppercase text-white no-underline px-12 py-4 rounded-[2px] inline-block">
+                            <a
+                                href="/login"
+                                className="btn-signin-custom font-jost font-normal text-[0.75rem] tracking-[0.22em] uppercase text-white no-underline px-12 py-4 rounded-[2px] inline-block"
+                            >
                                 Sign In
                             </a>
                         )}
