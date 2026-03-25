@@ -8,6 +8,7 @@
 // const FinanceTracking = () => {
 //     const [allTracking, setAllTracking] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
+//     const [loading, setLoading] = useState(false);
 //     const [editingTracking, setEditingTracking] = useState(null);
 //     const [showAddForm, setShowAddForm] = useState(false);
 //     const [agingReport, setAgingReport] = useState({
@@ -19,6 +20,7 @@
 
 //     useEffect(() => {
 //         const fetchTracking = async () => {
+//             setLoading(true);
 //             try {
 //                 const response = await axios.get(route("ourfinance.index"));
 //                 const trackingData = response.data.data;
@@ -26,6 +28,8 @@
 //                 calculateAgingReport(trackingData);
 //             } catch (error) {
 //                 console.error("fetching error ", error);
+//             } finally {
+//                 setLoading(false);
 //             }
 //         };
 //         fetchTracking();
@@ -323,8 +327,12 @@
 //                     </button>
 //                 </div>
 
-//                 {/* MyTable Component */}
-//                 <MyTable columns={columns} data={allTracking} />
+//                 {/* MyTable Component with integrated loading */}
+//                 <MyTable 
+//                     columns={columns} 
+//                     data={allTracking} 
+//                     loading={loading}
+//                 />
 
 //                 {/* Modal */}
 //                 {showAddForm && (
@@ -344,10 +352,11 @@
 
 
 import AddFinanceTrackingForm from "@/AddFormComponents/AddFinanceTrackingForm";
+import EditFinanceTrackingForm from "@/EditFormComponents/EditFinanceTrackingForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
-import { Edit2, Trash2, Clock, Edit } from "lucide-react";
+import { Edit, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
 const FinanceTracking = () => {
@@ -356,21 +365,14 @@ const FinanceTracking = () => {
     const [loading, setLoading] = useState(false);
     const [editingTracking, setEditingTracking] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
-    const [agingReport, setAgingReport] = useState({
-        "0-30 days": { total: 0, count: 0, invoices: [] },
-        "31-60 days": { total: 0, count: 0, invoices: [] },
-        "61-90 days": { total: 0, count: 0, invoices: [] },
-        "90+ days": { total: 0, count: 0, invoices: [] },
-    });
+    const [showEditForm, setShowEditForm] = useState(false);
 
     useEffect(() => {
         const fetchTracking = async () => {
             setLoading(true);
             try {
                 const response = await axios.get(route("ourfinance.index"));
-                const trackingData = response.data.data;
-                setAllTracking(trackingData);
-                calculateAgingReport(trackingData);
+                setAllTracking(response.data.data);
             } catch (error) {
                 console.error("fetching error ", error);
             } finally {
@@ -379,80 +381,6 @@ const FinanceTracking = () => {
         };
         fetchTracking();
     }, [reloadTrigger]);
-
-    const calculateAgingReport = (trackingData) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const report = {
-            "0-30 days": { total: 0, count: 0, invoices: [] },
-            "31-60 days": { total: 0, count: 0, invoices: [] },
-            "61-90 days": { total: 0, count: 0, invoices: [] },
-            "90+ days": { total: 0, count: 0, invoices: [] },
-        };
-
-        trackingData.forEach((item) => {
-            const balance = Number(item.balance);
-            if (balance > 0 && item.due_date) {
-                const dueDate = new Date(item.due_date);
-                dueDate.setHours(0, 0, 0, 0);
-
-                const daysOverdue = Math.floor(
-                    (today - dueDate) / (1000 * 60 * 60 * 24),
-                );
-
-                if (daysOverdue > 0) {
-                    if (daysOverdue <= 30) {
-                        report["0-30 days"].total += balance;
-                        report["0-30 days"].count += 1;
-                        report["0-30 days"].invoices.push({
-                            id: item.id,
-                            invoice_id: item.invoice_id,
-                            client: item.client,
-                            amount: balance,
-                            due_date: item.due_date,
-                            days: daysOverdue,
-                        });
-                    } else if (daysOverdue <= 60) {
-                        report["31-60 days"].total += balance;
-                        report["31-60 days"].count += 1;
-                        report["31-60 days"].invoices.push({
-                            id: item.id,
-                            invoice_id: item.invoice_id,
-                            client: item.client,
-                            amount: balance,
-                            due_date: item.due_date,
-                            days: daysOverdue,
-                        });
-                    } else if (daysOverdue <= 90) {
-                        report["61-90 days"].total += balance;
-                        report["61-90 days"].count += 1;
-                        report["61-90 days"].invoices.push({
-                            id: item.id,
-                            invoice_id: item.invoice_id,
-                            client: item.client,
-                            amount: balance,
-                            due_date: item.due_date,
-                            days: daysOverdue,
-                        });
-                    } else {
-                        report["90+ days"].total += balance;
-                        report["90+ days"].count += 1;
-                        report["90+ days"].invoices.push({
-                            id: item.id,
-                            invoice_id: item.invoice_id,
-                            client: item.client,
-                            amount: balance,
-                            due_date: item.due_date,
-                            days: daysOverdue,
-                        });
-                    }
-                }
-            }
-        });
-
-        setAgingReport(report);
-    };
 
     const handleDelete = async (id) => {
         try {
@@ -465,7 +393,7 @@ const FinanceTracking = () => {
 
     const handleEdit = (tracking) => {
         setEditingTracking(tracking);
-        setShowAddForm(true);
+        setShowEditForm(true);
     };
 
     const handleUpdate = async (formData, id) => {
@@ -484,11 +412,6 @@ const FinanceTracking = () => {
         }
     };
 
-    const handleCloseForm = () => {
-        setShowAddForm(false);
-        setEditingTracking(null);
-    };
-
     const statusStyles = {
         unpaid: "bg-red-100 text-red-700",
         paid: "bg-emerald-100 text-emerald-700",
@@ -497,19 +420,6 @@ const FinanceTracking = () => {
         partially_paid: "bg-blue-100 text-blue-700",
     };
 
-    const agingColors = {
-        "0-30 days": "bg-amber-50 border-amber-200",
-        "31-60 days": "bg-orange-50 border-orange-200",
-        "61-90 days": "bg-rose-50 border-rose-200",
-        "90+ days": "bg-red-50 border-red-200",
-    };
-
-    const totalOverdue = Object.values(agingReport).reduce(
-        (sum, category) => sum + category.total,
-        0,
-    );
-
-    // Define columns for MyTable
     const columns = useMemo(
         () => [
             {
@@ -599,13 +509,9 @@ const FinanceTracking = () => {
                     const dueDate = new Date(row.due_date);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
-                    const daysOverdue =
-                        balance > 0 && dueDate < today
-                            ? Math.floor(
-                                  (today - dueDate) / (1000 * 60 * 60 * 24),
-                              )
-                            : 0;
-                    return daysOverdue;
+                    return balance > 0 && dueDate < today
+                        ? Math.floor((today - dueDate) / (1000 * 60 * 60 * 24))
+                        : 0;
                 },
                 Cell: ({ value }) => {
                     if (value > 0) {
@@ -661,10 +567,7 @@ const FinanceTracking = () => {
                         Finance Tracking
                     </h1>
                     <button
-                        onClick={() => {
-                            setEditingTracking(null);
-                            setShowAddForm(true);
-                        }}
+                        onClick={() => setShowAddForm(true)}
                         className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
                         <span>+</span>
@@ -672,19 +575,29 @@ const FinanceTracking = () => {
                     </button>
                 </div>
 
-                {/* MyTable Component with integrated loading */}
-                <MyTable 
-                    columns={columns} 
-                    data={allTracking} 
+                {/* Table */}
+                <MyTable
+                    columns={columns}
+                    data={allTracking}
                     loading={loading}
                 />
 
-                {/* Modal */}
+                {/* Add Modal */}
                 {showAddForm && (
                     <AddFinanceTrackingForm
-                        editingTracking={editingTracking}
-                        setShowForm={handleCloseForm}
+                        setShowForm={() => setShowAddForm(false)}
                         setReloadTrigger={setReloadTrigger}
+                    />
+                )}
+
+                {/* Edit Modal */}
+                {showEditForm && editingTracking && (
+                    <EditFinanceTrackingForm
+                        editingTracking={editingTracking}
+                        setShowForm={() => {
+                            setShowEditForm(false);
+                            setEditingTracking(null);
+                        }}
                         handleUpdate={handleUpdate}
                     />
                 )}
