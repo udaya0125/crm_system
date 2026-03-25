@@ -40,7 +40,7 @@ class ExpirationController extends Controller
         $this->createExpirationNotification($expiration, 'created');
 
         // User log
-        $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
+        $clientName = $expiration->client?->name ?? 'Unknown Client';
         $this->createUserLog(
             title: 'Expiration Created',
             detail: "Created expiration '{$expiration->title}' for {$clientName}. Expires on ".
@@ -73,7 +73,7 @@ class ExpirationController extends Controller
         $this->createExpirationNotification($expiration, 'updated');
 
         // User log
-        $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
+        $clientName = $expiration->client?->name ?? 'Unknown Client';
         $this->createUserLog(
             title: 'Expiration Updated',
             detail: "Updated expiration '{$expiration->title}' for {$clientName}. Expires on ".
@@ -90,7 +90,7 @@ class ExpirationController extends Controller
     public function destroy(Request $request, $id)
     {
         $expiration = Expiration::with('client')->findOrFail($id);
-        $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
+        $clientName = $expiration->client?->name ?? 'Unknown Client';
         $title = $expiration->title;
 
         $expiration->delete();
@@ -116,7 +116,7 @@ class ExpirationController extends Controller
      */
     private function createExpirationNotification($expiration, string $action): void
     {
-        $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
+        $clientName = $expiration->client?->name ?? 'Unknown Client';
 
         $message = match ($action) {
             'created' => "New expiration created: '{$expiration->title}' for {$clientName}. Expires on ".
@@ -149,7 +149,7 @@ class ExpirationController extends Controller
 
         foreach ($expirations as $expiration) {
             $daysLeft = (int) $today->diffInDays(Carbon::parse($expiration->expiration_date), false);
-            $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
+            $clientName = $expiration->client?->name ?? 'Unknown Client';
 
             if ($daysLeft < 0) {
                 continue; // already expired — skip
@@ -237,7 +237,7 @@ class ExpirationController extends Controller
 
         foreach ($expirations as $expiration) {
             $daysLeft = (int) $today->diffInDays(Carbon::parse($expiration->expiration_date), false);
-            $clientName = $expiration->client?->organization_name ?? 'Unknown Client';
+            $clientName = $expiration->client?->name ?? 'Unknown Client';
 
             if ($daysLeft < 0) {
                 continue;

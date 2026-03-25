@@ -42,7 +42,7 @@ class HostingManagementController extends Controller
         $hosting = HostingManagement::create($request->all());
         $hosting->load('client');
 
-        $clientName = $hosting->client?->organization_name ?? 'Unknown Client';
+        $clientName = $hosting->client?->name ?? 'Unknown Client';
 
         // Notification
         Notification::create([
@@ -84,7 +84,7 @@ class HostingManagementController extends Controller
         $hosting->update($request->all());
         $hosting->load('client');
 
-        $clientName = $hosting->client?->organization_name ?? 'Unknown Client';
+        $clientName = $hosting->client?->name ?? 'Unknown Client';
 
         // Notification
         Notification::create([
@@ -115,7 +115,7 @@ class HostingManagementController extends Controller
     {
         $hosting = HostingManagement::with('client')->findOrFail($id);
 
-        $clientName  = $hosting->client?->organization_name ?? 'Unknown Client';
+        $clientName  = $hosting->client?->name ?? 'Unknown Client';
         $hostingPlan = $hosting->hosting_plan;
 
         $hosting->delete();
@@ -150,7 +150,7 @@ class HostingManagementController extends Controller
 
         foreach ($hostings as $hosting) {
             $daysLeft   = (int) $today->diffInDays(Carbon::parse($hosting->renewal_date), false);
-            $clientName = $hosting->client?->organization_name ?? 'Unknown Client';
+            $clientName = $hosting->client?->name ?? 'Unknown Client';
 
             if ($daysLeft < 0) {
                 continue; // already past renewal date — skip

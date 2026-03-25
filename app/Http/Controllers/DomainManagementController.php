@@ -40,7 +40,7 @@ class DomainManagementController extends Controller
         $domain = DomainManagement::create($request->all());
         $domain->load('client');
 
-        $clientName = $domain->client?->organization_name ?? 'Unknown Client';
+        $clientName = $domain->client?->name ?? 'Unknown Client';
 
         // Notification
         Notification::create([
@@ -82,7 +82,7 @@ class DomainManagementController extends Controller
         $domain->update($request->all());
         $domain->load('client');
 
-        $clientName = $domain->client?->organization_name ?? 'Unknown Client';
+        $clientName = $domain->client?->name ?? 'Unknown Client';
 
         // Notification
         Notification::create([
@@ -111,7 +111,7 @@ class DomainManagementController extends Controller
     {
         $domain = DomainManagement::with('client')->findOrFail($id);
 
-        $clientName  = $domain->client?->organization_name ?? 'Unknown Client';
+        $clientName  = $domain->client?->name ?? 'Unknown Client';
         $domainName  = $domain->domain_name;
 
         $domain->delete();
@@ -146,7 +146,7 @@ class DomainManagementController extends Controller
 
         foreach ($domains as $domain) {
             $daysLeft   = (int) $today->diffInDays(Carbon::parse($domain->expiry_date), false);
-            $clientName = $domain->client?->organization_name ?? 'Unknown Client';
+            $clientName = $domain->client?->name ?? 'Unknown Client';
 
             if ($daysLeft < 0) {
                 continue; // already expired — skip
