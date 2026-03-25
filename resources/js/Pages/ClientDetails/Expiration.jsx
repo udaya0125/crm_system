@@ -733,24 +733,24 @@ const Expiration = () => {
                     </div>
                 ),
             },
-            {
-                Header: "Contact Phone",
-                accessor: "client.contact_phone",
-                Cell: ({ row }) => (
-                    <div className="text-sm text-gray-900">
-                        {row.original.client?.contact_phone ? (
-                            <a
-                                href={`tel:${row.original.client.contact_phone}`}
-                                className="text-blue-600 hover:underline"
-                            >
-                                {row.original.client.contact_phone}
-                            </a>
-                        ) : (
-                            "N/A"
-                        )}
-                    </div>
-                ),
-            },
+            // {
+            //     Header: "Contact Phone",
+            //     accessor: "client.contact_phone",
+            //     Cell: ({ row }) => (
+            //         <div className="text-sm text-gray-900">
+            //             {row.original.client?.contact_phone ? (
+            //                 <a
+            //                     href={`tel:${row.original.client.contact_phone}`}
+            //                     className="text-blue-600 hover:underline"
+            //                 >
+            //                     {row.original.client.contact_phone}
+            //                 </a>
+            //             ) : (
+            //                 "N/A"
+            //             )}
+            //         </div>
+            //     ),
+            // },
             {
                 Header: "Last Renewal",
                 accessor: "last_renewal_date",
