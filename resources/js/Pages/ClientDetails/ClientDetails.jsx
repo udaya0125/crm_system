@@ -541,7 +541,6 @@
 
 // export default ClientDetails;
 
-
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import axios from "axios";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
@@ -555,7 +554,10 @@ const fmt = (val, fallback = "—") =>
 
 const fmtCurrency = (val) =>
     val != null
-        ? new Intl.NumberFormat("en-NP", { style: "currency", currency: "NPR" }).format(val)
+        ? new Intl.NumberFormat("en-NP", {
+              style: "currency",
+              currency: "NPR",
+          }).format(val)
         : "—";
 
 const fmtDate = (val) => {
@@ -994,9 +996,9 @@ const ClientDetails = () => {
                 </div>
 
                 {/* MyTable with integrated loading */}
-                <MyTable 
-                    columns={columns} 
-                    data={filteredData} 
+                <MyTable
+                    columns={columns}
+                    data={filteredData}
                     loading={loading}
                 />
             </div>

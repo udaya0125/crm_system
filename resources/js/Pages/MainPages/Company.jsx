@@ -838,7 +838,6 @@
 
 // export default Company;
 
-
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import {
     Info,
@@ -864,7 +863,6 @@ import { useForm } from "react-hook-form";
 import toast, { Toaster } from "react-hot-toast";
 import CompanyPopUp from "./CompanyPopUp";
 
-
 // Global Filter Component (kept separate as it's not part of MyTable)
 const GlobalFilter = ({ globalFilter, setGlobalFilter }) => {
     const [value, setValue] = useState(globalFilter || "");
@@ -884,7 +882,7 @@ const GlobalFilter = ({ globalFilter, setGlobalFilter }) => {
                 setGlobalFilter(newValue || undefined);
             }, 300);
         },
-        [setGlobalFilter]
+        [setGlobalFilter],
     );
 
     return (
@@ -977,7 +975,7 @@ const Company = () => {
     const handleDelete = useCallback(async (id) => {
         if (
             !window.confirm(
-                "Are you sure you want to delete this company and all its related records? This action cannot be undone."
+                "Are you sure you want to delete this company and all its related records? This action cannot be undone.",
             )
         ) {
             return;
@@ -987,14 +985,14 @@ const Company = () => {
         try {
             setDeleteLoading(id);
             const response = await axios.delete(
-                route("ourcompany.delete", { id })
+                route("ourcompany.delete", { id }),
             );
             toast.success(
                 response.data.message || "Company deleted successfully",
                 {
                     id: deleteToast,
                     duration: 3000,
-                }
+                },
             );
             setReloadTrigger((prev) => prev + 1);
         } catch (error) {
@@ -1018,7 +1016,7 @@ const Company = () => {
             reset();
             clearErrors();
         },
-        [reset, clearErrors]
+        [reset, clearErrors],
     );
 
     const closeModal = useCallback(() => {
@@ -1048,7 +1046,7 @@ const Company = () => {
                             "Content-Type": "application/json",
                             Accept: "application/json",
                         },
-                    }
+                    },
                 );
 
                 // Update local state optimistically
@@ -1059,8 +1057,8 @@ const Company = () => {
                                   ...company,
                                   follow_up_date: formData.followUpDate,
                               }
-                            : company
-                    )
+                            : company,
+                    ),
                 );
 
                 setSelectedCompany((prev) => ({
@@ -1107,16 +1105,16 @@ const Company = () => {
                 setFollowUpLoading(false);
             }
         },
-        [selectedCompany, setFormError, closeModal]
+        [selectedCompany, setFormError, closeModal],
     );
 
     // Filter companies based on global filter
     const filteredCompanies = useMemo(() => {
         if (!globalFilter) return allCompany;
-        
+
         const searchTerm = globalFilter.toLowerCase();
-        return allCompany.filter(company => 
-            company.company_name?.toLowerCase().includes(searchTerm)
+        return allCompany.filter((company) =>
+            company.company_name?.toLowerCase().includes(searchTerm),
         );
     }, [allCompany, globalFilter]);
 
@@ -1223,7 +1221,7 @@ const Company = () => {
                                                             .length > 20
                                                             ? value.meeting_location.substring(
                                                                   0,
-                                                                  20
+                                                                  20,
                                                               ) + "..."
                                                             : value.meeting_location}
                                                     </span>
@@ -1244,7 +1242,7 @@ const Company = () => {
                                                             .length > 20
                                                             ? value.phone_details.substring(
                                                                   0,
-                                                                  20
+                                                                  20,
                                                               ) + "..."
                                                             : value.phone_details}
                                                     </span>
@@ -1267,7 +1265,7 @@ const Company = () => {
                                                 {value.attendee.length > 15
                                                     ? value.attendee.substring(
                                                           0,
-                                                          15
+                                                          15,
                                                       ) + "..."
                                                     : value.attendee}
                                             </span>
@@ -1331,7 +1329,7 @@ const Company = () => {
                 },
             },
         ],
-        [handleDelete, handleViewDetails, deleteLoading]
+        [handleDelete, handleViewDetails, deleteLoading],
     );
 
     const clearSearch = () => {
@@ -1416,13 +1414,16 @@ const Company = () => {
                     <>
                         {filteredCompanies.length > 0 ? (
                             <MyTable
-                                columns={columns} 
-                                data={filteredCompanies} 
+                                columns={columns}
+                                data={filteredCompanies}
                             />
                         ) : (
                             <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
                                 <div className="flex flex-col items-center justify-center">
-                                    <Info size={40} className="text-gray-300 mb-2" />
+                                    <Info
+                                        size={40}
+                                        className="text-gray-300 mb-2"
+                                    />
                                     <p className="text-base font-medium text-gray-400">
                                         {globalFilter
                                             ? "No matching companies found"

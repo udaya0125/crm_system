@@ -56,7 +56,7 @@ const GlobalFilter = ({ globalFilter, setGlobalFilter }) => {
                 setGlobalFilter(newValue || undefined);
             }, 300);
         },
-        [setGlobalFilter]
+        [setGlobalFilter],
     );
 
     return (
@@ -143,7 +143,7 @@ const CompanyDetails = () => {
     const handleDelete = useCallback(async (id) => {
         if (
             !window.confirm(
-                "Are you sure you want to delete this company and all its related records? This action cannot be undone."
+                "Are you sure you want to delete this company and all its related records? This action cannot be undone.",
             )
         ) {
             return;
@@ -153,14 +153,14 @@ const CompanyDetails = () => {
         try {
             setDeleteLoading(id);
             const response = await axios.delete(
-                route("ourcompany.delete", { id })
+                route("ourcompany.delete", { id }),
             );
             toast.success(
                 response.data.message || "Company deleted successfully",
                 {
                     id: deleteToast,
                     duration: 3000,
-                }
+                },
             );
             setReloadTrigger((prev) => prev + 1);
         } catch (error) {
@@ -183,7 +183,7 @@ const CompanyDetails = () => {
             reset();
             clearErrors();
         },
-        [reset, clearErrors]
+        [reset, clearErrors],
     );
 
     const closeModal = useCallback(() => {
@@ -213,7 +213,7 @@ const CompanyDetails = () => {
                             "Content-Type": "application/json",
                             Accept: "application/json",
                         },
-                    }
+                    },
                 );
 
                 setAllCompany((prevCompanies) =>
@@ -223,8 +223,8 @@ const CompanyDetails = () => {
                                   ...company,
                                   follow_up_date: formData.followUpDate,
                               }
-                            : company
-                    )
+                            : company,
+                    ),
                 );
 
                 setSelectedCompany((prev) => ({
@@ -270,7 +270,7 @@ const CompanyDetails = () => {
                 setFollowUpLoading(false);
             }
         },
-        [selectedCompany, setFormError, closeModal]
+        [selectedCompany, setFormError, closeModal],
     );
 
     const columns = useMemo(
@@ -309,9 +309,9 @@ const CompanyDetails = () => {
                                             "positive"
                                                 ? "bg-green-500"
                                                 : value.initial_response ===
-                                                  "negative"
-                                                ? "bg-red-500"
-                                                : "bg-yellow-500"
+                                                    "negative"
+                                                  ? "bg-red-500"
+                                                  : "bg-yellow-500"
                                         }`}
                                     ></span>
                                     <span
@@ -320,9 +320,9 @@ const CompanyDetails = () => {
                                             "positive"
                                                 ? "bg-green-100 text-green-800"
                                                 : value.initial_response ===
-                                                  "negative"
-                                                ? "bg-red-100 text-red-800"
-                                                : "bg-yellow-100 text-yellow-800"
+                                                    "negative"
+                                                  ? "bg-red-100 text-red-800"
+                                                  : "bg-yellow-100 text-yellow-800"
                                         }`}
                                     >
                                         {value.initial_response?.toUpperCase() ||
@@ -334,7 +334,7 @@ const CompanyDetails = () => {
                                         className="text-xs text-gray-500 truncate"
                                         title={value.initial_notes.replace(
                                             /<[^>]*>/g,
-                                            ""
+                                            "",
                                         )}
                                     >
                                         {value.initial_notes
@@ -382,9 +382,9 @@ const CompanyDetails = () => {
                                             value.meeting_type === "in-person"
                                                 ? "bg-blue-100 text-blue-800"
                                                 : value.meeting_type ===
-                                                  "virtual"
-                                                ? "bg-purple-100 text-purple-800"
-                                                : "bg-gray-100 text-gray-800"
+                                                    "virtual"
+                                                  ? "bg-purple-100 text-purple-800"
+                                                  : "bg-gray-100 text-gray-800"
                                         }`}
                                     >
                                         {value.meeting_type === "in-person" && (
@@ -407,7 +407,7 @@ const CompanyDetails = () => {
                                             {value.attendee.length > 15
                                                 ? value.attendee.substring(
                                                       0,
-                                                      15
+                                                      15,
                                                   ) + "..."
                                                 : value.attendee}
                                         </span>
@@ -437,9 +437,9 @@ const CompanyDetails = () => {
                                             "positive"
                                                 ? "bg-green-500"
                                                 : value.follow_up_response ===
-                                                  "negative"
-                                                ? "bg-red-500"
-                                                : "bg-yellow-500"
+                                                    "negative"
+                                                  ? "bg-red-500"
+                                                  : "bg-yellow-500"
                                         }`}
                                     ></span>
                                     <span
@@ -448,9 +448,9 @@ const CompanyDetails = () => {
                                             "positive"
                                                 ? "bg-green-100 text-green-800"
                                                 : value.follow_up_response ===
-                                                  "negative"
-                                                ? "bg-red-100 text-red-800"
-                                                : "bg-yellow-100 text-yellow-800"
+                                                    "negative"
+                                                  ? "bg-red-100 text-red-800"
+                                                  : "bg-yellow-100 text-yellow-800"
                                         }`}
                                     >
                                         {value.follow_up_response?.toUpperCase() ||
@@ -462,7 +462,7 @@ const CompanyDetails = () => {
                                         className="text-xs text-gray-500 truncate"
                                         title={value.follow_up_notes.replace(
                                             /<[^>]*>/g,
-                                            ""
+                                            "",
                                         )}
                                     >
                                         {value.follow_up_notes
@@ -594,8 +594,8 @@ const CompanyDetails = () => {
                                     isPastDue
                                         ? "text-red-600 font-medium"
                                         : isToday
-                                        ? "text-orange-600 font-medium"
-                                        : ""
+                                          ? "text-orange-600 font-medium"
+                                          : ""
                                 }`}
                             >
                                 <Calendar size={14} />
@@ -667,7 +667,7 @@ const CompanyDetails = () => {
                 },
             },
         ],
-        [handleDelete, handleViewDetails, deleteLoading]
+        [handleDelete, handleViewDetails, deleteLoading],
     );
 
     const tableInstance = useTable(
@@ -682,7 +682,7 @@ const CompanyDetails = () => {
         },
         useGlobalFilter,
         useSortBy,
-        usePagination
+        usePagination,
     );
 
     const {
@@ -814,7 +814,7 @@ const CompanyDetails = () => {
                                                 (column) => (
                                                     <th
                                                         {...column.getHeaderProps(
-                                                            column.getSortByToggleProps()
+                                                            column.getSortByToggleProps(),
                                                         )}
                                                         className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors whitespace-nowrap"
                                                         style={{
@@ -823,7 +823,7 @@ const CompanyDetails = () => {
                                                     >
                                                         <div className="flex items-center">
                                                             {column.render(
-                                                                "Header"
+                                                                "Header",
                                                             )}
                                                             {column.isSorted ? (
                                                                 column.isSortedDesc ? (
@@ -844,7 +844,7 @@ const CompanyDetails = () => {
                                                             ) : null}
                                                         </div>
                                                     </th>
-                                                )
+                                                ),
                                             )}
                                         </tr>
                                     ))}
@@ -867,7 +867,7 @@ const CompanyDetails = () => {
                                                             className="px-4 py-3 align-middle"
                                                         >
                                                             {cell.render(
-                                                                "Cell"
+                                                                "Cell",
                                                             )}
                                                         </td>
                                                     ))}
@@ -924,7 +924,7 @@ const CompanyDetails = () => {
                                     <span className="font-medium">
                                         {Math.min(
                                             (pageIndex + 1) * pageSize,
-                                            allCompany.length
+                                            allCompany.length,
                                         )}
                                     </span>
                                     <span>of</span>
@@ -1005,7 +1005,7 @@ const CompanyDetails = () => {
                                                         {pageNum + 1}
                                                     </button>
                                                 );
-                                            }
+                                            },
                                         )}
                                     </div>
                                     <button
