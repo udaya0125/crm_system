@@ -18,10 +18,10 @@
 //             try {
 //                 setLoading(true);
 //                 const response = await axios.get(route("ourhostings.index"));
-                
+
 //                 // Check if response.data is an array, if not, extract the array
 //                 let hostingData = response.data;
-                
+
 //                 // Handle different possible response structures
 //                 if (Array.isArray(hostingData)) {
 //                     setAllHosting(hostingData);
@@ -36,10 +36,10 @@
 //                     } else {
 //                         // If it's a single object, wrap it in an array
 //                         // Or if it's an object with numeric keys, convert to array
-//                         const possibleArray = Object.values(hostingData).filter(item => 
+//                         const possibleArray = Object.values(hostingData).filter(item =>
 //                             item && typeof item === 'object' && !Array.isArray(item)
 //                         );
-                        
+
 //                         if (possibleArray.length > 0) {
 //                             setAllHosting(possibleArray);
 //                         } else {
@@ -144,11 +144,11 @@
 //                 Cell: ({ row }) => {
 //                     const renewalDate = row.original.renewal_date;
 //                     if (!renewalDate) return <span className="text-gray-500">N/A</span>;
-                    
+
 //                     const today = new Date();
 //                     const renewal = new Date(renewalDate);
 //                     const daysUntilRenewal = Math.ceil((renewal - today) / (1000 * 60 * 60 * 24));
-                    
+
 //                     if (daysUntilRenewal < 0) {
 //                         return <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Expired</span>;
 //                     } else if (daysUntilRenewal <= 7) {
@@ -207,9 +207,9 @@
 //                     </div>
 
 //                     {/* Table Component with integrated loading */}
-//                     <MyTable 
-//                         columns={columns} 
-//                         data={Array.isArray(allHosting) ? allHosting : []} 
+//                     <MyTable
+//                         columns={columns}
+//                         data={Array.isArray(allHosting) ? allHosting : []}
 //                         loading={loading}
 //                     />
 
@@ -230,7 +230,6 @@
 // };
 
 // export default HostingManagement;
-
 
 import AddHostingForm from "@/AddFormComponents/AddHostingForm";
 import EditHostingForm from "@/EditFormComponents/EditHostingForm";
@@ -270,10 +269,10 @@ const HostingManagement = () => {
                             (item) =>
                                 item &&
                                 typeof item === "object" &&
-                                !Array.isArray(item)
+                                !Array.isArray(item),
                         );
                         setAllHosting(
-                            possibleArray.length > 0 ? possibleArray : []
+                            possibleArray.length > 0 ? possibleArray : [],
                         );
                     }
                 } else {
@@ -314,7 +313,7 @@ const HostingManagement = () => {
             const response = await axios.post(
                 route("ourhostings.update", { id }),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                { headers: { "Content-Type": "multipart/form-data" } },
             );
             setReloadTrigger((prev) => !prev);
             return response.data;
@@ -364,14 +363,12 @@ const HostingManagement = () => {
                 Cell: ({ row }) => {
                     const renewalDate = row.original.renewal_date;
                     if (!renewalDate)
-                        return (
-                            <span className="text-gray-500">N/A</span>
-                        );
+                        return <span className="text-gray-500">N/A</span>;
 
                     const today = new Date();
                     const renewal = new Date(renewalDate);
                     const daysUntilRenewal = Math.ceil(
-                        (renewal - today) / (1000 * 60 * 60 * 24)
+                        (renewal - today) / (1000 * 60 * 60 * 24),
                     );
 
                     if (daysUntilRenewal < 0) {
@@ -418,7 +415,7 @@ const HostingManagement = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     return (

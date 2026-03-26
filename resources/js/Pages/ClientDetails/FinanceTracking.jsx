@@ -328,9 +328,9 @@
 //                 </div>
 
 //                 {/* MyTable Component with integrated loading */}
-//                 <MyTable 
-//                     columns={columns} 
-//                     data={allTracking} 
+//                 <MyTable
+//                     columns={columns}
+//                     data={allTracking}
 //                     loading={loading}
 //                 />
 
@@ -349,7 +349,6 @@
 // };
 
 // export default FinanceTracking;
-
 
 import AddFinanceTrackingForm from "@/AddFormComponents/AddFinanceTrackingForm";
 import EditFinanceTrackingForm from "@/EditFormComponents/EditFinanceTrackingForm";
