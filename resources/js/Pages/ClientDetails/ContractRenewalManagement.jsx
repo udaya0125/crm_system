@@ -34,7 +34,7 @@
 //         if (!window.confirm("Are you sure you want to delete this renewal?")) {
 //             return;
 //         }
-        
+
 //         try {
 //             const response = await axios.delete(
 //                 route("renewals.destroy", { id: id }),
@@ -116,10 +116,10 @@
 //                     const today = new Date();
 //                     today.setHours(0, 0, 0, 0);
 //                     const daysUntilRenewal = Math.ceil((nextDate - today) / (1000 * 60 * 60 * 24));
-                    
+
 //                     let statusColor = "";
 //                     let statusText = "";
-                    
+
 //                     if (daysUntilRenewal < 0) {
 //                         statusColor = "text-red-600 bg-red-100";
 //                         statusText = `Overdue by ${Math.abs(daysUntilRenewal)} days`;
@@ -134,7 +134,7 @@
 //                         const monthsRemaining = Math.floor(daysUntilRenewal / 30);
 //                         statusText = `${monthsRemaining} month${monthsRemaining !== 1 ? 's' : ''} left`;
 //                     }
-                    
+
 //                     return (
 //                         <div>
 //                             <div className="text-sm text-gray-900">
@@ -222,9 +222,9 @@
 //                     </div>
 
 //                     {/* MyTable Component with integrated loading */}
-//                     <MyTable 
-//                         columns={columns} 
-//                         data={allRenewal} 
+//                     <MyTable
+//                         columns={columns}
+//                         data={allRenewal}
 //                         loading={loading}
 //                     />
 
@@ -246,7 +246,6 @@
 
 // export default ContractRenewalManagement;
 
-
 import AddRenewalForm from "@/AddFormComponents/AddRenewalForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import EditRenewalForm from "@/EditFormComponents/EditRenewalForm";
@@ -255,7 +254,7 @@ import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 
-// Note I have not used this on my project 
+// Note I have not used this on my project
 
 const ContractRenewalManagement = () => {
     const [allRenewal, setAllRenewal] = useState([]);
@@ -284,7 +283,8 @@ const ContractRenewalManagement = () => {
 
     // Delete
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this renewal?")) return;
+        if (!window.confirm("Are you sure you want to delete this renewal?"))
+            return;
 
         try {
             await axios.delete(route("renewals.destroy", { id }));
@@ -355,7 +355,9 @@ const ContractRenewalManagement = () => {
                         statusText = `${daysUntilRenewal} days left`;
                     } else {
                         statusColor = "text-green-600 bg-green-100";
-                        const monthsRemaining = Math.floor(daysUntilRenewal / 30);
+                        const monthsRemaining = Math.floor(
+                            daysUntilRenewal / 30,
+                        );
                         statusText = `${monthsRemaining} month${monthsRemaining !== 1 ? "s" : ""} left`;
                     }
 
@@ -445,7 +447,11 @@ const ContractRenewalManagement = () => {
                 </div>
 
                 {/* Table */}
-                <MyTable columns={columns} data={allRenewal} loading={loading} />
+                <MyTable
+                    columns={columns}
+                    data={allRenewal}
+                    loading={loading}
+                />
 
                 {/* Add Form */}
                 {showAddForm && (
