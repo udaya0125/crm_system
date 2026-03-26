@@ -8,17 +8,21 @@
 // const Leads = () => {
 //     const [allLeads, setAllLeads] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
+//     const [loading, setLoading] = useState(false);
 //     const [editingLead, setEditingLead] = useState(null);
 //     const [showAddForm, setShowAddForm] = useState(false);
 
 //     // Fetch leads
 //     useEffect(() => {
 //         const fetchLeads = async () => {
+//             setLoading(true);
 //             try {
 //                 const response = await axios.get(route("ourleads.index"));
 //                 setAllLeads(response.data.data);
 //             } catch (error) {
 //                 console.error("Fetching error:", error);
+//             } finally {
+//                 setLoading(false);
 //             }
 //         };
 
@@ -68,6 +72,11 @@
 //     // Define columns for react-table
 //     const columns = useMemo(
 //         () => [
+//             {
+//                 Header: "s/n",
+//                 accessor: "index",
+//                 Cell: ({ row }) => <span>{row.index + 1}</span>,
+//             },
 //             {
 //                 Header: "Lead ID",
 //                 accessor: "lead_id",
@@ -155,14 +164,12 @@
 //                     </button>
 //                 </div>
 
-//                 {/* Leads table */}
-//                 {allLeads.length === 0 ? (
-//                     <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-blue-100">
-//                         No leads found.
-//                     </div>
-//                 ) : (
-//                     <MyTable columns={columns} data={allLeads} />
-//                 )}
+//                 {/* Leads table with integrated loading */}
+//                 <MyTable 
+//                     columns={columns} 
+//                     data={allLeads} 
+//                     loading={loading}
+//                 />
 //             </div>
 
 //             {/* Add / Edit modal */}
@@ -184,6 +191,7 @@
 
 import AddLeadForm from "@/AddFormComponents/AddLeadForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+import EditLeadForm from "@/EditFormComponents/EditLeadForm";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
@@ -195,6 +203,7 @@ const Leads = () => {
     const [loading, setLoading] = useState(false);
     const [editingLead, setEditingLead] = useState(null);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
 
     // Fetch leads
     useEffect(() => {
@@ -227,10 +236,10 @@ const Leads = () => {
     // Open edit form
     const handleEdit = (lead) => {
         setEditingLead(lead);
-        setShowAddForm(true);
+        setShowEditForm(true);
     };
 
-    // Called by AddLeadForm to persist an update
+    // Called by EditLeadForm to persist an update
     const handleUpdate = async (formData, id) => {
         try {
             formData.append("_method", "PUT");
@@ -247,9 +256,14 @@ const Leads = () => {
         }
     };
 
-    // Close form and clear editing state
-    const handleCloseForm = () => {
+    // Close add form
+    const handleCloseAddForm = () => {
         setShowAddForm(false);
+    };
+
+    // Close edit form
+    const handleCloseEditForm = () => {
+        setShowEditForm(false);
         setEditingLead(null);
     };
 
@@ -348,22 +362,28 @@ const Leads = () => {
                     </button>
                 </div>
 
-                {/* Leads table with integrated loading */}
-                <MyTable 
-                    columns={columns} 
-                    data={allLeads} 
+                {/* Leads table */}
+                <MyTable
+                    columns={columns}
+                    data={allLeads}
                     loading={loading}
                 />
             </div>
 
-            {/* Add / Edit modal */}
+            {/* Add modal */}
             {showAddForm && (
                 <AddLeadForm
-                    editingLead={editingLead}
-                    setEditingLead={setEditingLead}
-                    handleUpdate={handleUpdate}
                     setReloadTrigger={setReloadTrigger}
-                    onClose={handleCloseForm}
+                    onClose={handleCloseAddForm}
+                />
+            )}
+
+            {/* Edit modal */}
+            {showEditForm && editingLead && (
+                <EditLeadForm
+                    editingLead={editingLead}
+                    handleUpdate={handleUpdate}
+                    onClose={handleCloseEditForm}
                 />
             )}
         </AdminWrapper>

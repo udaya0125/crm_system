@@ -1,157 +1,38 @@
-// import axios from "axios";
-// import { X } from "lucide-react";
-// import React, { useEffect, useState } from "react";
-
-// const AddRenewalForm = ({ editingRenewal, setEditingRenewal, setShowForm }) => {
-//     const [submitting, setSubmitting] = useState(false);
-//     const [renewalForm, setRenewalForm] = useState({
-//         contract_id: "",
-//         client_name: "",
-//         service_type: "",
-//         start_date: "",
-//         expiry_date: "",
-//         amount: "",
-//         renewal_period: "",
-//         responsible_staff: "",
-//         status: "",
-//     });
-
-//     //  Use Effect
-//     useEffect(() => {
-//         if (editingRenewal) {
-//             setRenewalForm({
-//                 ...editingRenewal,
-//                 image: null,
-//             });
-//             setShowForm(true);
-//         } else {
-//             setRenewalForm({
-//                 contract_id: "",
-//                 client_name: "",
-//                 service_type: "",
-//                 start_date: "",
-//                 expiry_date: "",
-//                 amount: "",
-//                 renewal_period: "",
-//                 responsible_staff: "",
-//                 status: "",
-//             });
-//         }
-//     }, [editingRenewal]);
-
-//     // Handle Create Renewal
-//     const handleCreate = async (formData) => {
-//         try {
-//             await axios.post(route("renewals.store"), formData, {
-//                 headers: {
-//                     "Content-Type": "multipart/form-data",
-//                 },
-//             });
-
-//             setReloadTrigger((prev) => !prev);
-//         } catch (error) {
-//             console.log("Error creating renewal", error);
-//             throw error;
-//         }
-//     };
-
-//     // Handle Submit - now clearly separated paths
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         const formData = new FormData();
-//         // Append all form data except image if it's empty
-//         for (const key in renewalForm) {
-//             if (renewalForm[key] !== null && renewalForm[key] !== "") {
-//                 formData.append(key, renewalForm[key]);
-//             }
-//         }
-//         try {
-//             setSubmitting(true);
-
-//             if (editingRenewal) {
-//                 // Editing existing renewal
-//                 await handleUpdate(formData, editingRenewal.id);
-//             } else {
-//                 // Creating new renewal
-//                 await handleCreate(formData);
-//             }
-//             setRenewalForm({
-//                 contract_id: "",
-//                 client_name: "",
-//                 service_type: "",
-//                 start_date: "",
-//                 expiry_date: "",
-//                 amount: "",
-//                 renewal_period: "",
-//                 responsible_staff: "",
-//                 status: "",
-//             });
-
-//             setShowForm(false);
-//             setEditingRenewal(null);
-//         } catch (error) {
-//             console.log("Error saving data", error);
-//         } finally {
-//             setSubmitting(false);
-//         }
-//     };
-
-//     // handle  change for image and the others
-
-//     const handleChange = (e) => {
-//         const { name, value, type, files } = e.target;
-//         setRenewalForm((prev) => ({
-//             ...prev,
-//             [name]: type === "file" ? files[0] : value,
-//         }));
-//     };
-//     return (
-//         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-//             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
-//                 <div className="flex justify-between items-center mb-6 bg-white pb-4 border-b">
-//                     <h2 className="text-2xl font-bold">Add New Renewal</h2>
-//                     <button
-//                         type="button"
-//                         onClick={() => {
-//                             setShowForm(false);
-//                             setEditingRenewal(null);
-//                         }}
-//                         className="p-2 hover:bg-gray-100 rounded-full transition"
-//                     >
-//                         <X size={24} />
-//                     </button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default AddRenewalForm;
-
-
-
 import axios from "axios";
 import { X } from "lucide-react";
-import React, { useState } from "react";
-
-const EMPTY_FORM = {
-    contract_id: "",
-    client_name: "",
-    service_type: "",
-    start_date: "",
-    expiry_date: "",
-    amount: "",
-    renewal_period: "",
-    responsible_staff: "",
-    status: "",
-};
-
+import React, { useEffect, useState } from "react";
 
 // Note I have not used this on my project 
-
-const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
+const EditRenewalForm = ({ editingRenewal, setShowForm, setEditingRenewal, setReloadTrigger }) => {
     const [submitting, setSubmitting] = useState(false);
-    const [renewalForm, setRenewalForm] = useState(EMPTY_FORM);
+    const [renewalForm, setRenewalForm] = useState({
+        contract_id: "",
+        client_name: "",
+        service_type: "",
+        start_date: "",
+        expiry_date: "",
+        amount: "",
+        renewal_period: "",
+        responsible_staff: "",
+        status: "",
+    });
+
+    // Pre-populate form with the renewal being edited
+    useEffect(() => {
+        if (editingRenewal) {
+            setRenewalForm({
+                contract_id:       editingRenewal.contract_id       ?? "",
+                client_name:       editingRenewal.client_name       ?? "",
+                service_type:      editingRenewal.service_type      ?? "",
+                start_date:        editingRenewal.start_date        ?? "",
+                expiry_date:       editingRenewal.expiry_date       ?? "",
+                amount:            editingRenewal.amount            ?? "",
+                renewal_period:    editingRenewal.renewal_period    ?? "",
+                responsible_staff: editingRenewal.responsible_staff ?? "",
+                status:            editingRenewal.status            ?? "",
+            });
+        }
+    }, [editingRenewal]);
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
@@ -161,11 +42,20 @@ const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
         }));
     };
 
-    const handleCreate = async (formData) => {
-        await axios.post(route("renewals.store"), formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+    const handleClose = () => {
+        setShowForm(false);
+        setEditingRenewal(null);
+    };
+
+    const handleUpdate = async (formData, id) => {
+        formData.append("_method", "PUT");
+        const response = await axios.post(
+            route("renewals.update", { id }),
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } },
+        );
         setReloadTrigger((prev) => !prev);
+        return response.data;
     };
 
     const handleSubmit = async (e) => {
@@ -180,11 +70,10 @@ const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
 
         try {
             setSubmitting(true);
-            await handleCreate(formData);
-            setRenewalForm(EMPTY_FORM);
-            setShowForm(false);
+            await handleUpdate(formData, editingRenewal.id);
+            handleClose();
         } catch (error) {
-            console.error("Error creating renewal", error);
+            console.error("Error updating renewal", error);
         } finally {
             setSubmitting(false);
         }
@@ -196,11 +85,11 @@ const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 pb-4 border-b">
                     <h2 className="text-2xl font-bold text-stone-800">
-                        Add New Renewal
+                        Edit Renewal
                     </h2>
                     <button
                         type="button"
-                        onClick={() => setShowForm(false)}
+                        onClick={handleClose}
                         className="p-2 hover:bg-gray-100 rounded-full transition"
                     >
                         <X size={24} />
@@ -338,7 +227,7 @@ const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
                     <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                         <button
                             type="button"
-                            onClick={() => setShowForm(false)}
+                            onClick={handleClose}
                             className="px-5 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-full hover:bg-gray-200 transition"
                         >
                             Cancel
@@ -348,7 +237,7 @@ const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
                             disabled={submitting}
                             className="px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-full hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            {submitting ? "Creating..." : "Create Renewal"}
+                            {submitting ? "Saving..." : "Save Changes"}
                         </button>
                     </div>
                 </form>
@@ -357,4 +246,4 @@ const AddRenewalForm = ({ setShowForm, setReloadTrigger }) => {
     );
 };
 
-export default AddRenewalForm;
+export default EditRenewalForm;
