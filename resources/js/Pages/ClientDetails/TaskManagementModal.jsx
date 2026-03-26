@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { X, Plus, Trash2, CheckCircle, Circle, Save, ArrowUp, ArrowDown } from "lucide-react";
+import {
+    X,
+    Plus,
+    Trash2,
+    CheckCircle,
+    Circle,
+    Save,
+    ArrowUp,
+    ArrowDown,
+} from "lucide-react";
 
 const TaskManagementModal = ({ project, onClose, onSave }) => {
     const [tasks, setTasks] = useState([]);
@@ -12,7 +21,9 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                 const parsedTasks = JSON.parse(project.project_description);
                 if (Array.isArray(parsedTasks)) {
                     // Sort tasks by ID (timestamp) in descending order to show newest first
-                    const sortedTasks = [...parsedTasks].sort((a, b) => b.id - a.id);
+                    const sortedTasks = [...parsedTasks].sort(
+                        (a, b) => b.id - a.id,
+                    );
                     setTasks(sortedTasks);
                 } else {
                     setTasks([]);
@@ -20,11 +31,13 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
             } catch (e) {
                 // If not JSON, create a single task from the description
                 if (project.project_description) {
-                    setTasks([{
-                        id: Date.now(),
-                        text: project.project_description,
-                        completed: false
-                    }]);
+                    setTasks([
+                        {
+                            id: Date.now(),
+                            text: project.project_description,
+                            completed: false,
+                        },
+                    ]);
                 } else {
                     setTasks([]);
                 }
@@ -37,7 +50,7 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
     // Calculate completion percentage
     const calculateCompletion = () => {
         if (tasks.length === 0) return 0;
-        const completedTasks = tasks.filter(task => task.completed).length;
+        const completedTasks = tasks.filter((task) => task.completed).length;
         return Math.round((completedTasks / tasks.length) * 100);
     };
 
@@ -46,14 +59,14 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
         const newTask = {
             id: Date.now(), // Using timestamp ensures newer tasks have higher IDs
             text: "",
-            completed: false
+            completed: false,
         };
         // Add new task to the beginning of the array
         setTasks([newTask, ...tasks]);
-        
+
         // Auto-focus the new task input (we'll need to use ref for this)
         setTimeout(() => {
-            const taskInputs = document.querySelectorAll('.task-input');
+            const taskInputs = document.querySelectorAll(".task-input");
             if (taskInputs.length > 0) {
                 taskInputs[0].focus();
             }
@@ -63,30 +76,44 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
     // Remove task
     const removeTask = (taskId) => {
         if (tasks.length <= 1) {
-            if (!confirm("Removing all tasks will set progress to 0%. Continue?")) return;
+            if (
+                !confirm(
+                    "Removing all tasks will set progress to 0%. Continue?",
+                )
+            )
+                return;
         }
-        setTasks(tasks.filter(task => task.id !== taskId));
+        setTasks(tasks.filter((task) => task.id !== taskId));
     };
 
     // Update task text
     const updateTaskText = (taskId, newText) => {
-        setTasks(tasks.map(task =>
-            task.id === taskId ? { ...task, text: newText } : task
-        ));
+        setTasks(
+            tasks.map((task) =>
+                task.id === taskId ? { ...task, text: newText } : task,
+            ),
+        );
     };
 
     // Toggle task completion
     const toggleTaskCompletion = (taskId) => {
-        setTasks(tasks.map(task =>
-            task.id === taskId ? { ...task, completed: !task.completed } : task
-        ));
+        setTasks(
+            tasks.map((task) =>
+                task.id === taskId
+                    ? { ...task, completed: !task.completed }
+                    : task,
+            ),
+        );
     };
 
     // Move task up (earlier in the list)
     const moveTaskUp = (index) => {
         if (index === 0) return; // Already at the top
         const newTasks = [...tasks];
-        [newTasks[index - 1], newTasks[index]] = [newTasks[index], newTasks[index - 1]];
+        [newTasks[index - 1], newTasks[index]] = [
+            newTasks[index],
+            newTasks[index - 1],
+        ];
         setTasks(newTasks);
     };
 
@@ -94,17 +121,22 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
     const moveTaskDown = (index) => {
         if (index === tasks.length - 1) return; // Already at the bottom
         const newTasks = [...tasks];
-        [newTasks[index], newTasks[index + 1]] = [newTasks[index + 1], newTasks[index]];
+        [newTasks[index], newTasks[index + 1]] = [
+            newTasks[index + 1],
+            newTasks[index],
+        ];
         setTasks(newTasks);
     };
 
     // Handle save
     const handleSave = async () => {
         // Filter out empty tasks
-        const validTasks = tasks.filter(task => task.text.trim() !== "");
-        
+        const validTasks = tasks.filter((task) => task.text.trim() !== "");
+
         if (validTasks.length === 0) {
-            if (!confirm("No valid tasks. This will clear all tasks. Continue?")) {
+            if (
+                !confirm("No valid tasks. This will clear all tasks. Continue?")
+            ) {
                 return;
             }
         }
@@ -121,7 +153,6 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
-
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-stone-100">
                     <div>
@@ -144,28 +175,43 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                 {/* Project Info Summary */}
                 <div className="grid grid-cols-3 gap-3 mb-6 p-4 bg-stone-50 rounded-lg">
                     <div>
-                        <span className="text-xs text-stone-400 block">Priority</span>
-                        <span className={`text-sm font-medium capitalize mt-1 ${
-                            project?.priority === 'high' ? 'text-red-600' :
-                            project?.priority === 'medium' ? 'text-amber-600' :
-                            'text-emerald-600'
-                        }`}>
+                        <span className="text-xs text-stone-400 block">
+                            Priority
+                        </span>
+                        <span
+                            className={`text-sm font-medium capitalize mt-1 ${
+                                project?.priority === "high"
+                                    ? "text-red-600"
+                                    : project?.priority === "medium"
+                                      ? "text-amber-600"
+                                      : "text-emerald-600"
+                            }`}
+                        >
                             {project?.priority}
                         </span>
                     </div>
                     <div>
-                        <span className="text-xs text-stone-400 block">Status</span>
-                        <span className={`text-sm font-medium capitalize mt-1 ${
-                            project?.status === 'completed' ? 'text-emerald-600' :
-                            project?.status === 'in progress' ? 'text-blue-600' :
-                            project?.status === 'pending' ? 'text-amber-600' :
-                            'text-red-600'
-                        }`}>
+                        <span className="text-xs text-stone-400 block">
+                            Status
+                        </span>
+                        <span
+                            className={`text-sm font-medium capitalize mt-1 ${
+                                project?.status === "completed"
+                                    ? "text-emerald-600"
+                                    : project?.status === "in progress"
+                                      ? "text-blue-600"
+                                      : project?.status === "pending"
+                                        ? "text-amber-600"
+                                        : "text-red-600"
+                            }`}
+                        >
                             {project?.status}
                         </span>
                     </div>
                     <div>
-                        <span className="text-xs text-stone-400 block">Deadline</span>
+                        <span className="text-xs text-stone-400 block">
+                            Deadline
+                        </span>
                         <span className="text-sm font-medium text-stone-700 mt-1">
                             {project?.deadline}
                         </span>
@@ -176,7 +222,8 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                 <div className="mb-6">
                     <div className="flex justify-between items-center mb-3">
                         <label className="block text-xs font-semibold tracking-wide text-stone-500 uppercase">
-                            Project Tasks {tasks.length > 0 && `(${tasks.length})`}
+                            Project Tasks{" "}
+                            {tasks.length > 0 && `(${tasks.length})`}
                         </label>
                         <button
                             type="button"
@@ -193,40 +240,62 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                         {tasks.length === 0 ? (
                             <div className="text-center py-8 bg-stone-50 rounded-lg border-2 border-dashed border-stone-200">
                                 <p className="text-sm text-stone-400">
-                                    No tasks yet. Click "Add Task" to create your first task.
+                                    No tasks yet. Click "Add Task" to create
+                                    your first task.
                                 </p>
                             </div>
                         ) : (
                             tasks.map((task, index) => (
-                                <div 
-                                    key={task.id} 
+                                <div
+                                    key={task.id}
                                     className={`flex items-center gap-2 bg-white p-3 rounded-lg border transition-all ${
-                                        task.completed ? 'border-emerald-200 bg-emerald-50/30' : 'border-stone-200 hover:border-indigo-200'
+                                        task.completed
+                                            ? "border-emerald-200 bg-emerald-50/30"
+                                            : "border-stone-200 hover:border-indigo-200"
                                     }`}
                                 >
                                     <button
                                         type="button"
-                                        onClick={() => toggleTaskCompletion(task.id)}
+                                        onClick={() =>
+                                            toggleTaskCompletion(task.id)
+                                        }
                                         className="flex-shrink-0 transition-transform hover:scale-110"
-                                        title={task.completed ? "Mark as incomplete" : "Mark as complete"}
+                                        title={
+                                            task.completed
+                                                ? "Mark as incomplete"
+                                                : "Mark as complete"
+                                        }
                                     >
                                         {task.completed ? (
-                                            <CheckCircle size={22} className="text-emerald-500" />
+                                            <CheckCircle
+                                                size={22}
+                                                className="text-emerald-500"
+                                            />
                                         ) : (
-                                            <Circle size={22} className="text-stone-400 hover:text-indigo-400" />
+                                            <Circle
+                                                size={22}
+                                                className="text-stone-400 hover:text-indigo-400"
+                                            />
                                         )}
                                     </button>
-                                    
+
                                     <input
                                         type="text"
                                         value={task.text}
-                                        onChange={(e) => updateTaskText(task.id, e.target.value)}
+                                        onChange={(e) =>
+                                            updateTaskText(
+                                                task.id,
+                                                e.target.value,
+                                            )
+                                        }
                                         placeholder={`Task ${index + 1}`}
                                         className={`task-input flex-1 text-sm border-none focus:ring-0 p-1 bg-transparent ${
-                                            task.completed ? 'line-through text-stone-400' : 'text-stone-700'
+                                            task.completed
+                                                ? "line-through text-stone-400"
+                                                : "text-stone-700"
                                         }`}
                                     />
-                                    
+
                                     {/* Move Up/Down buttons */}
                                     <div className="flex items-center gap-1">
                                         <button
@@ -234,9 +303,9 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                                             onClick={() => moveTaskUp(index)}
                                             disabled={index === 0}
                                             className={`p-1.5 rounded-full transition ${
-                                                index === 0 
-                                                    ? 'text-stone-300 cursor-not-allowed' 
-                                                    : 'hover:bg-stone-100 text-stone-500'
+                                                index === 0
+                                                    ? "text-stone-300 cursor-not-allowed"
+                                                    : "hover:bg-stone-100 text-stone-500"
                                             }`}
                                             title="Move up"
                                         >
@@ -245,11 +314,13 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                                         <button
                                             type="button"
                                             onClick={() => moveTaskDown(index)}
-                                            disabled={index === tasks.length - 1}
+                                            disabled={
+                                                index === tasks.length - 1
+                                            }
                                             className={`p-1.5 rounded-full transition ${
-                                                index === tasks.length - 1 
-                                                    ? 'text-stone-300 cursor-not-allowed' 
-                                                    : 'hover:bg-stone-100 text-stone-500'
+                                                index === tasks.length - 1
+                                                    ? "text-stone-300 cursor-not-allowed"
+                                                    : "hover:bg-stone-100 text-stone-500"
                                             }`}
                                             title="Move down"
                                         >
@@ -273,17 +344,24 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                     {tasks.length > 0 && (
                         <div className="mt-6 p-4 bg-indigo-50 rounded-lg">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm font-medium text-stone-700">Progress</span>
-                                <span className="text-lg font-bold text-indigo-600">{calculateCompletion()}%</span>
+                                <span className="text-sm font-medium text-stone-700">
+                                    Progress
+                                </span>
+                                <span className="text-lg font-bold text-indigo-600">
+                                    {calculateCompletion()}%
+                                </span>
                             </div>
                             <div className="w-full bg-stone-200 rounded-full h-2.5 mb-2">
                                 <div
                                     className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300"
-                                    style={{ width: `${calculateCompletion()}%` }}
+                                    style={{
+                                        width: `${calculateCompletion()}%`,
+                                    }}
                                 />
                             </div>
                             <p className="text-xs text-stone-500">
-                                {tasks.filter(t => t.completed).length} of {tasks.length} tasks completed
+                                {tasks.filter((t) => t.completed).length} of{" "}
+                                {tasks.length} tasks completed
                             </p>
                         </div>
                     )}

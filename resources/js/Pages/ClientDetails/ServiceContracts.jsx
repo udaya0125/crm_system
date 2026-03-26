@@ -480,9 +480,9 @@
 //                     </div>
 
 //                     {/* MyTable Component with integrated loading */}
-//                     <MyTable 
-//                         columns={columns} 
-//                         data={filteredData} 
+//                     <MyTable
+//                         columns={columns}
+//                         data={filteredData}
 //                         loading={loading}
 //                     />
 //                 </div>
@@ -539,7 +539,6 @@
 // };
 
 // export default ServiceContracts;
-
 
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -756,9 +755,9 @@ const ServiceContracts = () => {
                     </div>
 
                     {/* MyTable Component with integrated loading */}
-                    <MyTable 
-                        columns={columns} 
-                        data={filteredData} 
+                    <MyTable
+                        columns={columns}
+                        data={filteredData}
                         loading={loading}
                     />
                 </div>
