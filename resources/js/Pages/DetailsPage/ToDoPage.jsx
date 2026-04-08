@@ -1,3 +1,531 @@
+import axios from "axios";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+    ChevronUp,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Edit,
+    Trash2,
+    X,
+    Eye,
+    FileText,
+    Calendar,
+    CheckCircle,
+    Square,
+    Plus,
+} from "lucide-react";
+import AddTodo from "@/AddFormComponents/AddTodo";
+import EditTodo from "@/EditFormComponents/EditTodo";
+import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+import parse from "html-react-parser";
+import MyTable from "@/TableComponents/MyTable";
+
+const ToDOPage = () => {
+    const [allTodo, setAllTodo] = useState([]);
+    const [reloadTrigger, setReloadTrigger] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedTodo, setSelectedTodo] = useState(null);
+    const [editingTodo, setEditingTodo] = useState(null);
+
+    useEffect(() => {
+        const fetchTodo = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(route("ourtodo.index"));
+                setAllTodo(response.data.data || []);
+            } catch (error) {
+                console.error("fetching error ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchTodo();
+    }, [reloadTrigger]);
+
+    // Custom parser to replace HTML elements with Lucide icons
+    const parseWithIcons = (html) => {
+        if (!html) return null;
+
+        const elements = parse(html);
+
+        const replaceElements = (node) => {
+            if (!node || typeof node !== "object") return node;
+
+            if (Array.isArray(node)) {
+                return node.map(replaceElements);
+            }
+
+            if (node.props && node.props.children) {
+                // Replace ul/ol with custom styled lists
+                if (node.type === "ul" || node.type === "ol") {
+                    const children = React.Children.map(
+                        node.props.children,
+                        (child, index) => {
+                            if (child && child.props && child.type === "li") {
+                                return React.cloneElement(child, {
+                                    className: `${
+                                        child.props.className || ""
+                                    } flex items-start gap-2 py-1`,
+                                    children: (
+                                        <>
+                                            {node.type === "ul" ? (
+                                                <CheckCircle
+                                                    size={12}
+                                                    className="mt-1.5 text-blue-500 flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <span className="text-sm font-medium text-blue-600 w-5 flex-shrink-0">
+                                                    {index + 1}.
+                                                </span>
+                                            )}
+                                            <span className="flex-1">
+                                                {replaceElements(
+                                                    child.props.children
+                                                )}
+                                            </span>
+                                        </>
+                                    ),
+                                });
+                            }
+                            return child;
+                        }
+                    );
+
+                    return React.createElement(node.type, {
+                        ...node.props,
+                        className: `${
+                            node.props.className || ""
+                        } space-y-2 my-2`,
+                        children: children,
+                    });
+                }
+
+                // Replace checkboxes/todo items
+                if (
+                    node.props.className &&
+                    node.props.className.includes("ql-direction")
+                ) {
+                    const children = React.Children.map(
+                        node.props.children,
+                        (child) => {
+                            if (child && child.props && child.type === "span") {
+                                const isChecked =
+                                    child.props.style?.textDecoration ===
+                                    "line-through";
+                                return React.cloneElement(child, {
+                                    children: (
+                                        <div className="flex items-center gap-2">
+                                            {isChecked ? (
+                                                <CheckCircle
+                                                    size={16}
+                                                    className="text-green-500 flex-shrink-0"
+                                                />
+                                            ) : (
+                                                <Square
+                                                    size={16}
+                                                    className="text-gray-400 flex-shrink-0"
+                                                />
+                                            )}
+                                            <span
+                                                className={
+                                                    isChecked
+                                                        ? "line-through text-gray-500"
+                                                        : ""
+                                                }
+                                            >
+                                                {child.props.children}
+                                            </span>
+                                        </div>
+                                    ),
+                                });
+                            }
+                            return child;
+                        }
+                    );
+
+                    return React.createElement("div", {
+                        ...node.props,
+                        children: children,
+                    });
+                }
+
+                const newChildren = React.Children.map(
+                    node.props.children,
+                    replaceElements
+                );
+                return React.cloneElement(node, { children: newChildren });
+            }
+
+            return node;
+        };
+
+        return replaceElements(elements);
+    };
+
+    // handleDelete
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this todo?")) {
+            return;
+        }
+
+        try {
+            await axios.delete(route("ourtodo.destroy", { id: id }));
+            setReloadTrigger((prev) => !prev);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // handleEdit - Opens edit modal
+    const handleEdit = (todo) => {
+        // Don't allow editing if todo is completed
+        if (todo.is_completed) {
+            return;
+        }
+        setEditingTodo(todo);
+        setIsEditModalOpen(true);
+    };
+
+    // Handle Add Todo
+    const handleAdd = async (formData) => {
+        try {
+            const response = await axios.post(route("ourtodo.store"), formData);
+            setReloadTrigger((prev) => !prev);
+            setIsAddModalOpen(false);
+            return response.data;
+        } catch (error) {
+            console.log("Error adding todo", error);
+            throw error;
+        }
+    };
+
+    // Handle Update Todo
+    const handleUpdate = async (formData, id) => {
+        try {
+            const response = await axios.put(
+                route("ourtodo.update", { id }),
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+            setReloadTrigger((prev) => !prev);
+            setEditingTodo(null);
+            setIsEditModalOpen(false);
+            return response.data;
+        } catch (error) {
+            console.log("Error updating todo", error);
+            throw error;
+        }
+    };
+
+    // Format date for display
+    const formatDate = (dateString) => {
+        if (!dateString) return "No due date";
+        const date = new Date(dateString);
+        const isOverdue = date < new Date() && !selectedTodo?.is_completed;
+
+        return (
+            <div className="flex flex-col lg:flex-row items-center gap-2">
+                <span
+                    className={`px-3 py-1 text-xs rounded-full ${
+                        isOverdue
+                            ? "bg-red-100 text-red-800"
+                            : "bg-blue-100 text-blue-800"
+                    }`}
+                >
+                    {String(date.getDate()).padStart(2, "0")}/
+                    {String(date.getMonth() + 1).padStart(2, "0")}/
+                    {date.getFullYear()}
+                </span>
+            </div>
+        );
+    };
+
+    // Define columns for MyTable
+    const columns = useMemo(
+        () => [
+            {
+                Header: "S/N",
+                accessor: (row, index) => index + 1,
+                id: "rowIndex",
+                width: 50,
+            },
+            {
+                Header: "Status",
+                accessor: "is_completed",
+                Cell: ({ value }) => (
+                    <div className="flex items-center gap-2">
+                        <span
+                            className={`px-3 py-1.5 text-xs font-medium rounded-full ${
+                                value
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-yellow-100 text-yellow-800"
+                            }`}
+                        >
+                            {value ? "Complete" : "Incomplete"}
+                        </span>
+                    </div>
+                ),
+                width: 140,
+            },
+            {
+                Header: "Title",
+                accessor: "title",
+                Cell: ({ value }) => (
+                    <div className="flex items-center gap-2">
+                        <span className={`text-sm font-medium text-gray-900`}>
+                            {value}
+                        </span>
+                    </div>
+                ),
+            },
+            {
+                Header: "Due Date",
+                accessor: "due_date",
+                Cell: ({ value }) => formatDate(value),
+                width: 200,
+            },
+            {
+                Header: "Actions",
+                accessor: "id",
+                Cell: ({ row }) => {
+                    const todo = row.original;
+                    const isCompleted = todo.is_completed;
+
+                    return (
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setSelectedTodo(todo)}
+                                className={`p-2  transition-colors flex items-center justify-center ${
+                                    selectedTodo?.id === todo.id
+                                        ? " text-blue-700"
+                                        : " text-gray-700 "
+                                }`}
+                                title="View todo details"
+                            >
+                                <Eye size={16} />
+                            </button>
+
+                            {/* Only show edit button if todo is NOT completed */}
+                            {!isCompleted && (
+                                <button
+                                    onClick={() => handleEdit(todo)}
+                                    className="text-indigo-600 hover:text-indigo-900 transition duration-200"
+                                    title="Edit todo"
+                                >
+                                    <Edit size={16} />
+                                </button>
+                            )}
+
+                            <button
+                                onClick={() => handleDelete(todo.id)}
+                                className="text-red-600 hover:text-red-900 transition duration-200"
+                                title="Delete todo"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    );
+                },
+                width: 160,
+            },
+        ],
+        [selectedTodo]
+    );
+
+    // Open add modal
+    const openAddModal = () => {
+        setIsAddModalOpen(true);
+    };
+
+    // Close add modal
+    const closeAddModal = () => {
+        setIsAddModalOpen(false);
+    };
+
+    // Close edit modal
+    const closeEditModal = () => {
+        setIsEditModalOpen(false);
+        setEditingTodo(null);
+    };
+
+    return (
+        <AdminWrapper>
+            <div className="container mx-auto py-4">
+                {/* Header */}
+                <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                        ToDo List
+                    </h1>
+                    <button
+                        onClick={openAddModal}
+                        className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm"
+                    >
+                        <Plus size={18} />
+                        <span>Create</span>
+                    </button>
+                </div>
+
+                {/* Todo List Table - Using MyTable component with integrated loading */}
+                <MyTable 
+                    columns={columns} 
+                    data={allTodo} 
+                    loading={loading}
+                />
+
+                {/* Todo Details Section - Below the Table */}
+                {selectedTodo && (
+                    <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
+                        {/* Todo Information */}
+                        <div className="p-6">
+                            <div>
+                                <div className="flex justify-between">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <FileText
+                                            size={24}
+                                            className="text-blue-600"
+                                        />
+                                        <h3 className="text-lg font-semibold text-gray-800">
+                                            {selectedTodo.title}
+                                        </h3>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {!selectedTodo.is_completed && (
+                                            <button
+                                                onClick={() =>
+                                                    handleEdit(selectedTodo)
+                                                }
+                                                className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
+                                                title="Edit todo"
+                                            >
+                                                <Edit size={16} />
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() =>
+                                                setSelectedTodo(null)
+                                            }
+                                            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                                            title="Close details"
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {selectedTodo.descriptions &&
+                                selectedTodo.descriptions.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {selectedTodo.descriptions
+                                            .slice()
+                                            .reverse()
+                                            .map((description, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4"
+                                                >
+                                                    <div className="flex items-start gap-3 mb-3">
+                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                                            <span className="text-sm font-semibold text-blue-600">
+                                                                T
+                                                            </span>
+                                                        </div>
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-start mb-2">
+                                                                <div className="font-medium text-gray-800">
+                                                                    <h2 className="font-medium text-gray-800">
+                                                                        Todo
+                                                                        Description
+                                                                    </h2>
+                                                                </div>
+                                                                <div className="flex gap-2 items-center">
+                                                                    <Calendar
+                                                                        size={
+                                                                            14
+                                                                        }
+                                                                        className="text-gray-400"
+                                                                    />
+                                                                    <p className="text-xs text-gray-500">
+                                                                        {description.created_at
+                                                                            ? new Date(
+                                                                                  description.created_at
+                                                                              ).toLocaleString()
+                                                                            : "Unknown date"}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pl-14">
+                                                        <div className="prose max-w-none text-md text-gray-700 pl-4 py-2">
+                                                            {/* Using custom parser with Lucide icons */}
+                                                            {parseWithIcons(
+                                                                description.description ||
+                                                                    ""
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                                        <FileText
+                                            size={64}
+                                            className="mx-auto text-gray-300 mb-3"
+                                        />
+                                        <h4 className="text-lg font-medium text-gray-500 mb-2">
+                                            No descriptions available
+                                        </h4>
+                                        <p className="text-gray-400 text-sm">
+                                            There are no descriptions for this
+                                            todo yet.
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Add Todo Modal */}
+                {isAddModalOpen && (
+                    <AddTodo
+                        onClose={closeAddModal}
+                        handleAdd={handleAdd}
+                        reloadTrigger={reloadTrigger}
+                        setReloadTrigger={setReloadTrigger}
+                    />
+                )}
+
+                {/* Edit Todo Modal */}
+                {isEditModalOpen && editingTodo && (
+                    <EditTodo
+                        editingTodo={editingTodo}
+                        onClose={closeEditModal}
+                        handleUpdate={handleUpdate}
+                        reloadTrigger={reloadTrigger}
+                        setReloadTrigger={setReloadTrigger}
+                    />
+                )}
+            </div>
+        </AdminWrapper>
+    );
+};
+
+export default ToDOPage;
+
+
+
+
 // import axios from "axios";
 // import React, { useEffect, useMemo, useState } from "react";
 // import {
@@ -543,527 +1071,3 @@
 // export default ToDOPage;
 
 
-import axios from "axios";
-import React, { useEffect, useMemo, useState } from "react";
-import {
-    ChevronUp,
-    ChevronDown,
-    ChevronLeft,
-    ChevronRight,
-    Edit,
-    Trash2,
-    X,
-    Eye,
-    FileText,
-    Calendar,
-    CheckCircle,
-    Square,
-    Plus,
-} from "lucide-react";
-import AddTodo from "@/AddFormComponents/AddTodo";
-import EditTodo from "@/EditFormComponents/EditTodo";
-import AdminWrapper from "@/AdminWrapper/AdminWrapper";
-import parse from "html-react-parser";
-import MyTable from "@/TableComponents/MyTable";
-
-const ToDOPage = () => {
-    const [allTodo, setAllTodo] = useState([]);
-    const [reloadTrigger, setReloadTrigger] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedTodo, setSelectedTodo] = useState(null);
-    const [editingTodo, setEditingTodo] = useState(null);
-
-    useEffect(() => {
-        const fetchTodo = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(route("ourtodo.index"));
-                setAllTodo(response.data.data || []);
-            } catch (error) {
-                console.error("fetching error ", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchTodo();
-    }, [reloadTrigger]);
-
-    // Custom parser to replace HTML elements with Lucide icons
-    const parseWithIcons = (html) => {
-        if (!html) return null;
-
-        const elements = parse(html);
-
-        const replaceElements = (node) => {
-            if (!node || typeof node !== "object") return node;
-
-            if (Array.isArray(node)) {
-                return node.map(replaceElements);
-            }
-
-            if (node.props && node.props.children) {
-                // Replace ul/ol with custom styled lists
-                if (node.type === "ul" || node.type === "ol") {
-                    const children = React.Children.map(
-                        node.props.children,
-                        (child, index) => {
-                            if (child && child.props && child.type === "li") {
-                                return React.cloneElement(child, {
-                                    className: `${
-                                        child.props.className || ""
-                                    } flex items-start gap-2 py-1`,
-                                    children: (
-                                        <>
-                                            {node.type === "ul" ? (
-                                                <CheckCircle
-                                                    size={12}
-                                                    className="mt-1.5 text-blue-500 flex-shrink-0"
-                                                />
-                                            ) : (
-                                                <span className="text-sm font-medium text-blue-600 w-5 flex-shrink-0">
-                                                    {index + 1}.
-                                                </span>
-                                            )}
-                                            <span className="flex-1">
-                                                {replaceElements(
-                                                    child.props.children
-                                                )}
-                                            </span>
-                                        </>
-                                    ),
-                                });
-                            }
-                            return child;
-                        }
-                    );
-
-                    return React.createElement(node.type, {
-                        ...node.props,
-                        className: `${
-                            node.props.className || ""
-                        } space-y-2 my-2`,
-                        children: children,
-                    });
-                }
-
-                // Replace checkboxes/todo items
-                if (
-                    node.props.className &&
-                    node.props.className.includes("ql-direction")
-                ) {
-                    const children = React.Children.map(
-                        node.props.children,
-                        (child) => {
-                            if (child && child.props && child.type === "span") {
-                                const isChecked =
-                                    child.props.style?.textDecoration ===
-                                    "line-through";
-                                return React.cloneElement(child, {
-                                    children: (
-                                        <div className="flex items-center gap-2">
-                                            {isChecked ? (
-                                                <CheckCircle
-                                                    size={16}
-                                                    className="text-green-500 flex-shrink-0"
-                                                />
-                                            ) : (
-                                                <Square
-                                                    size={16}
-                                                    className="text-gray-400 flex-shrink-0"
-                                                />
-                                            )}
-                                            <span
-                                                className={
-                                                    isChecked
-                                                        ? "line-through text-gray-500"
-                                                        : ""
-                                                }
-                                            >
-                                                {child.props.children}
-                                            </span>
-                                        </div>
-                                    ),
-                                });
-                            }
-                            return child;
-                        }
-                    );
-
-                    return React.createElement("div", {
-                        ...node.props,
-                        children: children,
-                    });
-                }
-
-                const newChildren = React.Children.map(
-                    node.props.children,
-                    replaceElements
-                );
-                return React.cloneElement(node, { children: newChildren });
-            }
-
-            return node;
-        };
-
-        return replaceElements(elements);
-    };
-
-    // handleDelete
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this todo?")) {
-            return;
-        }
-
-        try {
-            await axios.delete(route("ourtodo.destroy", { id: id }));
-            setReloadTrigger((prev) => !prev);
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    // handleEdit - Opens edit modal
-    const handleEdit = (todo) => {
-        // Don't allow editing if todo is completed
-        if (todo.is_completed) {
-            return;
-        }
-        setEditingTodo(todo);
-        setIsEditModalOpen(true);
-    };
-
-    // Handle Add Todo
-    const handleAdd = async (formData) => {
-        try {
-            const response = await axios.post(route("ourtodo.store"), formData);
-            setReloadTrigger((prev) => !prev);
-            setIsAddModalOpen(false);
-            return response.data;
-        } catch (error) {
-            console.log("Error adding todo", error);
-            throw error;
-        }
-    };
-
-    // Handle Update Todo
-    const handleUpdate = async (formData, id) => {
-        try {
-            const response = await axios.put(
-                route("ourtodo.update", { id }),
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
-            );
-            setReloadTrigger((prev) => !prev);
-            setEditingTodo(null);
-            setIsEditModalOpen(false);
-            return response.data;
-        } catch (error) {
-            console.log("Error updating todo", error);
-            throw error;
-        }
-    };
-
-    // Format date for display
-    const formatDate = (dateString) => {
-        if (!dateString) return "No due date";
-        const date = new Date(dateString);
-        const isOverdue = date < new Date() && !selectedTodo?.is_completed;
-
-        return (
-            <div className="flex flex-col lg:flex-row items-center gap-2">
-                <span
-                    className={`px-3 py-1 text-xs rounded-full ${
-                        isOverdue
-                            ? "bg-red-100 text-red-800"
-                            : "bg-blue-100 text-blue-800"
-                    }`}
-                >
-                    {String(date.getDate()).padStart(2, "0")}/
-                    {String(date.getMonth() + 1).padStart(2, "0")}/
-                    {date.getFullYear()}
-                </span>
-            </div>
-        );
-    };
-
-    // Define columns for MyTable
-    const columns = useMemo(
-        () => [
-            {
-                Header: "S/N",
-                accessor: (row, index) => index + 1,
-                id: "rowIndex",
-                width: 50,
-            },
-            {
-                Header: "Status",
-                accessor: "is_completed",
-                Cell: ({ value }) => (
-                    <div className="flex items-center gap-2">
-                        <span
-                            className={`px-3 py-1.5 text-xs font-medium rounded-full ${
-                                value
-                                    ? "bg-green-100 text-green-800"
-                                    : "bg-yellow-100 text-yellow-800"
-                            }`}
-                        >
-                            {value ? "Complete" : "Incomplete"}
-                        </span>
-                    </div>
-                ),
-                width: 140,
-            },
-            {
-                Header: "Title",
-                accessor: "title",
-                Cell: ({ value }) => (
-                    <div className="flex items-center gap-2">
-                        <span className={`text-sm font-medium text-gray-900`}>
-                            {value}
-                        </span>
-                    </div>
-                ),
-            },
-            {
-                Header: "Due Date",
-                accessor: "due_date",
-                Cell: ({ value }) => formatDate(value),
-                width: 200,
-            },
-            {
-                Header: "Actions",
-                accessor: "id",
-                Cell: ({ row }) => {
-                    const todo = row.original;
-                    const isCompleted = todo.is_completed;
-
-                    return (
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setSelectedTodo(todo)}
-                                className={`p-2  transition-colors flex items-center justify-center ${
-                                    selectedTodo?.id === todo.id
-                                        ? " text-blue-700"
-                                        : " text-gray-700 "
-                                }`}
-                                title="View todo details"
-                            >
-                                <Eye size={16} />
-                            </button>
-
-                            {/* Only show edit button if todo is NOT completed */}
-                            {!isCompleted && (
-                                <button
-                                    onClick={() => handleEdit(todo)}
-                                    className="text-indigo-600 hover:text-indigo-900 transition duration-200"
-                                    title="Edit todo"
-                                >
-                                    <Edit size={16} />
-                                </button>
-                            )}
-
-                            <button
-                                onClick={() => handleDelete(todo.id)}
-                                className="text-red-600 hover:text-red-900 transition duration-200"
-                                title="Delete todo"
-                            >
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    );
-                },
-                width: 160,
-            },
-        ],
-        [selectedTodo]
-    );
-
-    // Open add modal
-    const openAddModal = () => {
-        setIsAddModalOpen(true);
-    };
-
-    // Close add modal
-    const closeAddModal = () => {
-        setIsAddModalOpen(false);
-    };
-
-    // Close edit modal
-    const closeEditModal = () => {
-        setIsEditModalOpen(false);
-        setEditingTodo(null);
-    };
-
-    return (
-        <AdminWrapper>
-            <div className="container mx-auto py-4">
-                {/* Header */}
-                <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
-                        ToDo List
-                    </h1>
-                    <button
-                        onClick={openAddModal}
-                        className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm"
-                    >
-                        <Plus size={18} />
-                        <span>Create</span>
-                    </button>
-                </div>
-
-                {/* Todo List Table - Using MyTable component with integrated loading */}
-                <MyTable 
-                    columns={columns} 
-                    data={allTodo} 
-                    loading={loading}
-                />
-
-                {/* Todo Details Section - Below the Table */}
-                {selectedTodo && (
-                    <div className="bg-white rounded-xl shadow-lg overflow-hidden mt-6">
-                        {/* Todo Information */}
-                        <div className="p-6">
-                            <div>
-                                <div className="flex justify-between">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <FileText
-                                            size={24}
-                                            className="text-blue-600"
-                                        />
-                                        <h3 className="text-lg font-semibold text-gray-800">
-                                            {selectedTodo.title}
-                                        </h3>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        {!selectedTodo.is_completed && (
-                                            <button
-                                                onClick={() =>
-                                                    handleEdit(selectedTodo)
-                                                }
-                                                className="text-blue-600 hover:text-blue-900 transition-colors p-2 rounded hover:bg-blue-50"
-                                                title="Edit todo"
-                                            >
-                                                <Edit size={16} />
-                                            </button>
-                                        )}
-                                        <button
-                                            onClick={() =>
-                                                setSelectedTodo(null)
-                                            }
-                                            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
-                                            title="Close details"
-                                        >
-                                            <X size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {selectedTodo.descriptions &&
-                                selectedTodo.descriptions.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {selectedTodo.descriptions
-                                            .slice()
-                                            .reverse()
-                                            .map((description, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="bg-gray-50 border border-gray-200 rounded-lg p-4"
-                                                >
-                                                    <div className="flex items-start gap-3 mb-3">
-                                                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                                            <span className="text-sm font-semibold text-blue-600">
-                                                                T
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex-1">
-                                                            <div className="flex justify-between items-start mb-2">
-                                                                <div className="font-medium text-gray-800">
-                                                                    <h2 className="font-medium text-gray-800">
-                                                                        Todo
-                                                                        Description
-                                                                    </h2>
-                                                                </div>
-                                                                <div className="flex gap-2 items-center">
-                                                                    <Calendar
-                                                                        size={
-                                                                            14
-                                                                        }
-                                                                        className="text-gray-400"
-                                                                    />
-                                                                    <p className="text-xs text-gray-500">
-                                                                        {description.created_at
-                                                                            ? new Date(
-                                                                                  description.created_at
-                                                                              ).toLocaleString()
-                                                                            : "Unknown date"}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="pl-14">
-                                                        <div className="prose max-w-none text-md text-gray-700 pl-4 py-2">
-                                                            {/* Using custom parser with Lucide icons */}
-                                                            {parseWithIcons(
-                                                                description.description ||
-                                                                    ""
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
-                                        <FileText
-                                            size={64}
-                                            className="mx-auto text-gray-300 mb-3"
-                                        />
-                                        <h4 className="text-lg font-medium text-gray-500 mb-2">
-                                            No descriptions available
-                                        </h4>
-                                        <p className="text-gray-400 text-sm">
-                                            There are no descriptions for this
-                                            todo yet.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* Add Todo Modal */}
-                {isAddModalOpen && (
-                    <AddTodo
-                        onClose={closeAddModal}
-                        handleAdd={handleAdd}
-                        reloadTrigger={reloadTrigger}
-                        setReloadTrigger={setReloadTrigger}
-                    />
-                )}
-
-                {/* Edit Todo Modal */}
-                {isEditModalOpen && editingTodo && (
-                    <EditTodo
-                        editingTodo={editingTodo}
-                        onClose={closeEditModal}
-                        handleUpdate={handleUpdate}
-                        reloadTrigger={reloadTrigger}
-                        setReloadTrigger={setReloadTrigger}
-                    />
-                )}
-            </div>
-        </AdminWrapper>
-    );
-};
-
-export default ToDOPage;
