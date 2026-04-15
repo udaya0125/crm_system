@@ -11,7 +11,6 @@ const TaskAssigned = () => {
     // Get user from page props
     const { props } = usePage();
     const user = props.auth.user;
-
     // States
     const [allTaskList, setAllTaskList] = useState([]);
     const [users, setUsers] = useState([]);
