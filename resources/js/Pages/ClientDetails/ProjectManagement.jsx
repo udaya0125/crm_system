@@ -194,9 +194,7 @@ const ProjectManagement = () => {
                 Header: "ID",
                 accessor: "project_id",
                 Cell: ({ value }) => (
-                    <span className="font-mono text-xs ">
-                        {value}
-                    </span>
+                    <span className="font-mono text-xs ">{value}</span>
                 ),
             },
             {
