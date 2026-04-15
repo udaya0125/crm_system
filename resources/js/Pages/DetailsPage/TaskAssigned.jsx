@@ -7,7 +7,6 @@ import { Edit, Plus, Trash2 } from "lucide-react";
 import EditTaskAssigned from "@/EditFormComponents/EditTaskAssigned";
 import MyTable from "@/TableComponents/MyTable";
 
-
 const TaskAssigned = () => {
     // Get user from page props
     const { props } = usePage();
@@ -200,7 +199,7 @@ const TaskAssigned = () => {
                         onClick={handleAddNew}
                         className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm"
                     >
-                       <Plus size={18} />
+                        <Plus size={18} />
                         <span>Create</span>
                     </button>
                 </div>
@@ -262,10 +261,7 @@ const TaskAssigned = () => {
                                 )}
                             </div>
                         ) : (
-                            <MyTable 
-                                columns={columns} 
-                                data={allTaskList}
-                            />
+                            <MyTable columns={columns} data={allTaskList} />
                         )}
                     </>
                 )}
@@ -275,9 +271,6 @@ const TaskAssigned = () => {
 };
 
 export default TaskAssigned;
-
-
-
 
 // import React, { useState, useEffect, useMemo } from "react";
 // import axios from "axios";
@@ -522,7 +515,7 @@ export default TaskAssigned;
 //                     <h1 className="text-3xl font-bold text-gray-800">
 //                         Assigned Tasks
 //                     </h1>
-                   
+
 //                     {user.role === "admin" && (
 //                         <div className="flex justify-end mb-4">
 //                             <button
@@ -781,4 +774,3 @@ export default TaskAssigned;
 // };
 
 // export default TaskAssigned;
-
