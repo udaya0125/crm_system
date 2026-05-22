@@ -23,7 +23,8 @@ use App\Http\Controllers\UserLogController;
 use App\Http\Controllers\ServiceContractController;
 use App\Http\Controllers\PasswordController;
 use App\Http\Controllers\PaymentController;
-
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\OrganizationController;
 
     // -----------------------------------------
     // WELCOME PAGE
@@ -472,5 +473,25 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     // Route::get('/ticket-dashboard', function(){
     //     return Inertia::render('Dashboard/ExpiryDashboard');
     // });
+
+
+    Route::get('/ourcategories', [CategoryController::class, 'index'])->name('ourcategories.index');
+    Route::post('/ourcategories', [CategoryController::class, 'store'])->name('ourcategories.store');
+    Route::put('/ourcategories/{id}', [CategoryController::class, 'update'])->name('ourcategories.update');
+    Route::delete('/ourcategories/{id}', [CategoryController::class, 'destroy'])->name('ourcategories.destroy');
+
+
+    Route::get('/category',function (){
+        return Inertia::render('Passwords/Category');
+    });
+
+    Route::get('/organization',function (){
+        return Inertia::render('Passwords/Organization');
+    });
+
+    Route::get('/ourOrganizations', [OrganizationController::class, 'index'])->name('ourorganizations.index');
+    Route::post('/ourOrganizations', [OrganizationController::class, 'store'])->name('ourorganizations.store');
+    Route::put('/ourOrganizations/{id}', [OrganizationController::class, 'update'])->name('ourorganizations.update');
+    Route::delete('/ourOrganizations/{id}', [OrganizationController::class, 'destroy'])->name('ourorganizations.destroy');
 
 require __DIR__.'/auth.php';
