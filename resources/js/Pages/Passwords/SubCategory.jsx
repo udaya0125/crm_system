@@ -1,19 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Layers } from "lucide-react";
 import AddSubCategoryForm from "@/AddFormComponents/AddSubCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 
-const formatDate = (value) => {
-    if (!value) return "N/A";
-    return new Date(value).toLocaleDateString();
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+const groupByCategory = (subCategories) => {
+    const map = {};
+    subCategories.forEach((sub) => {
+        const catId   = sub.category?.id   ?? "__none__";
+        const catName = sub.category?.name ?? "Uncategorised";
+        if (!map[catId]) {
+            map[catId] = { id: catId, name: catName, children: [] };
+        }
+        map[catId].children.push(sub);
+    });
+    return Object.values(map);
 };
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 const SubCategory = () => {
-    const [allSubCategories, setAllSubCategories] = useState([]);
-    const [reloadTrigger, setReloadTrigger] = useState(false);
+    const [allSubCategories, setAllSubCategories]     = useState([]);
+    const [reloadTrigger, setReloadTrigger]           = useState(false);
     const [editingSubCategory, setEditingSubCategory] = useState(null);
-    const [showForm, setShowForm] = useState(true);
+    const [showForm, setShowForm]                     = useState(false);
 
     useEffect(() => {
         const fetchSubCategories = async () => {
@@ -24,28 +36,21 @@ const SubCategory = () => {
                 console.error("fetching error", error);
             }
         };
-
         fetchSubCategories();
     }, [reloadTrigger]);
 
     const handleDelete = async (id) => {
         if (!confirm("Delete this subcategory?")) return;
-
         try {
             await axios.delete(route("oursubcategories.destroy", { id }));
             setReloadTrigger((prev) => !prev);
-
-            if (editingSubCategory?.id === id) {
-                setEditingSubCategory(null);
-                setShowForm(true);
-            }
         } catch (error) {
             console.error(error);
         }
     };
 
-    const handleEdit = (subCategory) => {
-        setEditingSubCategory(subCategory);
+    const handleEdit = (sub) => {
+        setEditingSubCategory(sub);
         setShowForm(true);
     };
 
@@ -55,7 +60,7 @@ const SubCategory = () => {
             const response = await axios.post(
                 route("oursubcategories.update", { id }),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } },
+                { headers: { "Content-Type": "multipart/form-data" } }
             );
             setReloadTrigger((prev) => !prev);
             return response.data;
@@ -65,140 +70,135 @@ const SubCategory = () => {
         }
     };
 
-    const startCreate = () => {
-        setEditingSubCategory(null);
-        setShowForm(true);
-    };
+    const grouped = useMemo(
+        () => groupByCategory(allSubCategories),
+        [allSubCategories]
+    );
 
     return (
         <AdminWrapper>
-            <div className="space-y-6 px-4 py-6 lg:px-0">
-                <div className="rounded-[28px] bg-gradient-to-r from-emerald-900 via-teal-800 to-cyan-800 p-6 text-white shadow-lg">
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                        <div>
-                            <p className="text-sm font-medium uppercase tracking-[0.28em] text-emerald-200">
-                                Admin panel
-                            </p>
-                            <h1 className="mt-2 text-3xl font-semibold">
-                                Subcategory management
-                            </h1>
-                            <p className="mt-2 max-w-2xl text-sm text-emerald-100">
-                                Keep parent and child relationships clear while editing from one page.
-                            </p>
-                        </div>
+            {/* Header */}
+            <div className="mb-6 flex justify-between items-center">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                    SubCategory Management
+                </h1>
+                <button
+                    onClick={() => { setEditingSubCategory(null); setShowForm(true); }}
+                    className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm text-sm font-medium"
+                >
+                    <Plus size={16} />
+                    Create
+                </button>
+            </div>
 
-                        <div className="flex flex-wrap items-center gap-3">
-                            <div className="rounded-2xl bg-white/10 px-4 py-3 backdrop-blur">
-                                <p className="text-xs uppercase tracking-[0.2em] text-emerald-100">
-                                    Total subcategories
-                                </p>
-                                <p className="mt-1 text-2xl font-semibold">
-                                    {allSubCategories.length}
-                                </p>
-                            </div>
-                            <button
-                                onClick={startCreate}
-                                className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-medium text-slate-900 transition hover:bg-slate-100"
-                            >
-                                <Plus size={18} />
-                                New subcategory
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            {/* Table card */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                            <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">
+                                S.N.
+                            </th>
+                            <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Sub Category
+                            </th>
+                            <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                Created At
+                            </th>
+                            <th className="px-5 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
 
-                <div className="grid gap-6 xl:grid-cols-12">
-                    <div className="xl:col-span-4">
-                        <AddSubCategoryForm
-                            showForm={showForm}
-                            setShowForm={setShowForm}
-                            setReloadTrigger={setReloadTrigger}
-                            editingSubCategory={editingSubCategory}
-                            setEditingSubCategory={setEditingSubCategory}
-                            handleUpdate={handleUpdate}
-                        />
-                    </div>
+                    <tbody>
+                        {grouped.length === 0 ? (
+                            <tr>
+                                <td colSpan={4} className="px-6 py-12 text-center text-gray-400">
+                                    No subcategories found.
+                                </td>
+                            </tr>
+                        ) : (
+                            grouped.map((group) => (
+                                <React.Fragment key={group.id}>
+                                    {/* Category header row */}
+                                    <tr className="bg-indigo-50/60 border-t-2 border-indigo-100">
+                                        <td colSpan={4} className="px-5 py-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+                                                    <Layers size={13} className="text-indigo-600" />
+                                                </div>
+                                                <span className="font-semibold text-indigo-700 tracking-wide uppercase text-xs">
+                                                    {group.name}
+                                                </span>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                    <div className="xl:col-span-8">
-                        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                            <div className="border-b border-slate-200 px-6 py-5">
-                                <h2 className="text-lg font-semibold text-slate-900">
-                                    Subcategories list
-                                </h2>
-                                <p className="text-sm text-slate-500">
-                                    Parent category details stay visible right in the table.
-                                </p>
-                            </div>
-
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full">
-                                    <thead className="bg-slate-50">
-                                        <tr className="text-left text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-                                            <th className="px-6 py-4">#</th>
-                                            <th className="px-6 py-4">Name</th>
-                                            <th className="px-6 py-4">Parent category</th>
-                                            <th className="px-6 py-4">Created</th>
-                                            <th className="px-6 py-4 text-right">Actions</th>
+                                    {/* Subcategory rows */}
+                                    {group.children.map((sub, index) => (
+                                        <tr
+                                            key={sub.id}
+                                            className="border-t border-gray-50 hover:bg-gray-50/70 transition-colors"
+                                        >
+                                            <td className="px-5 py-3">
+                                                <span className="text-gray-400 text-xs font-mono">
+                                                    {index + 1}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <span className="text-gray-700 font-medium pl-1">
+                                                    {sub.name}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-3">
+                                                <span className="text-gray-500 text-xs">
+                                                    {new Date(sub.created_at).toLocaleDateString()}
+                                                </span>
+                                            </td>
+                                            <td className="px-5 py-3 text-right">
+                                                <div className="flex gap-1 justify-end">
+                                                    <button
+                                                        onClick={() => handleEdit(sub)}
+                                                        title="Edit"
+                                                        className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
+                                                    >
+                                                        <Pencil size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(sub.id)}
+                                                        title="Delete"
+                                                        className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {allSubCategories.length === 0 ? (
-                                            <tr>
-                                                <td
-                                                    colSpan={5}
-                                                    className="px-6 py-14 text-center text-sm text-slate-400"
-                                                >
-                                                    No subcategories found yet.
-                                                </td>
-                                            </tr>
-                                        ) : (
-                                            allSubCategories.map((subCategory, index) => (
-                                                <tr
-                                                    key={subCategory.id}
-                                                    className="transition hover:bg-slate-50"
-                                                >
-                                                    <td className="px-6 py-4 text-sm text-slate-500">
-                                                        {index + 1}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <p className="text-sm font-medium text-slate-900">
-                                                            {subCategory.name}
-                                                        </p>
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-600">
-                                                        {subCategory.category?.name || "N/A"}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm text-slate-500">
-                                                        {formatDate(subCategory.created_at)}
-                                                    </td>
-                                                    <td className="px-6 py-4">
-                                                        <div className="flex justify-end gap-2">
-                                                            <button
-                                                                onClick={() => handleEdit(subCategory)}
-                                                                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-                                                            >
-                                                                <Pencil size={15} />
-                                                                Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDelete(subCategory.id)}
-                                                                className="inline-flex items-center gap-2 rounded-xl border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 transition hover:bg-rose-50"
-                                                            >
-                                                                <Trash2 size={15} />
-                                                                Delete
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                                    ))}
+                                </React.Fragment>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+
+                {/* Footer */}
+                <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between text-xs text-gray-400">
+                    <span>
+                        {grouped.length} {grouped.length === 1 ? "category" : "categories"}
+                    </span>
+                    <span>{allSubCategories.length} total subcategories</span>
                 </div>
             </div>
+
+            <AddSubCategoryForm
+                showForm={showForm}
+                setShowForm={setShowForm}
+                setReloadTrigger={setReloadTrigger}
+                editingSubCategory={editingSubCategory}
+                setEditingSubCategory={setEditingSubCategory}
+                handleUpdate={handleUpdate}
+            />
         </AdminWrapper>
     );
 };

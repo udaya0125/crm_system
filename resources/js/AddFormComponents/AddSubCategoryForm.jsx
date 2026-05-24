@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { X } from "lucide-react";
 
 const AddSubCategoryForm = ({
     showForm,
@@ -16,35 +17,42 @@ const AddSubCategoryForm = ({
         category_id: "",
     });
 
+    // Fetch parent categories for the dropdown
+    // useEffect(() => {
+    //     const fetchCategories = async () => {
+    //         try {
+    //             const response = await axios.get(route("ourCategories.index")); // adjust route name
+    //             setCategories(response.data.data ?? response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching categories", error);
+    //         }
+    //     };
+    //     fetchCategories();
+    // }, []);
+    // In AddSubCategoryForm.jsx — fix the route name
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get(route("ourcategories.index"));
-                setCategories(response.data.data);
+                setCategories(response.data.data); // controller returns { status, data }
             } catch (error) {
                 console.error("Error fetching categories", error);
             }
         };
-
         fetchCategories();
     }, []);
 
+    // Populate form when editing
     useEffect(() => {
         if (editingSubCategory) {
             setSubCategoryForm({
                 name: editingSubCategory.name,
                 category_id: editingSubCategory.category_id,
             });
-        } else if (showForm) {
+        } else {
             setSubCategoryForm({ name: "", category_id: "" });
         }
-    }, [editingSubCategory, showForm]);
-
-    const resetForm = () => {
-        setShowForm(true);
-        setEditingSubCategory(null);
-        setSubCategoryForm({ name: "", category_id: "" });
-    };
+    }, [editingSubCategory]);
 
     const handleCreate = async (formData) => {
         await axios.post(route("oursubcategories.store"), formData, {
@@ -56,23 +64,21 @@ const AddSubCategoryForm = ({
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
-
-        Object.entries(subCategoryForm).forEach(([key, value]) => {
-            if (value !== null && value !== "") {
-                formData.append(key, value);
+        for (const key in subCategoryForm) {
+            if (subCategoryForm[key] !== null && subCategoryForm[key] !== "") {
+                formData.append(key, subCategoryForm[key]);
             }
-        });
-
+        }
         try {
             setSubmitting(true);
-
             if (editingSubCategory) {
                 await handleUpdate(formData, editingSubCategory.id);
             } else {
                 await handleCreate(formData);
             }
-
-            resetForm();
+            setSubCategoryForm({ name: "", category_id: "" });
+            setShowForm(false);
+            setEditingSubCategory(null);
         } catch (error) {
             console.error("Error saving subcategory", error);
         } finally {
@@ -85,87 +91,96 @@ const AddSubCategoryForm = ({
         setSubCategoryForm((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleClose = () => {
+        setShowForm(false);
+        setEditingSubCategory(null);
+        setSubCategoryForm({ name: "", category_id: "" });
+    };
+
     if (!showForm) return null;
 
     return (
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="mb-6">
-                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-indigo-600">
-                    {editingSubCategory ? "Edit mode" : "Create mode"}
-                </p>
-                <h2 className="mt-2 text-2xl font-semibold text-slate-900">
-                    {editingSubCategory
-                        ? "Update subcategory"
-                        : "Add a new subcategory"}
-                </h2>
-                <p className="mt-2 text-sm text-slate-500">
-                    Pick the parent category and manage the next level from this page.
-                </p>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        {editingSubCategory
+                            ? "Edit SubCategory"
+                            : "Add New SubCategory"}
+                    </h2>
+                    <button
+                        onClick={handleClose}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
+                        <X size={24} />
+                    </button>
+                </div>
+
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* Name */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            SubCategory Name{" "}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={subCategoryForm.name}
+                            onChange={handleChange}
+                            required
+                            placeholder="e.g. Men's Shoes"
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+                        />
+                    </div>
+
+                    {/* Category dropdown */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Parent Category{" "}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                            name="category_id"
+                            value={subCategoryForm.category_id}
+                            onChange={handleChange}
+                            required
+                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white"
+                        >
+                            <option value="">— Select a category —</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {cat.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="px-5 py-2 text-sm rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-50 transition"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="px-5 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            {submitting
+                                ? "Saving..."
+                                : editingSubCategory
+                                  ? "Update SubCategory"
+                                  : "Create SubCategory"}
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <form onSubmit={handleSubmit} className="space-y-5">
-                <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Subcategory name <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                        type="text"
-                        name="name"
-                        value={subCategoryForm.name}
-                        onChange={handleChange}
-                        required
-                        placeholder="e.g. Men's Shoes"
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                    />
-                </div>
-
-                <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Parent category <span className="text-rose-500">*</span>
-                    </label>
-                    <select
-                        name="category_id"
-                        value={subCategoryForm.category_id}
-                        onChange={handleChange}
-                        required
-                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100"
-                    >
-                        <option value="">Select a category</option>
-                        {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                                {category.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-
-                <div className="flex flex-wrap gap-3 pt-2">
-                    <button
-                        type="submit"
-                        disabled={submitting}
-                        className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                        {submitting
-                            ? "Saving..."
-                            : editingSubCategory
-                              ? "Update subcategory"
-                              : "Create subcategory"}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={resetForm}
-                        className="rounded-2xl border border-slate-200 px-5 py-3 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-                    >
-                        Clear form
-                    </button>
-                </div>
-            </form>
-
-            {editingSubCategory ? (
-                <p className="mt-4 text-xs text-slate-500">
-                    You are editing an existing subcategory. Clear the form to switch back to create mode.
-                </p>
-            ) : null}
         </div>
     );
 };
