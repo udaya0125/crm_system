@@ -26,6 +26,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SubCategoryController;
+use App\Http\Controllers\SubSubCategoryController;
 
     // -----------------------------------------
     // WELCOME PAGE
@@ -504,5 +505,16 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::post('/ourSubcategories', [SubCategoryController::class, 'store'])->name('oursubcategories.store');
     Route::put('/ourSubcategories/{id}', [SubCategoryController::class, 'update'])->name('oursubcategories.update');
     Route::delete('/ourSubcategories/{id}', [SubCategoryController::class, 'destroy'])->name('oursubcategories.destroy');
+
+
+    Route::get('/sub-sub-category',function (){
+        return Inertia::render('Passwords/ChildCategory');
+    });
+
+
+    Route::get('/ourChildcategories', [SubSubCategoryController::class, 'index'])->name('ourchildcategories.index');
+    Route::post('/ourChildcategories', [SubSubCategoryController::class, 'store'])->name('ourchildcategories.store');
+    Route::put('/ourChildcategories/{id}', [SubSubCategoryController::class, 'update'])->name('ourchildcategories.update');
+    Route::delete('/ourChildcategories/{id}', [SubSubCategoryController::class, 'destroy'])->name('ourchildcategories.destroy');
 
 require __DIR__.'/auth.php';
