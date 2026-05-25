@@ -164,12 +164,14 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import AddCategoryForm from "@/AddFormComponents/AddCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
+import EditCategoryForm from "@/EditFormComponents/EditCategoryForm";
 
 const Category = () => {
     const [allCategory, setAllCategory] = useState([]);
     const [reloadTrigger, setReloadTrigger] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
-    const [showForm, setShowForm] = useState(false);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -199,7 +201,7 @@ const Category = () => {
 
     const handleEdit = (category) => {
         setEditingCategory(category);
-        setShowForm(true);
+        setShowEditForm(true);
     };
 
     const handleUpdate = async (formData, id) => {
@@ -210,7 +212,6 @@ const Category = () => {
                 formData,
                 { headers: { "Content-Type": "multipart/form-data" } }
             );
-            setReloadTrigger((prev) => !prev);
             return response.data;
         } catch (error) {
             console.error("Error updating category:", error);
@@ -271,8 +272,7 @@ const Category = () => {
                 </h1>
                 <button
                     onClick={() => {
-                        setEditingCategory(null);
-                        setShowForm(true);
+                        setShowAddForm(true);
                     }}
                     className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
                 >
@@ -288,14 +288,21 @@ const Category = () => {
                 loading={loading}
             />
 
-            {/* Modal Form */}
+            {/* Add Category Modal */}
             <AddCategoryForm
-                showForm={showForm}
-                setShowForm={setShowForm}
+                showForm={showAddForm}
+                setShowForm={setShowAddForm}
                 setReloadTrigger={setReloadTrigger}
+            />
+
+            {/* Edit Category Modal */}
+            <EditCategoryForm
+                showForm={showEditForm}
+                setShowForm={setShowEditForm}
                 editingCategory={editingCategory}
                 setEditingCategory={setEditingCategory}
                 handleUpdate={handleUpdate}
+                setReloadTrigger={setReloadTrigger}
             />
         </AdminWrapper>
     );
