@@ -22,6 +22,7 @@ import {
     Users,
     ClipboardList,
     ListTodo,
+    Key,
 } from "lucide-react";
 
 const AdminSideBar = ({
@@ -37,12 +38,13 @@ const AdminSideBar = ({
     const [isLeadManagementOpen, setIsLeadManagementOpen] = useState(false);
     const [isTaskManagementOpen, setIsTaskManagementOpen] = useState(false);
     const [isClientManagementOpen, setIsClientManagementOpen] = useState(false);
-
+    const [isPasswordManagementOpen, setIsPasswordManagementOpen] =
+        useState(false);
     // Hover states for collapsed dropdowns
     const [isLeadHovered, setIsLeadHovered] = useState(false);
     const [isTaskHovered, setIsTaskHovered] = useState(false);
     const [isClientHovered, setIsClientHovered] = useState(false);
-
+    const [isPasswordHovered, setIsPasswordHovered] = useState(false);
     // Get authenticated user from auth prop
     const { auth } = usePage().props;
     const user = auth?.user;
@@ -50,9 +52,12 @@ const AdminSideBar = ({
     // Check The Role of the User
     const isAdmin = user?.role === "admin";
     const isUser = user?.role === "user";
-    const isAdminOrTechnician = user?.role === "admin" || user?.role === "technician";
-    const isAdminOrDeveloper = user?.role === "admin" || user?.role === "developer";
-    const isAdminOrAccountant = user?.role === "admin" || user?.role === "accountant";
+    const isAdminOrTechnician =
+        user?.role === "admin" || user?.role === "technician";
+    const isAdminOrDeveloper =
+        user?.role === "admin" || user?.role === "developer";
+    const isAdminOrAccountant =
+        user?.role === "admin" || user?.role === "accountant";
     const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
 
     console.log("Current User Role:", user?.role);
@@ -68,6 +73,12 @@ const AdminSideBar = ({
             const routePath = route.replace("/", "");
             return currentPath === routePath || url.startsWith(route + "/");
         });
+    };
+
+    const togglePasswordManagement = () => {
+        if (!isCollapsed) {
+            setIsPasswordManagementOpen(!isPasswordManagementOpen);
+        }
     };
 
     // Toggle functions for expanded view
@@ -96,6 +107,8 @@ const AdminSideBar = ({
     const handleTaskMouseLeave = () => setIsTaskHovered(false);
     const handleClientMouseEnter = () => setIsClientHovered(true);
     const handleClientMouseLeave = () => setIsClientHovered(false);
+    const handlePasswordMouseEnter = () => setIsPasswordHovered(true);
+    const handlePasswordMouseLeave = () => setIsPasswordHovered(false);
 
     // Common link styles
     const linkBaseClasses =
@@ -937,6 +950,199 @@ const AdminSideBar = ({
                                 {isCollapsed && <Tooltip>Leads</Tooltip>}
                             </Link> */}
 
+                            {/* Password Management Dropdown - NEW SECTION */}
+                            {!isCollapsed ? (
+                                // Expanded view
+                                <div className="space-y-1">
+                                    <button
+                                        onClick={togglePasswordManagement}
+                                        className={dropdownButtonClasses(
+                                            isGroupActive([
+                                                "/password-categories",
+                                                "/password-subcategories",
+                                                "/password-sub-subcategories",
+                                                "/password-organizations",
+                                                "/passwords",
+                                            ]),
+                                        )}
+                                    >
+                                        <div className="flex items-center">
+                                            <Key
+                                                className={iconClasses(
+                                                    isGroupActive([
+                                                        "/password-categories",
+                                                        "/password-subcategories",
+                                                        "/password-sub-subcategories",
+                                                        "/password-organizations",
+                                                        "/passwords",
+                                                    ]),
+                                                )}
+                                            />
+                                            <span className="ml-3 font-medium whitespace-nowrap">
+                                                Password Manager
+                                            </span>
+                                        </div>
+                                        {isPasswordManagementOpen ? (
+                                            <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
+                                        ) : (
+                                            <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
+                                        )}
+                                    </button>
+
+                                    {isPasswordManagementOpen && (
+                                        <div className="ml-9 space-y-0.5">
+                                            {/* Categories */}
+                                            <Link
+                                                href="/password-categories"
+                                                className={`
+                        flex items-center p-2.5 rounded-lg transition-colors duration-200
+                        ${isActive("/password-categories") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                    `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Categories
+                                                </span>
+                                            </Link>
+
+                                            {/* Sub Categories */}
+                                            <Link
+                                                href="/password-subcategories"
+                                                className={`
+                        flex items-center p-2.5 rounded-lg transition-colors duration-200
+                        ${isActive("/password-subcategories") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                    `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Sub Categories
+                                                </span>
+                                            </Link>
+
+                                            {/* Sub Sub Categories */}
+                                            <Link
+                                                href="/password-sub-subcategories"
+                                                className={`
+                        flex items-center p-2.5 rounded-lg transition-colors duration-200
+                        ${isActive("/password-sub-subcategories") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+                    `}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Sub Sub Categories
+                                                </span>
+                                            </Link>
+
+                                            {/* Organizations */}
+                                            <Link
+                                                href="/password-organizations"
+                                                className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/password-organizations") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Organizations
+                                                </span>
+                                            </Link>
+
+                                            {/* Passwords */}
+                                            <Link
+                                                href="/passwords"
+                                                className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/passwords") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
+                                                <span className="text-sm whitespace-nowrap">
+                                                    Passwords
+                                                </span>
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
+                            ) : (
+                                // Collapsed view with hover dropdown
+                                <div
+                                    className="relative"
+                                    onMouseEnter={handlePasswordMouseEnter}
+                                    onMouseLeave={handlePasswordMouseLeave}
+                                >
+                                    <button
+                                        onClick={() => {
+                                            if (isCollapsed) {
+                                                setIsPasswordHovered(
+                                                    !isPasswordHovered,
+                                                );
+                                            }
+                                        }}
+                                        className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group ${isGroupActive(["/password-categories", "/password-subcategories", "/password-sub-subcategories", "/password-organizations", "/passwords"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                    >
+                                        <Key
+                                            className={iconClasses(
+                                                isGroupActive([
+                                                    "/password-categories",
+                                                    "/password-subcategories",
+                                                    "/password-sub-subcategories",
+                                                    "/password-organizations",
+                                                    "/passwords",
+                                                ]),
+                                            )}
+                                        />
+                                    </button>
+
+                                    {isPasswordHovered && (
+                                        <div
+                                            className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
+                                            onMouseEnter={
+                                                handlePasswordMouseEnter
+                                            }
+                                            onMouseLeave={
+                                                handlePasswordMouseLeave
+                                            }
+                                        >
+                                            <Link
+                                                href="/password-categories"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-categories") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Categories
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                href="/password-subcategories"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-subcategories") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Sub Categories
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                href="/password-sub-subcategories"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-sub-subcategories") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"} `}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Sub Sub Categories
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                href="/password-organizations"
+                                                className={` flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-organizations") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Organizations
+                                                </span>
+                                            </Link>
+                                            <Link
+                                                href="/passwords"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/passwords") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
+`}
+                                            >
+                                                <span className="whitespace-nowrap">
+                                                    Passwords
+                                                </span>
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             {isAdminOrAccountant && (
                                 <Link
                                     href="/payment-finance-tracking"
@@ -1147,8 +1353,6 @@ const AdminSideBar = ({
 };
 
 export default AdminSideBar;
-
-
 
 // import React from "react";
 // import { Link, usePage } from "@inertiajs/react";
@@ -1562,5 +1766,3 @@ export default AdminSideBar;
 // };
 
 // export default AdminSideBar;
-
-
