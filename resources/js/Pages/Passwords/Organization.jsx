@@ -170,12 +170,14 @@ import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import axios from "axios";
 import AddOrganizationForm from "@/AddFormComponents/AddOrganizationForm";
 import MyTable from "@/TableComponents/MyTable";
+import EditOrganizationForm from "@/EditFormComponents/EditOrganizationForm";
 
 const Organization = () => {
     const [allOrganizations, setAllOrganizations] = useState([]);
     const [reloadTrigger, setReloadTrigger] = useState(false);
     const [editingOrganization, setEditingOrganization] = useState(null);
-    const [showForm, setShowForm] = useState(false);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -185,7 +187,6 @@ const Organization = () => {
                 const response = await axios.get(
                     route("ourorganizations.index"),
                 );
-                // Controller returns { status, data } — unwrap it
                 setAllOrganizations(response.data.data ?? response.data);
             } catch (error) {
                 console.error("Fetching error", error);
@@ -209,7 +210,7 @@ const Organization = () => {
 
     const handleEdit = (organization) => {
         setEditingOrganization(organization);
-        setShowForm(true); // Open the form modal
+        setShowEditForm(true);
     };
 
     const handleUpdate = async (formData, id) => {
@@ -223,7 +224,6 @@ const Organization = () => {
         return response.data;
     };
 
-    // Define table columns
     const columns = useMemo(
         () => [
             {
@@ -282,15 +282,13 @@ const Organization = () => {
 
     return (
         <AdminWrapper>
-            {/* Page Header */}
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
                     Organizations Management
                 </h1>
                 <button
                     onClick={() => {
-                        setEditingOrganization(null);
-                        setShowForm(true);
+                        setShowAddForm(true);
                     }}
                     className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
                 >
@@ -299,20 +297,24 @@ const Organization = () => {
                 </button>
             </div>
 
-            {/* Table */}
             <MyTable 
                 columns={columns} 
                 data={allOrganizations} 
                 loading={loading}
             />
 
-            {/* Modal Form */}
             <AddOrganizationForm
-                showForm={showForm}
-                setShowForm={setShowForm}
+                showForm={showAddForm}
+                setShowForm={setShowAddForm}
                 setReloadTrigger={setReloadTrigger}
+            />
+
+            <EditOrganizationForm
+                showForm={showEditForm}
+                setShowForm={setShowEditForm}
                 editingOrganization={editingOrganization}
                 setEditingOrganization={setEditingOrganization}
+                setReloadTrigger={setReloadTrigger}
                 handleUpdate={handleUpdate}
             />
         </AdminWrapper>
