@@ -1022,10 +1022,7 @@ const AdminSideBar = ({
                                             {/* Sub Sub Categories */}
                                             <Link
                                                 href="/password-sub-subcategories"
-                                                className={`
-                        flex items-center p-2.5 rounded-lg transition-colors duration-200
-                        ${isActive("/password-sub-subcategories") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-                    `}
+                                                className={`flex items-center p-2.5 rounded-lg transition-colors duration-200${isActive("/password-sub-subcategories") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
                                             >
                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
                                                 <span className="text-sm whitespace-nowrap">
