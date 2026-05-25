@@ -958,7 +958,7 @@ const AdminSideBar = ({
                                         onClick={togglePasswordManagement}
                                         className={dropdownButtonClasses(
                                             isGroupActive([
-                                                "/password-categories",
+                                                "/category",
                                                 "/password-subcategories",
                                                 "/password-sub-subcategories",
                                                 "/password-organizations",
@@ -970,7 +970,7 @@ const AdminSideBar = ({
                                             <Key
                                                 className={iconClasses(
                                                     isGroupActive([
-                                                        "/password-categories",
+                                                        "/category",
                                                         "/password-subcategories",
                                                         "/password-sub-subcategories",
                                                         "/password-organizations",
@@ -993,8 +993,8 @@ const AdminSideBar = ({
                                         <div className="ml-9 space-y-0.5">
                                             {/* Categories */}
                                             <Link
-                                                href="/password-categories"
-                                                className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/password-categories") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                                href="/category"
+                                                className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/category") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
                                             >
                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
                                                 <span className="text-sm whitespace-nowrap">
@@ -1063,16 +1063,16 @@ const AdminSideBar = ({
                                                 );
                                             }
                                         }}
-                                        className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group ${isGroupActive(["/password-categories", "/password-subcategories", "/password-sub-subcategories", "/password-organizations", "/passwords"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                        className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group ${isGroupActive(["/category", "/sub-category", "/sub-sub-category", "/organization", "/password"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
                                     >
                                         <Key
                                             className={iconClasses(
                                                 isGroupActive([
-                                                    "/password-categories",
-                                                    "/password-subcategories",
-                                                    "/password-sub-subcategories",
-                                                    "/password-organizations",
-                                                    "/passwords",
+                                                    "/category",
+                                                    "/sub-category",
+                                                    "/sub-sub-category",
+                                                    "/organization",
+                                                    "/password",
                                                 ]),
                                             )}
                                         />
@@ -1089,32 +1089,32 @@ const AdminSideBar = ({
                                             }
                                         >
                                             <Link
-                                                href="/password-categories"
-                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-categories") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                                href="/category"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/category") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
                                             >
                                                 <span className="whitespace-nowrap">
                                                     Categories
                                                 </span>
                                             </Link>
                                             <Link
-                                                href="/password-subcategories"
-                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-subcategories") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                                href="/sub-category"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/sub-category") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
                                             >
                                                 <span className="whitespace-nowrap">
                                                     Sub Categories
                                                 </span>
                                             </Link>
                                             <Link
-                                                href="/password-sub-subcategories"
-                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-sub-subcategories") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"} `}
+                                                href="/sub-sub-category"
+                                                className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/sub-sub-category") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"} `}
                                             >
                                                 <span className="whitespace-nowrap">
                                                     Sub Sub Categories
                                                 </span>
                                             </Link>
                                             <Link
-                                                href="/password-organizations"
-                                                className={` flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password-organizations") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
+                                                href="/organization"
+                                                className={` flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/organization") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
                                             >
                                                 <span className="whitespace-nowrap">
                                                     Organizations
