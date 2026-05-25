@@ -207,6 +207,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import AddPasswordForm from "@/AddFormComponents/AddPasswordForm";
 import MyTable from "@/TableComponents/MyTable";
+import EditPasswordForm from "@/EditFormComponents/EditPasswordForm";
 
 const Password = () => {
     const [allPassword, setAllPassword] = useState([]);
@@ -216,7 +217,8 @@ const Password = () => {
     const [allChildCategory, setAllChildCategory] = useState([]);
     const [reloadTrigger, setReloadTrigger] = useState(false);
     const [editingPassword, setEditingPassword] = useState(null);
-    const [showForm, setShowForm] = useState(false);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -289,7 +291,7 @@ const Password = () => {
     // Open form for editing
     const handleEdit = (password) => {
         setEditingPassword(password);
-        setShowForm(true);
+        setShowEditForm(true);
     };
 
     // Update existing password
@@ -386,7 +388,7 @@ const Password = () => {
                 <button
                     onClick={() => {
                         setEditingPassword(null);
-                        setShowForm(true);
+                        setShowAddForm(true);
                     }}
                     className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
                 >
@@ -402,9 +404,21 @@ const Password = () => {
                 loading={loading}
             />
 
+            {/* Add Password Form */}
             <AddPasswordForm
-                showForm={showForm}
-                setShowForm={setShowForm}
+                showForm={showAddForm}
+                setShowForm={setShowAddForm}
+                setReloadTrigger={setReloadTrigger}
+                allOrganization={allOrganization}
+                allCategory={allCategory}
+                allSubCategory={allSubCategory}
+                allChildCategory={allChildCategory}
+            />
+
+            {/* Edit Password Form */}
+            <EditPasswordForm
+                showForm={showEditForm}
+                setShowForm={setShowEditForm}
                 setReloadTrigger={setReloadTrigger}
                 editingPassword={editingPassword}
                 setEditingPassword={setEditingPassword}
