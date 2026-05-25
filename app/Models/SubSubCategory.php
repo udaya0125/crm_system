@@ -16,4 +16,8 @@ class SubSubCategory extends Model
     {
         return $this->belongsTo(SubCategory::class);
     }
+    public function passwords()
+    {
+        return $this->hasMany(Password::class);
+    }
 }

@@ -16,4 +16,13 @@ class SubCategory extends Model
     {
         return $this->belongsTo(Category::class);
     }
+    public function subsubcategories()
+    {
+        return $this->hasMany(SubSubCategory::class);
+    }
+
+    public function passwords()
+    {
+        return $this->hasMany(Password::class);
+    }
 }

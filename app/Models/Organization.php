@@ -11,4 +11,9 @@ class Organization extends Model
         'name',
         'domain',
     ];
+
+    public function passwords()
+    {
+        return $this->hasMany(Password::class);
+    }
 }
