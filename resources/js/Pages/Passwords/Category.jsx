@@ -265,6 +265,7 @@ const Category = () => {
 
     return (
         <AdminWrapper>
+            <div className="container mx-auto py-4">
             {/* Header */}
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
@@ -304,6 +305,7 @@ const Category = () => {
                 handleUpdate={handleUpdate}
                 setReloadTrigger={setReloadTrigger}
             />
+            </div>
         </AdminWrapper>
     );
 };
