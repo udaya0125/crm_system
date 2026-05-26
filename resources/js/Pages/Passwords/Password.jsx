@@ -315,7 +315,7 @@ const Password = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "#",
+                Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => <span>{row.index + 1}</span>,
             },
