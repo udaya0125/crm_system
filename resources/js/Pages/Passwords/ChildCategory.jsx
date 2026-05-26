@@ -287,6 +287,7 @@ const ChildCategory = () => {
 
     return (
         <AdminWrapper>
+            <div className="container mx-auto py-4">
             {/* Header */}
             <div className="mb-6 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
@@ -417,6 +418,7 @@ const ChildCategory = () => {
                 setReloadTrigger={setReloadTrigger}
                 handleUpdate={handleUpdate}
             />
+            </div>
         </AdminWrapper>
     );
 };
