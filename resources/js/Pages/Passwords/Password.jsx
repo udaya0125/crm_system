@@ -381,6 +381,7 @@ const Password = () => {
 
     return (
         <AdminWrapper>
+            <div className="container mx-auto py-4">
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
                     Password Management
@@ -428,6 +429,8 @@ const Password = () => {
                 allSubCategory={allSubCategory}
                 allChildCategory={allChildCategory}
             />
+
+            </div>
         </AdminWrapper>
     );
 };
