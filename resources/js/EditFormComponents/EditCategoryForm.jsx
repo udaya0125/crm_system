@@ -76,7 +76,8 @@ const EditCategoryForm = ({
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Category Name <span className="text-red-500">*</span>
+                            Category Name{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
