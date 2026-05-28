@@ -1,3 +1,165 @@
+import { Pencil, Plus, Trash2 } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
+import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+import axios from "axios";
+import AddOrganizationForm from "@/AddFormComponents/AddOrganizationForm";
+import MyTable from "@/TableComponents/MyTable";
+import EditOrganizationForm from "@/EditFormComponents/EditOrganizationForm";
+
+const Organization = () => {
+    const [allOrganizations, setAllOrganizations] = useState([]);
+    const [reloadTrigger, setReloadTrigger] = useState(false);
+    const [editingOrganization, setEditingOrganization] = useState(null);
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [showEditForm, setShowEditForm] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        const fetchOrganizations = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(
+                    route("ourorganizations.index"),
+                );
+                setAllOrganizations(response.data.data ?? response.data);
+            } catch (error) {
+                console.error("Fetching error", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchOrganizations();
+    }, [reloadTrigger]);
+
+    const handleDelete = async (id) => {
+        if (!confirm("Are you sure you want to delete this organization?"))
+            return;
+        try {
+            await axios.delete(route("ourorganizations.destroy", { id }));
+            setReloadTrigger((prev) => !prev);
+        } catch (error) {
+            console.error("Delete error", error);
+        }
+    };
+
+    const handleEdit = (organization) => {
+        setEditingOrganization(organization);
+        setShowEditForm(true);
+    };
+
+    const handleUpdate = async (formData, id) => {
+        formData.append("_method", "PUT");
+        const response = await axios.post(
+            route("ourorganizations.update", { id }),
+            formData,
+            { headers: { "Content-Type": "multipart/form-data" } },
+        );
+        setReloadTrigger((prev) => !prev);
+        return response.data;
+    };
+
+    const columns = useMemo(
+        () => [
+            {
+                Header: "S.N.",
+                accessor: "index",
+                Cell: ({ row }) => <span>{row.index + 1}</span>,
+            },
+            {
+                Header: "Name",
+                accessor: "name",
+                Cell: ({ value }) => <span className="font-medium text-gray-800">{value}</span>,
+            },
+            {
+                Header: "Domain",
+                accessor: "domain",
+                Cell: ({ value }) => (
+                    value ? (
+                        <a
+                            href={value.startsWith("http") ? value : `https://${value}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                        >
+                            {value}
+                        </a>
+                    ) : (
+                        <span>-</span>
+                    )
+                ),
+            },
+            {
+                Header: "Actions",
+                accessor: "actions",
+                Cell: ({ row }) => (
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => handleEdit(row.original)}
+                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
+                            title="Edit"
+                        >
+                            <Pencil size={16} />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(row.original.id)}
+                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
+                            title="Delete"
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    </div>
+                ),
+            },
+        ],
+        []
+    );
+
+    return (
+        <AdminWrapper>
+            <div className="container mx-auto py-4">
+            <div className="mb-8 flex justify-between items-center">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                    Organizations Management
+                </h1>
+                <button
+                    onClick={() => {
+                        setShowAddForm(true);
+                    }}
+                    className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+                >
+                    <Plus size={18} />
+                    <span>Create</span>
+                </button>
+            </div>
+
+            <MyTable 
+                columns={columns} 
+                data={allOrganizations} 
+                loading={loading}
+            />
+
+            <AddOrganizationForm
+                showForm={showAddForm}
+                setShowForm={setShowAddForm}
+                setReloadTrigger={setReloadTrigger}
+            />
+
+            <EditOrganizationForm
+                showForm={showEditForm}
+                setShowForm={setShowEditForm}
+                editingOrganization={editingOrganization}
+                setEditingOrganization={setEditingOrganization}
+                setReloadTrigger={setReloadTrigger}
+                handleUpdate={handleUpdate}
+            />
+            </div>
+        </AdminWrapper>
+    );
+};
+
+export default Organization;
+
+
 // import { Pencil, Plus, Trash2 } from "lucide-react";
 // import React, { useEffect, useState } from "react";
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
@@ -162,165 +324,3 @@
 // };
 
 // export default Organization;
-
-
-import { Pencil, Plus, Trash2 } from "lucide-react";
-import React, { useEffect, useState, useMemo } from "react";
-import AdminWrapper from "@/AdminWrapper/AdminWrapper";
-import axios from "axios";
-import AddOrganizationForm from "@/AddFormComponents/AddOrganizationForm";
-import MyTable from "@/TableComponents/MyTable";
-import EditOrganizationForm from "@/EditFormComponents/EditOrganizationForm";
-
-const Organization = () => {
-    const [allOrganizations, setAllOrganizations] = useState([]);
-    const [reloadTrigger, setReloadTrigger] = useState(false);
-    const [editingOrganization, setEditingOrganization] = useState(null);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [showEditForm, setShowEditForm] = useState(false);
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        const fetchOrganizations = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(
-                    route("ourorganizations.index"),
-                );
-                setAllOrganizations(response.data.data ?? response.data);
-            } catch (error) {
-                console.error("Fetching error", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchOrganizations();
-    }, [reloadTrigger]);
-
-    const handleDelete = async (id) => {
-        if (!confirm("Are you sure you want to delete this organization?"))
-            return;
-        try {
-            await axios.delete(route("ourorganizations.destroy", { id }));
-            setReloadTrigger((prev) => !prev);
-        } catch (error) {
-            console.error("Delete error", error);
-        }
-    };
-
-    const handleEdit = (organization) => {
-        setEditingOrganization(organization);
-        setShowEditForm(true);
-    };
-
-    const handleUpdate = async (formData, id) => {
-        formData.append("_method", "PUT");
-        const response = await axios.post(
-            route("ourorganizations.update", { id }),
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } },
-        );
-        setReloadTrigger((prev) => !prev);
-        return response.data;
-    };
-
-    const columns = useMemo(
-        () => [
-            {
-                Header: "S.N.",
-                accessor: "index",
-                Cell: ({ row }) => <span>{row.index + 1}</span>,
-            },
-            {
-                Header: "Name",
-                accessor: "name",
-                Cell: ({ value }) => <span className="font-medium text-gray-800">{value}</span>,
-            },
-            {
-                Header: "Domain",
-                accessor: "domain",
-                Cell: ({ value }) => (
-                    value ? (
-                        <a
-                            href={value.startsWith("http") ? value : `https://${value}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                        >
-                            {value}
-                        </a>
-                    ) : (
-                        <span>-</span>
-                    )
-                ),
-            },
-            {
-                Header: "Actions",
-                accessor: "actions",
-                Cell: ({ row }) => (
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => handleEdit(row.original)}
-                            className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
-                            title="Edit"
-                        >
-                            <Pencil size={16} />
-                        </button>
-                        <button
-                            onClick={() => handleDelete(row.original.id)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                            title="Delete"
-                        >
-                            <Trash2 size={16} />
-                        </button>
-                    </div>
-                ),
-            },
-        ],
-        []
-    );
-
-    return (
-        <AdminWrapper>
-            <div className="container mx-auto py-4">
-            <div className="mb-8 flex justify-between items-center">
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
-                    Organizations Management
-                </h1>
-                <button
-                    onClick={() => {
-                        setShowAddForm(true);
-                    }}
-                    className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
-                >
-                    <Plus size={18} />
-                    <span>Create</span>
-                </button>
-            </div>
-
-            <MyTable 
-                columns={columns} 
-                data={allOrganizations} 
-                loading={loading}
-            />
-
-            <AddOrganizationForm
-                showForm={showAddForm}
-                setShowForm={setShowAddForm}
-                setReloadTrigger={setReloadTrigger}
-            />
-
-            <EditOrganizationForm
-                showForm={showEditForm}
-                setShowForm={setShowEditForm}
-                editingOrganization={editingOrganization}
-                setEditingOrganization={setEditingOrganization}
-                setReloadTrigger={setReloadTrigger}
-                handleUpdate={handleUpdate}
-            />
-            </div>
-        </AdminWrapper>
-    );
-};
-
-export default Organization;
