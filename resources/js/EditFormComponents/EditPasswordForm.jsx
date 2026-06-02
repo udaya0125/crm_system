@@ -669,18 +669,15 @@ const EditPasswordForm = ({
     if (!showForm) return null;
 
     return (
-        <div className="fixed inset-0 bg-slate-950/55 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-slate-950/55  flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
                 {/* Header */}
-                <div className="flex justify-between items-start gap-4 px-6 py-5 border-b border-gray-100 shrink-0 bg-slate-50">
+                <div className="flex justify-between items-start gap-4 px-6 py-5 border-b border-gray-100 shrink-0 ">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">
                             Edit Password
                         </h2>
-                        {/* <p className="mt-1 text-sm text-gray-500">
-                            Update saved credentials and copy the password when needed.
-                        </p> */}
                     </div>
                     <button
                         type="button"
