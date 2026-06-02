@@ -97,7 +97,7 @@ const TaskAssigned = () => {
     const columns = useMemo(() => {
         const baseColumns = [
             {
-                Header: "S/N",
+                Header: "S.N.",
                 accessor: (row, index) => index + 1,
                 id: "rowIndex",
                 width: 50,

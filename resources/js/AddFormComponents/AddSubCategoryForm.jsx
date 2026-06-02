@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
+import Select from "react-select";
 
 const AddSubCategoryForm = ({
     showForm,
@@ -26,6 +27,12 @@ const AddSubCategoryForm = ({
         };
         fetchCategories();
     }, []);
+
+    // Transform categories for react-select
+    const categoryOptions = categories.map((cat) => ({
+        value: cat.id,
+        label: cat.name,
+    }));
 
     const handleCreate = async (formData) => {
         await axios.post(route("oursubcategories.store"), formData, {
@@ -57,6 +64,13 @@ const AddSubCategoryForm = ({
     const handleChange = (e) => {
         const { name, value } = e.target;
         setSubCategoryForm((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleCategoryChange = (selectedOption) => {
+        setSubCategoryForm((prev) => ({
+            ...prev,
+            category_id: selectedOption ? selectedOption.value : "",
+        }));
     };
 
     const handleClose = () => {
@@ -101,26 +115,54 @@ const AddSubCategoryForm = ({
                         />
                     </div>
 
-                    {/* Category dropdown */}
+                    {/* Category dropdown with React Select */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Parent Category{" "}
                             <span className="text-red-500">*</span>
                         </label>
-                        <select
+                        <Select
                             name="category_id"
-                            value={subCategoryForm.category_id}
-                            onChange={handleChange}
+                            options={categoryOptions}
+                            value={categoryOptions.find(
+                                (option) => option.value === subCategoryForm.category_id
+                            )}
+                            onChange={handleCategoryChange}
+                            placeholder="— Select a category —"
+                            isClearable
                             required
-                            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition bg-white"
-                        >
-                            <option value="">— Select a category —</option>
-                            {categories.map((cat) => (
-                                <option key={cat.id} value={cat.id}>
-                                    {cat.name}
-                                </option>
-                            ))}
-                        </select>
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                            styles={{
+                                control: (base, state) => ({
+                                    ...base,
+                                    borderRadius: "0.5rem",
+                                    borderColor: state.isFocused ? "#6366f1" : "#d1d5db",
+                                    boxShadow: state.isFocused ? "0 0 0 1px #6366f1" : "none",
+                                    "&:hover": {
+                                        borderColor: state.isFocused ? "#6366f1" : "#9ca3af",
+                                    },
+                                    minHeight: "42px",
+                                }),
+                                placeholder: (base) => ({
+                                    ...base,
+                                    color: "#9ca3af",
+                                    fontSize: "0.875rem",
+                                }),
+                                singleValue: (base) => ({
+                                    ...base,
+                                    fontSize: "0.875rem",
+                                }),
+                                option: (base, state) => ({
+                                    ...base,
+                                    backgroundColor: state.isFocused ? "#e0e7ff" : "white",
+                                    color: state.isFocused ? "#4f46e5" : "#374151",
+                                    "&:active": {
+                                        backgroundColor: "#c7d2fe",
+                                    },
+                                }),
+                            }}
+                        />
                     </div>
 
                     {/* Actions */}

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Plus } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import AddPasswordForm from "@/AddFormComponents/AddPasswordForm";
@@ -73,6 +73,8 @@ const Password = () => {
             fetchChildCategory()
         ]).finally(() => setLoading(false));
     }, [reloadTrigger]);
+
+    console.log("All Passwords: ", allPassword);
 
     // Delete password
     const handleDelete = async (id) => {
@@ -159,15 +161,15 @@ const Password = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => handleEdit(row.original)}
-                            className="px-3 py-1 text-xs bg-indigo-100 text-indigo-700 rounded-full hover:bg-indigo-200 transition"
+                            className="text-indigo-600 hover:text-indigo-900 transition duration-200"
                         >
-                            Edit
+                          <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
-                            className="px-3 py-1 text-xs bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition"
+                            className="text-red-600 hover:text-red-900 transition duration-200"
                         >
-                            Delete
+                            <Trash2 size={16} />
                         </button>
                     </div>
                 ),

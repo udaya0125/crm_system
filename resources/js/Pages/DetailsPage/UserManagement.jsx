@@ -42,7 +42,7 @@ const UserManagement = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "S/N",
+                Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => <span>{row.index + 1}</span>,
             },

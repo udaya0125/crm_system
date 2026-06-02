@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { Plus, Pencil, Trash2, Layers } from "lucide-react";
+import { Plus, Pencil, Trash2, Layers, Edit } from "lucide-react";
 import AddSubCategoryForm from "@/AddFormComponents/AddSubCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import EditSubCategoryForm from "@/EditFormComponents/EditSubCategoryForm";
@@ -150,7 +150,7 @@ const SubCategory = () => {
                                                         title="Edit"
                                                         className="p-2 text-indigo-500 hover:bg-indigo-50 rounded-lg transition"
                                                     >
-                                                        <Pencil size={14} />
+                                                         <Edit size={16} />
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(sub.id)}

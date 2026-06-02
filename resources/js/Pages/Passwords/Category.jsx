@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Edit } from "lucide-react";
 import AddCategoryForm from "@/AddFormComponents/AddCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
@@ -87,7 +87,7 @@ const Category = () => {
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                             title="Edit"
                         >
-                            <Pencil size={16} />
+                             <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
