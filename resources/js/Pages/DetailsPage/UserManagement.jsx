@@ -161,7 +161,7 @@ const UserManagement = () => {
         <AdminWrapper>
             <div className="container mx-auto py-4 px-4">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">User Management</h1>
                     <button
                         onClick={handleAddNew}
                         className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm"

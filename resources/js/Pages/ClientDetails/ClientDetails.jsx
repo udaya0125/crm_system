@@ -432,17 +432,27 @@ const ClientDetails = () => {
         <AdminWrapper>
             <div className="p-6">
                 {/* Page Header */}
-                <div className="flex items-baseline gap-4 mb-8 border-b border-slate-700/50 pb-5">
-                    <h1 className="text-3xl font-bold  tracking-tight">
+                <div className="flex justify-between items-baseline gap-4  pb-5">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Client Details
                     </h1>
-                    <span className="text-xs text-slate-500 uppercase tracking-widest hidden sm:block">
+                    {/* <span className="text-xs text-slate-500 uppercase tracking-widest hidden sm:block">
                         Service Contracts &amp; Payments
-                    </span>
+                    </span> */}
+                    {/* Search */}
+                    <div className="">
+                        <input
+                            type="text"
+                            placeholder="Search by client, invoice, or service type..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full md:w-80   text-black placeholder-slate-600 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
+                        />
+                    </div>
                 </div>
 
                 {/* Search */}
-                <div className="mb-5">
+                {/* <div className="mb-5">
                     <input
                         type="text"
                         placeholder="Search by client, invoice, or service type..."
@@ -450,7 +460,7 @@ const ClientDetails = () => {
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full md:w-80   text-black placeholder-slate-600 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 transition-colors"
                     />
-                </div>
+                </div> */}
 
                 {/* MyTable with integrated loading */}
                 <MyTable

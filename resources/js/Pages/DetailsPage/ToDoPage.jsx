@@ -361,7 +361,7 @@ const ToDOPage = () => {
             <div className="container mx-auto py-4">
                 {/* Header */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2 flex items-center gap-3">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         ToDo List
                     </h1>
                     <button

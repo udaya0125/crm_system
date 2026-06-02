@@ -142,7 +142,7 @@ const Dashboard = () => {
                         <>
                             {isAdmin && (
                                 <>
-                                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                                    <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                                         Admin Dashboard
                                     </h2>
                                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
@@ -159,7 +159,7 @@ const Dashboard = () => {
 
                             {isManager && (
                                 <>
-                                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+                                    <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                                         Manager Dashboard
                                     </h2>
                                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
@@ -174,7 +174,7 @@ const Dashboard = () => {
                             {isUser && (
                                 <>
                                     <div className="max-w-7xl mx-auto py-4">
-                                        <h2 className="text-2xl font-semibold text-gray-800 mb-10">
+                                        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                                             Dashboard
                                         </h2>
 
@@ -224,7 +224,7 @@ const Dashboard = () => {
                             {isDeveloper && (
                                 <>
                                     <div className="max-w-7xl mx-auto py-4">
-                                        <h2 className="text-2xl font-semibold text-gray-800 mb-10">
+                                        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase mb-10">
                                             Dashboard
                                         </h2>
 
@@ -278,7 +278,7 @@ const Dashboard = () => {
                             {isAccountant && (
                                 <>
                                     <div className="max-w-7xl mx-auto py-4">
-                                        <h2 className="text-2xl font-semibold text-gray-800 mb-10">
+                                        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase mb-10">
                                             Dashboard
                                         </h2>
 
@@ -332,7 +332,7 @@ const Dashboard = () => {
                             {isTechnician && (
                                 <>
                                     <div className="max-w-7xl mx-auto py-4">
-                                        <h2 className="text-2xl font-semibold text-gray-800 mb-10">
+                                        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase mb-10">
                                             Dashboard
                                         </h2>
 

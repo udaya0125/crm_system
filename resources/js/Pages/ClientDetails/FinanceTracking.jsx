@@ -97,13 +97,13 @@ const FinanceTracking = () => {
                     <span className="text-stone-600">{value}</span>
                 ),
             },
-            {
-                Header: "Invoice Date",
-                accessor: "invoice_date",
-                Cell: ({ value }) => (
-                    <span className="text-stone-500">{value}</span>
-                ),
-            },
+            // {
+            //     Header: "Invoice Date",
+            //     accessor: "invoice_date",
+            //     Cell: ({ value }) => (
+            //         <span className="text-stone-500">{value}</span>
+            //     ),
+            // },
             {
                 Header: "Due Date",
                 accessor: "due_date",
@@ -129,11 +129,26 @@ const FinanceTracking = () => {
                     </span>
                 ),
             },
+            // {
+            //     Header: "Balance",
+            //     accessor: "balance",
+            //     Cell: ({ value }) => (
+            //         <span className="text-rose-600">
+            //             NPR {Number(value).toLocaleString()}
+            //         </span>
+            //     ),
+            // },
             {
                 Header: "Balance",
                 accessor: "balance",
                 Cell: ({ value }) => (
-                    <span className="text-rose-600">
+                    <span
+                        className={
+                            Number(value) === 0
+                                ? "text-green-600"
+                                : "text-rose-600"
+                        }
+                    >
                         NPR {Number(value).toLocaleString()}
                     </span>
                 ),
@@ -178,7 +193,7 @@ const FinanceTracking = () => {
                             </span>
                         );
                     }
-                    return <span className="text-stone-400">-</span>;
+                    return <span className="text-stone-400">---</span>;
                 },
             },
             {
@@ -210,7 +225,7 @@ const FinanceTracking = () => {
             <div className="container mx-auto py-4">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <h1 className="text-4xl font-bold tracking-widest text-stone-800 uppercase">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Finance Tracking
                     </h1>
                     <button
@@ -254,8 +269,6 @@ const FinanceTracking = () => {
 };
 
 export default FinanceTracking;
-
-
 
 // import AddFinanceTrackingForm from "@/AddFormComponents/AddFinanceTrackingForm";
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
@@ -608,4 +621,3 @@ export default FinanceTracking;
 // };
 
 // export default FinanceTracking;
-

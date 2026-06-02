@@ -1,39 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, usePage } from "@inertiajs/react";
 import {
-    FiMenu,
-    FiX,
-    FiChevronDown,
-    FiChevronRight,
-    FiUsers,
-    FiCreditCard,
-    FiActivity,
-    FiFileText,
-    FiCheckSquare,
-    FiList,
-} from "react-icons/fi";
-import {
-    LayoutDashboard,
-    ListFilter,
-    CheckSquare,
+    Activity,
+    Building2,
+    ChevronDown,
+    ChevronRight,
     ClipboardList,
     Key,
-    Building2,
-    Server,
-    Globe,
-    CalendarClock,
-    Ticket,
-    FolderKanban,
-    ListTodo,
-    UserCircle,
-    UserCog,
+    Landmark,
+    LayoutDashboard,
+    ListFilter,
+    Menu,
     Receipt,
     ScrollText,
-    Layers,
-    Tag,
-    Tags,
-    Lock,
-    Landmark,
+    UserCircle,
+    UserCog,
+    X,
 } from "lucide-react";
 
 const AdminSideBar = ({
@@ -42,1744 +24,365 @@ const AdminSideBar = ({
     isCollapsed,
     onToggleCollapse,
 }) => {
-    const { url } = usePage();
-    const currentPath = url.split("/")[1];
+    const { url, props } = usePage();
+    const user = props?.auth?.user;
+    const role = user?.role;
+    const [openGroups, setOpenGroups] = useState({});
+    const currentUrl = url.split("?")[0];
 
-    const [isLeadManagementOpen, setIsLeadManagementOpen] = useState(false);
-    const [isTaskManagementOpen, setIsTaskManagementOpen] = useState(false);
-    const [isClientManagementOpen, setIsClientManagementOpen] = useState(false);
-    const [isPasswordManagementOpen, setIsPasswordManagementOpen] = useState(false);
-
-    const [isLeadHovered, setIsLeadHovered] = useState(false);
-    const [isTaskHovered, setIsTaskHovered] = useState(false);
-    const [isClientHovered, setIsClientHovered] = useState(false);
-    const [isPasswordHovered, setIsPasswordHovered] = useState(false);
-
-    const { auth } = usePage().props;
-    const user = auth?.user;
-
-    const isAdmin = user?.role === "admin";
-    const isAdminOrTechnician = user?.role === "admin" || user?.role === "technician";
-    const isAdminOrDeveloper = user?.role === "admin" || user?.role === "developer";
-    const isAdminOrAccountant = user?.role === "admin" || user?.role === "accountant";
-    const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
-
-    const isActive = (href) => {
-        const path = href.replace("/", "");
-        return currentPath === path || url.startsWith(href + "/");
+    const can = {
+        admin: role === "admin",
+        adminOrTechnician: role === "admin" || role === "technician",
+        adminOrDeveloper: role === "admin" || role === "developer",
+        adminOrAccountant: role === "admin" || role === "accountant",
+        adminOrManager: role === "admin" || role === "manager",
     };
 
-    const isGroupActive = (routes) =>
-        routes.some((route) => {
-            const routePath = route.replace("/", "");
-            return currentPath === routePath || url.startsWith(route + "/");
-        });
+    const isActive = (href) =>
+        currentUrl === href || currentUrl.startsWith(`${href}/`);
+    const isGroupActive = (items) => items.some((item) => isActive(item.href));
 
-    const togglePasswordManagement = () => { if (!isCollapsed) setIsPasswordManagementOpen(!isPasswordManagementOpen); };
-    const toggleLeadManagement = () => { if (!isCollapsed) setIsLeadManagementOpen(!isLeadManagementOpen); };
-    const toggleTaskManagement = () => { if (!isCollapsed) setIsTaskManagementOpen(!isTaskManagementOpen); };
-    const toggleClientManagement = () => { if (!isCollapsed) setIsClientManagementOpen(!isClientManagementOpen); };
+    const groups = useMemo(
+        () => [
+            {
+                id: "crm",
+                label: "CRM",
+                icon: ListFilter,
+                show: can.adminOrAccountant,
+                items: [
+                    { href: "/leads", label: "Leads" },
+                    { href: "/client-management", label: "Client Management" },
+                ],
+            },
+            {
+                id: "report",
+                label: "Report",
+                icon: ClipboardList,
+                show: true,
+                items: [
+                    { href: "/todo", label: "To Do List" },
+                    {
+                        href: "/ticket",
+                        label: "Ticket Management",
+                        show: can.adminOrTechnician,
+                    },
+                    {
+                        href: "/project-management",
+                        label: "Project Management",
+                        show: can.adminOrDeveloper,
+                    },
+                ],
+            },
+            {
+                id: "company",
+                label: "Company",
+                icon: Building2,
+                show: can.adminOrManager,
+                items: [
+                    { href: "/client", label: "Clients" },
+                    { href: "/expiration", label: "Expirations" },
+                    { href: "/hosting-tracking", label: "Hosting Management" },
+                    { href: "/domain-tracking", label: "Domain Management" },
+                ],
+            },
+            {
+                id: "passwords",
+                label: "Password Manager",
+                icon: Key,
+                show: true,
+                items: [
+                    { href: "/category", label: "Categories" },
+                    { href: "/sub-category", label: "Sub Categories" },
+                    { href: "/sub-sub-category", label: "Sub Sub Categories" },
+                    { href: "/organization", label: "Organizations" },
+                    { href: "/password", label: "Passwords" },
+                ],
+            },
+        ],
+        [
+            can.adminOrAccountant,
+            can.adminOrDeveloper,
+            can.adminOrManager,
+            can.adminOrTechnician,
+        ],
+    );
 
-    const handleLeadMouseEnter = () => { if (isCollapsed) setIsLeadHovered(true); };
-    const handleLeadMouseLeave = () => setIsLeadHovered(false);
-    const handleTaskMouseEnter = () => { if (isCollapsed) setIsTaskHovered(true); };
-    const handleTaskMouseLeave = () => setIsTaskHovered(false);
-    const handleClientMouseEnter = () => { if (isCollapsed) setIsClientHovered(true); };
-    const handleClientMouseLeave = () => setIsClientHovered(false);
-    const handlePasswordMouseEnter = () => { if (isCollapsed) setIsPasswordHovered(true); };
-    const handlePasswordMouseLeave = () => setIsPasswordHovered(false);
+    const quickLinks = [
+        {
+            href: "/payment-finance-tracking",
+            label: "Finance Tracking",
+            tooltip: "Payment & Finance Tracking",
+            icon: Landmark,
+            show: can.adminOrAccountant,
+        },
+        {
+            href: "/client-details",
+            label: "Client Details",
+            icon: UserCircle,
+            show: can.admin,
+        },
+        {
+            href: "/payment-management",
+            label: "Payment",
+            icon: Receipt,
+            show: can.admin,
+        },
+        {
+            href: "/service-contracts",
+            label: "Service Contracts",
+            icon: ScrollText,
+            show: can.admin,
+        },
+        {
+            href: "/user-management",
+            label: "User Management",
+            icon: UserCog,
+            show: can.admin,
+        },
+        {
+            href: "/activity-log",
+            label: "Activity Log",
+            icon: Activity,
+            show: can.admin,
+        },
+    ];
 
-    const linkBaseClasses = "flex items-center rounded-lg transition-colors duration-200 group relative";
-    const linkCollapsedClasses = isCollapsed ? "p-3 justify-center" : "p-3";
-    const linkActiveClasses = (href) =>
-        isActive(href)
-            ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600"
-            : "text-gray-600 hover:bg-blue-50 hover:text-blue-700";
+    useEffect(() => {
+        const activeGroups = groups.reduce((next, group) => {
+            const visibleItems = group.items.filter((item) => item.show !== false);
+            if (isGroupActive(visibleItems)) {
+                next[group.id] = true;
+            }
+            return next;
+        }, {});
 
-    const dropdownButtonClasses = (isActiveGroup) => `
-        flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200
-        ${isActiveGroup ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-    `;
+        if (Object.keys(activeGroups).length > 0) {
+            setOpenGroups((current) => ({ ...current, ...activeGroups }));
+        }
+    }, [groups, url]);
 
-    const iconClasses = (isItemActive, customClass = "w-5 h-5") => `
-        ${customClass}
-        ${isItemActive ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}
-    `;
+    const toggleGroup = (groupId) => {
+        if (isCollapsed) return;
+        setOpenGroups((current) => ({
+            ...current,
+            [groupId]: !current[groupId],
+        }));
+    };
+
+    const closeMobileMenu = () => {
+        if (isMobileOpen) onMobileToggle();
+    };
+
+    const navItemClass = (active) =>
+        [
+            "group relative flex h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors duration-200",
+            isCollapsed ? "justify-center" : "",
+            active
+                ? "border-l-4 border-blue-600 bg-blue-50 font-semibold text-blue-700"
+                : "text-gray-600 hover:bg-blue-50 hover:text-blue-700",
+        ].join(" ");
+
+    const subItemClass = (active) =>
+        [
+            "flex items-center rounded-lg px-3 py-2.5 text-sm transition-colors duration-200",
+            active
+                ? "bg-blue-100 font-medium text-blue-700"
+                : "text-gray-600 hover:bg-blue-50 hover:text-blue-700",
+        ].join(" ");
 
     const Tooltip = ({ children }) => (
-        <div
-            className="fixed left-12 ml-6 px-2 py-1 text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50"
-            style={{
-                backgroundColor: "#ffffff",
-                border: "1px solid #e5e7eb",
-                color: "#374151",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-            }}
-        >
+        <span className="pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2 rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 opacity-0 shadow-lg shadow-slate-200/70 transition group-hover:opacity-100">
             {children}
-        </div>
+        </span>
     );
 
-    const SubLink = ({ href, label }) => (
-        <Link
-            href={href}
-            className={`flex items-center p-2.5 rounded-lg transition-colors duration-200
-                ${isActive(href) ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-        >
-            <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-            <span className="text-sm whitespace-nowrap">{label}</span>
-        </Link>
-    );
+    const NavLink = ({ href, label, tooltip, icon: Icon }) => {
+        const active = isActive(href);
 
-    const CollapsedSubLink = ({ href, label }) => (
-        <Link
-            href={href}
-            className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-                ${isActive(href) ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-        >
-            <span className="whitespace-nowrap">{label}</span>
-        </Link>
-    );
+        return (
+            <Link
+                href={href}
+                onClick={closeMobileMenu}
+                className={navItemClass(active)}
+                title={isCollapsed ? label : undefined}
+            >
+                <Icon className="h-5 w-5 shrink-0" />
+                {!isCollapsed && <span className="truncate">{label}</span>}
+                {isCollapsed && <Tooltip>{tooltip || label}</Tooltip>}
+            </Link>
+        );
+    };
+
+    const NavGroup = ({ group }) => {
+        const visibleItems = group.items.filter((item) => item.show !== false);
+        const active = isGroupActive(visibleItems);
+        const Icon = group.icon;
+        const isOpen = Boolean(openGroups[group.id]);
+
+        if (visibleItems.length === 0 || group.show === false) return null;
+
+        if (isCollapsed) {
+            return (
+                <div className="group/flyout relative">
+                    <button
+                        type="button"
+                        className={navItemClass(active)}
+                        title={group.label}
+                    >
+                        <Icon className="h-5 w-5 shrink-0" />
+                        <Tooltip>{group.label}</Tooltip>
+                    </button>
+                    <div className="invisible  fixed top-24 ml-12 z-50 min-w-56 rounded-lg border border-gray-200 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
+                        <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-slate-400">
+                            {group.label}
+                        </p>
+                        <div className="space-y-1">
+                            {visibleItems.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={closeMobileMenu}
+                                    className={subItemClass(isActive(item.href))}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        return (
+            <div>
+                <button
+                    type="button"
+                    onClick={() => toggleGroup(group.id)}
+                    className={`${navItemClass(active)} w-full justify-between`}
+                    aria-expanded={isOpen}
+                >
+                    <span className="flex min-w-0 items-center gap-3">
+                        <Icon className="h-5 w-5 shrink-0" />
+                        <span className="truncate">{group.label}</span>
+                    </span>
+                    {isOpen ? (
+                        <ChevronDown className="h-4 w-4 shrink-0" />
+                    ) : (
+                        <ChevronRight className="h-4 w-4 shrink-0" />
+                    )}
+                </button>
+
+                {isOpen && (
+                    <div className="ml-5 mt-1 space-y-0.5 border-l border-gray-200 pl-3">
+                        {visibleItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                onClick={closeMobileMenu}
+                                className={subItemClass(isActive(item.href))}
+                            >
+                                <span className="mr-3 h-1.5 w-1.5 shrink-0 rounded-full bg-gray-400" />
+                                <span className="truncate">{item.label}</span>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
     return (
         <>
             {isMobileOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+                <button
+                    type="button"
+                    className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden"
+                    aria-label="Close sidebar"
                     onClick={onMobileToggle}
                 />
             )}
 
-            <div
-                className={`
-                    fixed left-0 top-0 h-screen border-r z-50 transition-all duration-300
-                    ${isCollapsed ? "w-16" : "w-64"}
-                    ${isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
-                `}
-                style={{ backgroundColor: "#ffffff", borderColor: "#e5e7eb" }}
+            <aside
+                className={[
+                    "fixed left-0 top-0 z-50 flex h-screen flex-col border-r border-slate-200 bg-white shadow-xl shadow-slate-200/60 transition-all duration-300",
+                    isCollapsed ? "w-16" : "w-64",
+                    isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+                ].join(" ")}
             >
-                <div className="relative z-10 h-full flex flex-col">
-                    {/* Header */}
-                    <div
-                        className={`flex items-center justify-between p-4 border-b h-16 ${isCollapsed ? "px-3" : ""}`}
-                        style={{ borderColor: "#e5e7eb" }}
-                    >
-                        {!isCollapsed && (
-                            <Link href="/dashboard" className="text-xl font-bold text-gray-800 whitespace-nowrap">
-                                <img src="/images/logo2.png" alt="Logo" className="h-10 w-auto" />
-                            </Link>
-                        )}
-                        <div className="flex items-center space-x-1">
-                            <button
-                                onClick={onToggleCollapse}
-                                className="hidden lg:flex p-1.5 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-                                title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                            >
-                                <FiMenu className="w-4 h-4 text-gray-600" />
-                            </button>
-                            <button onClick={onMobileToggle} className="lg:hidden p-1.5 hover:bg-blue-50 rounded-lg transition-colors duration-200">
-                                <FiX className="w-4 h-4 text-gray-600" />
-                            </button>
-                        </div>
-                    </div>
+                <div
+                    className={[
+                        "flex h-16 shrink-0 items-center border-b border-slate-200",
+                        isCollapsed ? "justify-center" : "justify-between",
+                        isCollapsed ? "px-3" : "px-4",
+                    ].join(" ")}
+                >
+                    {!isCollapsed && (
+                        <Link
+                            href="/dashboard"
+                            className="flex min-w-0 items-center gap-3"
+                            onClick={closeMobileMenu}
+                        >
+                            <img
+                                src="/images/logo2.png"
+                                alt="S.A I.T Solution"
+                                className="h-10 w-auto max-w-[170px] object-contain"
+                            />
+                        </Link>
+                    )}
 
-                    {/* Menu Items */}
-                    <div className={`flex-1 overflow-y-auto ${isCollapsed ? "px-2" : "px-3"} py-2`}>
-                        <div className="space-y-1">
-
-                            {/* Dashboard */}
-                            <Link href="/dashboard" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/dashboard")}`}>
-                                <LayoutDashboard className={iconClasses(isActive("/dashboard"))} />
-                                {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">Dashboard</span>}
-                                {isCollapsed && <Tooltip>Dashboard</Tooltip>}
-                            </Link>
-
-                            {!isCollapsed && (
-                                <div className="pt-4 px-3">
-                                    <h1 className="font-medium text-gray-500 text-xs uppercase tracking-wider">Pages</h1>
-                                </div>
-                            )}
-
-                            {/* CRM Dropdown — icon: ListFilter (funnel/leads) */}
-                            {!isCollapsed ? (
-                                <div className="space-y-1">
-                                    {isAdminOrAccountant && (
-                                        <button onClick={toggleLeadManagement} className={dropdownButtonClasses(isGroupActive(["/leads", "/client-management"]))}>
-                                            <div className="flex items-center">
-                                                <ListFilter className={iconClasses(isGroupActive(["/leads", "/client-management"]))} />
-                                                <span className="ml-3 font-medium whitespace-nowrap">CRM</span>
-                                            </div>
-                                            {isLeadManagementOpen
-                                                ? <FiChevronDown className="w-4 h-4" />
-                                                : <FiChevronRight className="w-4 h-4" />}
-                                        </button>
-                                    )}
-                                    {isLeadManagementOpen && (
-                                        <div className="ml-9 space-y-0.5">
-                                            {/* Leads — UserCircle */}
-                                            <SubLink href="/leads" label="Leads" />
-                                            {/* Client Management — UserCog */}
-                                            <SubLink href="/client-management" label="Client Management" />
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                isAdminOrAccountant && (
-                                    <div className="relative" onMouseEnter={handleLeadMouseEnter} onMouseLeave={handleLeadMouseLeave}>
-                                        <div className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group cursor-pointer
-                                            ${isGroupActive(["/leads", "/client-management"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}>
-                                            <ListFilter className={iconClasses(isGroupActive(["/leads", "/client-management"]))} />
-                                        </div>
-                                        {isLeadHovered && (
-                                            <div className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
-                                                onMouseEnter={handleLeadMouseEnter} onMouseLeave={handleLeadMouseLeave}>
-                                                <CollapsedSubLink href="/leads" label="Leads" />
-                                                <CollapsedSubLink href="/client-management" label="Client Management" />
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            )}
-
-                            {/* Report Dropdown — icon: ClipboardList */}
-                            {!isCollapsed ? (
-                                <div className="space-y-1">
-                                    <button onClick={toggleTaskManagement} className={dropdownButtonClasses(isGroupActive(["/ticket", "/todo", "/project-management"]))}>
-                                        <div className="flex items-center">
-                                            <ClipboardList className={iconClasses(isGroupActive(["/ticket", "/todo", "/project-management"]))} />
-                                            <span className="ml-3 font-medium whitespace-nowrap">Report</span>
-                                        </div>
-                                        {isTaskManagementOpen
-                                            ? <FiChevronDown className="w-4 h-4" />
-                                            : <FiChevronRight className="w-4 h-4" />}
-                                    </button>
-                                    {isTaskManagementOpen && (
-                                        <div className="ml-9 space-y-0.5">
-                                            {/* To Do List — ListTodo */}
-                                            <SubLink href="/todo" label="To Do List" />
-                                            {/* Ticket Management — Ticket */}
-                                            {isAdminOrTechnician && <SubLink href="/ticket" label="Ticket Management" />}
-                                            {/* Project Management — FolderKanban */}
-                                            {isAdminOrDeveloper && <SubLink href="/project-management" label="Project Management" />}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="relative" onMouseEnter={handleTaskMouseEnter} onMouseLeave={handleTaskMouseLeave}>
-                                    <div className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group cursor-pointer
-                                        ${isGroupActive(["/ticket", "/todo", "/project-management"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}>
-                                        <ClipboardList className={iconClasses(isGroupActive(["/ticket", "/todo", "/project-management"]))} />
-                                    </div>
-                                    {isTaskHovered && (
-                                        <div className="fixed left-10 top-44 ml-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
-                                            onMouseEnter={handleTaskMouseEnter} onMouseLeave={handleTaskMouseLeave}>
-                                            <CollapsedSubLink href="/todo" label="To Do List" />
-                                            {isAdminOrTechnician && <CollapsedSubLink href="/ticket" label="Ticket" />}
-                                            {isAdminOrDeveloper && <CollapsedSubLink href="/project-management" label="Project Management" />}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Company Dropdown — icon: Building2 */}
-                            {!isCollapsed ? (
-                                <div className="space-y-1">
-                                    {isAdminOrManager && (
-                                        <button onClick={toggleClientManagement} className={dropdownButtonClasses(isGroupActive(["/client", "/expiration", "/hosting-tracking", "/domain-tracking"]))}>
-                                            <div className="flex items-center">
-                                                <Building2 className={iconClasses(isGroupActive(["/client", "/expiration", "/hosting-tracking", "/domain-tracking"]))} />
-                                                <span className="ml-3 font-medium whitespace-nowrap">Company</span>
-                                            </div>
-                                            {isClientManagementOpen
-                                                ? <FiChevronDown className="w-4 h-4" />
-                                                : <FiChevronRight className="w-4 h-4" />}
-                                        </button>
-                                    )}
-                                    {isClientManagementOpen && (
-                                        <div className="ml-9 space-y-0.5">
-                                            {/* Clients — FiUsers */}
-                                            <SubLink href="/client" label="Clients" />
-                                            {/* Expirations — CalendarClock */}
-                                            <SubLink href="/expiration" label="Expirations" />
-                                            {/* Hosting Management — Server */}
-                                            <SubLink href="/hosting-tracking" label="Hosting Management" />
-                                            {/* Domain Management — Globe */}
-                                            <SubLink href="/domain-tracking" label="Domain Management" />
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                isAdminOrManager && (
-                                    <div className="relative" onMouseEnter={handleClientMouseEnter} onMouseLeave={handleClientMouseLeave}>
-                                        <div className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group cursor-pointer
-                                            ${isGroupActive(["/client", "/expiration", "/hosting-tracking", "/domain-tracking"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}>
-                                            <Building2 className={iconClasses(isGroupActive(["/client", "/expiration", "/hosting-tracking", "/domain-tracking"]))} />
-                                        </div>
-                                        {isClientHovered && (
-                                            <div className="fixed left-10 top-64 ml-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
-                                                onMouseEnter={handleClientMouseEnter} onMouseLeave={handleClientMouseLeave}>
-                                                <CollapsedSubLink href="/client" label="Clients" />
-                                                <CollapsedSubLink href="/expiration" label="Expirations" />
-                                                <CollapsedSubLink href="/hosting-tracking" label="Hosting Management" />
-                                                <CollapsedSubLink href="/domain-tracking" label="Domain Management" />
-                                            </div>
-                                        )}
-                                    </div>
-                                )
-                            )}
-
-                            {/* Password Manager Dropdown — icon: Key */}
-                            {!isCollapsed ? (
-                                <div className="space-y-1">
-                                    <button onClick={togglePasswordManagement} className={dropdownButtonClasses(isGroupActive(["/category", "/sub-category", "/sub-sub-category", "/organization", "/password"]))}>
-                                        <div className="flex items-center">
-                                            <Key className={iconClasses(isGroupActive(["/category", "/sub-category", "/sub-sub-category", "/organization", "/password"]))} />
-                                            <span className="ml-3 font-medium whitespace-nowrap">Password Manager</span>
-                                        </div>
-                                        {isPasswordManagementOpen
-                                            ? <FiChevronDown className="w-4 h-4" />
-                                            : <FiChevronRight className="w-4 h-4" />}
-                                    </button>
-                                    {isPasswordManagementOpen && (
-                                        <div className="ml-9 space-y-0.5">
-                                            {/* Categories — Tag */}
-                                            <SubLink href="/category" label="Categories" />
-                                            {/* Sub Categories — Tags */}
-                                            <SubLink href="/sub-category" label="Sub Categories" />
-                                            {/* Sub Sub Categories — Layers */}
-                                            <SubLink href="/sub-sub-category" label="Sub Sub Categories" />
-                                            {/* Organizations — Landmark */}
-                                            <SubLink href="/organization" label="Organizations" />
-                                            {/* Passwords — Lock */}
-                                            <SubLink href="/password" label="Passwords" />
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="relative" onMouseEnter={handlePasswordMouseEnter} onMouseLeave={handlePasswordMouseLeave}>
-                                    <div className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group cursor-pointer
-                                        ${isGroupActive(["/category", "/sub-category", "/sub-sub-category", "/organization", "/password"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}>
-                                        <Key className={iconClasses(isGroupActive(["/category", "/sub-category", "/sub-sub-category", "/organization", "/password"]))} />
-                                    </div>
-                                    {isPasswordHovered && (
-                                        <div className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
-                                            onMouseEnter={handlePasswordMouseEnter} onMouseLeave={handlePasswordMouseLeave}>
-                                            <CollapsedSubLink href="/category" label="Categories" />
-                                            <CollapsedSubLink href="/sub-category" label="Sub Categories" />
-                                            <CollapsedSubLink href="/sub-sub-category" label="Sub Sub Categories" />
-                                            <CollapsedSubLink href="/organization" label="Organizations" />
-                                            <CollapsedSubLink href="/password" label="Passwords" />
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Finance Tracking — Landmark (bank/finance) */}
-                            {isAdminOrAccountant && (
-                                <Link href="/payment-finance-tracking" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}`}>
-                                    <Landmark className={iconClasses(isActive("/payment-finance-tracking"))} />
-                                    {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">Finance Tracking</span>}
-                                    {isCollapsed && <Tooltip>Payment & Finance Tracking</Tooltip>}
-                                </Link>
-                            )}
-
-                            {/* Admin-only Links */}
-                            {isAdmin && (
-                                <>
-                                    {/* Client Details — UserCircle */}
-                                    <Link href="/client-details" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-details")}`}>
-                                        <UserCircle className={iconClasses(isActive("/client-details"))} />
-                                        {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">Client Details</span>}
-                                        {isCollapsed && <Tooltip>Client Details</Tooltip>}
-                                    </Link>
-
-                                    {/* Payment — Receipt */}
-                                    <Link href="/payment-management" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-management")}`}>
-                                        <Receipt className={iconClasses(isActive("/payment-management"))} />
-                                        {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">Payment</span>}
-                                        {isCollapsed && <Tooltip>Payment</Tooltip>}
-                                    </Link>
-
-                                    {/* Service Contracts — ScrollText */}
-                                    <Link href="/service-contracts" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/service-contracts")}`}>
-                                        <ScrollText className={iconClasses(isActive("/service-contracts"))} />
-                                        {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">Service Contracts</span>}
-                                        {isCollapsed && <Tooltip>Service Contracts</Tooltip>}
-                                    </Link>
-
-                                    {/* User Management — UserCog */}
-                                    <Link href="/user-management" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/user-management")}`}>
-                                        <UserCog className={iconClasses(isActive("/user-management"))} />
-                                        {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">User Management</span>}
-                                        {isCollapsed && <Tooltip>User Management</Tooltip>}
-                                    </Link>
-
-                                    {/* Activity Log — FiActivity */}
-                                    <Link href="/activity-log" className={`${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/activity-log")}`}>
-                                        <FiActivity className={iconClasses(isActive("/activity-log"))} />
-                                        {!isCollapsed && <span className="ml-3 font-medium whitespace-nowrap">Activity Log</span>}
-                                        {isCollapsed && <Tooltip>Activity Log</Tooltip>}
-                                    </Link>
-                                </>
-                            )}
-
-                        </div>
+                    <div className="flex items-center gap-1">
+                        <button
+                            type="button"
+                            onClick={onToggleCollapse}
+                            className="hidden rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:inline-flex"
+                            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                        >
+                            <Menu className="h-5 w-5" />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={onMobileToggle}
+                            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 lg:hidden"
+                            aria-label="Close sidebar"
+                        >
+                            <X className="h-5 w-5" />
+                        </button>
                     </div>
                 </div>
-            </div>
+
+                <nav
+                    className={[
+                        "flex-1 overflow-y-auto py-4",
+                        isCollapsed ? "px-2" : "px-3",
+                    ].join(" ")}
+                >
+                    <div className="space-y-1">
+                        <NavLink
+                            href="/dashboard"
+                            label="Dashboard"
+                            icon={LayoutDashboard}
+                        />
+
+                        {!isCollapsed && (
+                            <p className="px-3 pb-1 pt-5 text-xs font-bold uppercase tracking-wide text-slate-400">
+                                Pages
+                            </p>
+                        )}
+
+                        {groups.map((group) => (
+                            <NavGroup key={group.id} group={group} />
+                        ))}
+
+                        {quickLinks
+                            .filter((link) => link.show !== false)
+                            .map((link) => (
+                                <NavLink key={link.href} {...link} />
+                            ))}
+                    </div>
+                </nav>
+            </aside>
         </>
     );
 };
 
 export default AdminSideBar;
-
-
-
-// import React, { useState } from "react";
-// import { Link, usePage } from "@inertiajs/react";
-// import {
-//     FiMenu,
-//     FiX,
-//     FiChevronDown,
-//     FiChevronRight,
-//     FiUsers,
-//     FiUser,
-//     FiCreditCard,
-//     FiBookOpen,
-//     FiList,
-//     FiCheckSquare,
-//     FiClipboard,
-//     FiHome,
-// } from "react-icons/fi";
-// import {
-//     Building,
-//     LayoutDashboard,
-//     ListFilter,
-//     CheckSquare,
-//     Users,
-//     ClipboardList,
-//     ListTodo,
-//     Key,
-// } from "lucide-react";
-
-// const AdminSideBar = ({
-//     isMobileOpen,
-//     onMobileToggle,
-//     isCollapsed,
-//     onToggleCollapse,
-// }) => {
-//     const { url } = usePage();
-//     const currentPath = url.split("/")[1];
-
-//     // Dropdown states
-//     const [isLeadManagementOpen, setIsLeadManagementOpen] = useState(false);
-//     const [isTaskManagementOpen, setIsTaskManagementOpen] = useState(false);
-//     const [isClientManagementOpen, setIsClientManagementOpen] = useState(false);
-//     const [isPasswordManagementOpen, setIsPasswordManagementOpen] =
-//         useState(false);
-//     // Hover states for collapsed dropdowns
-//     const [isLeadHovered, setIsLeadHovered] = useState(false);
-//     const [isTaskHovered, setIsTaskHovered] = useState(false);
-//     const [isClientHovered, setIsClientHovered] = useState(false);
-//     const [isPasswordHovered, setIsPasswordHovered] = useState(false);
-//     // Get authenticated user from auth prop
-//     const { auth } = usePage().props;
-//     const user = auth?.user;
-
-//     // Check The Role of the User
-//     const isAdmin = user?.role === "admin";
-//     const isUser = user?.role === "user";
-//     const isAdminOrTechnician =
-//         user?.role === "admin" || user?.role === "technician";
-//     const isAdminOrDeveloper =
-//         user?.role === "admin" || user?.role === "developer";
-//     const isAdminOrAccountant =
-//         user?.role === "admin" || user?.role === "accountant";
-//     const isAdminOrManager = user?.role === "admin" || user?.role === "manager";
-
-//     console.log("Current User Role:", user?.role);
-
-//     const isActive = (href) => {
-//         const path = href.replace("/", "");
-//         return currentPath === path || url.startsWith(href + "/");
-//     };
-
-//     // Check if any route in a group is active
-//     const isGroupActive = (routes) => {
-//         return routes.some((route) => {
-//             const routePath = route.replace("/", "");
-//             return currentPath === routePath || url.startsWith(route + "/");
-//         });
-//     };
-
-//     const togglePasswordManagement = () => {
-//         if (!isCollapsed) {
-//             setIsPasswordManagementOpen(!isPasswordManagementOpen);
-//         }
-//     };
-
-//     // Toggle functions for expanded view
-//     const toggleLeadManagement = () => {
-//         if (!isCollapsed) {
-//             setIsLeadManagementOpen(!isLeadManagementOpen);
-//         }
-//     };
-
-//     const toggleTaskManagement = () => {
-//         if (!isCollapsed) {
-//             setIsTaskManagementOpen(!isTaskManagementOpen);
-//         }
-//     };
-
-//     const toggleClientManagement = () => {
-//         if (!isCollapsed) {
-//             setIsClientManagementOpen(!isClientManagementOpen);
-//         }
-//     };
-
-//     // Hover handlers for collapsed view
-//     const handleLeadMouseEnter = () => setIsLeadHovered(true);
-//     const handleLeadMouseLeave = () => setIsLeadHovered(false);
-//     const handleTaskMouseEnter = () => setIsTaskHovered(true);
-//     const handleTaskMouseLeave = () => setIsTaskHovered(false);
-//     const handleClientMouseEnter = () => setIsClientHovered(true);
-//     const handleClientMouseLeave = () => setIsClientHovered(false);
-//     const handlePasswordMouseEnter = () => setIsPasswordHovered(true);
-//     const handlePasswordMouseLeave = () => setIsPasswordHovered(false);
-
-//     // Common link styles
-//     const linkBaseClasses =
-//         "flex items-center rounded-lg transition-colors duration-200 group relative";
-//     const linkCollapsedClasses = isCollapsed ? "p-3 justify-center" : "p-3";
-//     const linkActiveClasses = (href) =>
-//         isActive(href)
-//             ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600"
-//             : "text-gray-600 hover:bg-blue-50 hover:text-blue-700";
-
-//     const dropdownButtonClasses = (isActive) => `
-//         flex items-center justify-between w-full p-3 rounded-lg transition-colors duration-200
-//         ${isActive ? "bg-blue-50 text-blue-700 font-semibold border-l-4 border-blue-600" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//     `;
-
-//     // Icon style function
-//     const iconClasses = (isItemActive, customClass = "w-5 h-5") => `
-//         ${isCollapsed ? customClass : customClass}
-//         ${isItemActive ? "text-blue-600" : "text-gray-500 group-hover:text-blue-600"}
-//     `;
-
-//     // Tooltip for collapsed state
-//     const Tooltip = ({ children }) => (
-//         <div
-//             className="fixed left-12 ml-6 px-2 py-1 text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50"
-//             style={{
-//                 backgroundColor: "#ffffff",
-//                 border: "1px solid #e5e7eb",
-//                 color: "#374151",
-//                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-//             }}
-//         >
-//             {children}
-//         </div>
-//     );
-
-//     return (
-//         <>
-//             {isMobileOpen && (
-//                 <div
-//                     className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-//                     onClick={onMobileToggle}
-//                 />
-//             )}
-
-//             <div
-//                 className={`
-//                     fixed left-0 top-0 h-screen border-r z-50 transition-all duration-300
-//                     ${isCollapsed ? "w-16" : "w-64"}
-//                     ${
-//                         isMobileOpen
-//                             ? "translate-x-0"
-//                             : "-translate-x-full lg:translate-x-0"
-//                     }
-//                 `}
-//                 style={{
-//                     backgroundColor: "#ffffff",
-//                     borderColor: "#e5e7eb",
-//                 }}
-//             >
-//                 {/* Content Container */}
-//                 <div className="relative z-10 h-full flex flex-col">
-//                     {/* Header */}
-//                     <div
-//                         className={`flex items-center justify-between p-4 border-b h-16 ${
-//                             isCollapsed ? "px-3" : ""
-//                         }`}
-//                         style={{ borderColor: "#e5e7eb" }}
-//                     >
-//                         {!isCollapsed && (
-//                             <Link
-//                                 href="/dashboard"
-//                                 className="text-xl font-bold text-gray-800 whitespace-nowrap"
-//                             >
-//                                 <img
-//                                     src="/images/logo2.png"
-//                                     alt="Logo"
-//                                     className="h-10 w-auto"
-//                                 />
-//                             </Link>
-//                         )}
-//                         <div className="flex items-center space-x-1">
-//                             {/* Collapse Toggle Button - Only show on desktop */}
-//                             <button
-//                                 onClick={onToggleCollapse}
-//                                 className="hidden lg:flex p-1.5 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-//                                 title={
-//                                     isCollapsed
-//                                         ? "Expand sidebar"
-//                                         : "Collapse sidebar"
-//                                 }
-//                             >
-//                                 <FiMenu className="w-4 h-4 text-gray-600" />
-//                             </button>
-
-//                             {/* Mobile Close Button */}
-//                             <button
-//                                 onClick={onMobileToggle}
-//                                 className="lg:hidden p-1.5 hover:bg-blue-50 rounded-lg transition-colors duration-200"
-//                             >
-//                                 <FiX className="w-4 h-4 text-gray-600" />
-//                             </button>
-//                         </div>
-//                     </div>
-
-//                     {/* Menu Items */}
-//                     <div
-//                         className={`flex-1 overflow-y-auto ${isCollapsed ? "px-2" : "px-3"} py-2`}
-//                     >
-//                         <div className="space-y-1">
-//                             {/* Dashboard Link */}
-//                             <Link
-//                                 href="/dashboard"
-//                                 className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/dashboard")}
-//                                 `}
-//                             >
-//                                 <LayoutDashboard
-//                                     className={iconClasses(
-//                                         isActive("/dashboard"),
-//                                     )}
-//                                 />
-//                                 {!isCollapsed && (
-//                                     <span className="ml-3 font-medium whitespace-nowrap">
-//                                         Dashboard
-//                                     </span>
-//                                 )}
-//                                 {isCollapsed && <Tooltip>Dashboard</Tooltip>}
-//                             </Link>
-
-//                             {/* Section Header */}
-//                             {!isCollapsed && (
-//                                 <div className="pt-4 px-3">
-//                                     <h1 className="font-medium text-gray-500 text-xs uppercase tracking-wider">
-//                                         Pages
-//                                     </h1>
-//                                 </div>
-//                             )}
-
-//                             {/* Company Management Dropdown (formerly CRM & Company) */}
-//                             {/* {!isCollapsed ? (
-//                                 // Expanded view
-//                                 <div className="space-y-1">
-//                                     <button
-//                                         onClick={toggleLeadManagement}
-//                                         className={dropdownButtonClasses(
-//                                             isGroupActive(["/crm", "/company"]),
-//                                         )}
-//                                     >
-//                                         <div className="flex items-center">
-//                                             <ListFilter
-//                                                 className={iconClasses(
-//                                                     isGroupActive([
-//                                                         "/crm",
-//                                                         "/company",
-//                                                     ]),
-//                                                 )}
-//                                             />
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 CRM
-//                                             </span>
-//                                         </div>
-//                                         {isLeadManagementOpen ? (
-//                                             <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-//                                         ) : (
-//                                             <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-//                                         )}
-//                                     </button>
-
-                                   
-//                                     {isLeadManagementOpen && (
-//                                         <div className="ml-9 space-y-0.5">
-                                            
-//                                             <Link
-//                                                 href="/crm"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/crm") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     CRM
-//                                                 </span>
-//                                             </Link>
-
-                                            
-//                                             <Link
-//                                                 href="/company"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/company") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Companies
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             ) : (
-//                                 // Collapsed view with hover dropdown
-//                                 <div
-//                                     className="relative"
-//                                     onMouseEnter={handleLeadMouseEnter}
-//                                     onMouseLeave={handleLeadMouseLeave}
-//                                 >
-//                                     <button
-//                                         onClick={() => {
-//                                             if (isCollapsed) {
-//                                                 setIsLeadHovered(
-//                                                     !isLeadHovered,
-//                                                 );
-//                                             }
-//                                         }}
-//                                         className={`
-//                                             flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
-//                                             ${isGroupActive(["/crm", "/company"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                         `}
-//                                     >
-//                                         <ListFilter
-//                                             className={iconClasses(
-//                                                 isGroupActive([
-//                                                     "/crm",
-//                                                     "/company",
-//                                                 ]),
-//                                             )}
-//                                         />
-                                      
-//                                     </button>
-
-//                                     {isLeadHovered && (
-//                                         <div
-//                                             className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1"
-//                                             onMouseEnter={handleLeadMouseEnter}
-//                                             onMouseLeave={handleLeadMouseLeave}
-//                                         >
-//                                             <Link
-//                                                 href="/crm"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/crm") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     CRM
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/company"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/company") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Companies
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             )} */}
-
-//                             {!isCollapsed ? (
-//                                 // Expanded view
-//                                 <div className="space-y-1">
-//                                     {isAdminOrAccountant && (
-//                                         <button
-//                                             onClick={toggleLeadManagement}
-//                                             className={dropdownButtonClasses(
-//                                                 isGroupActive([
-//                                                     "/leads",
-//                                                     "/client-management",
-//                                                 ]),
-//                                             )}
-//                                         >
-//                                             <div className="flex items-center">
-//                                                 <ListFilter
-//                                                     className={iconClasses(
-//                                                         isGroupActive([
-//                                                             "/leads",
-//                                                             "/client-management",
-//                                                         ]),
-//                                                     )}
-//                                                 />
-//                                                 <span className="ml-3 font-medium whitespace-nowrap">
-//                                                     CRM
-//                                                 </span>
-//                                             </div>
-//                                             {isLeadManagementOpen ? (
-//                                                 <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-//                                             ) : (
-//                                                 <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-//                                             )}
-//                                         </button>
-//                                     )}
-
-//                                     {isLeadManagementOpen && (
-//                                         <div className="ml-9 space-y-0.5">
-//                                             <Link
-//                                                 href="/leads"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/leads") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Leads
-//                                                 </span>
-//                                             </Link>
-
-//                                             <Link
-//                                                 href="/client-management"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/client-management") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Client Management
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             ) : (
-//                                 // Collapsed view with hover dropdown
-//                                 <div
-//                                     className="relative"
-//                                     onMouseEnter={handleLeadMouseEnter}
-//                                     onMouseLeave={handleLeadMouseLeave}
-//                                 >
-//                                     <button
-//                                         onClick={() => {
-//                                             if (isCollapsed) {
-//                                                 setIsLeadHovered(
-//                                                     !isLeadHovered,
-//                                                 );
-//                                             }
-//                                         }}
-//                                         className={`
-//                                             flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
-//                                             ${isGroupActive(["/leads", "/client-management"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                         `}
-//                                     >
-//                                         <ListFilter
-//                                             className={iconClasses(
-//                                                 isGroupActive([
-//                                                     "/leads",
-//                                                     "/client-management",
-//                                                 ]),
-//                                             )}
-//                                         />
-//                                     </button>
-
-//                                     {isLeadHovered && (
-//                                         <div
-//                                             className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1"
-//                                             onMouseEnter={handleLeadMouseEnter}
-//                                             onMouseLeave={handleLeadMouseLeave}
-//                                         >
-//                                             <Link
-//                                                 href="/leads"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/leads") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Leads
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/client-management"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/client-management") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Client Management
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             )}
-
-//                             {/* Report Dropdown (formerly Tasks & Todo) */}
-//                             {!isCollapsed ? (
-//                                 // Expanded view
-//                                 <div className="space-y-1">
-//                                     <button
-//                                         onClick={toggleTaskManagement}
-//                                         className={dropdownButtonClasses(
-//                                             isGroupActive([
-//                                                 "/ticket",
-//                                                 "/todo",
-//                                                 "/project-management",
-//                                             ]),
-//                                         )}
-//                                     >
-//                                         <div className="flex items-center">
-//                                             <FiBookOpen
-//                                                 className={iconClasses(
-//                                                     isGroupActive([
-//                                                         "/ticket",
-//                                                         "/todo",
-//                                                         "/project-management",
-//                                                     ]),
-//                                                 )}
-//                                             />
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 Report
-//                                             </span>
-//                                         </div>
-//                                         {isTaskManagementOpen ? (
-//                                             <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-//                                         ) : (
-//                                             <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-//                                         )}
-//                                     </button>
-
-//                                     {/* Dropdown Content */}
-//                                     {isTaskManagementOpen && (
-//                                         <div className="ml-9 space-y-0.5">
-//                                             {/* Tasks Link */}
-//                                             {/* <Link
-//                                                 href="/tasks"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/tasks") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Task Management
-//                                                 </span>
-//                                             </Link> */}
-
-//                                             {/* Todo Link */}
-//                                             <Link
-//                                                 href="/todo"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/todo") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     To Do List
-//                                                 </span>
-//                                             </Link>
-
-//                                             {isAdminOrTechnician && (
-//                                                 <Link
-//                                                     href="/ticket"
-//                                                     className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/ticket") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                                 >
-//                                                     <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                     <span className="text-sm whitespace-nowrap">
-//                                                         Ticket Management
-//                                                     </span>
-//                                                 </Link>
-//                                             )}
-
-//                                             {isAdminOrDeveloper && (
-//                                                 <Link
-//                                                     href="/project-management"
-//                                                     className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/project-management") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                                 >
-//                                                     <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                     <span className="text-sm whitespace-nowrap">
-//                                                         Project Management
-//                                                     </span>
-//                                                 </Link>
-//                                             )}
-
-//                                             {/* Task Assignments Link - Only for Admin */}
-//                                             {/* {isAdmin && (
-//                                                 <Link
-//                                                     href="/task-assignments"
-//                                                     className={`
-//                                                         flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                         ${isActive("/task-assignments") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                     `}
-//                                                 >
-//                                                     <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                     <span className="text-sm whitespace-nowrap">
-//                                                         Task Assignments
-//                                                     </span>
-//                                                 </Link>
-//                                             )} */}
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             ) : (
-//                                 // Collapsed view with hover dropdown
-//                                 <div
-//                                     className="relative"
-//                                     onMouseEnter={handleTaskMouseEnter}
-//                                     onMouseLeave={handleTaskMouseLeave}
-//                                 >
-//                                     <button
-//                                         onClick={() => {
-//                                             if (isCollapsed) {
-//                                                 setIsTaskHovered(
-//                                                     !isTaskHovered,
-//                                                 );
-//                                             }
-//                                         }}
-//                                         className={`
-//                                             flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
-//                                             ${isGroupActive(["/ticket", "/todo", "/project-management"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                         `}
-//                                     >
-//                                         <FiBookOpen
-//                                             className={iconClasses(
-//                                                 isGroupActive([
-//                                                     "/ticket",
-//                                                     "/todo",
-//                                                     "/project-management",
-//                                                 ]),
-//                                             )}
-//                                         />
-//                                         {/* <Tooltip>Report</Tooltip> */}
-//                                     </button>
-
-//                                     {/* Collapsed dropdown - appears on hover */}
-//                                     {isTaskHovered && (
-//                                         <div
-//                                             className="fixed left-10 top-44 ml-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
-//                                             onMouseEnter={handleTaskMouseEnter}
-//                                             onMouseLeave={handleTaskMouseLeave}
-//                                         >
-//                                             {/* <Link
-//                                                 href="/tasks"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/tasks") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Task Management
-//                                                 </span>
-//                                             </Link> */}
-//                                             <Link
-//                                                 href="/todo"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/todo") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     To Do List
-//                                                 </span>
-//                                             </Link>
-
-//                                             {isAdminOrTechnician && (
-//                                                 <Link
-//                                                     href="/ticket"
-//                                                     className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/ticket") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                                 >
-//                                                     <span className="whitespace-nowrap">
-//                                                         Ticket
-//                                                     </span>
-//                                                 </Link>
-//                                             )}
-
-//                                             {isAdminOrDeveloper && (
-//                                                 <Link
-//                                                     href="/project-management"
-//                                                     className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/project-management") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                                 >
-//                                                     <span className="whitespace-nowrap">
-//                                                         Project Management
-//                                                     </span>
-//                                                 </Link>
-//                                             )}
-//                                             {/* {isAdmin && (
-//                                                 <Link
-//                                                     href="/task-assignments"
-//                                                     className={`
-//                                                         flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                         ${isActive("/task-assignments") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                     `}
-//                                                 >
-//                                                     <span className="whitespace-nowrap">
-//                                                         Task Assignments
-//                                                     </span>
-//                                                 </Link>
-//                                             )} */}
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             )}
-
-//                             {/* Company Dropdown (formerly Client & Expiration) */}
-//                             {!isCollapsed ? (
-//                                 // Expanded view
-//                                 <div className="space-y-1">
-//                                     {isAdminOrManager && (
-//                                         <button
-//                                             onClick={toggleClientManagement}
-//                                             className={dropdownButtonClasses(
-//                                                 isGroupActive([
-//                                                     "/client",
-//                                                     "/expiration",
-//                                                     "/hosting-tracking",
-//                                                     "/domain-tracking",
-//                                                 ]),
-//                                             )}
-//                                         >
-//                                             <div className="flex items-center">
-//                                                 <FiCheckSquare
-//                                                     className={iconClasses(
-//                                                         isGroupActive([
-//                                                             "/client",
-//                                                             "/expiration",
-//                                                         ]),
-//                                                     )}
-//                                                 />
-//                                                 <span className="ml-3 font-medium whitespace-nowrap">
-//                                                     Company
-//                                                 </span>
-//                                             </div>
-
-//                                             {isClientManagementOpen ? (
-//                                                 <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-//                                             ) : (
-//                                                 <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-//                                             )}
-//                                         </button>
-//                                     )}
-
-//                                     {/* Dropdown Content */}
-//                                     {isClientManagementOpen && (
-//                                         <div className="ml-9 space-y-0.5">
-//                                             {/* Client Link */}
-//                                             <Link
-//                                                 href="/client"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/client") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Clients
-//                                                 </span>
-//                                             </Link>
-
-//                                             {/* Expiration Link */}
-//                                             <Link
-//                                                 href="/expiration"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/expiration") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Expirations
-//                                                 </span>
-//                                             </Link>
-
-//                                             <Link
-//                                                 href="/hosting-tracking"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/hosting-tracking") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Hosting Management
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/domain-tracking"
-//                                                 className={`
-//                                                     flex items-center p-2.5 rounded-lg transition-colors duration-200
-//                                                     ${isActive("/domain-tracking") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Domain Management
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             ) : (
-//                                 // Collapsed view with hover dropdown
-//                                 <div
-//                                     className="relative"
-//                                     onMouseEnter={handleClientMouseEnter}
-//                                     onMouseLeave={handleClientMouseLeave}
-//                                 >
-//                                     <button
-//                                         onClick={() => {
-//                                             if (isCollapsed) {
-//                                                 setIsClientHovered(
-//                                                     !isClientHovered,
-//                                                 );
-//                                             }
-//                                         }}
-//                                         className={`
-//                                             flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group
-//                                             ${isGroupActive(["/client", "/expiration", "/hosting-tracking", "/domain-tracking"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                         `}
-//                                     >
-//                                         <FiCheckSquare
-//                                             className={iconClasses(
-//                                                 isGroupActive([
-//                                                     "/client",
-//                                                     "/expiration",
-//                                                     "/hosting-tracking",
-//                                                     "/domain-tracking",
-//                                                 ]),
-//                                             )}
-//                                         />
-//                                         {/* <Tooltip>Company</Tooltip> */}
-//                                     </button>
-
-//                                     {/* Collapsed dropdown - appears on hover */}
-//                                     {isClientHovered && (
-//                                         <div
-//                                             className="fixed left-10 top-64 ml-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[140px] py-1"
-//                                             onMouseEnter={
-//                                                 handleClientMouseEnter
-//                                             }
-//                                             onMouseLeave={
-//                                                 handleClientMouseLeave
-//                                             }
-//                                         >
-//                                             <Link
-//                                                 href="/client"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/client") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Clients
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/expiration"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/expiration") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Expirations
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/hosting-tracking"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/hosting-tracking") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Hosting Management
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/domain-tracking"
-//                                                 className={`
-//                                                     flex items-center px-3 py-2.5 text-sm transition-colors duration-200
-//                                                     ${isActive("/domain-tracking") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-//                                                 `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Domain Management
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             )}
-
-//                             {/* <Link
-//                                 href="/client-management"
-//                                 className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-management")}
-//                                 `}
-//                             >
-//                                 <LayoutDashboard
-//                                     className={iconClasses(
-//                                         isActive("/client-management"),
-//                                     )}
-//                                 />
-//                                 {!isCollapsed && (
-//                                     <span className="ml-3 font-medium whitespace-nowrap">
-//                                         Client Management
-//                                     </span>
-//                                 )}
-//                                 {isCollapsed && (
-//                                     <Tooltip>Client Management</Tooltip>
-//                                 )}
-//                             </Link> */}
-
-//                             {/* <Link
-//                                 href="/leads"
-//                                 className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/leads")}
-//                                 `}
-//                             >
-//                                 <LayoutDashboard
-//                                     className={iconClasses(isActive("/leads"))}
-//                                 />
-//                                 {!isCollapsed && (
-//                                     <span className="ml-3 font-medium whitespace-nowrap">
-//                                         Leads
-//                                     </span>
-//                                 )}
-//                                 {isCollapsed && <Tooltip>Leads</Tooltip>}
-//                             </Link> */}
-
-//                             {/* Password Management Dropdown - NEW SECTION */}
-//                             {!isCollapsed ? (
-//                                 // Expanded view
-//                                 <div className="space-y-1">
-//                                     <button
-//                                         onClick={togglePasswordManagement}
-//                                         className={dropdownButtonClasses(
-//                                             isGroupActive([
-//                                                 "/category",
-//                                                 "/sub-category",
-//                                                 "/sub-sub-category",
-//                                                 "/organization",
-//                                                 "/password",
-//                                             ]),
-//                                         )}
-//                                     >
-//                                         <div className="flex items-center">
-//                                             <Key
-//                                                 className={iconClasses(
-//                                                     isGroupActive([
-//                                                         "/category",
-//                                                         "/sub-category",
-//                                                         "/sub-sub-category",
-//                                                         "/organization",
-//                                                         "/password",
-//                                                     ]),
-//                                                 )}
-//                                             />
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 Password Manager
-//                                             </span>
-//                                         </div>
-//                                         {isPasswordManagementOpen ? (
-//                                             <FiChevronDown className="w-4 h-4 transition-transform duration-200" />
-//                                         ) : (
-//                                             <FiChevronRight className="w-4 h-4 transition-transform duration-200" />
-//                                         )}
-//                                     </button>
-
-//                                     {isPasswordManagementOpen && (
-//                                         <div className="ml-9 space-y-0.5">
-//                                             {/* Categories */}
-//                                             <Link
-//                                                 href="/category"
-//                                                 className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/category") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Categories
-//                                                 </span>
-//                                             </Link>
-
-//                                             {/* Sub Categories */}
-//                                             <Link
-//                                                 href="/sub-category"
-//                                                 className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/sub-category") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Sub Categories
-//                                                 </span>
-//                                             </Link>
-
-//                                             {/* Sub Sub Categories */}
-//                                             <Link
-//                                                 href="/sub-sub-category"
-//                                                 className={`flex items-center p-2.5 rounded-lg transition-colors duration-200${isActive("/sub-sub-category") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Sub Sub Categories
-//                                                 </span>
-//                                             </Link>
-
-//                                             {/* Organizations */}
-//                                             <Link
-//                                                 href="/organization"
-//                                                 className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/organization") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Organizations
-//                                                 </span>
-//                                             </Link>
-
-//                                             {/* Passwords */}
-//                                             <Link
-//                                                 href="/password"
-//                                                 className={`flex items-center p-2.5 rounded-lg transition-colors duration-200 ${isActive("/password") ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mr-3"></div>
-//                                                 <span className="text-sm whitespace-nowrap">
-//                                                     Passwords
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             ) : (
-//                                 // Collapsed view with hover dropdown
-//                                 <div
-//                                     className="relative"
-//                                     onMouseEnter={handlePasswordMouseEnter}
-//                                     onMouseLeave={handlePasswordMouseLeave}
-//                                 >
-//                                     <button
-//                                         onClick={() => {
-//                                             if (isCollapsed) {
-//                                                 setIsPasswordHovered(
-//                                                     !isPasswordHovered,
-//                                                 );
-//                                             }
-//                                         }}
-//                                         className={`flex items-center justify-center w-full p-3 rounded-lg transition-colors duration-200 group ${isGroupActive(["/category", "/sub-category", "/sub-sub-category", "/organization", "/password"]) ? "bg-blue-50 text-blue-700" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                     >
-//                                         <Key
-//                                             className={iconClasses(
-//                                                 isGroupActive([
-//                                                     "/category",
-//                                                     "/sub-category",
-//                                                     "/sub-sub-category",
-//                                                     "/organization",
-//                                                     "/password",
-//                                                 ]),
-//                                             )}
-//                                         />
-//                                     </button>
-
-//                                     {isPasswordHovered && (
-//                                         <div
-//                                             className="fixed left-10 top-28 ml-4 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px] py-1"
-//                                             onMouseEnter={
-//                                                 handlePasswordMouseEnter
-//                                             }
-//                                             onMouseLeave={
-//                                                 handlePasswordMouseLeave
-//                                             }
-//                                         >
-//                                             <Link
-//                                                 href="/category"
-//                                                 className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/category") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Categories
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/sub-category"
-//                                                 className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/sub-category") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Sub Categories
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/sub-sub-category"
-//                                                 className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/sub-sub-category") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"} `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Sub Sub Categories
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/organization"
-//                                                 className={` flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/organization") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}`}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Organizations
-//                                                 </span>
-//                                             </Link>
-//                                             <Link
-//                                                 href="/password"
-//                                                 className={`flex items-center px-3 py-2.5 text-sm transition-colors duration-200 ${isActive("/password") ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-600 hover:bg-blue-50 hover:text-blue-700"}
-// `}
-//                                             >
-//                                                 <span className="whitespace-nowrap">
-//                                                     Passwords
-//                                                 </span>
-//                                             </Link>
-//                                         </div>
-//                                     )}
-//                                 </div>
-//                             )}
-
-//                             {isAdminOrAccountant && (
-//                                 <Link
-//                                     href="/payment-finance-tracking"
-//                                     className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-finance-tracking")}
-//                                 `}
-//                                 >
-//                                     <LayoutDashboard
-//                                         className={iconClasses(
-//                                             isActive(
-//                                                 "/payment-finance-tracking",
-//                                             ),
-//                                         )}
-//                                     />
-//                                     {!isCollapsed && (
-//                                         <span className="ml-3 font-medium whitespace-nowrap">
-//                                             Finance Tracking
-//                                         </span>
-//                                     )}
-//                                     {isCollapsed && (
-//                                         <Tooltip>
-//                                             Payment & Finance Tracking
-//                                         </Tooltip>
-//                                     )}
-//                                 </Link>
-//                             )}
-
-//                             {/* <Link
-//                                 href="/ticket"
-//                                 className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/ticket")}
-//                                 `}
-//                             >
-//                                 <LayoutDashboard
-//                                     className={iconClasses(isActive("/ticket"))}
-//                                 />
-//                                 {!isCollapsed && (
-//                                     <span className="ml-3 font-medium whitespace-nowrap">
-//                                         Ticket
-//                                     </span>
-//                                 )}
-//                                 {isCollapsed && <Tooltip>Ticket</Tooltip>}
-//                             </Link> */}
-
-//                             {/* <Link
-//                                 href="/project-management"
-//                                 className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/project-management")}
-//                                 `}
-//                             >
-//                                 <LayoutDashboard
-//                                     className={iconClasses(
-//                                         isActive("/project-management"),
-//                                     )}
-//                                 />
-//                                 {!isCollapsed && (
-//                                     <span className="ml-3 font-medium whitespace-nowrap">
-//                                         Project Management
-//                                     </span>
-//                                 )}
-//                                 {isCollapsed && (
-//                                     <Tooltip>Project Management</Tooltip>
-//                                 )}
-//                             </Link> */}
-
-//                             {/* <Link
-//                                 href="/contract-renewal-management"
-//                                 className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/contract-renewal-management")}
-//                                 `}
-//                             >
-//                                 <LayoutDashboard
-//                                     className={iconClasses(
-//                                         isActive(
-//                                             "/contract-renewal-management",
-//                                         ),
-//                                     )}
-//                                 />
-//                                 {!isCollapsed && (
-//                                     <span className="ml-3 font-medium whitespace-nowrap">
-//                                         Renewal Management
-//                                     </span>
-//                                 )}
-//                                 {isCollapsed && (
-//                                     <Tooltip>
-//                                         Contract Renewal Management
-//                                     </Tooltip>
-//                                 )}
-//                             </Link> */}
-
-//                             {/* Admin Links */}
-//                             {isAdmin && (
-//                                 <>
-//                                     <Link
-//                                         href="/client-details"
-//                                         className={`
-//                                     ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/client-details")}
-//                                 `}
-//                                     >
-//                                         <LayoutDashboard
-//                                             className={iconClasses(
-//                                                 isActive("/client-details"),
-//                                             )}
-//                                         />
-//                                         {!isCollapsed && (
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 Client Details
-//                                             </span>
-//                                         )}
-//                                         {isCollapsed && (
-//                                             <Tooltip>Client Details</Tooltip>
-//                                         )}
-//                                     </Link>
-
-//                                     {/* User Management Link */}
-//                                     <Link
-//                                         href="/payment-management"
-//                                         className={`
-//                                             ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/payment-management")}
-//                                         `}
-//                                     >
-//                                         <FiUsers
-//                                             className={iconClasses(
-//                                                 isActive("/payment-management"),
-//                                             )}
-//                                         />
-//                                         {!isCollapsed && (
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 Payment
-//                                             </span>
-//                                         )}
-//                                         {isCollapsed && (
-//                                             <Tooltip>Payment </Tooltip>
-//                                         )}
-//                                     </Link>
-
-//                                     {/* User Management Link */}
-//                                     <Link
-//                                         href="/service-contracts"
-//                                         className={`
-//                                             ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/service-contracts")}
-//                                         `}
-//                                     >
-//                                         <FiUsers
-//                                             className={iconClasses(
-//                                                 isActive("/service-contracts"),
-//                                             )}
-//                                         />
-//                                         {!isCollapsed && (
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 Service Contracts
-//                                             </span>
-//                                         )}
-//                                         {isCollapsed && (
-//                                             <Tooltip>Service Contracts</Tooltip>
-//                                         )}
-//                                     </Link>
-//                                     {/* User Management Link */}
-//                                     <Link
-//                                         href="/user-management"
-//                                         className={`
-//                                             ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/user-management")}
-//                                         `}
-//                                     >
-//                                         <FiUsers
-//                                             className={iconClasses(
-//                                                 isActive("/user-management"),
-//                                             )}
-//                                         />
-//                                         {!isCollapsed && (
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 User Management
-//                                             </span>
-//                                         )}
-//                                         {isCollapsed && (
-//                                             <Tooltip>User Management</Tooltip>
-//                                         )}
-//                                     </Link>
-
-//                                     <Link
-//                                         href="/activity-log"
-//                                         className={`
-//                                             ${linkBaseClasses} ${linkCollapsedClasses} ${linkActiveClasses("/activity-log")}
-//                                         `}
-//                                     >
-//                                         <FiUsers
-//                                             className={iconClasses(
-//                                                 isActive("/activity-log"),
-//                                             )}
-//                                         />
-//                                         {!isCollapsed && (
-//                                             <span className="ml-3 font-medium whitespace-nowrap">
-//                                                 Activity Log
-//                                             </span>
-//                                         )}
-//                                         {isCollapsed && (
-//                                             <Tooltip>Activity Log</Tooltip>
-//                                         )}
-//                                     </Link>
-//                                 </>
-//                             )}
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         </>
-//     );
-// };
-
-// export default AdminSideBar;
-
-

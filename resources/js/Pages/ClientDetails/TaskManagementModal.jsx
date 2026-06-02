@@ -156,7 +156,7 @@ const TaskManagementModal = ({ project, onClose, onSave }) => {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4 pb-4 border-b border-stone-100">
                     <div>
-                        <h2 className="text-xl font-bold tracking-wide text-stone-800">
+                        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                             Task Management
                         </h2>
                         <p className="text-sm text-stone-500 mt-1">

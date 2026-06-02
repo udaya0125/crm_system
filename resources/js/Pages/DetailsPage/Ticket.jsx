@@ -168,7 +168,7 @@ const Ticket = () => {
             <AdminWrapper>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold tracking-widest text-stone-800 uppercase">
+                        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                             Tickets
                         </h1>
                     </div>

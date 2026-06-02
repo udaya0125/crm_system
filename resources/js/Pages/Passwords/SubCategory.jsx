@@ -66,7 +66,7 @@ const SubCategory = () => {
             <div className="container mx-auto py-4">
             {/* Header */}
             <div className="mb-6 flex justify-between items-center">
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                     SubCategory Management
                 </h1>
                 <button

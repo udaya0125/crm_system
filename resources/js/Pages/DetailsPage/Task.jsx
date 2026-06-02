@@ -392,7 +392,7 @@ const Task = () => {
             <div className="container mx-auto py-4">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
-                    <h1 className="text-3xl font-bold text-gray-800">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Task Management
                     </h1>
                     {/* Add Task Button - Only show if user role is 'user' */}

@@ -182,7 +182,7 @@ const Password = () => {
         <AdminWrapper>
             <div className="container mx-auto py-4">
             <div className="mb-8 flex justify-between items-center">
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-800">
+                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                     Password Management
                 </h1>
                 <button

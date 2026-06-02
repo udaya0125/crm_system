@@ -193,16 +193,13 @@ const ServiceContracts = () => {
                 <div className="p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-2xl font-semibold text-gray-800">
+                        <h2 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                             Service Contracts
                         </h2>
-                        <span className="text-sm text-gray-500">
+                        {/* <span className="text-sm text-gray-500">
                             {filteredData.length} record(s)
-                        </span>
-                    </div>
-
-                    {/* Search */}
-                    <div className="mb-4">
+                        </span> */}
+                        <div className="">
                         <input
                             type="text"
                             placeholder="Search by customer, service type, or invoice number..."
@@ -211,6 +208,18 @@ const ServiceContracts = () => {
                             className="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
+                    </div>
+
+                    {/* Search */}
+                    {/* <div className="mb-4">
+                        <input
+                            type="text"
+                            placeholder="Search by customer, service type, or invoice number..."
+                            value={search}
+                            onChange={handleSearchChange}
+                            className="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div> */}
 
                     {/* MyTable Component with integrated loading */}
                     <MyTable

@@ -182,16 +182,10 @@ const Payment = () => {
         <AdminWrapper>
             <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Payment Management
                     </h1>
-                    <span className="text-sm text-gray-500">
-                        {filteredData.length} record(s)
-                    </span>
-                </div>
-
-                {/* Search Input */}
-                <div className="mb-4">
+                     <div className="mb-4">
                     <input
                         type="text"
                         placeholder="Search by customer, service type, payment reference, invoice reference, or payment mode..."
@@ -200,6 +194,19 @@ const Payment = () => {
                         className="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
+                    
+                </div>
+
+                {/* Search Input */}
+                {/* <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search by customer, service type, payment reference, invoice reference, or payment mode..."
+                        value={search}
+                        onChange={handleSearchChange}
+                        className="w-full md:w-80 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                </div> */}
 
                 {/* MyTable Component with integrated loading */}
                 <MyTable 
