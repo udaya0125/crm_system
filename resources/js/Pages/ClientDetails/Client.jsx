@@ -119,7 +119,7 @@ const Client = () => {
     const columns = useMemo(
         () => [
            {
-                Header: "S/N",
+                Header: "S.N.",
                 accessor: (row, i) => i + 1,
                 id: "rowIndex",
                 width: 60,

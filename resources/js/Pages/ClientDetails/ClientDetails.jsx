@@ -318,7 +318,7 @@ const ClientDetails = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "S/N",
+                Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => row.index + 1,
                 disableSortBy: true,
