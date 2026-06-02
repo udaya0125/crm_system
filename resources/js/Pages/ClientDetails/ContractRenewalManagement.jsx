@@ -56,7 +56,7 @@ const ContractRenewalManagement = () => {
     const columns = useMemo(
         () => [
             {
-                Header: "s/n",
+                Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => <span>{row.index + 1}</span>,
             },
