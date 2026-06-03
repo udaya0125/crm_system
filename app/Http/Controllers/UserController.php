@@ -32,6 +32,8 @@ class UserController extends Controller
             'email'    => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'role'     => 'required|string',
+            'contact' => 'nullable|string',
+            'image' => 'nullable|string',
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
@@ -63,6 +65,8 @@ class UserController extends Controller
             'email'    => 'sometimes|email|unique:users,email,'.$id,
             'password' => 'nullable|string|min:6',
             'role'     => 'sometimes|string',
+            'contact' => 'nullable|string',
+            'image' => 'nullable|string',
         ]);
 
         // Keep old password if not provided

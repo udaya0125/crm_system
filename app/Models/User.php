@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'contact',
+        'image',
     ];
 
     /**
@@ -47,27 +49,27 @@ class User extends Authenticatable
         ];
     }
 
-    // A user has many task lists
-    public function taskLists()
-    {
-        return $this->hasMany(TaskList::class);
-    }
+    // // A user has many task lists
+    // public function taskLists()
+    // {
+    //     return $this->hasMany(TaskList::class);
+    // }
 
-    // (Optional) A user has many tasks through task lists
-    public function tasks()
-    {
-        return $this->hasManyThrough(Task::class, TaskList::class);
-    }
+    // // (Optional) A user has many tasks through task lists
+    // public function tasks()
+    // {
+    //     return $this->hasManyThrough(Task::class, TaskList::class);
+    // }
 
-    public function assignedTasks()
-    {
-        return $this->hasMany(TaskList::class, 'assigned_to');
-    }
+    // public function assignedTasks()
+    // {
+    //     return $this->hasMany(TaskList::class, 'assigned_to');
+    // }
 
-    public function createdTasks()
-    {
-        return $this->hasMany(TaskList::class, 'user_id');
-    }
+    // public function createdTasks()
+    // {
+    //     return $this->hasMany(TaskList::class, 'user_id');
+    // }
 
     public function isAdmin()
     {
@@ -84,10 +86,10 @@ class User extends Authenticatable
         return $this->hasMany(Todo::class);
     }
 
-    public function companies()
-    {
-        return $this->hasMany(Company::class);
-    }
+    // public function companies()
+    // {
+    //     return $this->hasMany(Company::class);
+    // }
 
     public function projects()
     {
