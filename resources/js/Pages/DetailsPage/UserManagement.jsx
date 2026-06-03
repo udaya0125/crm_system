@@ -1,10 +1,6 @@
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import React, { useEffect, useMemo, useState } from "react";
-import {
-    Plus,
-    SquarePen,
-    Trash2,
-} from "lucide-react";
+import { Plus, SquarePen, Trash2 } from "lucide-react";
 import axios from "axios";
 import AddUserForm from "@/AddFormComponents/AddUserForm";
 import EditUserForm from "@/EditFormComponents/EditUserForm";
@@ -38,6 +34,8 @@ const UserManagement = () => {
         fetchUser();
     }, [reloadTrigger]);
 
+    console.log("Fetched users:", allUser);
+
     // Define columns for MyTable
     const columns = useMemo(
         () => [
@@ -45,6 +43,24 @@ const UserManagement = () => {
                 Header: "S.N.",
                 accessor: "index",
                 Cell: ({ row }) => <span>{row.index + 1}</span>,
+            },
+            {
+                Header: "Image",
+                accessor: "image",
+                Cell: ({ row }) => {
+                    const { image, name } = row.original;
+                    return image ? (
+                        <img
+                            src={`storage/${image}`}
+                            alt={name}
+                            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                        />
+                    ) : (
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-sm font-semibold">
+                            {name?.charAt(0).toUpperCase() ?? "?"}
+                        </div>
+                    );
+                },
             },
             {
                 Header: "Name",
@@ -69,6 +85,16 @@ const UserManagement = () => {
                     </span>
                 ),
             },
+            // Add after Role, before Actions:
+            {
+                Header: "Contact",
+                accessor: "contact",
+                Cell: ({ value }) => (
+                    <span className="text-sm text-gray-600">
+                        {value || "-"}
+                    </span>
+                ),
+            },
             {
                 Header: "Role",
                 accessor: "role",
@@ -78,8 +104,8 @@ const UserManagement = () => {
                             value === "admin"
                                 ? "bg-red-100 text-red-800"
                                 : value === "editor"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-green-100 text-green-800"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-green-100 text-green-800"
                         }`}
                     >
                         {value || "user"}
@@ -109,7 +135,7 @@ const UserManagement = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     // handleDelete
@@ -161,7 +187,9 @@ const UserManagement = () => {
         <AdminWrapper>
             <div className="container mx-auto py-4 px-4">
                 <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">User Management</h1>
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                        User Management
+                    </h1>
                     <button
                         onClick={handleAddNew}
                         className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm"
@@ -179,16 +207,12 @@ const UserManagement = () => {
                 )}
 
                 {/* Users Table - Using MyTable component with loading prop */}
-                <MyTable 
-                    columns={columns} 
-                    data={allUser} 
-                    loading={loading}
-                />
+                <MyTable columns={columns} data={allUser} loading={loading} />
 
                 {/* Add User Form Modal */}
                 {showAddForm && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg w-full max-w-md">
+                        <div className="bg-white rounded-lg w-full max-w-2xl">
                             <AddUserForm
                                 onSuccess={handleFormSuccess}
                                 onCancel={handleCancelAdd}
@@ -200,7 +224,7 @@ const UserManagement = () => {
                 {/* Edit User Form Modal */}
                 {showEditForm && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                        <div className="bg-white rounded-lg w-full max-w-md">
+                        <div className="bg-white rounded-lg w-full max-w-2xl">
                             <EditUserForm
                                 editingUser={editingUser}
                                 onSuccess={handleFormSuccess}
@@ -216,9 +240,6 @@ const UserManagement = () => {
 
 export default UserManagement;
 
-
-
-
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import React, { useEffect, useMemo, useState } from "react";
 // import {
@@ -231,7 +252,6 @@ export default UserManagement;
 // import AddUserForm from "@/AddFormComponents/AddUserForm";
 // import EditUserForm from "@/EditStepComponents/EditUserForm";
 // import MyTable from "@/TableComponents/MyTable";
-
 
 // const UserManagement = () => {
 //     const [allUser, setAllUser] = useState([]);
@@ -444,4 +464,3 @@ export default UserManagement;
 // };
 
 // export default UserManagement;
-
