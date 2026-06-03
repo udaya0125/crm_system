@@ -23,6 +23,36 @@ class ExpirationController extends Controller
         ]);
     }
 
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'client_id' => 'required|exists:clients,id',
+    //         'title' => 'required|string|max:255',
+    //         'last_renewal_date' => 'required|date',
+    //         'duration' => 'required|integer|min:1|max:120',
+    //         'expiration_date' => 'required|date|after_or_equal:last_renewal_date',
+    //     ]);
+
+    //     $expiration = Expiration::create($validated);
+    //     $expiration->load('client');
+
+    //     // Notification
+    //     $this->createExpirationNotification($expiration, 'created');
+
+    //     // User log
+    //     $clientName = $expiration->client?->name ?? 'Unknown Client';
+    //     $this->createUserLog(
+    //         title: 'Expiration Created',
+    //         detail: "Created expiration for {$clientName}",
+    //         request: $request
+    //     );
+
+    //     return response()->json([
+    //         'message' => 'Expiration created successfully',
+    //         'data' => $expiration,
+    //     ], 201);
+    // }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -39,12 +69,11 @@ class ExpirationController extends Controller
         // Notification
         $this->createExpirationNotification($expiration, 'created');
 
-        // User log
+        // User Log
         $clientName = $expiration->client?->name ?? 'Unknown Client';
+
         $this->createUserLog(
-            title: 'Expiration Created',
-            detail: "Created expiration '{$expiration->title}' for {$clientName}. Expires on ".
-                    Carbon::parse($expiration->expiration_date)->format('M d, Y'),
+            title: "Expiration Created for {$clientName}",
             request: $request
         );
 
@@ -72,12 +101,11 @@ class ExpirationController extends Controller
         // Notification
         $this->createExpirationNotification($expiration, 'updated');
 
-        // User log
+        // User Log
         $clientName = $expiration->client?->name ?? 'Unknown Client';
+
         $this->createUserLog(
-            title: 'Expiration Updated',
-            detail: "Updated expiration '{$expiration->title}' for {$clientName}. Expires on ".
-                    Carbon::parse($expiration->expiration_date)->format('M d, Y'),
+            title: "Expiration Updated for {$clientName}",
             request: $request
         );
 
@@ -87,18 +115,49 @@ class ExpirationController extends Controller
         ]);
     }
 
+    // public function update(Request $request, $id)
+    // {
+    //     $expiration = Expiration::findOrFail($id);
+
+    //     $validated = $request->validate([
+    //         'client_id' => 'required|exists:clients,id',
+    //         'title' => 'required|string|max:255',
+    //         'last_renewal_date' => 'required|date',
+    //         'duration' => 'required|integer|min:1|max:120',
+    //         'expiration_date' => 'required|date|after_or_equal:last_renewal_date',
+    //     ]);
+
+    //     $expiration->update($validated);
+    //     $expiration->load('client');
+
+    //     // Notification
+    //     $this->createExpirationNotification($expiration, 'updated');
+
+    //     // User log
+    //     $clientName = $expiration->client?->name ?? 'Unknown Client';
+    //     $this->createUserLog(
+    //         title: 'Expiration Updated for {$clientName} ',
+    //         detail: 'Updated expiration  ',
+    //         request: $request
+    //     );
+
+    //     return response()->json([
+    //         'message' => 'Expiration updated successfully',
+    //         'data' => $expiration,
+    //     ]);
+    // }
+
     public function destroy(Request $request, $id)
     {
         $expiration = Expiration::with('client')->findOrFail($id);
+
         $clientName = $expiration->client?->name ?? 'Unknown Client';
-        $title = $expiration->title;
 
         $expiration->delete();
 
-        // User log (no notification needed for delete)
+        // User Log
         $this->createUserLog(
-            title: 'Expiration Deleted',
-            detail: "Deleted expiration '{$title}' for {$clientName}.",
+            title: "Expiration Deleted for {$clientName}",
             request: $request
         );
 
@@ -106,6 +165,26 @@ class ExpirationController extends Controller
             'message' => 'Expiration deleted successfully',
         ]);
     }
+
+    // public function destroy(Request $request, $id)
+    // {
+    //     $expiration = Expiration::with('client')->findOrFail($id);
+    //     $clientName = $expiration->client?->name ?? 'Unknown Client';
+    //     $title = $expiration->title;
+
+    //     $expiration->delete();
+
+    //     // User log (no notification needed for delete)
+    //     $this->createUserLog(
+    //         title: 'Expiration Deleted',
+    //         detail: "Deleted expiration '{$title}' for {$clientName}.",
+    //         request: $request
+    //     );
+
+    //     return response()->json([
+    //         'message' => 'Expiration deleted successfully',
+    //     ]);
+    // }
 
     // -------------------------------------------------------------------------
     //  Notifications
@@ -213,12 +292,21 @@ class ExpirationController extends Controller
     /**
      * Generic helper to write a UserLog entry.
      */
-    private function createUserLog(string $title, string $detail, Request $request): void
+    // private function createUserLog(string $title, string $detail, Request $request): void
+    // {
+    //     UserLog::create([
+    //         'name' => $request->user()?->name ?? 'System',
+    //         'ip_address' => $request->ip(),
+    //         'title' => "[{$title}] {$detail}",
+    //     ]);
+    // }
+
+    private function createUserLog(string $title, Request $request): void
     {
         UserLog::create([
             'name' => $request->user()?->name ?? 'System',
             'ip_address' => $request->ip(),
-            'title' => "[{$title}] {$detail}",
+            'title' => "{$title}",
         ]);
     }
 

@@ -208,7 +208,7 @@ const AdminSideBar = ({
             >
                 <Icon className="h-5 w-5 shrink-0" />
                 {!isCollapsed && <span className="truncate">{label}</span>}
-                {isCollapsed && <Tooltip>{tooltip || label}</Tooltip>}
+                {/* {isCollapsed && <Tooltip>{tooltip || label}</Tooltip>} */}
             </Link>
         );
     };
@@ -230,9 +230,9 @@ const AdminSideBar = ({
                         title={group.label}
                     >
                         <Icon className="h-5 w-5 shrink-0" />
-                        <Tooltip>{group.label}</Tooltip>
+                        {/* <Tooltip>{group.label}</Tooltip> */}
                     </button>
-                    <div className="invisible  fixed top-24 ml-12 z-50 min-w-56 rounded-lg border border-gray-200 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
+                    <div className="invisible fixed top-24 ml-12 z-50 min-w-56 rounded-lg border border-gray-200 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
                         <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-slate-400">
                             {group.label}
                         </p>
