@@ -2,9 +2,9 @@ import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
-import AddPasswordForm from "@/AddFormComponents/AddPasswordForm";
+import AddPasswordForm from "@/AddPasswordComponents/AddPasswordForm";
 import MyTable from "@/TableComponents/MyTable";
-import EditPasswordForm from "@/EditFormComponents/EditPasswordForm";
+import EditPasswordForm from "@/EditPasswordComponents/EditPasswordForm";
 
 const Password = () => {
     const [allPassword, setAllPassword] = useState([]);
