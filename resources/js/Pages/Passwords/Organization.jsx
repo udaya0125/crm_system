@@ -2,9 +2,9 @@ import { Edit, Pencil, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import axios from "axios";
-import AddOrganizationForm from "@/AddFormComponents/AddOrganizationForm";
+import AddOrganizationForm from "@/AddPasswordComponents/AddOrganizationForm";
 import MyTable from "@/TableComponents/MyTable";
-import EditOrganizationForm from "@/EditFormComponents/EditOrganizationForm";
+import EditOrganizationForm from "@/EditPasswordComponents/EditOrganizationForm";
 
 const Organization = () => {
     const [allOrganizations, setAllOrganizations] = useState([]);
