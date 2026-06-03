@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import AddUserForm from "@/AddFormComponents/AddUserForm";
-import EditUserForm from "@/EditStepComponents/EditUserForm";
+import EditUserForm from "@/EditFormComponents/EditUserForm";
 import MyTable from "@/TableComponents/MyTable";
 
 const UserManagement = () => {
