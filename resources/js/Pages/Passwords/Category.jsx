@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Plus, Pencil, Trash2, Edit } from "lucide-react";
-import AddCategoryForm from "@/AddFormComponents/AddCategoryForm";
+import AddCategoryForm from "@/AddPasswordComponents/AddCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
-import EditCategoryForm from "@/EditFormComponents/EditCategoryForm";
+import EditCategoryForm from "@/EditPasswordComponents/EditCategoryForm";
 
 const Category = () => {
     const [allCategory, setAllCategory] = useState([]);
