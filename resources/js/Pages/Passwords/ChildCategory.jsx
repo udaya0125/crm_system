@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, Layers, Edit } from "lucide-react";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import AddChildCategory from "@/AddPasswordComponents/AddChildCategory";
 import EditChildCategory from "@/EditPasswordComponents/EditChildCategory";
+import { Head } from "@inertiajs/react";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -79,11 +80,12 @@ const ChildCategory = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4">
+            <Head title="Child Category" />
+            <div className="container mx-auto">
             {/* Header */}
             <div className="mb-6 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-                    Child Category Management
+                    Child Category 
                 </h1>
                 <button
                     onClick={() => setShowAddForm(true)}

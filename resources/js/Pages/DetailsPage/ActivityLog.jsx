@@ -2,6 +2,7 @@ import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 
 const ActivityLog = () => {
     const [allLogs, setAllLogs] = useState([]);
@@ -83,6 +84,7 @@ const ActivityLog = () => {
 
     return (
         <AdminWrapper>
+            <Head title="Activity Log" />
             <div className="p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">

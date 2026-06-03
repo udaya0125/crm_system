@@ -5,6 +5,7 @@ import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import AddPasswordForm from "@/AddPasswordComponents/AddPasswordForm";
 import MyTable from "@/TableComponents/MyTable";
 import EditPasswordForm from "@/EditPasswordComponents/EditPasswordForm";
+import { Head } from "@inertiajs/react";
 
 const Password = () => {
     const [allPassword, setAllPassword] = useState([]);
@@ -180,10 +181,11 @@ const Password = () => {
 
     return (
         <AdminWrapper>
+            <Head title="Password " />
             <div className="container mx-auto py-4">
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-                    Password Management
+                    Password 
                 </h1>
                 <button
                     onClick={() => {

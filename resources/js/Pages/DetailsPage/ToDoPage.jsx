@@ -20,6 +20,7 @@ import EditTodo from "@/EditFormComponents/EditTodo";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import parse from "html-react-parser";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 
 const ToDOPage = () => {
     const [allTodo, setAllTodo] = useState([]);
@@ -358,7 +359,8 @@ const ToDOPage = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4">
+            <Head title="ToDo List" />
+            <div className="container mx-auto">
                 {/* Header */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">

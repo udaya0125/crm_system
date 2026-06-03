@@ -60,7 +60,7 @@ const AdminWrapper = ({ children }) => {
                     isCollapsed ? "lg:ml-16" : "lg:ml-64",
                 ].join(" ")}
             >
-                <div className="px-4 sm:px-6 lg:px-8">
+                <div className="p-6 lg:p-8">
                     <div className="mx-auto w-full max-w-[1600px]">{children}</div>
                 </div>
             </main>

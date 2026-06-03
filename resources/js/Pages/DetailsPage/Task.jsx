@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import {
     Calendar,
     ChevronLeft,
@@ -389,7 +389,8 @@ const Task = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4">
+            <Head title="Task Management" />
+            <div className="container mx-auto">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">

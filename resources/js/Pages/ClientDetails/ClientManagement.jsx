@@ -5,6 +5,7 @@ import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 
 const ClientManagement = () => {
     const [allClients, setAllClients] = useState([]);
@@ -134,7 +135,8 @@ const ClientManagement = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4">
+            <Head title="Client Management" />
+            <div className="container mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Clients

@@ -5,6 +5,7 @@ import axios from "axios";
 import AddOrganizationForm from "@/AddPasswordComponents/AddOrganizationForm";
 import MyTable from "@/TableComponents/MyTable";
 import EditOrganizationForm from "@/EditPasswordComponents/EditOrganizationForm";
+import { Head } from "@inertiajs/react";
 
 const Organization = () => {
     const [allOrganizations, setAllOrganizations] = useState([]);
@@ -116,10 +117,11 @@ const Organization = () => {
 
     return (
         <AdminWrapper>
+            <Head title="Organization " />
             <div className="container mx-auto py-4">
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-                    Organizations Management
+                    Organizations 
                 </h1>
                 <button
                     onClick={() => {

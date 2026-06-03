@@ -183,6 +183,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/password/verify', [PasswordController::class, 'verify'])->name('password.verify');
 
+
+
+    Route::get('/profile', function () {
+        return Inertia::render('DetailsPage/Profile');
+    });
+
 });
     
 

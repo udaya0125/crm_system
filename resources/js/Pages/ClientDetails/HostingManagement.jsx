@@ -5,6 +5,7 @@ import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { Head } from "@inertiajs/react";
 
 const HostingManagement = () => {
     const [allHosting, setAllHosting] = useState([]);
@@ -187,6 +188,7 @@ const HostingManagement = () => {
 
     return (
         <AdminWrapper>
+            <Head title="Hosting Management" />
             <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>

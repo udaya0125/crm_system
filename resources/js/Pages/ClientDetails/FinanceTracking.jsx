@@ -5,6 +5,7 @@ import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
 import { Edit, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
+import { Head } from "@inertiajs/react";
 
 const FinanceTracking = () => {
     const [allTracking, setAllTracking] = useState([]);
@@ -222,6 +223,7 @@ const FinanceTracking = () => {
 
     return (
         <AdminWrapper>
+            <Head title="Finance Tracking" />
             <div className="container mx-auto py-4">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { usePage } from "@inertiajs/react";
+import { Head, usePage } from "@inertiajs/react";
 import AddTaskAssigned from "@/AddFormComponents/AddTaskAssigned";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Edit, Plus, Trash2 } from "lucide-react";
@@ -189,7 +189,8 @@ const TaskAssigned = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto  py-4">
+            <Head title="Task Assigned" />
+            <div className="container mx-auto">
                 <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Task Assigned

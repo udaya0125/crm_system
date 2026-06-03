@@ -6,6 +6,7 @@ import AddProjectForm from "@/AddFormComponents/AddProjectForm";
 import EditProjectForm from "@/EditFormComponents/EditProjectForm";
 import MyTable from "@/TableComponents/MyTable";
 import TaskManagementModal from "./TaskManagementModal";
+import { Head } from "@inertiajs/react";
 
 const ProjectManagement = () => {
     const [allProjects, setAllProjects] = useState([]);
@@ -300,6 +301,7 @@ const ProjectManagement = () => {
     return (
         <>
             <AdminWrapper>
+                <Head title="Project Management" />
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>

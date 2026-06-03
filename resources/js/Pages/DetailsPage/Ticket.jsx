@@ -5,6 +5,7 @@ import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 
 const Ticket = () => {
     const [allTickets, setAllTickets] = useState([]);
@@ -164,8 +165,9 @@ const Ticket = () => {
     );
 
     return (
-        <div className="py-4">
+        <div>
             <AdminWrapper>
+                <Head title="Tickets" />
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">

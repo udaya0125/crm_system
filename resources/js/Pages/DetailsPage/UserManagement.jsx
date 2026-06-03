@@ -5,6 +5,7 @@ import axios from "axios";
 import AddUserForm from "@/AddFormComponents/AddUserForm";
 import EditUserForm from "@/EditFormComponents/EditUserForm";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 
 const UserManagement = () => {
     const [allUser, setAllUser] = useState([]);
@@ -186,7 +187,8 @@ const UserManagement = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4 px-4">
+            <Head title="User Management" />
+            <div className="container mx-auto">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         User Management

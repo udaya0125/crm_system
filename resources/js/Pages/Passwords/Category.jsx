@@ -5,6 +5,7 @@ import AddCategoryForm from "@/AddPasswordComponents/AddCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import EditCategoryForm from "@/EditPasswordComponents/EditCategoryForm";
+import { Head } from "@inertiajs/react";
 
 const Category = () => {
     const [allCategory, setAllCategory] = useState([]);
@@ -105,7 +106,8 @@ const Category = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4">
+            <Head title="Category Management" />
+            <div className="container mx-auto ">
             {/* Header */}
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">

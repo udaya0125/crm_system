@@ -1,5 +1,6 @@
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { Trash2, Eye, EyeOff } from "lucide-react";
 import React, { useEffect, useState, useMemo, useCallback } from "react";
@@ -180,7 +181,8 @@ const Payment = () => {
 
     return (
         <AdminWrapper>
-            <div className="p-6">
+            <Head title="Payment Management" />
+            <div className="">
                 <div className="flex items-center justify-between mb-6">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Payment Management

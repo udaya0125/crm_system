@@ -2,6 +2,7 @@ import AddRenewalForm from "@/AddFormComponents/AddRenewalForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import EditRenewalForm from "@/EditFormComponents/EditRenewalForm";
 import MyTable from "@/TableComponents/MyTable";
+import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
@@ -183,7 +184,8 @@ const ContractRenewalManagement = () => {
 
     return (
         <AdminWrapper>
-            <div className="container mx-auto py-4">
+            <Head title="Contract Renewal" />
+            <div className="container mx-auto">
                 {/* Page Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">

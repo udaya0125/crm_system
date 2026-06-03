@@ -323,7 +323,7 @@ const Expiration = () => {
     return (
         <AdminWrapper>
             <Head title="Expiration Management" />
-            <div className="container mx-auto py-4">
+            <div className="container mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Expiration Management

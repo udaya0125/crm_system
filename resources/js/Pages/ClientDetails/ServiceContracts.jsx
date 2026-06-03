@@ -4,6 +4,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import MyTable from "@/TableComponents/MyTable";
 import { Trash2, Eye, EyeOff } from "lucide-react";
+import { Head } from "@inertiajs/react";
 
 const ServiceContracts = () => {
     const [allService, setAllService] = useState([]);
@@ -190,6 +191,7 @@ const ServiceContracts = () => {
     return (
         <>
             <AdminWrapper>
+                <Head title="Service Contracts" />
                 <div className="p-6">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">

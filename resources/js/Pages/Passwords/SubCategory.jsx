@@ -4,6 +4,7 @@ import { Plus, Pencil, Trash2, Layers, Edit } from "lucide-react";
 import AddSubCategoryForm from "@/AddPasswordComponents/AddSubCategoryForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import EditSubCategoryForm from "@/EditPasswordComponents/EditSubCategoryForm";
+import { Head } from "@inertiajs/react";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -63,11 +64,12 @@ const SubCategory = () => {
 
     return (
         <AdminWrapper>
+            <Head title="SubCategory " />
             <div className="container mx-auto py-4">
             {/* Header */}
             <div className="mb-6 flex justify-between items-center">
                 <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-                    SubCategory Management
+                    SubCategory
                 </h1>
                 <button
                     onClick={() => { setShowAddForm(true); }}

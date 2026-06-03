@@ -1,6 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Bell, Check, ChevronDown, LogOut, Menu, UserCircle, X } from "lucide-react";
-import { usePage } from "@inertiajs/react";
+import {
+    Bell,
+    Check,
+    ChevronDown,
+    LogOut,
+    Menu,
+    User,
+    UserCircle,
+    X,
+} from "lucide-react";
+import { usePage , Link } from "@inertiajs/react";
 import axios from "axios";
 
 const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
@@ -9,6 +18,7 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
 
     const userMenuRef = useRef(null);
     const notificationRef = useRef(null);
@@ -26,7 +36,9 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
             const response = await axios.get(route("notifications.index"));
             const data = Array.isArray(response.data) ? response.data : [];
             setNotifications(data);
-            setUnreadCount(data.filter((notification) => !notification.is_read).length);
+            setUnreadCount(
+                data.filter((notification) => !notification.is_read).length,
+            );
         } catch (error) {
             console.error("Error fetching notifications:", error);
         } finally {
@@ -44,7 +56,8 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             const clickedOutsideUser =
-                userMenuRef.current && !userMenuRef.current.contains(event.target);
+                userMenuRef.current &&
+                !userMenuRef.current.contains(event.target);
             const clickedOutsideNotifications =
                 notificationRef.current &&
                 !notificationRef.current.contains(event.target);
@@ -106,7 +119,9 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
         if (!canUseRoutes) return;
 
         try {
-            await axios.patch(route("notifications.markAsRead", notificationId));
+            await axios.patch(
+                route("notifications.markAsRead", notificationId),
+            );
             setNotifications((current) =>
                 current.map((notification) =>
                     notification.id === notificationId
@@ -126,7 +141,10 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
         try {
             await axios.patch(route("notifications.markAllAsRead"));
             setNotifications((current) =>
-                current.map((notification) => ({ ...notification, is_read: true })),
+                current.map((notification) => ({
+                    ...notification,
+                    is_read: true,
+                })),
             );
             setUnreadCount(0);
         } catch (error) {
@@ -139,7 +157,9 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
 
         try {
             await axios.delete(route("notifications.destroy", notificationId));
-            const notification = notifications.find((item) => item.id === notificationId);
+            const notification = notifications.find(
+                (item) => item.id === notificationId,
+            );
             setNotifications((current) =>
                 current.filter((item) => item.id !== notificationId),
             );
@@ -166,14 +186,19 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
 
     const formatTime = (timestamp) => {
         const date = new Date(timestamp);
-        const diffInSeconds = Math.max(0, Math.floor((new Date() - date) / 1000));
+        const diffInSeconds = Math.max(
+            0,
+            Math.floor((new Date() - date) / 1000),
+        );
         const diffInMinutes = Math.floor(diffInSeconds / 60);
         const diffInHours = Math.floor(diffInMinutes / 60);
         const diffInDays = Math.floor(diffInHours / 24);
 
         if (Number.isNaN(date.getTime())) return "";
-        if (diffInDays > 0) return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
-        if (diffInHours > 0) return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+        if (diffInDays > 0)
+            return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+        if (diffInHours > 0)
+            return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
         if (diffInMinutes > 0) {
             return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
         }
@@ -205,7 +230,6 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                         aria-label="Open menu"
                     >
                         <Menu className="h-5 w-5" />
-                        
                     </button>
                     {/* <div className="hidden min-w-0 sm:block">
                         <img src="/images/logo2.png" alt="" className="h-8 w-8" />
@@ -266,7 +290,9 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                                     {loading ? (
                                         <div className="px-4 py-10 text-center text-sm text-slate-500">
                                             <span className="mx-auto block h-8 w-8 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
-                                            <span className="mt-3 block">Loading notifications...</span>
+                                            <span className="mt-3 block">
+                                                Loading notifications...
+                                            </span>
                                         </div>
                                     ) : notifications.length > 0 ? (
                                         notifications.map((notification) => (
@@ -290,10 +316,14 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                                                     />
                                                     <div className="min-w-0 flex-1">
                                                         <p className="break-words text-sm text-slate-800">
-                                                            {notification.message}
+                                                            {
+                                                                notification.message
+                                                            }
                                                         </p>
                                                         <p className="mt-1 text-xs text-slate-400">
-                                                            {formatTime(notification.created_at)}
+                                                            {formatTime(
+                                                                notification.created_at,
+                                                            )}
                                                         </p>
                                                     </div>
                                                     {isAdmin && (
@@ -302,7 +332,9 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() =>
-                                                                        markAsRead(notification.id)
+                                                                        markAsRead(
+                                                                            notification.id,
+                                                                        )
                                                                     }
                                                                     className="rounded-md p-1 text-blue-700 transition hover:bg-blue-100"
                                                                     title="Mark as read"
@@ -313,7 +345,9 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                                                             <button
                                                                 type="button"
                                                                 onClick={() =>
-                                                                    deleteNotification(notification.id)
+                                                                    deleteNotification(
+                                                                        notification.id,
+                                                                    )
                                                                 }
                                                                 className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
                                                                 title="Delete notification"
@@ -349,7 +383,7 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                             <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-100 text-xs font-bold text-blue-700">
                                 {user?.image ? (
                                     <img
-                                        src={user.image}
+                                        src={`${imgurl}/${user.image}`}
                                         alt={`${user?.name || "User"} profile`}
                                         className="h-full w-full object-cover"
                                     />
@@ -385,6 +419,15 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
                                         {user?.email || ""}
                                     </p>
                                 </div>
+
+                                <Link
+                                    href="/profile"
+                                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:bg-slate-50"
+                                >
+                                    <User className="h-4 w-4" />
+                                    Profile
+                                </Link>
+
                                 <button
                                     type="button"
                                     onClick={handleLogout}
