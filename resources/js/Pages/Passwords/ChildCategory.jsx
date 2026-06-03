@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Plus, Pencil, Trash2, Layers, Edit } from "lucide-react";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
-import AddChildCategory from "@/AddFormComponents/AddChildCategory";
-import EditChildCategory from "@/EditFormComponents/EditChildCategory";
+import AddChildCategory from "@/AddPasswordComponents/AddChildCategory";
+import EditChildCategory from "@/EditPasswordComponents/EditChildCategory";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
