@@ -14,6 +14,7 @@ const UserManagement = () => {
     const [showEditForm, setShowEditForm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
 
     // Use Effect - Fetch Users
     useEffect(() => {
@@ -51,7 +52,7 @@ const UserManagement = () => {
                     const { image, name } = row.original;
                     return image ? (
                         <img
-                            src={`storage/${image}`}
+                            src={`${imgurl}/${image}`}
                             alt={name}
                             className="w-8 h-8 rounded-full object-cover border border-gray-200"
                         />

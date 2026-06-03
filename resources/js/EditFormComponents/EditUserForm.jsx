@@ -334,6 +334,7 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
     const [submitting, setSubmitting] = useState(false);
     const [imagePreview, setImagePreview] = useState(null);
     const [apiErrors, setApiErrors] = useState({});
+    const imgurl = import.meta.env.VITE_IMAGE_PATH;
     const [userForm, setUserForm] = useState({
         name: "",
         email: "",
@@ -369,7 +370,7 @@ const EditUserForm = ({ editingUser, onSuccess, onCancel }) => {
                 // If the image path already starts with 'storage/', use as is; otherwise add it
                 const imagePath = editingUser.image.startsWith('storage/') 
                     ? editingUser.image 
-                    : `storage/${editingUser.image}`;
+                    : `${imgurl}/${editingUser.image}`;
                 setImagePreview(imagePath);
             } else {
                 setImagePreview(null);
