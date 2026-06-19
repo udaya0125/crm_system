@@ -6,6 +6,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const ClientManagement = () => {
     const [allClients, setAllClients] = useState([]);
@@ -150,11 +151,17 @@ const ClientManagement = () => {
                     </button>
                 </div>
 
-                <MyTable
+                {/* <MyTable
                     columns={columns}
                     data={allClients}
                     loading={loading}
-                />
+                /> */}
+
+                {loading ? (
+                    <PageLoader/>
+                ):(
+                    <MyTable columns={columns} data={allClients} />
+                )}
             </div>
 
             {/* Add Modal */}

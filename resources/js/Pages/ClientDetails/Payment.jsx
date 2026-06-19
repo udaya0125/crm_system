@@ -1,4 +1,5 @@
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
+import PageLoader from "@/Loader/PageLoader";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
@@ -211,11 +212,17 @@ const Payment = () => {
                 </div> */}
 
                 {/* MyTable Component with integrated loading */}
-                <MyTable 
+                {/* <MyTable 
                     columns={columns} 
                     data={filteredData} 
                     loading={loading}
-                />
+                /> */}
+
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={filteredData} />
+                )}
 
                 {/* Delete Confirmation Modal */}
                 {showDeleteModal && (

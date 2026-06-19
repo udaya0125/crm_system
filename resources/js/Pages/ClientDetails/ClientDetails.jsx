@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { toast } from "react-toastify";
 import MyTable from "@/TableComponents/MyTable";
 import { Eye } from "lucide-react";
+import PageLoader from "@/Loader/PageLoader";
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 const fmt = (val, fallback = "—") =>
@@ -463,11 +464,15 @@ const ClientDetails = () => {
                 </div> */}
 
                 {/* MyTable with integrated loading */}
-                <MyTable
-                    columns={columns}
-                    data={filteredData}
-                    loading={loading}
-                />
+
+                {loading ? (
+                    <PageLoader/>
+                ) : (
+                    <MyTable
+                        columns={columns}
+                        data={filteredData}
+                    />
+                )}
             </div>
 
             {/* Detail Modal */}

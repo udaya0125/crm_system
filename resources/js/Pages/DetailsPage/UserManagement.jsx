@@ -6,6 +6,7 @@ import AddUserForm from "@/AddFormComponents/AddUserForm";
 import EditUserForm from "@/EditFormComponents/EditUserForm";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const UserManagement = () => {
     const [allUser, setAllUser] = useState([]);
@@ -209,8 +210,11 @@ const UserManagement = () => {
                     </div>
                 )}
 
-                {/* Users Table - Using MyTable component with loading prop */}
-                <MyTable columns={columns} data={allUser} loading={loading} />
+              {loading ? (
+                <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={allUser} />
+              )}
 
                 {/* Add User Form Modal */}
                 {showAddForm && (

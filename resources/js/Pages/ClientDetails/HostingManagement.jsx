@@ -6,6 +6,7 @@ import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const HostingManagement = () => {
     const [allHosting, setAllHosting] = useState([]);
@@ -205,11 +206,20 @@ const HostingManagement = () => {
                     </button>
                 </div>
 
-                <MyTable
+                {/* <MyTable
                     columns={columns}
                     data={Array.isArray(allHosting) ? allHosting : []}
                     loading={loading}
-                />
+                /> */}
+
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable
+                        columns={columns}
+                        data={Array.isArray(allHosting) ? allHosting : []}
+                    />
+                )}
 
                 {/* Add Form Modal */}
                 {showAddForm && (

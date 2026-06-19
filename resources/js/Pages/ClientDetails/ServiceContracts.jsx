@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import MyTable from "@/TableComponents/MyTable";
 import { Trash2, Eye, EyeOff } from "lucide-react";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const ServiceContracts = () => {
     const [allService, setAllService] = useState([]);
@@ -224,11 +225,20 @@ const ServiceContracts = () => {
                     </div> */}
 
                     {/* MyTable Component with integrated loading */}
-                    <MyTable
+                    {loading ? (
+                        <PageLoader />
+
+                    ):(
+                        <MyTable
+                            columns={columns}
+                            data={filteredData}
+                        />
+                    )}
+                    {/* <MyTable
                         columns={columns}
                         data={filteredData}
                         loading={loading}
-                    />
+                    /> */}
                 </div>
             </AdminWrapper>
 

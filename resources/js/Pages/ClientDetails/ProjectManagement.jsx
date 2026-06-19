@@ -7,6 +7,7 @@ import EditProjectForm from "@/EditFormComponents/EditProjectForm";
 import MyTable from "@/TableComponents/MyTable";
 import TaskManagementModal from "./TaskManagementModal";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const ProjectManagement = () => {
     const [allProjects, setAllProjects] = useState([]);
@@ -408,11 +409,17 @@ const ProjectManagement = () => {
                     )}
 
                 {/* Projects Table - Using MyTable with integrated loading */}
-                <MyTable
+                {/* <MyTable
                     columns={columns}
                     data={filteredProjects}
                     loading={loading}
-                />
+                /> */}
+
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={filteredProjects} />
+                )}
             </AdminWrapper>
 
             {/* Add Modal */}

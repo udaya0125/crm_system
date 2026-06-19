@@ -6,6 +6,7 @@ import axios from "axios";
 import { Edit, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const FinanceTracking = () => {
     const [allTracking, setAllTracking] = useState([]);
@@ -240,11 +241,17 @@ const FinanceTracking = () => {
                 </div>
 
                 {/* Table */}
-                <MyTable
+                {/* <MyTable
                     columns={columns}
                     data={allTracking}
                     loading={loading}
-                />
+                /> */}
+
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={allTracking} />
+                )}
 
                 {/* Add Modal */}
                 {showAddForm && (

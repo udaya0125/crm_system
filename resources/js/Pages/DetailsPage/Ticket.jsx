@@ -6,6 +6,7 @@ import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const Ticket = () => {
     const [allTickets, setAllTickets] = useState([]);
@@ -187,11 +188,17 @@ const Ticket = () => {
                 </div>
 
                 {/* Tickets Table - Using MyTable with integrated loading */}
-                <MyTable
+
+                {loading ? (
+                    <PageLoader />
+                ):(
+                    <MyTable columns={columns} data={allTickets} />
+                )}
+                {/* <MyTable
                     columns={columns}
                     data={allTickets}
                     loading={loading}
-                />
+                /> */}
             </AdminWrapper>
 
             {/* Add Form Modal */}

@@ -6,6 +6,7 @@ import { Edit, Plus, Trash2, Building, Search, X } from "lucide-react";
 import { Head } from "@inertiajs/react";
 import MyTable from "@/TableComponents/MyTable";
 import EditClientForm from "@/EditFormComponents/EditClientForm";
+import PageLoader from "@/Loader/PageLoader";
 
 const Client = () => {
     const [allClients, setAllClients] = useState([]);
@@ -254,16 +255,8 @@ const Client = () => {
                     )}
                 </div>
 
-                {/* Loading State */}
-                {loading && (
-                    <div className="text-center py-16">
-                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-                        <p className="mt-4 text-gray-600">Loading clients...</p>
-                    </div>
-                )}
-
                 {/* Clients Table - Only show when not loading */}
-                {!loading && (
+                {/* {!loading && (
                     <div className="mt-8">
                         {filteredClients.length > 0 ? (
                             <MyTable columns={columns} data={filteredClients} />
@@ -283,6 +276,12 @@ const Client = () => {
                             </div>
                         )}
                     </div>
+                )} */}
+
+                {loading ? (
+                    <PageLoader />
+                ):(
+                    <MyTable columns={columns} data={filteredClients} />
                 )}
 
                 {/* Add Client Modal */}

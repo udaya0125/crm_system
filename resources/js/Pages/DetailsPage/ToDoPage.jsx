@@ -21,6 +21,7 @@ import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import parse from "html-react-parser";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const ToDOPage = () => {
     const [allTodo, setAllTodo] = useState([]);
@@ -376,11 +377,17 @@ const ToDOPage = () => {
                 </div>
 
                 {/* Todo List Table - Using MyTable component with integrated loading */}
-                <MyTable 
+
+                {loading ? (
+                    <PageLoader />
+                ):(
+                    <MyTable data={allTodo} columns={columns} />
+                )}
+                {/* <MyTable 
                     columns={columns} 
                     data={allTodo} 
                     loading={loading}
-                />
+                /> */}
 
                 {/* Todo Details Section - Below the Table */}
                 {selectedTodo && (

@@ -6,6 +6,7 @@ import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import EditCategoryForm from "@/EditPasswordComponents/EditCategoryForm";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const Category = () => {
     const [allCategory, setAllCategory] = useState([]);
@@ -125,11 +126,17 @@ const Category = () => {
             </div>
 
             {/* Table */}
-            <MyTable
+            {/* <MyTable
                 columns={columns} 
                 data={allCategory} 
                 loading={loading}
-            />
+            /> */}
+
+            {loading ? (
+                <PageLoader />
+            ):(
+                <MyTable columns={columns} data={allCategory} />
+            )}
 
             {/* Add Category Modal */}
             <AddCategoryForm

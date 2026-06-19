@@ -6,6 +6,7 @@ import EditExpirationForm from "@/EditFormComponents/EditExpirationForm";
 import { Edit, Plus, Trash2, Calendar, Search, X } from "lucide-react";
 import { Head } from "@inertiajs/react";
 import MyTable from "@/TableComponents/MyTable";
+import PageLoader from "@/Loader/PageLoader";
 
 const Expiration = () => {
     const [allExpiration, setAllExpiration] = useState([]);
@@ -407,13 +408,19 @@ const Expiration = () => {
                 )}
 
                 {/* MyTable Component with integrated loading */}
-                <div className="mt-8">
+                {/* <div className="mt-8">
                     <MyTable
                         columns={columns}
                         data={filteredExpirations}
                         loading={loading}
                     />
-                </div>
+                </div> */}
+
+                {loading ? (
+                    <PageLoader />
+                ):(
+                    <MyTable columns={columns} data={filteredExpirations} />
+                )}
 
                 {/* No Results Message - Only show when not loading and no filtered results */}
                 {!loading && filteredExpirations.length === 0 && allExpiration.length > 0 && (

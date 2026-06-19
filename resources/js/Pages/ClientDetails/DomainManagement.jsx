@@ -6,6 +6,7 @@ import axios from "axios";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const DomainManagement = () => {
     const [allDomain, setAllDomain] = useState([]);
@@ -170,11 +171,16 @@ const DomainManagement = () => {
                     </button>
                 </div>
 
-                <MyTable
+                {/* <MyTable
                     columns={columns}
                     data={allDomain}
                     loading={loading}
-                />
+                /> */}
+                {loading ? (
+                    <PageLoader />
+                ):(
+                    <MyTable columns={columns} data={allDomain} />
+                )}
             </div>
 
             {/* Add Domain Form */}

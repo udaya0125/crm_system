@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
+import PageLoader from "@/Loader/PageLoader";
 
 const ActivityLog = () => {
     const [allLogs, setAllLogs] = useState([]);
@@ -109,7 +110,12 @@ const ActivityLog = () => {
                 </div> */}
 
                 {/* Pass loading prop to MyTable */}
-                <MyTable columns={columns} data={filtered} loading={loading} />
+                {/* <MyTable columns={columns} data={filtered} /> */}
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={filtered} />
+                )}
             </div>
         </AdminWrapper>
     );

@@ -2,6 +2,7 @@
 import AddLeadForm from "@/AddFormComponents/AddLeadForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import EditLeadForm from "@/EditFormComponents/EditLeadForm";
+import PageLoader from "@/Loader/PageLoader";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
@@ -175,11 +176,14 @@ const Leads = () => {
                 </div>
 
                 {/* Leads table */}
-                <MyTable
-                    columns={columns}
-                    data={allLeads}
-                    loading={loading}
-                />
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable
+                        columns={columns}
+                        data={allLeads}
+                    />
+                )}
             </div>
 
             {/* Add modal */}
