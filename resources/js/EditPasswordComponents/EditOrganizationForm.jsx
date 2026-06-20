@@ -28,7 +28,10 @@ const EditOrganizationForm = ({
         e.preventDefault();
         const formData = new FormData();
         for (const key in organizationForm) {
-            if (organizationForm[key] !== null && organizationForm[key] !== "") {
+            if (
+                organizationForm[key] !== null &&
+                organizationForm[key] !== ""
+            ) {
                 formData.append(key, organizationForm[key]);
             }
         }

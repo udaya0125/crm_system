@@ -38,7 +38,7 @@ const EditSubCategoryForm = ({
 
     // Find selected category option
     const selectedCategory = categoryOptions.find(
-        (option) => option.value === subCategoryForm.category_id
+        (option) => option.value === subCategoryForm.category_id,
     );
 
     // Populate form when editing
@@ -58,7 +58,7 @@ const EditSubCategoryForm = ({
         const response = await axios.post(
             route("oursubcategories.update", { id }),
             formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
+            { headers: { "Content-Type": "multipart/form-data" } },
         );
         return response.data;
     };
@@ -159,10 +159,16 @@ const EditSubCategoryForm = ({
                                 control: (base, state) => ({
                                     ...base,
                                     borderRadius: "0.5rem",
-                                    borderColor: state.isFocused ? "#6366f1" : "#d1d5db",
-                                    boxShadow: state.isFocused ? "0 0 0 1px #6366f1" : "none",
+                                    borderColor: state.isFocused
+                                        ? "#6366f1"
+                                        : "#d1d5db",
+                                    boxShadow: state.isFocused
+                                        ? "0 0 0 1px #6366f1"
+                                        : "none",
                                     "&:hover": {
-                                        borderColor: state.isFocused ? "#6366f1" : "#9ca3af",
+                                        borderColor: state.isFocused
+                                            ? "#6366f1"
+                                            : "#9ca3af",
                                     },
                                     minHeight: "42px",
                                 }),
@@ -177,8 +183,12 @@ const EditSubCategoryForm = ({
                                 }),
                                 option: (base, state) => ({
                                     ...base,
-                                    backgroundColor: state.isFocused ? "#e0e7ff" : "white",
-                                    color: state.isFocused ? "#4f46e5" : "#374151",
+                                    backgroundColor: state.isFocused
+                                        ? "#e0e7ff"
+                                        : "white",
+                                    color: state.isFocused
+                                        ? "#4f46e5"
+                                        : "#374151",
                                     "&:active": {
                                         backgroundColor: "#c7d2fe",
                                     },
@@ -211,8 +221,6 @@ const EditSubCategoryForm = ({
 };
 
 export default EditSubCategoryForm;
-
-
 
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
