@@ -86,7 +86,7 @@ const ToDOPage = () => {
                                             )}
                                             <span className="flex-1">
                                                 {replaceElements(
-                                                    child.props.children
+                                                    child.props.children,
                                                 )}
                                             </span>
                                         </>
@@ -94,7 +94,7 @@ const ToDOPage = () => {
                                 });
                             }
                             return child;
-                        }
+                        },
                     );
 
                     return React.createElement(node.type, {
@@ -146,7 +146,7 @@ const ToDOPage = () => {
                                 });
                             }
                             return child;
-                        }
+                        },
                     );
 
                     return React.createElement("div", {
@@ -157,7 +157,7 @@ const ToDOPage = () => {
 
                 const newChildren = React.Children.map(
                     node.props.children,
-                    replaceElements
+                    replaceElements,
                 );
                 return React.cloneElement(node, { children: newChildren });
             }
@@ -215,7 +215,7 @@ const ToDOPage = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                }
+                },
             );
             setReloadTrigger((prev) => !prev);
             setEditingTodo(null);
@@ -339,7 +339,7 @@ const ToDOPage = () => {
                 width: 160,
             },
         ],
-        [selectedTodo]
+        [selectedTodo],
     );
 
     // Open add modal
@@ -380,7 +380,7 @@ const ToDOPage = () => {
 
                 {loading ? (
                     <PageLoader />
-                ):(
+                ) : (
                     <MyTable data={allTodo} columns={columns} />
                 )}
                 {/* <MyTable 
@@ -464,7 +464,7 @@ const ToDOPage = () => {
                                                                     <p className="text-xs text-gray-500">
                                                                         {description.created_at
                                                                             ? new Date(
-                                                                                  description.created_at
+                                                                                  description.created_at,
                                                                               ).toLocaleString()
                                                                             : "Unknown date"}
                                                                     </p>
@@ -478,7 +478,7 @@ const ToDOPage = () => {
                                                             {/* Using custom parser with Lucide icons */}
                                                             {parseWithIcons(
                                                                 description.description ||
-                                                                    ""
+                                                                    "",
                                                             )}
                                                         </div>
                                                     </div>
@@ -531,9 +531,6 @@ const ToDOPage = () => {
 };
 
 export default ToDOPage;
-
-
-
 
 // import axios from "axios";
 // import React, { useEffect, useMemo, useState } from "react";
@@ -1078,5 +1075,3 @@ export default ToDOPage;
 // };
 
 // export default ToDOPage;
-
-

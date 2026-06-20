@@ -191,7 +191,7 @@ const Ticket = () => {
 
                 {loading ? (
                     <PageLoader />
-                ):(
+                ) : (
                     <MyTable columns={columns} data={allTickets} />
                 )}
                 {/* <MyTable
