@@ -52,7 +52,7 @@ const Category = () => {
             const response = await axios.post(
                 route("ourcategories.update", { id }),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                { headers: { "Content-Type": "multipart/form-data" } },
             );
             return response.data;
         } catch (error) {
@@ -72,12 +72,16 @@ const Category = () => {
             {
                 Header: "Name",
                 accessor: "name",
-                Cell: ({ value }) => <span className="font-medium text-gray-800">{value}</span>,
+                Cell: ({ value }) => (
+                    <span className="font-medium text-gray-800">{value}</span>
+                ),
             },
             {
                 Header: "Created At",
                 accessor: "created_at",
-                Cell: ({ value }) => <span>{new Date(value).toLocaleDateString()}</span>,
+                Cell: ({ value }) => (
+                    <span>{new Date(value).toLocaleDateString()}</span>
+                ),
             },
             {
                 Header: "Actions",
@@ -89,7 +93,7 @@ const Category = () => {
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                             title="Edit"
                         >
-                             <Edit size={16} />
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
@@ -102,65 +106,64 @@ const Category = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     return (
         <AdminWrapper>
             <Head title="Category Management" />
             <div className="container mx-auto ">
-            {/* Header */}
-            <div className="mb-8 flex justify-between items-center">
-                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-                    Category Management
-                </h1>
-                <button
-                    onClick={() => {
-                        setShowAddForm(true);
-                    }}
-                    className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
-                >
-                    <Plus size={18} />
-                    <span>Create</span>
-                </button>
-            </div>
+                {/* Header */}
+                <div className="mb-8 flex justify-between items-center">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                        Category Management
+                    </h1>
+                    <button
+                        onClick={() => {
+                            setShowAddForm(true);
+                        }}
+                        className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+                    >
+                        <Plus size={18} />
+                        <span>Create</span>
+                    </button>
+                </div>
 
-            {/* Table */}
-            {/* <MyTable
+                {/* Table */}
+                {/* <MyTable
                 columns={columns} 
                 data={allCategory} 
                 loading={loading}
             /> */}
 
-            {loading ? (
-                <PageLoader />
-            ):(
-                <MyTable columns={columns} data={allCategory} />
-            )}
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={allCategory} />
+                )}
 
-            {/* Add Category Modal */}
-            <AddCategoryForm
-                showForm={showAddForm}
-                setShowForm={setShowAddForm}
-                setReloadTrigger={setReloadTrigger}
-            />
+                {/* Add Category Modal */}
+                <AddCategoryForm
+                    showForm={showAddForm}
+                    setShowForm={setShowAddForm}
+                    setReloadTrigger={setReloadTrigger}
+                />
 
-            {/* Edit Category Modal */}
-            <EditCategoryForm
-                showForm={showEditForm}
-                setShowForm={setShowEditForm}
-                editingCategory={editingCategory}
-                setEditingCategory={setEditingCategory}
-                handleUpdate={handleUpdate}
-                setReloadTrigger={setReloadTrigger}
-            />
+                {/* Edit Category Modal */}
+                <EditCategoryForm
+                    showForm={showEditForm}
+                    setShowForm={setShowEditForm}
+                    editingCategory={editingCategory}
+                    setEditingCategory={setEditingCategory}
+                    handleUpdate={handleUpdate}
+                    setReloadTrigger={setReloadTrigger}
+                />
             </div>
         </AdminWrapper>
     );
 };
 
 export default Category;
-
 
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
