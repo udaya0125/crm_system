@@ -210,11 +210,11 @@ const UserManagement = () => {
                     </div>
                 )}
 
-              {loading ? (
-                <PageLoader />
+                {loading ? (
+                    <PageLoader />
                 ) : (
                     <MyTable columns={columns} data={allUser} />
-              )}
+                )}
 
                 {/* Add User Form Modal */}
                 {showAddForm && (
