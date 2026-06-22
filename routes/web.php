@@ -372,4 +372,14 @@ Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
     Route::put('/ourpasswords/{id}', [PasswordController::class, 'update'])->name('ourpasswords.update');
     Route::delete('/ourpasswords/{id}', [PasswordController::class, 'destroy'])->name('ourpasswords.destroy');
 
+
+
+    Route::get('/tech-ticket',function (){
+        return Inertia::render('TicketCreate/TechTicket');
+    });
+
+    Route::get('/web-ticket',function (){
+        return Inertia::render('TicketCreate/WebTicket');
+    });
+
 require __DIR__.'/auth.php';
