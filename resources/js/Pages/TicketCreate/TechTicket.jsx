@@ -748,10 +748,6 @@ const CATEGORIES = [
         ],
     },
     {
-        group: "Photography",
-        items: ["Issue and Support", "Post Production", "Schedule a Shoot"],
-    },
-    {
         group: "Sales and Marketing",
         items: [
             "Invoice",
@@ -759,10 +755,6 @@ const CATEGORIES = [
             "Proposal and Agreement",
             "Quotation",
         ],
-    },
-    {
-        group: "Videography",
-        items: ["Issue and Support", "Post Production", "Schedule a Shoot"],
     },
     {
         group: "Website Development",
@@ -1007,8 +999,12 @@ const TechTicket = () => {
                         onClick={handleReset}
                         className="mt-8 w-full rounded-2xl text-white text-sm font-semibold py-3.5 active:scale-[0.98] transition-all duration-200 shadow-lg"
                         style={{ background: "#0b78b9" }}
-                        onMouseEnter={e => e.currentTarget.style.background = "#0969a2"}
-                        onMouseLeave={e => e.currentTarget.style.background = "#0b78b9"}
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.background = "#0969a2")
+                        }
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.background = "#0b78b9")
+                        }
                     >
                         Submit another ticket
                     </button>
@@ -1019,7 +1015,6 @@ const TechTicket = () => {
 
     return (
         <div className="min-h-screen bg-[#f4f5f7] flex flex-col">
-
             {/* ── Top-left Logo Bar ── */}
             <header className="px-8 pt-7 pb-2 flex-shrink-0">
                 <img
@@ -1032,29 +1027,32 @@ const TechTicket = () => {
             {/* ── Main two-column layout ── */}
             <main className="flex-1 flex items-start justify-center px-6 py-8">
                 <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-14 items-stretch">
-
                     {/* ── LEFT: Form Panel ── */}
                     <div className="w-full lg:w-[52%] flex-shrink-0">
-
                         {/* Form header */}
                         <div className="mb-6">
                             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                                 Create a support ticket
                             </h1>
                             <p className="text-sm text-gray-500 mt-1.5">
-                                Fill out the form below and we'll get back to you as soon as possible.
+                                Fill out the form below and we'll get back to
+                                you as soon as possible.
                             </p>
                         </div>
 
                         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-
                             {/* Section: Contact info */}
                             <div className="px-7 pt-7 pb-6 border-b border-gray-100">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">
                                     Contact info
                                 </p>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <InputField label="Name" id="name" required error={errors.name}>
+                                    <InputField
+                                        label="Name"
+                                        id="name"
+                                        required
+                                        error={errors.name}
+                                    >
                                         <input
                                             id="name"
                                             type="text"
@@ -1070,7 +1068,12 @@ const TechTicket = () => {
                                         />
                                     </InputField>
 
-                                    <InputField label="Email" id="email" required error={errors.email}>
+                                    <InputField
+                                        label="Email"
+                                        id="email"
+                                        required
+                                        error={errors.email}
+                                    >
                                         <input
                                             id="email"
                                             type="email"
@@ -1094,7 +1097,12 @@ const TechTicket = () => {
                                     Ticket details
                                 </p>
 
-                                <InputField label="Subject" id="subject" required error={errors.subject}>
+                                <InputField
+                                    label="Subject"
+                                    id="subject"
+                                    required
+                                    error={errors.subject}
+                                >
                                     <input
                                         id="subject"
                                         type="text"
@@ -1112,7 +1120,12 @@ const TechTicket = () => {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     {/* Category */}
-                                    <InputField label="Category" id="category" required error={errors.category}>
+                                    <InputField
+                                        label="Category"
+                                        id="category"
+                                        required
+                                        error={errors.category}
+                                    >
                                         <div className="relative">
                                             <select
                                                 id="category"
@@ -1130,9 +1143,17 @@ const TechTicket = () => {
                                                     Select a category
                                                 </option>
                                                 {CATEGORIES.map((g) => (
-                                                    <optgroup key={g.group} label={g.group} className="font-semibold">
+                                                    <optgroup
+                                                        key={g.group}
+                                                        label={g.group}
+                                                        className="font-semibold"
+                                                    >
                                                         {g.items.map((item) => (
-                                                            <option key={item} value={item} className="font-normal">
+                                                            <option
+                                                                key={item}
+                                                                value={item}
+                                                                className="font-normal"
+                                                            >
                                                                 {item}
                                                             </option>
                                                         ))}
@@ -1140,19 +1161,39 @@ const TechTicket = () => {
                                                 ))}
                                             </select>
                                             <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                                                <svg
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <polyline points="6 9 12 15 18 9" />
+                                                </svg>
                                             </span>
                                         </div>
                                     </InputField>
 
                                     {/* Priority */}
-                                    <InputField label="Priority" id="priority" required error={errors.priority}>
+                                    <InputField
+                                        label="Priority"
+                                        id="priority"
+                                        required
+                                        error={errors.priority}
+                                    >
                                         <div className="relative">
                                             <select
                                                 id="priority"
                                                 value={form.priority}
                                                 onChange={(e) => {
-                                                    setForm((f) => ({ ...f, priority: e.target.value }));
+                                                    setForm((f) => ({
+                                                        ...f,
+                                                        priority:
+                                                            e.target.value,
+                                                    }));
                                                     if (errors.priority)
                                                         setErrors((er) => {
                                                             const n = { ...er };
@@ -1172,19 +1213,38 @@ const TechTicket = () => {
                                                     Select priority
                                                 </option>
                                                 {PRIORITIES.map((p) => (
-                                                    <option key={p.value} value={p.value}>
+                                                    <option
+                                                        key={p.value}
+                                                        value={p.value}
+                                                    >
                                                         {p.value}
                                                     </option>
                                                 ))}
                                             </select>
                                             <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                                                <svg
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
+                                                    <polyline points="6 9 12 15 18 9" />
+                                                </svg>
                                             </span>
                                         </div>
                                     </InputField>
                                 </div>
 
-                                <InputField label="Description" id="description" required error={errors.description}>
+                                <InputField
+                                    label="Description"
+                                    id="description"
+                                    required
+                                    error={errors.description}
+                                >
                                     <textarea
                                         id="description"
                                         rows={5}
@@ -1215,7 +1275,9 @@ const TechTicket = () => {
                                     }}
                                     onDragLeave={() => setDragging(false)}
                                     onDrop={onDrop}
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() =>
+                                        fileInputRef.current?.click()
+                                    }
                                     className={`rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 text-center py-9 px-4 ${
                                         dragging
                                             ? "border-indigo-400 bg-indigo-50/50 shadow-[0_0_0_4px_rgba(99,102,241,0.1)]"
@@ -1232,7 +1294,8 @@ const TechTicket = () => {
                                                 or drag and drop
                                             </p>
                                             <p className="text-xs text-gray-400 mt-1">
-                                                PNG, JPG, PDF, ZIP, DOC — up to 10 MB each
+                                                PNG, JPG, PDF, ZIP, DOC — up to
+                                                10 MB each
                                             </p>
                                         </div>
                                     </div>
@@ -1257,7 +1320,16 @@ const TechTicket = () => {
                                                 className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-2.5 text-sm group hover:bg-gray-100 transition-colors"
                                             >
                                                 <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                    <svg
+                                                        width="16"
+                                                        height="16"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="#6366f1"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
                                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                                         <polyline points="14 2 14 8 20 8" />
                                                     </svg>
@@ -1266,11 +1338,14 @@ const TechTicket = () => {
                                                     {f.name}
                                                 </span>
                                                 <span className="text-xs text-gray-400 shrink-0">
-                                                    {(f.size / 1024).toFixed(0)} KB
+                                                    {(f.size / 1024).toFixed(0)}{" "}
+                                                    KB
                                                 </span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => removeFile(f.name)}
+                                                    onClick={() =>
+                                                        removeFile(f.name)
+                                                    }
                                                     className="shrink-0 text-gray-400 hover:text-rose-500 transition-colors p-1 rounded hover:bg-rose-50"
                                                     aria-label={`Remove ${f.name}`}
                                                 >
@@ -1288,14 +1363,35 @@ const TechTicket = () => {
                                     disabled={submitting}
                                     className="mt-6 w-full flex items-center justify-center gap-2.5 rounded-2xl text-white text-sm font-semibold py-3.5 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
                                     style={{ background: "#0b78b9" }}
-                                    onMouseEnter={e => e.currentTarget.style.background = "#0969a2"}
-                                    onMouseLeave={e => e.currentTarget.style.background = "#0b78b9"}
+                                    onMouseEnter={(e) =>
+                                        (e.currentTarget.style.background =
+                                            "#0969a2")
+                                    }
+                                    onMouseLeave={(e) =>
+                                        (e.currentTarget.style.background =
+                                            "#0b78b9")
+                                    }
                                 >
                                     {submitting ? (
                                         <>
-                                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                            <svg
+                                                className="animate-spin w-4 h-4"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="3"
+                                                />
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                />
                                             </svg>
                                             Submitting…
                                         </>
@@ -1309,7 +1405,9 @@ const TechTicket = () => {
 
                                 <p className="text-center text-xs text-gray-400 mt-4">
                                     Fields marked{" "}
-                                    <span className="text-rose-400 font-medium">*</span>{" "}
+                                    <span className="text-rose-400 font-medium">
+                                        *
+                                    </span>{" "}
                                     are required
                                 </p>
                             </div>
@@ -1332,7 +1430,7 @@ const TechTicket = () => {
                                 className="absolute inset-0"
                                 style={{
                                     background:
-                                        "linear-gradient(160deg, #0b78b9ee 0%, #0b78b9aa 40%, #0b78b9f0 100%)",
+                                        "linear-gradient(180deg, #063d5ecc 0%, #0b78b999 50%, #1a9fd4bb 100%)",
                                 }}
                             />
 
@@ -1349,14 +1447,30 @@ const TechTicket = () => {
                                 {/* Bottom text block */}
                                 <div>
                                     {/* Decorative accent line */}
-                                    <div className="w-8 h-0.5 rounded-full mb-5" style={{ background: "rgba(255,255,255,0.5)" }} />
+                                    <div
+                                        className="w-8 h-0.5 rounded-full mb-5"
+                                        style={{
+                                            background: "rgba(255,255,255,0.5)",
+                                        }}
+                                    />
 
                                     <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-                                        We're here to<br />help you resolve<br />any issue.
+                                        We're here to
+                                        <br />
+                                        help you resolve
+                                        <br />
+                                        any issue.
                                     </h2>
 
-                                    <p className="text-sm leading-relaxed mb-8 max-w-xs" style={{ color: "rgba(255,255,255,0.75)" }}>
-                                        Submit a ticket and our dedicated support team will get back to you promptly — usually within a few hours.
+                                    <p
+                                        className="text-sm leading-relaxed mb-8 max-w-xs"
+                                        style={{
+                                            color: "rgba(255,255,255,0.75)",
+                                        }}
+                                    >
+                                        Submit a ticket and our dedicated
+                                        support team will get back to you
+                                        promptly — usually within a few hours.
                                     </p>
 
                                     {/* Feature pills */}
@@ -1371,7 +1485,8 @@ const TechTicket = () => {
                                                 className="text-xs font-medium px-3 py-1.5 rounded-full"
                                                 style={{
                                                     color: "rgba(255,255,255,0.65)",
-                                                    background: "rgba(255,255,255,0.07)",
+                                                    background:
+                                                        "rgba(255,255,255,0.07)",
                                                     border: "0.5px solid rgba(255,255,255,0.12)",
                                                 }}
                                             >
@@ -1383,7 +1498,6 @@ const TechTicket = () => {
                             </div>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>
@@ -1391,9 +1505,6 @@ const TechTicket = () => {
 };
 
 export default TechTicket;
-
-
-
 
 // import { useState, useRef, useCallback } from "react";
 
@@ -1851,7 +1962,7 @@ export default TechTicket;
 //                                         ))}
 //                                     </select>
 //                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                    
+
 //                                     </span>
 //                                 </div>
 //                             </InputField>
@@ -1895,14 +2006,14 @@ export default TechTicket;
 //                                             <option
 //                                                 key={p.value}
 //                                                 value={p.value}
-                                               
+
 //                                             >
 //                                                 {p.value}
 //                                             </option>
 //                                         ))}
 //                                     </select>
 //                                     <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                       
+
 //                                     </span>
 //                                 </div>
 //                             </InputField>
