@@ -263,7 +263,7 @@ Route::middleware(['auth', 'role:technician,admin'])->group(function () {
     // TICKET MANAGEMENT CRUD for the Tech Support Team
     // ---------------------------------------------------------
     Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
-    Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+    // Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
     Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
 });
@@ -377,6 +377,8 @@ Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
     Route::get('/tech-ticket',function (){
         return Inertia::render('TicketCreate/TechTicket');
     });
+
+        Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
 
     Route::get('/web-ticket',function (){
         return Inertia::render('TicketCreate/WebTicket');

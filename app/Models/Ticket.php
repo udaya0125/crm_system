@@ -17,6 +17,7 @@ class Ticket extends Model
         'assigned_technician',
         'status',
         'email',
+        'image'
     ];
 
     protected static function boot()

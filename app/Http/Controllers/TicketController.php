@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Ticket;
 use App\Models\UserLog;
+use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller
 {
@@ -15,7 +16,7 @@ class TicketController extends Controller
     {
         $tickets = Ticket::with('assignedUser')->latest()->get();
 
-        $transformedTickets = $tickets->map(function($ticket) {
+        $transformedTickets = $tickets->map(function ($ticket) {
             return [
                 'id'                  => $ticket->id,
                 'ticket_id'           => $ticket->ticket_id,
@@ -24,11 +25,17 @@ class TicketController extends Controller
                 'device_type'         => $ticket->device_type,
                 'problem_description' => $ticket->problem_description,
                 'priority'            => $ticket->priority,
+                'email'               => $ticket->email,
+                'image'               => $ticket->image
+                    ? asset('storage/' . $ticket->image)
+                    : null,
                 'assigned_technician' => $ticket->assigned_technician,
-                'technician_name'     => $ticket->assignedUser ? $ticket->assignedUser->name : null,
+                'technician_name'     => $ticket->assignedUser
+                    ? $ticket->assignedUser->name
+                    : null,
                 'status'              => $ticket->status,
                 'created_at'          => $ticket->created_at,
-                'updated_at'          => $ticket->updated_at
+                'updated_at'          => $ticket->updated_at,
             ];
         });
 
@@ -49,9 +56,17 @@ class TicketController extends Controller
             'device_type'         => 'required|string|max:255',
             'problem_description' => 'required|string',
             'priority'            => 'required|string',
+            'email'               => 'nullable|email|max:255',
+            'image'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'assigned_technician' => 'nullable|exists:users,id',
             'status'              => 'required|string'
         ]);
+
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('tickets', 'public');
+        }
 
         $ticket = Ticket::create([
             'client_name'         => $request->client_name,
@@ -59,6 +74,8 @@ class TicketController extends Controller
             'device_type'         => $request->device_type,
             'problem_description' => $request->problem_description,
             'priority'            => $request->priority,
+            'email'               => $request->email,
+            'image'               => $imagePath,
             'assigned_technician' => $request->assigned_technician,
             'status'              => $request->status
         ]);
@@ -82,8 +99,14 @@ class TicketController extends Controller
                 'device_type'         => $ticket->device_type,
                 'problem_description' => $ticket->problem_description,
                 'priority'            => $ticket->priority,
+                'email'               => $ticket->email,
+                'image'               => $ticket->image
+                    ? asset('storage/' . $ticket->image)
+                    : null,
                 'assigned_technician' => $ticket->assigned_technician,
-                'technician_name'     => $ticket->assignedUser ? $ticket->assignedUser->name : null,
+                'technician_name'     => $ticket->assignedUser
+                    ? $ticket->assignedUser->name
+                    : null,
                 'status'              => $ticket->status,
                 'created_at'          => $ticket->created_at,
                 'updated_at'          => $ticket->updated_at
@@ -104,11 +127,25 @@ class TicketController extends Controller
             'device_type'         => 'sometimes|string|max:255',
             'problem_description' => 'sometimes|string',
             'priority'            => 'sometimes|string',
+            'email'               => 'sometimes|nullable|email|max:255',
+            'image'               => 'sometimes|nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
             'assigned_technician' => 'nullable|exists:users,id',
             'status'              => 'sometimes|string'
         ]);
 
-        $ticket->update($request->all());
+        $data = $request->except('image');
+
+        if ($request->hasFile('image')) {
+
+            if ($ticket->image && Storage::disk('public')->exists($ticket->image)) {
+                Storage::disk('public')->delete($ticket->image);
+            }
+
+            $data['image'] = $request->file('image')->store('tickets', 'public');
+        }
+
+        $ticket->update($data);
+
         $ticket->load('assignedUser');
 
         UserLog::create([
@@ -128,8 +165,14 @@ class TicketController extends Controller
                 'device_type'         => $ticket->device_type,
                 'problem_description' => $ticket->problem_description,
                 'priority'            => $ticket->priority,
+                'email'               => $ticket->email,
+                'image'               => $ticket->image
+                    ? asset('storage/' . $ticket->image)
+                    : null,
                 'assigned_technician' => $ticket->assigned_technician,
-                'technician_name'     => $ticket->assignedUser ? $ticket->assignedUser->name : null,
+                'technician_name'     => $ticket->assignedUser
+                    ? $ticket->assignedUser->name
+                    : null,
                 'status'              => $ticket->status,
                 'created_at'          => $ticket->created_at,
                 'updated_at'          => $ticket->updated_at
@@ -143,8 +186,14 @@ class TicketController extends Controller
     public function destroy(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
-        $ticketId    = $ticket->ticket_id;
-        $clientName  = $ticket->client_name;
+
+        $ticketId = $ticket->ticket_id;
+        $clientName = $ticket->client_name;
+
+        if ($ticket->image && Storage::disk('public')->exists($ticket->image)) {
+            Storage::disk('public')->delete($ticket->image);
+        }
+
         $ticket->delete();
 
         UserLog::create([
@@ -159,3 +208,4 @@ class TicketController extends Controller
         ]);
     }
 }
+
