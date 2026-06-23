@@ -16,6 +16,7 @@ class Ticket extends Model
         'priority',
         'assigned_technician',
         'status',
+        'email',
     ];
 
     protected static function boot()

@@ -1499,7 +1499,7 @@ function InputField({ label, id, required, error, children }) {
 const inputCls =
     "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-gray-300";
 
-const WebTicket = () => {
+const Web = () => {
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -2126,4 +2126,4 @@ const WebTicket = () => {
     );
 };
 
-export default WebTicket;
+export default Web;

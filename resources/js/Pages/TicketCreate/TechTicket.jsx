@@ -695,8 +695,6 @@
 
 // export default TechTicket;
 
-
-
 import { useState, useRef, useCallback } from "react";
 
 const CATEGORIES = [
@@ -748,6 +746,10 @@ const CATEGORIES = [
         ],
     },
     {
+        group: "Photography",
+        items: ["Issue and Support", "Post Production", "Schedule a Shoot"],
+    },
+    {
         group: "Sales and Marketing",
         items: [
             "Invoice",
@@ -755,6 +757,10 @@ const CATEGORIES = [
             "Proposal and Agreement",
             "Quotation",
         ],
+    },
+    {
+        group: "Videography",
+        items: ["Issue and Support", "Post Production", "Schedule a Shoot"],
     },
     {
         group: "Website Development",
@@ -819,23 +825,6 @@ function SendIcon() {
     );
 }
 
-function CheckIcon() {
-    return (
-        <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-        >
-            <polyline points="20 6 9 17 4 12" />
-        </svg>
-    );
-}
-
 function XIcon() {
     return (
         <svg
@@ -875,7 +864,7 @@ function InputField({ label, id, required, error, children }) {
 }
 
 const inputCls =
-    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(99,102,241,0.1)] hover:border-gray-300";
+    "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#0b78b9] focus:shadow-[0_0_0_4px_rgba(11,120,185,0.1)] hover:border-gray-300";
 
 const TechTicket = () => {
     const [form, setForm] = useState({
@@ -950,97 +939,192 @@ const TechTicket = () => {
 
     if (submitted) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100 flex items-center justify-center p-4">
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 max-w-md w-full text-center">
-                    <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-6 ring-8 ring-emerald-50/50">
-                        <CheckIcon />
+            <div
+                className="min-h-screen relative"
+                style={{ background: "#f0f4f8" }}
+            >
+                {/* Blue top half background */}
+                <div
+                    className="absolute top-0 left-0 right-0"
+                    style={{ height: "52%", zIndex: 0 }}
+                >
+                    <img
+                        src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=1400&q=80&fit=crop"
+                        alt=""
+                        aria-hidden="true"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ opacity: 0.18 }}
+                    />
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            background:
+                                "linear-gradient(135deg, #063d5ecc 0%, #0b78b999 50%, #1a9fd4bb 100%)",
+                        }}
+                    />
+                </div>
+
+                <div className="relative z-10 flex flex-col min-h-screen">
+                    {/* Logo */}
+                    <header className="px-8 pt-7 pb-2 flex-shrink-0">
+                        <img
+                            src="/images/logo2.png"
+                            alt="Company Logo"
+                            className="h-20 w-auto object-contain"
+                        />
+                    </header>
+
+                    <div className="flex-1 flex flex-col items-center justify-start px-4 pt-6 pb-16">
+                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 p-12 max-w-md w-full text-center">
+                            <div
+                                className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                                style={{ background: "rgba(11,120,185,0.08)" }}
+                            >
+                                <svg
+                                    width="36"
+                                    height="36"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#0b78b9"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                                Ticket submitted!
+                            </h2>
+                            <p className="text-sm text-gray-500 mb-1 leading-relaxed">
+                                Thanks,{" "}
+                                <span className="font-semibold text-gray-700">
+                                    {form.name}
+                                </span>
+                                . We'll review your ticket and get back to you
+                                at{" "}
+                                <span
+                                    className="font-semibold"
+                                    style={{ color: "#0b78b9" }}
+                                >
+                                    {form.email}
+                                </span>
+                                .
+                            </p>
+                            <div className="mt-8 bg-gray-50 rounded-2xl p-5 text-left space-y-3 text-sm border border-gray-100">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 text-xs uppercase tracking-wider font-medium">
+                                        Category
+                                    </span>
+                                    <span className="text-gray-900 font-medium">
+                                        {form.category}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 text-xs uppercase tracking-wider font-medium">
+                                        Priority
+                                    </span>
+                                    <span
+                                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                        style={{
+                                            background: "rgba(11,120,185,0.08)",
+                                            color: "#0b78b9",
+                                        }}
+                                    >
+                                        {form.priority}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-gray-500 text-xs uppercase tracking-wider font-medium">
+                                        Subject
+                                    </span>
+                                    <span className="text-gray-900 font-medium text-right max-w-[60%] truncate">
+                                        {form.subject}
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={handleReset}
+                                className="mt-8 w-full rounded-2xl text-white text-sm font-semibold py-3.5 active:scale-[0.98] transition-all duration-200 shadow-lg"
+                                style={{ background: "#0b78b9" }}
+                                onMouseEnter={(e) =>
+                                    (e.currentTarget.style.background =
+                                        "#0969a2")
+                                }
+                                onMouseLeave={(e) =>
+                                    (e.currentTarget.style.background =
+                                        "#0b78b9")
+                                }
+                            >
+                                Submit another ticket
+                            </button>
+                        </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        Ticket submitted!
-                    </h2>
-                    <p className="text-sm text-gray-500 mb-1 leading-relaxed">
-                        Thanks,{" "}
-                        <span className="font-semibold text-gray-700">
-                            {form.name}
-                        </span>
-                        . We'll review your ticket and get back to you at{" "}
-                        <span className="font-semibold text-indigo-600">
-                            {form.email}
-                        </span>
-                        .
-                    </p>
-                    <div className="mt-8 bg-gray-50 rounded-2xl p-5 text-left space-y-3 text-sm border border-gray-100">
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-500 text-xs uppercase tracking-wider font-medium">
-                                Category
-                            </span>
-                            <span className="text-gray-900 font-medium">
-                                {form.category}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-500 text-xs uppercase tracking-wider font-medium">
-                                Priority
-                            </span>
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-medium text-xs">
-                                {form.priority}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-gray-500 text-xs uppercase tracking-wider font-medium">
-                                Subject
-                            </span>
-                            <span className="text-gray-900 font-medium text-right max-w-[60%] truncate">
-                                {form.subject}
-                            </span>
-                        </div>
-                    </div>
-                    <button
-                        onClick={handleReset}
-                        className="mt-8 w-full rounded-2xl text-white text-sm font-semibold py-3.5 active:scale-[0.98] transition-all duration-200 shadow-lg"
-                        style={{ background: "#0b78b9" }}
-                        onMouseEnter={(e) =>
-                            (e.currentTarget.style.background = "#0969a2")
-                        }
-                        onMouseLeave={(e) =>
-                            (e.currentTarget.style.background = "#0b78b9")
-                        }
-                    >
-                        Submit another ticket
-                    </button>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#f4f5f7] flex flex-col">
-            {/* ── Top-left Logo Bar ── */}
-            <header className="px-8 pt-7 pb-2 flex-shrink-0">
+        <div
+            className="min-h-screen relative"
+            style={{ background: "#f0f4f8" }}
+        >
+            {/* ── Blue background — covers top portion, sits behind everything ── */}
+            <div
+                className="absolute top-0 left-0 right-0"
+                style={{ height: "640px", zIndex: 0 }}
+            >
+                {/* Photo */}
                 <img
-                    src="/images/logo2.png"
-                    alt="Company Logo"
-                    className="h-20 w-auto object-contain"
+                    src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=1400&q=80&fit=crop"
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ opacity: 0.18 }}
                 />
-            </header>
+                {/* Blue gradient overlay */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background:
+                            "linear-gradient(135deg, #063d5ecc 0%, #0b78b999 50%, #1a9fd4bb 100%)",
+                    }}
+                />
+            </div>
 
-            {/* ── Main two-column layout ── */}
-            <main className="flex-1 flex items-start justify-center px-6 py-8">
-                <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-14 items-stretch">
-                    {/* ── LEFT: Form Panel ── */}
-                    <div className="w-full lg:w-[52%] flex-shrink-0">
-                        {/* Form header */}
-                        <div className="mb-6">
-                            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                                Create a support ticket
-                            </h1>
-                            <p className="text-sm text-gray-500 mt-1.5">
-                                Fill out the form below and we'll get back to
-                                you as soon as possible.
-                            </p>
-                        </div>
+            {/* ── All page content sits above the blue bg ── */}
+            <div
+                className="relative flex flex-col min-h-screen"
+                style={{ zIndex: 1 }}
+            >
+                {/* Logo */}
+                <header className="px-8 pt-7 pb-2 flex-shrink-0 flex justify-center">
+                    <img
+                        src="/images/logo2.png"
+                        alt="Company Logo"
+                        className="h-20 w-auto object-contain"
+                    />
+                </header>
 
-                        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                {/* Hero text — inside the blue band */}
+                <div className="text-center px-4 pt-6 pb-10">
+                    <h1 className="text-4xl font-bold text-white tracking-tight">
+                        We're here to help you resolve any issue.
+                    </h1>
+                    <p
+                        className="text-sm mt-3 max-w-md mx-auto leading-relaxed"
+                        style={{ color: "rgba(255,255,255,0.75)" }}
+                    >
+                        Submit a ticket and our dedicated support team will get
+                        back to you promptly — usually within a few hours.
+                    </p>
+                </div>
+
+                {/* Form card */}
+                <div className="flex justify-center px-4 pt-0 pb-0">
+                    <div className="w-full max-w-2xl">
+                        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
                             {/* Section: Contact info */}
                             <div className="px-7 pt-7 pb-6 border-b border-gray-100">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">
@@ -1067,7 +1151,6 @@ const TechTicket = () => {
                                             }
                                         />
                                     </InputField>
-
                                     <InputField
                                         label="Email"
                                         id="email"
@@ -1119,7 +1202,6 @@ const TechTicket = () => {
                                 </InputField>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    {/* Category */}
                                     <InputField
                                         label="Category"
                                         id="category"
@@ -1177,7 +1259,6 @@ const TechTicket = () => {
                                         </div>
                                     </InputField>
 
-                                    {/* Priority */}
                                     <InputField
                                         label="Priority"
                                         id="priority"
@@ -1247,7 +1328,7 @@ const TechTicket = () => {
                                 >
                                     <textarea
                                         id="description"
-                                        rows={5}
+                                        rows={4}
                                         placeholder="Describe your issue in detail — include steps to reproduce, error messages, screenshots, or anything else that helps us understand the problem..."
                                         value={form.description}
                                         onChange={set("description")}
@@ -1278,17 +1359,24 @@ const TechTicket = () => {
                                     onClick={() =>
                                         fileInputRef.current?.click()
                                     }
-                                    className={`rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 text-center py-9 px-4 ${
-                                        dragging
-                                            ? "border-indigo-400 bg-indigo-50/50 shadow-[0_0_0_4px_rgba(99,102,241,0.1)]"
-                                            : "border-gray-200 bg-gray-50/50 hover:border-indigo-300 hover:bg-indigo-50/30"
-                                    }`}
+                                    className={`rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 text-center py-9 px-4`}
+                                    style={{
+                                        borderColor: dragging
+                                            ? "#0b78b9"
+                                            : "#e5e7eb",
+                                        background: dragging
+                                            ? "rgba(11,120,185,0.04)"
+                                            : "rgba(249,250,251,0.5)",
+                                    }}
                                 >
                                     <div className="flex flex-col items-center gap-3 pointer-events-none select-none">
                                         <UploadIcon />
                                         <div>
                                             <p className="text-sm text-gray-600">
-                                                <span className="font-semibold text-indigo-600">
+                                                <span
+                                                    className="font-semibold"
+                                                    style={{ color: "#0b78b9" }}
+                                                >
                                                     Click to upload
                                                 </span>{" "}
                                                 or drag and drop
@@ -1317,15 +1405,21 @@ const TechTicket = () => {
                                         {files.map((f) => (
                                             <li
                                                 key={f.name}
-                                                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-2.5 text-sm group hover:bg-gray-100 transition-colors"
+                                                className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-2.5 text-sm hover:bg-gray-100 transition-colors"
                                             >
-                                                <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center shrink-0">
+                                                <div
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                                                    style={{
+                                                        background:
+                                                            "rgba(11,120,185,0.08)",
+                                                    }}
+                                                >
                                                     <svg
                                                         width="16"
                                                         height="16"
                                                         viewBox="0 0 24 24"
                                                         fill="none"
-                                                        stroke="#6366f1"
+                                                        stroke="#0b78b9"
                                                         strokeWidth="2"
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
@@ -1412,94 +1506,46 @@ const TechTicket = () => {
                                 </p>
                             </div>
                         </div>
-                    </div>
 
-                    {/* ── RIGHT: Image Panel ── */}
-                    <div className="hidden lg:flex w-full self-stretch mt-20">
-                        <div className="w-full rounded-3xl overflow-hidden shadow-xl relative flex flex-col">
-                            {/* Background image */}
-                            <img
-                                src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=900&q=80&fit=crop"
-                                alt="Support team at work"
-                                className="absolute inset-0 w-full h-full object-cover"
-                                style={{ opacity: 0.4 }}
-                            />
-
-                            {/* Brand-colored overlay */}
+                        {/* ── Text block below the form card ── */}
+                        <div className="px-2 pt-10 pb-16 text-center">
                             <div
-                                className="absolute inset-0"
-                                style={{
-                                    background:
-                                        "linear-gradient(180deg, #063d5ecc 0%, #0b78b999 50%, #1a9fd4bb 100%)",
-                                }}
+                                className="w-8 h-0.5 rounded-full mx-auto mb-5"
+                                style={{ background: "#0b78b9" }}
                             />
+                            <h2 className="text-2xl font-bold text-gray-800 leading-snug mb-3">
+                                We're here to help you resolve any issue.
+                            </h2>
+                            <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto">
+                                Submit a ticket and our dedicated support team
+                                will get back to you promptly — usually within a
+                                few hours.
+                            </p>
 
-                            {/* Content */}
-                            <div className="relative z-10 flex-1 flex flex-col justify-between p-9">
-                                {/* Online badge */}
-                                <div className="flex items-center gap-2 self-start">
-                                    <span className="flex items-center gap-2 text-white text-xs font-medium px-3.5 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-                                        Support team online
-                                    </span>
-                                </div>
-
-                                {/* Bottom text block */}
-                                <div>
-                                    {/* Decorative accent line */}
-                                    <div
-                                        className="w-8 h-0.5 rounded-full mb-5"
+                            {/* Feature pills */}
+                            <div className="flex flex-wrap justify-center gap-2 mt-6">
+                                {[
+                                    "⚡ Fast response",
+                                    "🔒 Secure & private",
+                                    "📎 File attachments",
+                                ].map((tag) => (
+                                    <span
+                                        key={tag}
+                                        className="text-xs font-medium px-3 py-1.5 rounded-full text-gray-500"
                                         style={{
-                                            background: "rgba(255,255,255,0.5)",
-                                        }}
-                                    />
-
-                                    <h2 className="text-3xl font-bold text-white leading-snug mb-3">
-                                        We're here to
-                                        <br />
-                                        help you resolve
-                                        <br />
-                                        any issue.
-                                    </h2>
-
-                                    <p
-                                        className="text-sm leading-relaxed mb-8 max-w-xs"
-                                        style={{
-                                            color: "rgba(255,255,255,0.75)",
+                                            background: "rgba(11,120,185,0.07)",
+                                            border: "0.5px solid rgba(11,120,185,0.15)",
+                                            color: "#0b78b9",
                                         }}
                                     >
-                                        Submit a ticket and our dedicated
-                                        support team will get back to you
-                                        promptly — usually within a few hours.
-                                    </p>
-
-                                    {/* Feature pills */}
-                                    <div className="flex flex-wrap gap-2">
-                                        {[
-                                            "⚡ Fast response",
-                                            "🔒 Secure & private",
-                                            "📎 File attachments",
-                                        ].map((tag) => (
-                                            <span
-                                                key={tag}
-                                                className="text-xs font-medium px-3 py-1.5 rounded-full"
-                                                style={{
-                                                    color: "rgba(255,255,255,0.65)",
-                                                    background:
-                                                        "rgba(255,255,255,0.07)",
-                                                    border: "0.5px solid rgba(255,255,255,0.12)",
-                                                }}
-                                            >
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
+                                        {tag}
+                                    </span>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     );
 };
