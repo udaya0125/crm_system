@@ -30,8 +30,8 @@ class PasswordController extends Controller
         $passwords = Password::with([
             'organization',
             'category',
-            'subcategory',
-            'subsubcategory',
+            'sub_category',
+            'sub_sub_category',
         ])->latest()->get();
 
         $passwords->transform(function ($item) {

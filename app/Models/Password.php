@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Password extends Model
 {
     //
-        protected $fillable = [
+    protected $fillable = [
         'organization_id',
         'category_id',
         'sub_category_id',
@@ -29,13 +29,24 @@ class Password extends Model
         return $this->belongsTo(Category::class, 'category_id');
     }
 
-    public function subcategory()
+    // Password.php
+    public function sub_category()      // Laravel serializes as "sub_category"
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
 
-    public function subsubcategory()
+    public function sub_sub_category()  // Laravel serializes as "sub_sub_category"
     {
         return $this->belongsTo(SubSubCategory::class, 'sub_sub_category_id');
     }
+
+    // public function subcategory()
+    // {
+    //     return $this->belongsTo(SubCategory::class, 'sub_category_id');
+    // }
+
+    // public function subsubcategory()
+    // {
+    //     return $this->belongsTo(SubSubCategory::class, 'sub_sub_category_id');
+    // }
 }
