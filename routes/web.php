@@ -371,17 +371,26 @@ Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
 
 
 });
+   
 
-
-
-
+    // ---------------------------------------------------------
+    // TICKET MANAGEMENT for the Tech Support Team
+    // ---------------------------------------------------------
 
 
     Route::get('/tech-ticket',function (){
         return Inertia::render('TicketCreate/TechTicket');
     });
 
-        Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+    // ---------------------------------------------------------
+    // TICKET MANAGEMENT Store for create ticket
+    // ---------------------------------------------------------
+
+    Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+
+    // ---------------------------------------------------------
+    // TICKET MANAGEMENT for the Web Development Team
+    // ---------------------------------------------------------
 
     Route::get('/web-ticket',function (){
         return Inertia::render('TicketCreate/WebTicket');

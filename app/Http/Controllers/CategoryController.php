@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCategoryRequest;
+use App\Http\Requests\UpdateCategoryRequest;
 use App\Models\Category;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
-    /**
-     * Display all categories
-     */
     public function index()
     {
         $categories = Category::latest()->get();
@@ -20,18 +18,9 @@ class CategoryController extends Controller
         ]);
     }
 
-    /**
-     * Store new category
-     */
-    public function store(Request $request)
+    public function store(StoreCategoryRequest $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name',
-        ]);
-
-        $category = Category::create([
-            'name' => $request->name,
-        ]);
+        $category = Category::create($request->validated());
 
         return response()->json([
             'status' => true,
@@ -40,20 +29,11 @@ class CategoryController extends Controller
         ]);
     }
 
-    /**
-     * Update category
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateCategoryRequest $request, $id)
     {
         $category = Category::findOrFail($id);
 
-        $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $id,
-        ]);
-
-        $category->update([
-            'name' => $request->name,
-        ]);
+        $category->update($request->validated());
 
         return response()->json([
             'status' => true,
@@ -62,9 +42,6 @@ class CategoryController extends Controller
         ]);
     }
 
-    /**
-     * Delete category
-     */
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
