@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\CompanyMeeting;
+use App\Models\Lead;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
@@ -13,17 +13,16 @@ class MeetingScheduled extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $meeting;
-
-    public $company;
+    public Lead $lead;
+    public string $mailType; // 'created' or 'updated'
 
     /**
      * Create a new message instance.
      */
-    public function __construct(CompanyMeeting $meeting)
+    public function __construct(Lead $lead, string $mailType = 'created')
     {
-        $this->meeting = $meeting;
-        $this->company = $meeting->company;
+        $this->lead     = $lead;
+        $this->mailType = $mailType;
     }
 
     /**
@@ -31,9 +30,11 @@ class MeetingScheduled extends Mailable
      */
     public function envelope(): Envelope
     {
-        return new Envelope(
-            subject: 'New Meeting Scheduled - '.$this->company->company_name,
-        );
+        $subject = $this->mailType === 'created'
+            ? "New Lead Added: {$this->lead->client_name}"
+            : "Lead Updated: {$this->lead->client_name}";
+
+        return new Envelope(subject: $subject);
     }
 
     /**
@@ -48,8 +49,6 @@ class MeetingScheduled extends Mailable
 
     /**
      * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {

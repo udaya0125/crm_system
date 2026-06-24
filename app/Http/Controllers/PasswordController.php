@@ -5,13 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 
 class PasswordController extends Controller
 {
-    //
-
     public function verify(Request $request) 
     {
         $request->validate([
@@ -22,12 +19,10 @@ class PasswordController extends Controller
             return response()->json(['verified' => true]); 
         }
 
-        return response()->json(['verified'=>false],422);
-
+        return response()->json(['verified' => false], 422);
     }
 
-
-        /**
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -39,9 +34,12 @@ class PasswordController extends Controller
             'subsubcategory',
         ])->latest()->get();
 
-        // Decrypt password before sending response
         $passwords->transform(function ($item) {
-            $item->password = Crypt::decryptString($item->password);
+            try {
+                $item->password = $item->password ? decrypt($item->password) : null;
+            } catch (\Exception $e) {
+                $item->password = null;
+            }
             return $item;
         });
 
@@ -57,15 +55,15 @@ class PasswordController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'organization_id'   => 'required|exists:organizations,id',
-            'category_id'      => 'required|exists:categories,id',
-            'sub_category_id'  => 'nullable|exists:sub_categories,id',
-            'sub_sub_category_id'=> 'nullable|exists:sub_sub_categories,id',
-            'username'         => 'required|string|max:255',
-            'password'         => 'required|string',
-            'expirydate'       => 'nullable|date',
-            'note'             => 'nullable|string',
-            'image'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'organization_id'     => 'required|exists:organizations,id',
+            'category_id'         => 'required|exists:categories,id',
+            'sub_category_id'     => 'nullable|exists:sub_categories,id',
+            'sub_sub_category_id' => 'nullable|exists:sub_sub_categories,id',
+            'username'            => 'required|string|max:255',
+            'password'            => 'required|string',
+            'expirydate'          => 'nullable|date',
+            'note'                => 'nullable|string',
+            'image'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $imagePath = null;
@@ -74,15 +72,15 @@ class PasswordController extends Controller
         }
 
         $password = Password::create([
-            'organization_id'    => $request->organization_id,
-            'category_id'       => $request->category_id,
-            'sub_category_id'   => $request->sub_category_id,
+            'organization_id'     => $request->organization_id,
+            'category_id'         => $request->category_id,
+            'sub_category_id'     => $request->sub_category_id,
             'sub_sub_category_id' => $request->sub_sub_category_id,
-            'username'          => $request->username,
-            'password'          => Crypt::encryptString($request->password),
-            'expirydate'        => $request->expirydate,
-            'note'              => $request->note,
-            'image'             => $imagePath,
+            'username'            => $request->username,
+            'password'            => encrypt($request->password),
+            'expirydate'          => $request->expirydate,
+            'note'                => $request->note,
+            'image'               => $imagePath,
         ]);
 
         return response()->json([
@@ -100,20 +98,19 @@ class PasswordController extends Controller
         $password = Password::findOrFail($id);
 
         $request->validate([
-            'organization_id'   => 'required|exists:organizations,id',
-            'category_id'      => 'required|exists:categories,id',
-            'sub_category_id'  => 'nullable|exists:sub_categories,id',
-            'sub_sub_category_id'=> 'nullable|exists:sub_sub_categories,id',
-            'username'         => 'required|string|max:255',
-            'password'         => 'required|string',
-            'expirydate'       => 'nullable|date',
-            'note'             => 'nullable|string',
-            'image'            => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'organization_id'     => 'required|exists:organizations,id',
+            'category_id'         => 'required|exists:categories,id',
+            'sub_category_id'     => 'nullable|exists:sub_categories,id',
+            'sub_sub_category_id' => 'nullable|exists:sub_sub_categories,id',
+            'username'            => 'required|string|max:255',
+            'password'            => 'required|string',
+            'expirydate'          => 'nullable|date',
+            'note'                => 'nullable|string',
+            'image'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $imagePath = $password->image;
         if ($request->hasFile('image')) {
-            // Delete old image
             if ($password->image && Storage::disk('public')->exists($password->image)) {
                 Storage::disk('public')->delete($password->image);
             }
@@ -121,15 +118,15 @@ class PasswordController extends Controller
         }
 
         $password->update([
-            'organization_id'    => $request->organization_id,
-            'category_id'       => $request->category_id,
-            'sub_category_id'   => $request->sub_category_id,
+            'organization_id'     => $request->organization_id,
+            'category_id'         => $request->category_id,
+            'sub_category_id'     => $request->sub_category_id,
             'sub_sub_category_id' => $request->sub_sub_category_id,
-            'username'          => $request->username,
-            'password'          => Crypt::encryptString($request->password),
-            'expirydate'        => $request->expirydate,
-            'note'              => $request->note,
-            'image'             => $imagePath,
+            'username'            => $request->username,
+            'password'            => encrypt($request->password),
+            'expirydate'          => $request->expirydate,
+            'note'                => $request->note,
+            'image'               => $imagePath,
         ]);
 
         return response()->json([
@@ -157,6 +154,4 @@ class PasswordController extends Controller
             'message' => 'Password deleted successfully',
         ]);
     }
-
-
 }

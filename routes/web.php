@@ -103,6 +103,61 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('DetailsPage/Profile');
     });
 
+
+        // *********************************************************************
+    // Only user can access task list viewing
+    // *********************************************************************
+
+
+    Route::get('/ourcategories', [CategoryController::class, 'index'])->name('ourcategories.index');
+    Route::post('/ourcategories', [CategoryController::class, 'store'])->name('ourcategories.store');
+    Route::put('/ourcategories/{id}', [CategoryController::class, 'update'])->name('ourcategories.update');
+    Route::delete('/ourcategories/{id}', [CategoryController::class, 'destroy'])->name('ourcategories.destroy');
+
+
+    Route::get('/category',function (){
+        return Inertia::render('Passwords/Category');
+    });
+
+    Route::get('/organization',function (){
+        return Inertia::render('Passwords/Organization');
+    });
+
+    Route::get('/ourorganizations', [OrganizationController::class, 'index'])->name('ourorganizations.index');
+    Route::post('/ourorganizations', [OrganizationController::class, 'store'])->name('ourorganizations.store');
+    Route::put('/ourorganizations/{id}', [OrganizationController::class, 'update'])->name('ourorganizations.update');
+    Route::delete('/ourorganizations/{id}', [OrganizationController::class, 'destroy'])->name('ourorganizations.destroy');
+
+
+    Route::get('/sub-category',function (){
+        return Inertia::render('Passwords/SubCategory');
+    });
+
+    Route::get('/oursubcategories', [SubCategoryController::class, 'index'])->name('oursubcategories.index');
+    Route::post('/oursubcategories', [SubCategoryController::class, 'store'])->name('oursubcategories.store');
+    Route::put('/oursubcategories/{id}', [SubCategoryController::class, 'update'])->name('oursubcategories.update');
+    Route::delete('/oursubcategories/{id}', [SubCategoryController::class, 'destroy'])->name('oursubcategories.destroy');
+
+
+    Route::get('/sub-sub-category',function (){
+        return Inertia::render('Passwords/ChildCategory');
+    });
+
+
+    Route::get('/ourchildcategories', [SubSubCategoryController::class, 'index'])->name('ourchildcategories.index');
+    Route::post('/ourchildcategories', [SubSubCategoryController::class, 'store'])->name('ourchildcategories.store');
+    Route::put('/ourchildcategories/{id}', [SubSubCategoryController::class, 'update'])->name('ourchildcategories.update');
+    Route::delete('/ourchildcategories/{id}', [SubSubCategoryController::class, 'destroy'])->name('ourchildcategories.destroy');
+
+     Route::get('/password',function (){
+        return Inertia::render('Passwords/Password');
+    });
+
+    Route::get('/ourpasswords', [PasswordController::class, 'index'])->name('ourpasswords.index');
+    Route::post('/ourpasswords', [PasswordController::class, 'store'])->name('ourpasswords.store');
+    Route::put('/ourpasswords/{id}', [PasswordController::class, 'update'])->name('ourpasswords.update');
+    Route::delete('/ourpasswords/{id}', [PasswordController::class, 'destroy'])->name('ourpasswords.destroy');
+
 });
     
 
@@ -318,59 +373,7 @@ Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
 });
 
 
-    // *********************************************************************
-    // Only user can access task list viewing
-    // *********************************************************************
 
-
-    Route::get('/ourcategories', [CategoryController::class, 'index'])->name('ourcategories.index');
-    Route::post('/ourcategories', [CategoryController::class, 'store'])->name('ourcategories.store');
-    Route::put('/ourcategories/{id}', [CategoryController::class, 'update'])->name('ourcategories.update');
-    Route::delete('/ourcategories/{id}', [CategoryController::class, 'destroy'])->name('ourcategories.destroy');
-
-
-    Route::get('/category',function (){
-        return Inertia::render('Passwords/Category');
-    });
-
-    Route::get('/organization',function (){
-        return Inertia::render('Passwords/Organization');
-    });
-
-    Route::get('/ourorganizations', [OrganizationController::class, 'index'])->name('ourorganizations.index');
-    Route::post('/ourorganizations', [OrganizationController::class, 'store'])->name('ourorganizations.store');
-    Route::put('/ourorganizations/{id}', [OrganizationController::class, 'update'])->name('ourorganizations.update');
-    Route::delete('/ourorganizations/{id}', [OrganizationController::class, 'destroy'])->name('ourorganizations.destroy');
-
-
-    Route::get('/sub-category',function (){
-        return Inertia::render('Passwords/SubCategory');
-    });
-
-    Route::get('/oursubcategories', [SubCategoryController::class, 'index'])->name('oursubcategories.index');
-    Route::post('/oursubcategories', [SubCategoryController::class, 'store'])->name('oursubcategories.store');
-    Route::put('/oursubcategories/{id}', [SubCategoryController::class, 'update'])->name('oursubcategories.update');
-    Route::delete('/oursubcategories/{id}', [SubCategoryController::class, 'destroy'])->name('oursubcategories.destroy');
-
-
-    Route::get('/sub-sub-category',function (){
-        return Inertia::render('Passwords/ChildCategory');
-    });
-
-
-    Route::get('/ourchildcategories', [SubSubCategoryController::class, 'index'])->name('ourchildcategories.index');
-    Route::post('/ourchildcategories', [SubSubCategoryController::class, 'store'])->name('ourchildcategories.store');
-    Route::put('/ourchildcategories/{id}', [SubSubCategoryController::class, 'update'])->name('ourchildcategories.update');
-    Route::delete('/ourchildcategories/{id}', [SubSubCategoryController::class, 'destroy'])->name('ourchildcategories.destroy');
-
-     Route::get('/password',function (){
-        return Inertia::render('Passwords/Password');
-    });
-
-    Route::get('/ourpasswords', [PasswordController::class, 'index'])->name('ourpasswords.index');
-    Route::post('/ourpasswords', [PasswordController::class, 'store'])->name('ourpasswords.store');
-    Route::put('/ourpasswords/{id}', [PasswordController::class, 'update'])->name('ourpasswords.update');
-    Route::delete('/ourpasswords/{id}', [PasswordController::class, 'destroy'])->name('ourpasswords.destroy');
 
 
 

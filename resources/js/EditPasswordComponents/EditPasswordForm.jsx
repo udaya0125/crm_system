@@ -1020,6 +1020,7 @@ const EditPasswordForm = ({
         note: "",
         image: null,
     });
+     const imgurl = import.meta.env.VITE_IMAGE_PATH;
     const inputClass =
         "w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 shadow-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100";
     const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
@@ -1095,7 +1096,7 @@ const EditPasswordForm = ({
                 image: null,
             });
             setImagePreview(
-                editingPassword.image ? `/storage/${editingPassword.image}` : null
+                editingPassword.image ? `${imgurl}/${editingPassword.image}` : null
             );
             setSelectedImage(null);
             setShowForm(true);
