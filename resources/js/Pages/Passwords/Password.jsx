@@ -186,7 +186,7 @@
 //             <div className="container mx-auto py-4">
 //             <div className="mb-8 flex justify-between items-center">
 //                 <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-//                     Password 
+//                     Password
 //                 </h1>
 //                 <button
 //                     onClick={() => {
@@ -202,8 +202,8 @@
 
 //             {/* Password Table */}
 //             {/* <MyTable
-//                 columns={columns} 
-//                 data={allPassword} 
+//                 columns={columns}
+//                 data={allPassword}
 //                 loading={loading}
 //             /> */}
 
@@ -406,7 +406,7 @@
 //             <div className="container mx-auto py-4">
 //                 <div className="mb-8 flex justify-between items-center">
 //                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-//                         Password 
+//                         Password
 //                     </h1>
 //                     <button
 //                         onClick={() => {
@@ -457,8 +457,6 @@
 
 // export default Password;
 
-
-
 import axios from "axios";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
@@ -488,12 +486,18 @@ const Password = () => {
         const fetchAllData = async () => {
             setLoading(true);
             try {
-                const [passwordsRes, organizationsRes, categoriesRes, subCategoriesRes, childCategoriesRes] = await Promise.all([
+                const [
+                    passwordsRes,
+                    organizationsRes,
+                    categoriesRes,
+                    subCategoriesRes,
+                    childCategoriesRes,
+                ] = await Promise.all([
                     axios.get(route("ourpasswords.index")),
                     axios.get(route("ourorganizations.index")),
                     axios.get(route("ourcategories.index")),
                     axios.get(route("oursubcategories.index")),
-                    axios.get(route("ourchildcategories.index"))
+                    axios.get(route("ourchildcategories.index")),
                 ]);
 
                 setAllPassword(passwordsRes.data.data);
@@ -541,7 +545,7 @@ const Password = () => {
             const response = await axios.post(
                 route("ourpasswords.update", { id }),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                { headers: { "Content-Type": "multipart/form-data" } },
             );
             setReloadTrigger((prev) => !prev);
             return response.data;
@@ -590,9 +594,7 @@ const Password = () => {
                 Header: "Expiry Date",
                 accessor: "expirydate",
                 Cell: ({ value }) => (
-                    <span className="text-gray-600">
-                        {value || "—"}
-                    </span>
+                    <span className="text-gray-600">{value || "—"}</span>
                 ),
             },
             {
@@ -625,14 +627,14 @@ const Password = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     return (
         <AdminWrapper>
             <Head title="Password" />
             <div className="container mx-auto py-4">
-                <div className="mb-8 flex justify-between items-center">
+                {/* <div className="mb-8 flex justify-between items-center">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Password
                     </h1>
@@ -645,6 +647,22 @@ const Password = () => {
                     >
                         <Plus size={18} />
                         <span>Create</span>
+                    </button>
+                </div> */}
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                        Password
+                    </h1>
+                    <button
+                        onClick={() => {
+                            setEditingPassword(null);
+                            setShowAddForm(true);
+                        }}
+                        className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <Plus size={18} />
+                        Create
                     </button>
                 </div>
 

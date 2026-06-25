@@ -431,7 +431,7 @@ const ClientDetails = () => {
 
     return (
         <AdminWrapper>
-            <div className="p-6">
+            <div>
                 {/* Page Header */}
                 <div className="flex justify-between items-baseline gap-4  pb-5">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">

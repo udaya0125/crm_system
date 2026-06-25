@@ -1582,7 +1582,7 @@ const AddPasswordForm = ({
     if (!showForm) return null;
 
     return (
-        <div className="fixed inset-0 bg-slate-950/55 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-slate-950/55 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-3xl w-full shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
                 {/* Header */}

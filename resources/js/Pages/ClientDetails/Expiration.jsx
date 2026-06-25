@@ -464,7 +464,7 @@ const Expiration = () => {
 
                 {/* Add Expiration Modal */}
                 {showAddModal && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="fixed inset-0 z-50 backdrop-blur-sm overflow-y-auto">
                         <div
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={closeAddModal}
@@ -484,7 +484,7 @@ const Expiration = () => {
 
                 {/* Edit Expiration Modal */}
                 {showEditModal && editingExpiration && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="fixed inset-0 z-50 backdrop-blur-sm overflow-y-auto">
                         <div
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={closeEditModal}

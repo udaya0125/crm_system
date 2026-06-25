@@ -3,7 +3,7 @@ import EditFinanceTrackingForm from "@/EditFormComponents/EditFinanceTrackingFor
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import MyTable from "@/TableComponents/MyTable";
 import axios from "axios";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import { Head } from "@inertiajs/react";
 import PageLoader from "@/Loader/PageLoader";
@@ -240,7 +240,7 @@ const FinanceTracking = () => {
                         onClick={() => setShowAddForm(true)}
                         className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
-                        <span>+</span>
+                       <Plus size={18} />
                         Create
                     </button>
                 </div>

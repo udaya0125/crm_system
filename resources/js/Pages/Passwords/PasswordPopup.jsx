@@ -61,7 +61,7 @@ const PasswordPopup = ({ showPopup, setShowPopup, password }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-slate-950/70 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
 
                 {/* ── Header ── */}

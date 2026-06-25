@@ -221,7 +221,7 @@ const EditClientManagement = ({
         "block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1";
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 pb-4 border-b sticky top-0 bg-white z-10">

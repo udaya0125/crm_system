@@ -260,7 +260,6 @@ const Ticket = () => {
         fetchTickets();
     }, [reloadTrigger]);
 
-    console.log("Fetched tickets:", allTickets); // Debugging log
 
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this ticket?")) {

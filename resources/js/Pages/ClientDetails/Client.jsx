@@ -216,7 +216,7 @@ const Client = () => {
         <AdminWrapper>
             <Head title="Client Management" />
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-6">
+                {/* <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Client Management
                     </h1>
@@ -229,6 +229,22 @@ const Client = () => {
                     >
                         <Plus size={18} />
                         <span>Create</span>
+                    </button>
+                </div> */}
+
+                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                       Client
+                    </h1>
+                    <button
+                        onClick={() => {
+                            setShowAddModal(true);
+                            setEditingClient(null);
+                        }}
+                        className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <Plus size={18} />
+                        Create
                     </button>
                 </div>
 
@@ -286,7 +302,7 @@ const Client = () => {
 
                 {/* Add Client Modal */}
                 {showAddModal && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="fixed inset-0 z-50 backdrop-blur-sm overflow-y-auto">
                         <div
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={closeModals}
@@ -305,7 +321,7 @@ const Client = () => {
 
                 {/* Edit Client Modal */}
                 {showEditModal && editingClient && (
-                    <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="fixed inset-0 z-50 backdrop-blur-sm overflow-y-auto">
                         <div
                             className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
                             onClick={closeModals}

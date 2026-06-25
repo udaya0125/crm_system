@@ -37,7 +37,6 @@ const UserManagement = () => {
         fetchUser();
     }, [reloadTrigger]);
 
-    console.log("Fetched users:", allUser);
 
     // Define columns for MyTable
     const columns = useMemo(
@@ -190,7 +189,7 @@ const UserManagement = () => {
         <AdminWrapper>
             <Head title="User Management" />
             <div className="container mx-auto">
-                <div className="flex justify-between items-center mb-6">
+                {/* <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         User Management
                     </h1>
@@ -200,6 +199,19 @@ const UserManagement = () => {
                     >
                         <Plus size={18} />
                         <span>Create User</span>
+                    </button>
+                </div> */}
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                       User Management
+                    </h1>
+                    <button
+                         onClick={handleAddNew}
+                        className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                       <Plus size={18} />
+                        Create
                     </button>
                 </div>
 
@@ -218,7 +230,7 @@ const UserManagement = () => {
 
                 {/* Add User Form Modal */}
                 {showAddForm && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                         <div className="bg-white rounded-lg w-full max-w-2xl">
                             <AddUserForm
                                 onSuccess={handleFormSuccess}
@@ -230,7 +242,7 @@ const UserManagement = () => {
 
                 {/* Edit User Form Modal */}
                 {showEditForm && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                         <div className="bg-white rounded-lg w-full max-w-2xl">
                             <EditUserForm
                                 editingUser={editingUser}

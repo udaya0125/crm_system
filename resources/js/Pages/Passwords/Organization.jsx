@@ -136,7 +136,7 @@ const Organization = () => {
         <AdminWrapper>
             <Head title="Organization " />
             <div className="container mx-auto py-4">
-                <div className="mb-8 flex justify-between items-center">
+                {/* <div className="mb-8 flex justify-between items-center">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         Organizations
                     </h1>
@@ -148,6 +148,21 @@ const Organization = () => {
                     >
                         <Plus size={18} />
                         <span>Create</span>
+                    </button>
+                </div> */}
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                        Organizations
+                    </h1>
+                    <button
+                        onClick={() => {
+                            setShowAddForm(true);
+                        }}
+                        className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <Plus size={18} />
+                        Create
                     </button>
                 </div>
 

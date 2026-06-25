@@ -226,7 +226,6 @@
 
 // export default SubCategory;
 
-
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import { Plus, Edit, Trash2 } from "lucide-react";
@@ -236,7 +235,6 @@ import AddSubCategoryForm from "@/AddPasswordComponents/AddSubCategoryForm";
 import EditSubCategoryForm from "@/EditPasswordComponents/EditSubCategoryForm";
 import GroupedTable from "@/TableComponents/Groupedtable";
 import PageLoader from "@/Loader/PageLoader";
-
 
 const SubCategory = () => {
     const [allSubCategories, setAllSubCategories] = useState([]);
@@ -250,7 +248,9 @@ const SubCategory = () => {
         const fetchSubCategories = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(route("oursubcategories.index"));
+                const response = await axios.get(
+                    route("oursubcategories.index"),
+                );
                 setAllSubCategories(response.data.data);
             } catch (error) {
                 console.error("fetching error", error);
@@ -348,7 +348,7 @@ const SubCategory = () => {
             <Head title="SubCategory" />
             <div className="container mx-auto py-4">
                 {/* Header */}
-                <div className="mb-6 flex justify-between items-center">
+                {/* <div className="mb-6 flex justify-between items-center">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
                         SubCategory
                     </h1>
@@ -357,6 +357,19 @@ const SubCategory = () => {
                         className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition shadow-sm text-sm font-medium"
                     >
                         <Plus size={16} />
+                        Create
+                    </button>
+                </div> */}
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                        Sub Category
+                    </h1>
+                    <button
+                        onClick={() => setShowAddForm(true)}
+                        className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                    >
+                        <Plus size={18} />
                         Create
                     </button>
                 </div>

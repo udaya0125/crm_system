@@ -190,7 +190,7 @@ const HostingManagement = () => {
     return (
         <AdminWrapper>
             <Head title="Hosting Management" />
-            <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
@@ -202,7 +202,7 @@ const HostingManagement = () => {
                         className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                     >
                         <Plus size={18} />
-                        Create New Hosting
+                        Create
                     </button>
                 </div>
 
