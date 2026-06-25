@@ -32,6 +32,11 @@ const FinanceTracking = () => {
     }, [reloadTrigger]);
 
     const handleDelete = async (id) => {
+        if (
+            !window.confirm("Are you sure you want to delete this tracking entry?")
+        ) {
+            return;
+        }
         try {
             await axios.delete(route("ourfinance.destroy", { id }));
             setReloadTrigger((prev) => !prev);

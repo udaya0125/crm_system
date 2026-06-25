@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Models\UserLog;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,16 +27,9 @@ class UserController extends Controller
     /**
      * Store a newly created user.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validated = $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-            'role'     => 'required|string',
-            'contact'  => 'nullable|string|max:20',
-            'image'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
+        $validated = $request->validated();
 
         // Upload image
         if ($request->hasFile('image')) {
@@ -61,20 +55,26 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified user.
+     * Display the specified user.
      */
-    public function update(Request $request, $id)
+    public function show($id)
     {
         $user = User::findOrFail($id);
 
-        $validated = $request->validate([
-            'name'     => 'sometimes|string|max:255',
-            'email'    => 'sometimes|email|unique:users,email,' . $id,
-            'password' => 'nullable|string|min:6',
-            'role'     => 'sometimes|string',
-            'contact'  => 'nullable|string|max:20',
-            'image'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        return response()->json([
+            'status' => 'success',
+            'user'   => $user,
         ]);
+    }
+
+    /**
+     * Update the specified user.
+     */
+    public function update(UpdateUserRequest $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validated = $request->validated();
 
         // Upload new image
         if ($request->hasFile('image')) {
@@ -112,11 +112,11 @@ class UserController extends Controller
     /**
      * Remove the specified user.
      */
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         $user = User::findOrFail($id);
 
-        // Delete image from storage
+        // Delete image
         if ($user->image && Storage::disk('public')->exists($user->image)) {
             Storage::disk('public')->delete($user->image);
         }
@@ -126,8 +126,8 @@ class UserController extends Controller
         $user->delete();
 
         UserLog::create([
-            'name'       => $request->user()?->name ?? 'System',
-            'ip_address' => $request->ip(),
+            'name'       => auth()->user()?->name ?? 'System',
+            'ip_address' => request()->ip(),
             'title'      => "Deleted user: {$userName}",
         ]);
 
@@ -138,9 +138,9 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified user.
+     * Return user data for editing.
      */
-    public function show($id)
+    public function edit($id)
     {
         $user = User::findOrFail($id);
 

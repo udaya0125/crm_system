@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateCategoryRequest extends FormRequest
+class UpdateSubSubCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,18 +21,10 @@ class UpdateCategoryRequest extends FormRequest
      */
     public function rules(): array
     {
-         $categoryId = $this->route('id');
         return [
             //
-            'name' => 'required|string|max:255|unique:categories,name,' . $categoryId,
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'Category name is required.',
-            'name.unique' => 'This category already exists.',
+               'name' => 'required|string|max:255',
+            'sub_category_id' => 'required|exists:sub_categories,id',
         ];
     }
 }

@@ -49,6 +49,17 @@ const Organization = () => {
         setShowEditForm(true);
     };
 
+    // const handleUpdate = async (formData, id) => {
+    //     formData.append("_method", "PUT");
+    //     const response = await axios.post(
+    //         route("ourorganizations.update", { id }),
+    //         formData,
+    //         { headers: { "Content-Type": "multipart/form-data" } },
+    //     );
+    //     // setReloadTrigger((prev) => !prev);
+    //     return response.data;
+    // };
+
     const handleUpdate = async (formData, id) => {
         formData.append("_method", "PUT");
         const response = await axios.post(
@@ -56,7 +67,7 @@ const Organization = () => {
             formData,
             { headers: { "Content-Type": "multipart/form-data" } },
         );
-        // setReloadTrigger((prev) => !prev);
+        setReloadTrigger((prev) => !prev); // ✅ uncommented
         return response.data;
     };
 
@@ -70,15 +81,21 @@ const Organization = () => {
             {
                 Header: "Name",
                 accessor: "name",
-                Cell: ({ value }) => <span className="font-medium text-gray-800">{value}</span>,
+                Cell: ({ value }) => (
+                    <span className="font-medium text-gray-800">{value}</span>
+                ),
             },
             {
                 Header: "Domain",
                 accessor: "domain",
-                Cell: ({ value }) => (
+                Cell: ({ value }) =>
                     value ? (
                         <a
-                            href={value.startsWith("http") ? value : `https://${value}`}
+                            href={
+                                value.startsWith("http")
+                                    ? value
+                                    : `https://${value}`
+                            }
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
@@ -87,8 +104,7 @@ const Organization = () => {
                         </a>
                     ) : (
                         <span>-</span>
-                    )
-                ),
+                    ),
             },
             {
                 Header: "Actions",
@@ -100,7 +116,7 @@ const Organization = () => {
                             className="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition"
                             title="Edit"
                         >
-                             <Edit size={16} />
+                            <Edit size={16} />
                         </button>
                         <button
                             onClick={() => handleDelete(row.original.id)}
@@ -113,61 +129,60 @@ const Organization = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     return (
         <AdminWrapper>
             <Head title="Organization " />
             <div className="container mx-auto py-4">
-            <div className="mb-8 flex justify-between items-center">
-                <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-                    Organizations 
-                </h1>
-                <button
-                    onClick={() => {
-                        setShowAddForm(true);
-                    }}
-                    className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
-                >
-                    <Plus size={18} />
-                    <span>Create</span>
-                </button>
-            </div>
+                <div className="mb-8 flex justify-between items-center">
+                    <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                        Organizations
+                    </h1>
+                    <button
+                        onClick={() => {
+                            setShowAddForm(true);
+                        }}
+                        className="px-4 py-2 flex items-center gap-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition"
+                    >
+                        <Plus size={18} />
+                        <span>Create</span>
+                    </button>
+                </div>
 
-            {/* <MyTable 
+                {/* <MyTable 
                 columns={columns} 
                 data={allOrganizations} 
                 loading={loading}
             /> */}
 
-            {loading ? (
-                <PageLoader />
-            ) : (
-                <MyTable columns={columns} data={allOrganizations} />
-            )}
+                {loading ? (
+                    <PageLoader />
+                ) : (
+                    <MyTable columns={columns} data={allOrganizations} />
+                )}
 
-            <AddOrganizationForm
-                showForm={showAddForm}
-                setShowForm={setShowAddForm}
-                setReloadTrigger={setReloadTrigger}
-            />
+                <AddOrganizationForm
+                    showForm={showAddForm}
+                    setShowForm={setShowAddForm}
+                    setReloadTrigger={setReloadTrigger}
+                />
 
-            <EditOrganizationForm
-                showForm={showEditForm}
-                setShowForm={setShowEditForm}
-                editingOrganization={editingOrganization}
-                setEditingOrganization={setEditingOrganization}
-                setReloadTrigger={setReloadTrigger}
-                handleUpdate={handleUpdate}
-            />
+                <EditOrganizationForm
+                    showForm={showEditForm}
+                    setShowForm={setShowEditForm}
+                    editingOrganization={editingOrganization}
+                    setEditingOrganization={setEditingOrganization}
+                    setReloadTrigger={setReloadTrigger}
+                    handleUpdate={handleUpdate}
+                />
             </div>
         </AdminWrapper>
     );
 };
 
 export default Organization;
-
 
 // import { Edit, Plus, Trash2 } from "lucide-react";
 // import React, { useEffect, useState, useMemo } from "react";
@@ -333,7 +348,6 @@ export default Organization;
 // };
 
 // export default Organization;
-
 
 // import { Pencil, Plus, Trash2 } from "lucide-react";
 // import React, { useEffect, useState } from "react";

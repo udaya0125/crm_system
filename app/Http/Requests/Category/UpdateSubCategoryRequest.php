@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Category;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCategoryRequest extends FormRequest
+class UpdateSubCategoryRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,21 +23,8 @@ class StoreCategoryRequest extends FormRequest
     {
         return [
             //
-             'name' => 'required|string|max:255|unique:categories,name',
-        ];
-    }
-
-    /**
-     * Custom validation messages.
-     */
-    /**
-     * Custom validation messages.
-     */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'Category name is required.',
-            'name.unique' => 'This category already exists.',
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
         ];
     }
 }

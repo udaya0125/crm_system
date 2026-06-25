@@ -24,15 +24,39 @@ const EditOrganizationForm = ({
         }
     }, [editingOrganization]);
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     const formData = new FormData();
+    //     for (const key in organizationForm) {
+    //         if (
+    //             organizationForm[key] !== null &&
+    //             organizationForm[key] !== ""
+    //         ) {
+    //             formData.append(key, organizationForm[key]);
+    //         }
+    //     }
+    //     try {
+    //         setSubmitting(true);
+    //         await handleUpdate(formData, editingOrganization.id);
+    //         setOrganizationForm({ name: "", domain: "" });
+    //         setShowForm(false);
+    //         setEditingOrganization(null);
+    //     } catch (error) {
+    //         console.error("Error updating data", error);
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
         for (const key in organizationForm) {
             if (
                 organizationForm[key] !== null &&
-                organizationForm[key] !== ""
+                organizationForm[key] !== undefined
             ) {
-                formData.append(key, organizationForm[key]);
+                formData.append(key, organizationForm[key]); // ✅ empty string "" now passes through
             }
         }
         try {

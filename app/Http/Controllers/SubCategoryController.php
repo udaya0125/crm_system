@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Category\StoreSubCategoryRequest;
+use App\Http\Requests\Category\UpdateSubCategoryRequest;
 use App\Models\SubCategory;
-use Illuminate\Http\Request;
 
 class SubCategoryController extends Controller
 {
-    //
-        /**
-     * Display all sub categories
-     */
     public function index()
     {
         $subCategories = SubCategory::with('category')->latest()->get();
@@ -21,17 +18,9 @@ class SubCategoryController extends Controller
         ]);
     }
 
-    /**
-     * Store new sub category
-     */
-    public function store(Request $request)
+    public function store(StoreSubCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-        ]);
-
-        $subCategory = SubCategory::create($validated);
+        $subCategory = SubCategory::create($request->validated());
 
         return response()->json([
             'status' => true,
@@ -40,19 +29,11 @@ class SubCategoryController extends Controller
         ], 201);
     }
 
-    /**
-     * Update sub category
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateSubCategoryRequest $request, $id)
     {
         $subCategory = SubCategory::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-        ]);
-
-        $subCategory->update($validated);
+        $subCategory->update($request->validated());
 
         return response()->json([
             'status' => true,
@@ -61,9 +42,6 @@ class SubCategoryController extends Controller
         ]);
     }
 
-    /**
-     * Delete sub category
-     */
     public function destroy($id)
     {
         $subCategory = SubCategory::findOrFail($id);

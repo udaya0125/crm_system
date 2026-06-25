@@ -2,156 +2,138 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Password\StorePasswordRequest;
+use App\Http\Requests\Password\UpdatePasswordRequest;
 use App\Models\Password;
+use App\Services\PasswordService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class PasswordController extends Controller
 {
-    public function verify(Request $request) 
-    {
-        $request->validate([
-            'password' => 'required',
-        ]);
-        
-        if(Hash::check($request->password, auth()->user()->password)) {
-            return response()->json(['verified' => true]); 
-        }
+    protected PasswordService $passwordService;
 
-        return response()->json(['verified' => false], 422);
+    public function __construct(PasswordService $passwordService)
+    {
+        $this->passwordService = $passwordService;
     }
 
     /**
-     * Display a listing of the resource.
+     * Verify user's current password.
+     */
+    public function verify(Request $request)
+    {
+        $request->validate([
+            'password' => ['required'],
+        ]);
+
+        if (Hash::check($request->password, auth()->user()->password)) {
+            return response()->json([
+                'status' => true,
+                'verified' => true,
+                'message' => 'Password verified successfully.',
+            ]);
+        }
+
+        return response()->json([
+            'status' => false,
+            'verified' => false,
+            'message' => 'Invalid password.',
+        ], 422);
+    }
+
+    /**
+     * Display all passwords.
      */
     public function index()
     {
-        $passwords = Password::with([
-            'organization',
-            'category',
-            'sub_category',
-            'sub_sub_category',
-        ])->latest()->get();
-
-        $passwords->transform(function ($item) {
-            try {
-                $item->password = $item->password ? decrypt($item->password) : null;
-            } catch (\Exception $e) {
-                $item->password = null;
-            }
-            return $item;
-        });
-
         return response()->json([
             'status' => true,
-            'data'   => $passwords,
+            'data' => $this->passwordService->getAll(),
         ]);
     }
 
     /**
-     * Store a newly created resource.
+     * Store a newly created password.
      */
-    public function store(Request $request)
+    public function store(StorePasswordRequest $request)
     {
-        $request->validate([
-            'organization_id'     => 'required|exists:organizations,id',
-            'category_id'         => 'required|exists:categories,id',
-            'sub_category_id'     => 'nullable|exists:sub_categories,id',
-            'sub_sub_category_id' => 'nullable|exists:sub_sub_categories,id',
-            'username'            => 'required|string|max:255',
-            'password'            => 'required|string',
-            'expirydate'          => 'nullable|date',
-            'note'                => 'nullable|string',
-            'image'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
+        $data = $request->validated();
 
-        $imagePath = null;
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('passwords', 'public');
+            $data['image'] = $request->file('image');
         }
 
-        $password = Password::create([
-            'organization_id'     => $request->organization_id,
-            'category_id'         => $request->category_id,
-            'sub_category_id'     => $request->sub_category_id,
-            'sub_sub_category_id' => $request->sub_sub_category_id,
-            'username'            => $request->username,
-            'password'            => encrypt($request->password),
-            'expirydate'          => $request->expirydate,
-            'note'                => $request->note,
-            'image'               => $imagePath,
-        ]);
+        $password = $this->passwordService->create($data);
 
         return response()->json([
-            'status'  => true,
-            'message' => 'Password created successfully',
-            'data'    => $password,
+            'status' => true,
+            'message' => 'Password created successfully.',
+            'data' => $password,
         ], 201);
     }
 
     /**
-     * Update the specified resource.
+     * Display the specified password.
      */
-    public function update(Request $request, $id)
+    public function show($id)
     {
-        $password = Password::findOrFail($id);
+        $password = Password::with([
+            'organization',
+            'category',
+            'sub_category',
+            'sub_sub_category',
+        ])->findOrFail($id);
 
-        $request->validate([
-            'organization_id'     => 'required|exists:organizations,id',
-            'category_id'         => 'required|exists:categories,id',
-            'sub_category_id'     => 'nullable|exists:sub_categories,id',
-            'sub_sub_category_id' => 'nullable|exists:sub_sub_categories,id',
-            'username'            => 'required|string|max:255',
-            'password'            => 'required|string',
-            'expirydate'          => 'nullable|date',
-            'note'                => 'nullable|string',
-            'image'               => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
-        ]);
-
-        $imagePath = $password->image;
-        if ($request->hasFile('image')) {
-            if ($password->image && Storage::disk('public')->exists($password->image)) {
-                Storage::disk('public')->delete($password->image);
-            }
-            $imagePath = $request->file('image')->store('passwords', 'public');
+        try {
+            $password->password = decrypt($password->password);
+        } catch (\Exception $e) {
+            $password->password = null;
         }
 
-        $password->update([
-            'organization_id'     => $request->organization_id,
-            'category_id'         => $request->category_id,
-            'sub_category_id'     => $request->sub_category_id,
-            'sub_sub_category_id' => $request->sub_sub_category_id,
-            'username'            => $request->username,
-            'password'            => encrypt($request->password),
-            'expirydate'          => $request->expirydate,
-            'note'                => $request->note,
-            'image'               => $imagePath,
-        ]);
-
         return response()->json([
-            'status'  => true,
-            'message' => 'Password updated successfully',
-            'data'    => $password,
+            'status' => true,
+            'data' => $password,
         ]);
     }
 
     /**
-     * Remove the specified resource.
+     * Update the specified password.
+     */
+    public function update(UpdatePasswordRequest $request, $id)
+    {
+        $password = Password::findOrFail($id);
+
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image');
+        }
+
+        $updatedPassword = $this->passwordService->update(
+            $password,
+            $data
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Password updated successfully.',
+            'data' => $updatedPassword,
+        ]);
+    }
+
+    /**
+     * Remove the specified password.
      */
     public function destroy($id)
     {
         $password = Password::findOrFail($id);
 
-        if ($password->image && Storage::disk('public')->exists($password->image)) {
-            Storage::disk('public')->delete($password->image);
-        }
-
-        $password->delete();
+        $this->passwordService->delete($password);
 
         return response()->json([
-            'status'  => true,
-            'message' => 'Password deleted successfully',
+            'status' => true,
+            'message' => 'Password deleted successfully.',
         ]);
     }
 }

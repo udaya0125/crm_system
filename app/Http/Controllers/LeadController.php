@@ -8,6 +8,8 @@ use App\Mail\MeetingScheduled;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\Lead\StoreLeadRequest;
+use App\Http\Requests\Lead\UpdateLeadRequest;
 
 class LeadController extends Controller
 {
@@ -27,76 +29,118 @@ class LeadController extends Controller
     /**
      * Store a newly created lead
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'client_name'          => 'required|string|max:255',
-            'company_name'         => 'nullable|string|max:255',
-            'phone'                => 'required|string|max:20',
-            'email'                => 'nullable|email|max:255',
-            'service_interested'   => 'nullable|string|max:255',
-            'lead_source'          => 'nullable|string|max:255',
-            'assigned_salesperson' => 'nullable|string|max:255',
-            'next_followup_date'   => 'nullable|date',
-            'notes'                => 'nullable|string',
-            'status'               => 'nullable|string|max:100',
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'client_name'          => 'required|string|max:255',
+    //         'company_name'         => 'nullable|string|max:255',
+    //         'phone'                => 'required|string|max:20',
+    //         'email'                => 'nullable|email|max:255',
+    //         'service_interested'   => 'nullable|string|max:255',
+    //         'lead_source'          => 'nullable|string|max:255',
+    //         'assigned_salesperson' => 'nullable|string|max:255',
+    //         'next_followup_date'   => 'nullable|date',
+    //         'notes'                => 'nullable|string',
+    //         'status'               => 'nullable|string|max:100',
+    //     ]);
 
-        $lead = Lead::create($validated);
+    //     $lead = Lead::create($validated);
 
-        // ── Notify admin of new lead ───────────────────────────────────────
-        $this->sendAdminMail($lead, 'created');
+    //     // ── Notify admin of new lead ───────────────────────────────────────
+    //     $this->sendAdminMail($lead, 'created');
 
-        UserLog::create([
-            'name'       => $request->user()?->name ?? 'System',
-            'ip_address' => $request->ip(),
-            'title'      => "Created lead: {$lead->client_name}",
-        ]);
+    //     UserLog::create([
+    //         'name'       => $request->user()?->name ?? 'System',
+    //         'ip_address' => $request->ip(),
+    //         'title'      => "Created lead: {$lead->client_name}",
+    //     ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lead created successfully',
-            'data'    => $lead
-        ], 201);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Lead created successfully',
+    //         'data'    => $lead
+    //     ], 201);
+    // }
+
+    public function store(StoreLeadRequest $request)
+{
+    $validated = $request->validated();
+
+    $lead = Lead::create($validated);
+
+    $this->sendAdminMail($lead, 'created');
+
+    UserLog::create([
+        'name'       => $request->user()?->name ?? 'System',
+        'ip_address' => $request->ip(),
+        'title'      => "Created lead: {$lead->client_name}",
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Lead created successfully',
+        'data'    => $lead
+    ], 201);
+}
 
     /**
      * Update the specified lead
      */
-    public function update(Request $request, $id)
-    {
-        $lead = Lead::findOrFail($id);
+    // public function update(Request $request, $id)
+    // {
+    //     $lead = Lead::findOrFail($id);
 
-        $validated = $request->validate([
-            'client_name'          => 'sometimes|required|string|max:255',
-            'company_name'         => 'nullable|string|max:255',
-            'phone'                => 'sometimes|required|string|max:20',
-            'email'                => 'nullable|email|max:255',
-            'service_interested'   => 'nullable|string|max:255',
-            'lead_source'          => 'nullable|string|max:255',
-            'assigned_salesperson' => 'nullable|string|max:255',
-            'next_followup_date'   => 'nullable|date',
-            'notes'                => 'nullable|string',
-            'status'               => 'nullable|string|max:100',
-        ]);
+    //     $validated = $request->validate([
+    //         'client_name'          => 'sometimes|required|string|max:255',
+    //         'company_name'         => 'nullable|string|max:255',
+    //         'phone'                => 'sometimes|required|string|max:20',
+    //         'email'                => 'nullable|email|max:255',
+    //         'service_interested'   => 'nullable|string|max:255',
+    //         'lead_source'          => 'nullable|string|max:255',
+    //         'assigned_salesperson' => 'nullable|string|max:255',
+    //         'next_followup_date'   => 'nullable|date',
+    //         'notes'                => 'nullable|string',
+    //         'status'               => 'nullable|string|max:100',
+    //     ]);
 
-        $lead->update($validated);
+    //     $lead->update($validated);
 
-        // ── Notify admin of lead update ────────────────────────────────────
-        $this->sendAdminMail($lead, 'updated');
+    //     // ── Notify admin of lead update ────────────────────────────────────
+    //     $this->sendAdminMail($lead, 'updated');
 
-        UserLog::create([
-            'name'       => $request->user()?->name ?? 'System',
-            'ip_address' => $request->ip(),
-            'title'      => "Updated lead: {$lead->client_name}",
-        ]);
+    //     UserLog::create([
+    //         'name'       => $request->user()?->name ?? 'System',
+    //         'ip_address' => $request->ip(),
+    //         'title'      => "Updated lead: {$lead->client_name}",
+    //     ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Lead updated successfully',
-            'data'    => $lead
-        ]);
-    }
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Lead updated successfully',
+    //         'data'    => $lead
+    //     ]);
+    // }
+
+    public function update(UpdateLeadRequest $request, $id)
+{
+    $lead = Lead::findOrFail($id);
+
+    $lead->update($request->validated());
+
+    $this->sendAdminMail($lead, 'updated');
+
+    UserLog::create([
+        'name'       => $request->user()?->name ?? 'System',
+        'ip_address' => $request->ip(),
+        'title'      => "Updated lead: {$lead->client_name}",
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Lead updated successfully',
+        'data'    => $lead
+    ]);
+}
 
     /**
      * Remove the specified lead

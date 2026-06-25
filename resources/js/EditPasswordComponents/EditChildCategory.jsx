@@ -220,7 +220,7 @@ const EditChildCategory = ({
         try {
             setSubmitting(true);
             await handleUpdate(formData, editingChildCategory.id);
-            setReloadTrigger((prev) => !prev);
+            // setReloadTrigger((prev) => !prev);
             setShowForm(false);
             setEditingChildCategory(null);
         } catch (error) {

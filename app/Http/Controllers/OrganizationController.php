@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Organization\StoreOrganizationRequest;
+use App\Http\Requests\Organization\UpdateOrganizationRequest;
 use App\Models\Organization;
 use Illuminate\Http\Request;
 
 class OrganizationController extends Controller
 {
     //
-        /**
+    /**
      * Display a listing of the resource.
      */
     public function index()
@@ -24,14 +26,27 @@ class OrganizationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name'   => 'required|string|max:255',
-            'domain' => 'nullable|string|max:255|unique:organizations,domain',
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $validated = $request->validate([
+    //         'name'   => 'required|string|max:255',
+    //         'domain' => 'nullable|string|max:255|unique:organizations,domain',
+    //     ]);
 
-        $organization = Organization::create($validated);
+    //     $organization = Organization::create($validated);
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Organization created successfully',
+    //         'data' => $organization,
+    //     ], 201);
+    // }
+
+    public function store(StoreOrganizationRequest $request)
+    {
+        $organization = Organization::create(
+            $request->validated()
+        );
 
         return response()->json([
             'status' => true,
@@ -43,16 +58,29 @@ class OrganizationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    // public function update(Request $request, $id)
+    // {
+    //     $organization = Organization::findOrFail($id);
+
+    //     $validated = $request->validate([
+    //         'name'   => 'required|string|max:255',
+    //         'domain' => 'nullable|string|max:255|unique:organizations,domain,' . $id,
+    //     ]);
+
+    //     $organization->update($validated);
+
+    //     return response()->json([
+    //         'status' => true,
+    //         'message' => 'Organization updated successfully',
+    //         'data' => $organization,
+    //     ]);
+    // }
+
+    public function update(UpdateOrganizationRequest $request, $id)
     {
         $organization = Organization::findOrFail($id);
 
-        $validated = $request->validate([
-            'name'   => 'required|string|max:255',
-            'domain' => 'nullable|string|max:255|unique:organizations,domain,' . $id,
-        ]);
-
-        $organization->update($validated);
+        $organization->update($request->validated());
 
         return response()->json([
             'status' => true,

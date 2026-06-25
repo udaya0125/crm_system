@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\UserLog;
-use Illuminate\Http\Request;
 
 class UserLogController extends Controller
 {
     //
-      public function index()
+    public function index()
     {
         // Fetch all logs, latest first
         $logs = UserLog::latest()->get();

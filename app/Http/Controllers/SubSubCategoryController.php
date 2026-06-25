@@ -3,17 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Models\SubSubCategory;
-use Illuminate\Http\Request;
+use App\Http\Requests\Category\StoreSubSubCategoryRequest;
+use App\Http\Requests\Category\UpdateSubSubCategoryRequest;
 
 class SubSubCategoryController extends Controller
 {
-    //
-        /**
-     * Display all child categories
-     */
     public function index()
     {
-        $childCategories = SubSubCategory::with('subCategory')->latest()->get();
+        $childCategories = SubSubCategory::with('subCategory')
+            ->latest()
+            ->get();
 
         return response()->json([
             'status' => true,
@@ -21,17 +20,11 @@ class SubSubCategoryController extends Controller
         ]);
     }
 
-    /**
-     * Store new child category
-     */
-    public function store(Request $request)
+    public function store(StoreSubSubCategoryRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'sub_category_id' => 'required|exists:sub_categories,id',
-        ]);
-
-        $childCategory = SubSubCategory::create($validated);
+        $childCategory = SubSubCategory::create(
+            $request->validated()
+        );
 
         return response()->json([
             'status' => true,
@@ -40,19 +33,13 @@ class SubSubCategoryController extends Controller
         ], 201);
     }
 
-    /**
-     * Update child category
-     */
-    public function update(Request $request, $id)
+    public function update(UpdateSubSubCategoryRequest $request, $id)
     {
         $childCategory = SubSubCategory::findOrFail($id);
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'sub_category_id' => 'required|exists:sub_categories,id',
-        ]);
-
-        $childCategory->update($validated);
+        $childCategory->update(
+            $request->validated()
+        );
 
         return response()->json([
             'status' => true,
@@ -61,9 +48,6 @@ class SubSubCategoryController extends Controller
         ]);
     }
 
-    /**
-     * Delete child category
-     */
     public function destroy($id)
     {
         $childCategory = SubSubCategory::findOrFail($id);
