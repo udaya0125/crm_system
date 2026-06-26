@@ -169,7 +169,7 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Type
+                            Type <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -186,7 +186,7 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
                 {/* Row 2 - Branch Name only (Code removed - not editable) */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Branch Name
+                        Branch Name 
                     </label>
                     <input
                         type="text"
@@ -203,7 +203,7 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            PAN Number
+                            PAN Number <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -218,7 +218,7 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Ledger Name
+                            Ledger Name <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"

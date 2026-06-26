@@ -57,9 +57,25 @@ const ActivityLog = () => {
                     </div>
                 ),
             },
+            // {
+            //     Header: "Action",
+            //     accessor: "title",
+            // },
             {
                 Header: "Action",
                 accessor: "title",
+                Cell: ({ value }) => {
+                    if (!value) return "-";
+
+                    // Insert a line break after "for "
+                    const formattedTitle = value.replace(/for\s/, "for\n");
+
+                    return (
+                        <div style={{ whiteSpace: "pre-line" }}>
+                            {formattedTitle}
+                        </div>
+                    );
+                },
             },
             {
                 Header: "IP Address",
@@ -122,7 +138,6 @@ const ActivityLog = () => {
 };
 
 export default ActivityLog;
-
 
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import React, { useEffect, useState, useMemo } from "react";
@@ -237,7 +252,7 @@ export default ActivityLog;
 //                     <div className="flex justify-center items-center py-8">
 //                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
 //                     </div>
-//                 ) : 
+//                 ) :
 //                 filtered.length === 0 ? (
 //                     <div className="text-center py-16 text-gray-400 text-sm">
 //                         No activity logs found.
