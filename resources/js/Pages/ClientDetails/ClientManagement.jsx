@@ -212,7 +212,7 @@ import axios from "axios";
 import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
 import PageLoader from "@/Loader/PageLoader";
-import ClientPopup from "./ClientPopup";
+import ClientPopup from "../../PopupComponents/ClientPopup";
 
 const ClientManagement = () => {
     const [allClients, setAllClients] = useState([]);

@@ -218,7 +218,7 @@ import { Head } from "@inertiajs/react";
 import axios from "axios";
 import { Edit, Eye, Plus, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
-import LeadPopup from "./LeadPopup";
+import LeadPopup from "../../PopupComponents/LeadPopup";
 
 const Leads = () => {
     const [allLeads, setAllLeads] = useState([]);

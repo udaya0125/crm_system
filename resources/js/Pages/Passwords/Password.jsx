@@ -466,7 +466,7 @@ import MyTable from "@/TableComponents/MyTable";
 import EditPasswordForm from "@/EditPasswordComponents/EditPasswordForm";
 import { Head } from "@inertiajs/react";
 import PageLoader from "@/Loader/PageLoader";
-import PasswordPopup from "./PasswordPopup";
+import PasswordPopup from "../../PopupComponents/PasswordPopup";
 
 const Password = () => {
     const [allPassword, setAllPassword] = useState([]);
