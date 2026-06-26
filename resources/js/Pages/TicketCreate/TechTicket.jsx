@@ -37,7 +37,7 @@ const CATEGORIES = [
             "Bookings – Reservations, Changes, Cancellations",
             "Rates & Inventory",
             "Payments & Billing",
-            "Property Content",
+            "Property Content", 
             "Promotions & Visibility",
             "Integrations – Channel Manager",
             "Website Bookings",
@@ -76,12 +76,7 @@ const CATEGORIES = [
     },
 ];
 
-const PRIORITIES = [
-    { value: "High" },
-    { value: "Medium" },
-    { value: "Low" },
-
-];
+const PRIORITIES = [{ value: "High" }, { value: "Medium" }, { value: "Low" }];
 
 function UploadIcon() {
     return (
@@ -202,7 +197,13 @@ function InputField({ label, id, required, error, children }) {
 const inputCls =
     "w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-[#0b78b9] focus:shadow-[0_0_0_4px_rgba(11,120,185,0.1)] hover:border-gray-300";
 
-const ACCEPTED_TYPES = ["image/png", "image/jpg", "image/jpeg", "image/webp", "application/pdf"];
+const ACCEPTED_TYPES = [
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "image/webp",
+    "application/pdf",
+];
 const ACCEPTED_EXTENSIONS = ".png,.jpg,.jpeg,.webp,.pdf";
 
 const TechTicket = () => {
@@ -289,7 +290,7 @@ const TechTicket = () => {
             const response = await axios.post(
                 route("ourtickets.store"),
                 formData,
-                { headers: { "Content-Type": "multipart/form-data" } }
+                { headers: { "Content-Type": "multipart/form-data" } },
             );
 
             setCreatedTicketId(response.data.data.ticket_id);
@@ -309,7 +310,7 @@ const TechTicket = () => {
             } else {
                 alert(
                     error.response?.data?.message ||
-                        "Something went wrong. Please try again."
+                        "Something went wrong. Please try again.",
                 );
             }
         } finally {
@@ -345,7 +346,7 @@ const TechTicket = () => {
                     style={{ height: "52%", zIndex: 0 }}
                 >
                     <img
-                        src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=1400&q=80&fit=crop"
+                        src="/images/bg.jpg"
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-0 w-full h-full object-cover"
@@ -361,7 +362,7 @@ const TechTicket = () => {
                 </div>
 
                 <div className="relative z-10 flex flex-col min-h-screen">
-                    <header className="px-8 pt-7 pb-2 flex-shrink-0">
+                    <header className="px-8 pt-7 pb-2 flex-shrink-0 flex justify-center">
                         <img
                             src="/images/logo2.png"
                             alt="Company Logo"
@@ -478,10 +479,12 @@ const TechTicket = () => {
                                 className="mt-8 w-full rounded-2xl text-white text-sm font-semibold py-3.5 active:scale-[0.98] transition-all duration-200 shadow-lg"
                                 style={{ background: "#0b78b9" }}
                                 onMouseEnter={(e) =>
-                                    (e.currentTarget.style.background = "#0969a2")
+                                    (e.currentTarget.style.background =
+                                        "#0969a2")
                                 }
                                 onMouseLeave={(e) =>
-                                    (e.currentTarget.style.background = "#0b78b9")
+                                    (e.currentTarget.style.background =
+                                        "#0b78b9")
                                 }
                             >
                                 Submit another ticket
@@ -503,7 +506,7 @@ const TechTicket = () => {
                 style={{ height: "640px", zIndex: 0 }}
             >
                 <img
-                    src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=1400&q=80&fit=crop"
+                    src="/images/bg.jpg"
                     alt=""
                     aria-hidden="true"
                     className="absolute inset-0 w-full h-full object-cover"
@@ -546,7 +549,6 @@ const TechTicket = () => {
                 <div className="flex justify-center px-4 pt-0 pb-0">
                     <div className="w-full max-w-2xl">
                         <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-
                             {/* Section: Contact info */}
                             <div className="px-7 pt-7 pb-6 border-b border-gray-100">
                                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-5">
@@ -665,7 +667,16 @@ const TechTicket = () => {
                                                 ))}
                                             </select>
                                             <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
                                                     <polyline points="6 9 12 15 18 9" />
                                                 </svg>
                                             </span>
@@ -685,7 +696,8 @@ const TechTicket = () => {
                                                 onChange={(e) => {
                                                     setForm((f) => ({
                                                         ...f,
-                                                        priority: e.target.value,
+                                                        priority:
+                                                            e.target.value,
                                                     }));
                                                     if (errors.priority)
                                                         setErrors((er) => {
@@ -706,13 +718,25 @@ const TechTicket = () => {
                                                     Select priority
                                                 </option>
                                                 {PRIORITIES.map((p) => (
-                                                    <option key={p.value} value={p.value}>
+                                                    <option
+                                                        key={p.value}
+                                                        value={p.value}
+                                                    >
                                                         {p.value}
                                                     </option>
                                                 ))}
                                             </select>
                                             <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
-                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <svg
+                                                    width="14"
+                                                    height="14"
+                                                    viewBox="0 0 24 24"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    strokeWidth="2"
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                >
                                                     <polyline points="6 9 12 15 18 9" />
                                                 </svg>
                                             </span>
@@ -752,35 +776,46 @@ const TechTicket = () => {
                                 {/* Drop zone — hidden once a file is selected */}
                                 {!file && (
                                     <div
-                                        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                                        onDragOver={(e) => {
+                                            e.preventDefault();
+                                            setDragging(true);
+                                        }}
                                         onDragLeave={() => setDragging(false)}
                                         onDrop={onDrop}
-                                        onClick={() => fileInputRef.current?.click()}
+                                        onClick={() =>
+                                            fileInputRef.current?.click()
+                                        }
                                         className="rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200 text-center py-9 px-4"
                                         style={{
                                             borderColor: dragError
                                                 ? "#f87171"
                                                 : dragging
-                                                ? "#0b78b9"
-                                                : "#e5e7eb",
+                                                  ? "#0b78b9"
+                                                  : "#e5e7eb",
                                             background: dragError
                                                 ? "rgba(248,113,113,0.04)"
                                                 : dragging
-                                                ? "rgba(11,120,185,0.04)"
-                                                : "rgba(249,250,251,0.5)",
+                                                  ? "rgba(11,120,185,0.04)"
+                                                  : "rgba(249,250,251,0.5)",
                                         }}
                                     >
                                         <div className="flex flex-col items-center gap-3 pointer-events-none select-none">
                                             <UploadIcon />
                                             <div>
                                                 <p className="text-sm text-gray-600">
-                                                    <span className="font-semibold" style={{ color: "#0b78b9" }}>
+                                                    <span
+                                                        className="font-semibold"
+                                                        style={{
+                                                            color: "#0b78b9",
+                                                        }}
+                                                    >
                                                         Click to upload
                                                     </span>{" "}
                                                     or drag and drop
                                                 </p>
                                                 <p className="text-xs text-gray-400 mt-1">
-                                                    PNG, JPG, WEBP or PDF — up to 5 MB · one file only
+                                                    PNG, JPG, WEBP or PDF — up
+                                                    to 5 MB · one file only
                                                 </p>
                                             </div>
                                         </div>
@@ -791,7 +826,9 @@ const TechTicket = () => {
                                             accept={ACCEPTED_EXTENSIONS}
                                             onChange={(e) => {
                                                 if (e.target.files[0]) {
-                                                    setNewFile(e.target.files[0]);
+                                                    setNewFile(
+                                                        e.target.files[0],
+                                                    );
                                                 }
                                                 e.target.value = "";
                                             }}
@@ -818,7 +855,11 @@ const TechTicket = () => {
                                                     : "rgba(11,120,185,0.08)",
                                             }}
                                         >
-                                            {isPdf ? <PdfFileIcon /> : <ImageFileIcon />}
+                                            {isPdf ? (
+                                                <PdfFileIcon />
+                                            ) : (
+                                                <ImageFileIcon />
+                                            )}
                                         </div>
 
                                         {/* Name + type badge */}
@@ -827,14 +868,21 @@ const TechTicket = () => {
                                                 {file.name}
                                             </p>
                                             <p className="text-xs text-gray-400 mt-0.5">
-                                                {isPdf ? "PDF document" : "Image"} · {(file.size / 1024).toFixed(0)} KB
+                                                {isPdf
+                                                    ? "PDF document"
+                                                    : "Image"}{" "}
+                                                ·{" "}
+                                                {(file.size / 1024).toFixed(0)}{" "}
+                                                KB
                                             </p>
                                         </div>
 
                                         {/* Replace button */}
                                         <button
                                             type="button"
-                                            onClick={() => fileInputRef.current?.click()}
+                                            onClick={() =>
+                                                fileInputRef.current?.click()
+                                            }
                                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors"
                                         >
                                             Replace
@@ -858,7 +906,9 @@ const TechTicket = () => {
                                             accept={ACCEPTED_EXTENSIONS}
                                             onChange={(e) => {
                                                 if (e.target.files[0]) {
-                                                    setNewFile(e.target.files[0]);
+                                                    setNewFile(
+                                                        e.target.files[0],
+                                                    );
                                                 }
                                                 e.target.value = "";
                                             }}
@@ -873,14 +923,35 @@ const TechTicket = () => {
                                     disabled={submitting}
                                     className="mt-6 w-full flex items-center justify-center gap-2.5 rounded-2xl text-white text-sm font-semibold py-3.5 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 shadow-lg"
                                     style={{ background: "#0b78b9" }}
-                                    onMouseEnter={(e) => (e.currentTarget.style.background = "#0969a2")}
-                                    onMouseLeave={(e) => (e.currentTarget.style.background = "#0b78b9")}
+                                    onMouseEnter={(e) =>
+                                        (e.currentTarget.style.background =
+                                            "#0969a2")
+                                    }
+                                    onMouseLeave={(e) =>
+                                        (e.currentTarget.style.background =
+                                            "#0b78b9")
+                                    }
                                 >
                                     {submitting ? (
                                         <>
-                                            <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                                            <svg
+                                                className="animate-spin w-4 h-4"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="3"
+                                                />
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                                />
                                             </svg>
                                             Submitting…
                                         </>
@@ -894,7 +965,9 @@ const TechTicket = () => {
 
                                 <p className="text-center text-xs text-gray-400 mt-4">
                                     Fields marked{" "}
-                                    <span className="text-rose-400 font-medium">*</span>{" "}
+                                    <span className="text-rose-400 font-medium">
+                                        *
+                                    </span>{" "}
                                     are required
                                 </p>
                             </div>
@@ -902,15 +975,24 @@ const TechTicket = () => {
 
                         {/* Text block below form */}
                         <div className="px-2 pt-10 pb-16 text-center">
-                            <div className="w-8 h-0.5 rounded-full mx-auto mb-5" style={{ background: "#0b78b9" }} />
+                            <div
+                                className="w-8 h-0.5 rounded-full mx-auto mb-5"
+                                style={{ background: "#0b78b9" }}
+                            />
                             <h2 className="text-2xl font-bold text-gray-800 leading-snug mb-3">
                                 We're here to help you resolve any issue.
                             </h2>
                             <p className="text-sm text-gray-500 leading-relaxed max-w-md mx-auto">
-                                Submit a ticket and our dedicated support team will get back to you promptly — usually within a few hours.
+                                Submit a ticket and our dedicated support team
+                                will get back to you promptly — usually within a
+                                few hours.
                             </p>
                             <div className="flex flex-wrap justify-center gap-2 mt-6">
-                                {["⚡ Fast response", "🔒 Secure & private", "📎 File attachments"].map((tag) => (
+                                {[
+                                    "⚡ Fast response",
+                                    "🔒 Secure & private",
+                                    "📎 File attachments",
+                                ].map((tag) => (
                                     <span
                                         key={tag}
                                         className="text-xs font-medium px-3 py-1.5 rounded-full"
@@ -933,9 +1015,6 @@ const TechTicket = () => {
 };
 
 export default TechTicket;
-
-
-
 
 // import { useState, useRef, useCallback } from "react";
 

@@ -18,6 +18,16 @@ const CATEGORIES = [
             "Social Media Setups",
         ],
     },
+     {
+        group: "Exely",
+        items: [
+            "Channel Manager",
+            "Booking Engine",
+            "New Integration Query",
+            "New Integration Issue",
+            "Existing Integration Issue",
+        ],
+    },
     {
         group: "Domain and Hosting",
         items: [
@@ -344,7 +354,7 @@ const WebTicket = () => {
                     style={{ height: "52%", zIndex: 0 }}
                 >
                     <img
-                        src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=1400&q=80&fit=crop"
+                        src="/images/bg.jpg"
                         alt=""
                         aria-hidden="true"
                         className="absolute inset-0 w-full h-full object-cover"
@@ -360,7 +370,7 @@ const WebTicket = () => {
                 </div>
 
                 <div className="relative z-10 flex flex-col min-h-screen">
-                    <header className="px-8 pt-7 pb-2 flex-shrink-0">
+                        <header className="px-8 pt-7 pb-2 flex-shrink-0 flex justify-center">
                         <img
                             src="/images/logo2.png"
                             alt="Company Logo"
@@ -502,7 +512,7 @@ const WebTicket = () => {
                 style={{ height: "640px", zIndex: 0 }}
             >
                 <img
-                    src="https://images.unsplash.com/photo-1531973576160-7125cd663d86?w=1400&q=80&fit=crop"
+                    src="/images/bg.jpg"
                     alt=""
                     aria-hidden="true"
                     className="absolute inset-0 w-full h-full object-cover"
