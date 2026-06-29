@@ -61,21 +61,30 @@ const ActivityLog = () => {
             //     Header: "Action",
             //     accessor: "title",
             // },
+            // {
+            //     Header: "Action",
+            //     accessor: "title",
+            //     Cell: ({ value }) => {
+            //         if (!value) return "-";
+
+            //         // Insert a line break after "for "
+            //         const formattedTitle = value.replace(/for\s/, "for\n");
+
+            //         return (
+            //             <div style={{ whiteSpace: "pre-line" }}>
+            //                 {formattedTitle}
+            //             </div>
+            //         );
+            //     },
+            // },
             {
                 Header: "Action",
                 accessor: "title",
-                Cell: ({ value }) => {
-                    if (!value) return "-";
-
-                    // Insert a line break after "for "
-                    const formattedTitle = value.replace(/for\s/, "for\n");
-
-                    return (
-                        <div style={{ whiteSpace: "pre-line" }}>
-                            {formattedTitle}
-                        </div>
-                    );
-                },
+                Cell: ({ value }) => (
+                    <span className="block break-words whitespace-normal max-w-[300px]">
+                        {value}
+                    </span>
+                ),
             },
             {
                 Header: "IP Address",

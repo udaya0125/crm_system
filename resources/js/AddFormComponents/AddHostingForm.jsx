@@ -2,11 +2,9 @@ import axios from "axios";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
+import toast from "react-hot-toast";
 
-const AddHostingForm = ({
-    setShowAddForm,
-    setReloadTrigger,
-}) => {
+const AddHostingForm = ({ setShowAddForm, setReloadTrigger }) => {
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const [hostingForm, setHostingForm] = useState({
@@ -75,24 +73,69 @@ const AddHostingForm = ({
         return Object.keys(newErrors).length === 0;
     };
 
+    // const handleCreate = async (formData) => {
+    //     try {
+    //         await axios.post(route("ourhostings.store"), formData, {
+    //             headers: { "Content-Type": "multipart/form-data" },
+    //         });
+    //         setReloadTrigger((prev) => !prev);
+    //     } catch (error) {
+    //         console.log("Error creating hosting", error);
+    //         if (error.response?.data?.errors) {
+    //             setErrors(error.response.data.errors);
+    //         }
+    //         throw error;
+    //     }
+    // };
+
+    // Replace handleCreate with:
     const handleCreate = async (formData) => {
-        try {
-            await axios.post(route("ourhostings.store"), formData, {
+        await toast.promise(
+            axios.post(route("ourhostings.store"), formData, {
                 headers: { "Content-Type": "multipart/form-data" },
-            });
-            setReloadTrigger((prev) => !prev);
-        } catch (error) {
-            console.log("Error creating hosting", error);
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
-            }
-            throw error;
-        }
+            }),
+            {
+                loading: "Creating hosting...",
+                success: () => {
+                    setReloadTrigger((prev) => !prev);
+                    return "Hosting created successfully!";
+                },
+                error: (err) => {
+                    if (err.response?.data?.errors) {
+                        setErrors(err.response.data.errors);
+                    }
+                    return "Failed to create hosting.";
+                },
+            },
+        );
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     if (!validateForm()) return;
+
+    //     const formData = new FormData();
+    //     for (const key in hostingForm) {
+    //         if (hostingForm[key] !== null && hostingForm[key] !== "") {
+    //             formData.append(key, hostingForm[key]);
+    //         }
+    //     }
+
+    //     try {
+    //         setSubmitting(true);
+    //         await handleCreate(formData);
+    //         setShowAddForm(false);
+    //     } catch (error) {
+    //         console.log("Error saving data", error);
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
+    // Replace handleSubmit's try/catch with:
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         const formData = new FormData();
@@ -107,7 +150,7 @@ const AddHostingForm = ({
             await handleCreate(formData);
             setShowAddForm(false);
         } catch (error) {
-            console.log("Error saving data", error);
+            // errors already handled inside handleCreate
         } finally {
             setSubmitting(false);
         }
@@ -148,8 +191,8 @@ const AddHostingForm = ({
             borderColor: errors.client_id
                 ? "#ef4444"
                 : state.isFocused
-                ? "#6366f1"
-                : "#d1d5db",
+                  ? "#6366f1"
+                  : "#d1d5db",
             boxShadow: state.isFocused
                 ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
                 : "none",
@@ -160,8 +203,8 @@ const AddHostingForm = ({
             backgroundColor: state.isSelected
                 ? "#6366f1"
                 : state.isFocused
-                ? "#e0e7ff"
-                : "white",
+                  ? "#e0e7ff"
+                  : "white",
             color: state.isSelected ? "white" : "#111827",
             cursor: "pointer",
             "&:active": { backgroundColor: "#4f46e5" },
@@ -241,7 +284,8 @@ const AddHostingForm = ({
                     {/* Hosting Provider */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Hosting Provider <span className="text-red-500">*</span>
+                            Hosting Provider{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"

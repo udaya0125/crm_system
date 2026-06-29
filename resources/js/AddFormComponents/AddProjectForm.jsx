@@ -3,6 +3,7 @@ import axios from "axios";
 import { X, Plus, Trash2, CheckCircle, Circle } from "lucide-react";
 import { usePage } from "@inertiajs/react";
 import Select from "react-select";
+import toast from "react-hot-toast";
 
 const AddProjectForm = ({ onClose, setReloadTrigger }) => {
     const [submitting, setSubmitting] = useState(false);
@@ -134,16 +135,55 @@ const AddProjectForm = ({ onClose, setReloadTrigger }) => {
     };
 
     // Submit — create new project
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     // Filter out empty tasks
+    //     const validTasks = tasks.filter((task) => task.text.trim() !== "");
+
+    //     // Create form data
+    //     const formData = new FormData();
+
+    //     // Add all regular fields
+    //     for (const key in projectForm) {
+    //         if (key === "assigned_team" && projectForm.assigned_team) {
+    //             formData.append(key, projectForm.assigned_team.value);
+    //         } else if (key === "priority" && projectForm.priority) {
+    //             formData.append(key, projectForm.priority.value);
+    //         } else if (key === "status" && projectForm.status) {
+    //             formData.append(key, projectForm.status.value);
+    //         } else if (projectForm[key] !== null && projectForm[key] !== "") {
+    //             formData.append(key, projectForm[key]);
+    //         }
+    //     }
+
+    //     // Add tasks as JSON string in project_description
+    //     formData.append("project_description", JSON.stringify(validTasks));
+
+    //     // Add calculated completion percentage
+    //     const completionPercentage = calculateCompletion();
+    //     formData.append("completion", completionPercentage);
+
+    //     try {
+    //         setSubmitting(true);
+    //         await axios.post(route("ourprojects.store"), formData, {
+    //             headers: { "Content-Type": "multipart/form-data" },
+    //         });
+    //         setReloadTrigger((prev) => !prev);
+    //         onClose();
+    //     } catch (error) {
+    //         console.error("Error saving project:", error);
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Filter out empty tasks
         const validTasks = tasks.filter((task) => task.text.trim() !== "");
 
-        // Create form data
         const formData = new FormData();
-
-        // Add all regular fields
         for (const key in projectForm) {
             if (key === "assigned_team" && projectForm.assigned_team) {
                 formData.append(key, projectForm.assigned_team.value);
@@ -156,22 +196,27 @@ const AddProjectForm = ({ onClose, setReloadTrigger }) => {
             }
         }
 
-        // Add tasks as JSON string in project_description
         formData.append("project_description", JSON.stringify(validTasks));
-
-        // Add calculated completion percentage
-        const completionPercentage = calculateCompletion();
-        formData.append("completion", completionPercentage);
+        formData.append("completion", calculateCompletion());
 
         try {
             setSubmitting(true);
-            await axios.post(route("ourprojects.store"), formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            setReloadTrigger((prev) => !prev);
-            onClose();
+            await toast.promise(
+                axios.post(route("ourprojects.store"), formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                }),
+                {
+                    loading: "Creating project...",
+                    success: () => {
+                        setReloadTrigger((prev) => !prev);
+                        onClose();
+                        return "Project created successfully!";
+                    },
+                    error: "Failed to create project.",
+                },
+            );
         } catch (error) {
-            console.error("Error saving project:", error);
+            // errors already handled inside toast.promise
         } finally {
             setSubmitting(false);
         }

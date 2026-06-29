@@ -17,30 +17,34 @@ class TicketController extends Controller
         $this->ticketService = $ticketService;
     }
 
-    /**
-     * Display all tickets
-     */
     public function index()
     {
-        $tickets = Ticket::with('assignedUser')
-            ->latest()
-            ->get();
+        $tickets = Ticket::with('assignedUser')->latest()->get();
 
-        $data = $tickets->map(function ($ticket) {
-            return $this->ticketService->formatTicket($ticket);
-        });
+        $data = $tickets->map(fn($ticket) => $this->ticketService->formatTicket($ticket));
 
         return response()->json([
             'status' => true,
-            'data' => $data,
+            'data'   => $data,
         ]);
     }
 
-    /**
-     * Store a newly created ticket
-     */
     public function store(StoreTicketRequest $request)
     {
+        // Verify reCAPTCHA before anything else
+        $recaptchaValid = $this->ticketService->verifyRecaptcha(
+            $request->input('recaptcha_token'),
+            $request->ip()
+        );
+
+        if (!$recaptchaValid) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'reCAPTCHA verification failed. Please try again.',
+                'errors'  => ['recaptcha_token' => ['reCAPTCHA verification failed. Please try again.']],
+            ], 422);
+        }
+
         $ticket = $this->ticketService->createTicket(
             $request->validated(),
             $request->user()?->name,
@@ -48,29 +52,22 @@ class TicketController extends Controller
         );
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Ticket created successfully',
-            'data' => $this->ticketService->formatTicket($ticket),
+            'data'    => $this->ticketService->formatTicket($ticket),
         ], 201);
     }
 
-    /**
-     * Display single ticket
-     */
     public function show($id)
     {
-        $ticket = Ticket::with('assignedUser')
-            ->findOrFail($id);
+        $ticket = Ticket::with('assignedUser')->findOrFail($id);
 
         return response()->json([
             'status' => true,
-            'data' => $this->ticketService->formatTicket($ticket),
+            'data'   => $this->ticketService->formatTicket($ticket),
         ]);
     }
 
-    /**
-     * Update ticket
-     */
     public function update(UpdateTicketRequest $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
@@ -83,15 +80,12 @@ class TicketController extends Controller
         );
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Ticket updated successfully',
-            'data' => $this->ticketService->formatTicket($ticket),
+            'data'    => $this->ticketService->formatTicket($ticket),
         ]);
     }
 
-    /**
-     * Delete ticket
-     */
     public function destroy(Request $request, $id)
     {
         $ticket = Ticket::findOrFail($id);
@@ -103,7 +97,7 @@ class TicketController extends Controller
         );
 
         return response()->json([
-            'status' => true,
+            'status'  => true,
             'message' => 'Ticket deleted successfully',
         ]);
     }

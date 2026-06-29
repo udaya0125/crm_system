@@ -1,18 +1,20 @@
 // import AddClientManagement from "@/AddFormComponents/AddClientManagement";
 // import EditClientManagement from "@/EditFormComponents/EditClientManagement";
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
-// import { Edit, Plus, Trash2 } from "lucide-react";
+// import { Edit, Eye, Plus, Trash2 } from "lucide-react";
 // import React, { useEffect, useState, useMemo } from "react";
 // import axios from "axios";
 // import MyTable from "@/TableComponents/MyTable";
 // import { Head } from "@inertiajs/react";
 // import PageLoader from "@/Loader/PageLoader";
+// import ClientPopup from "../../PopupComponents/ClientPopup";
 
 // const ClientManagement = () => {
 //     const [allClients, setAllClients] = useState([]);
 //     const [reloadTrigger, setReloadTrigger] = useState(false);
 //     const [loading, setLoading] = useState(false);
 //     const [editingClient, setEditingClient] = useState(null);
+//     const [viewingClient, setViewingClient] = useState(null);
 //     const [showAddForm, setShowAddForm] = useState(false);
 //     const [showEditForm, setShowEditForm] = useState(false);
 
@@ -46,6 +48,10 @@
 //     const handleEdit = (client) => {
 //         setEditingClient(client);
 //         setShowEditForm(true);
+//     };
+
+//     const handleView = (client) => {
+//         setViewingClient(client);
 //     };
 
 //     const handleUpdate = async (formData, id) => {
@@ -114,16 +120,28 @@
 //                 accessor: "id",
 //                 disableSortBy: true,
 //                 Cell: ({ row }) => (
-//                     <div className="space-x-2">
+//                     <div className="flex gap-2">
+//                         <button
+//                             onClick={() => handleView(row.original)}
+//                             className="p-2 rounded-full transition-colors"
+//                             style={{ color: "#0d77c3" }}
+//                             onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#e8f2fb")}
+//                             onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
+//                             title="View details"
+//                         >
+//                             <Eye size={16} />
+//                         </button>
 //                         <button
 //                             onClick={() => handleEdit(row.original)}
 //                             className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+//                             title="Edit client"
 //                         >
 //                             <Edit size={16} />
 //                         </button>
 //                         <button
 //                             onClick={() => handleDelete(row.original.id)}
 //                             className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+//                             title="Delete client"
 //                         >
 //                             <Trash2 size={16} />
 //                         </button>
@@ -138,21 +156,9 @@
 //         <AdminWrapper>
 //             <Head title="Client Management" />
 //             <div className="container mx-auto">
-//                 {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+//                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
 //                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-//                         Clients
-//                     </h1>
-//                     <button
-//                         onClick={() => setShowAddForm(true)}
-//                         className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
-//                     >
-//                         <Plus size={18} />
-//                         Create
-//                     </button>
-//                 </div> */}
-//                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-//                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
-//                      Client Management
+//                         Client Management
 //                     </h1>
 //                     <button
 //                         onClick={() => setShowAddForm(true)}
@@ -163,18 +169,20 @@
 //                     </button>
 //                 </div>
 
-//                 {/* <MyTable
-//                     columns={columns}
-//                     data={allClients}
-//                     loading={loading}
-//                 /> */}
-
 //                 {loading ? (
-//                     <PageLoader/>
-//                 ):(
+//                     <PageLoader />
+//                 ) : (
 //                     <MyTable columns={columns} data={allClients} />
 //                 )}
 //             </div>
+
+//             {/* View Popup */}
+//             {viewingClient && (
+//                 <ClientPopup
+//                     client={viewingClient}
+//                     onClose={() => setViewingClient(null)}
+//                 />
+//             )}
 
 //             {/* Add Modal */}
 //             {showAddForm && (
@@ -202,7 +210,6 @@
 
 // export default ClientManagement;
 
-
 import AddClientManagement from "@/AddFormComponents/AddClientManagement";
 import EditClientManagement from "@/EditFormComponents/EditClientManagement";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
@@ -213,6 +220,7 @@ import MyTable from "@/TableComponents/MyTable";
 import { Head } from "@inertiajs/react";
 import PageLoader from "@/Loader/PageLoader";
 import ClientPopup from "../../PopupComponents/ClientPopup";
+import toast, { Toaster } from "react-hot-toast";
 
 const ClientManagement = () => {
     const [allClients, setAllClients] = useState([]);
@@ -228,7 +236,7 @@ const ClientManagement = () => {
             setLoading(true);
             try {
                 const response = await axios.get(
-                    route("ourclientmanagement.index")
+                    route("ourclientmanagement.index"),
                 );
                 setAllClients(response.data.data);
             } catch (error) {
@@ -245,8 +253,10 @@ const ClientManagement = () => {
         try {
             await axios.delete(route("ourclientmanagement.destroy", { id }));
             setReloadTrigger((prev) => !prev);
+            toast.success("Client deleted successfully.");
         } catch (error) {
             console.error(error);
+            toast.error("Failed to delete client. Please try again.");
         }
     };
 
@@ -259,15 +269,32 @@ const ClientManagement = () => {
         setViewingClient(client);
     };
 
+    // Called by AddClientManagement on successful store
+    const handleStoreSuccess = () => {
+        setReloadTrigger((prev) => !prev);
+        toast.success("Client created successfully.");
+    };
+
+    // Called by AddClientManagement on store error
+    const handleStoreError = () => {
+        toast.error("Failed to create client. Please try again.");
+    };
+
     const handleUpdate = async (formData, id) => {
         formData.append("_method", "PUT");
-        const response = await axios.post(
-            route("ourclientmanagement.update", { id }),
-            formData,
-            { headers: { "Content-Type": "multipart/form-data" } }
-        );
-        setReloadTrigger((prev) => !prev);
-        return response.data;
+        try {
+            const response = await axios.post(
+                route("ourclientmanagement.update", { id }),
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } },
+            );
+            setReloadTrigger((prev) => !prev);
+            toast.success("Client updated successfully.");
+            return response.data;
+        } catch (error) {
+            toast.error("Failed to update client. Please try again.");
+            throw error;
+        }
     };
 
     const columns = useMemo(
@@ -310,11 +337,15 @@ const ClientManagement = () => {
                 accessor: "payment_status",
                 Cell: ({ value }) => {
                     let bgColor = "bg-yellow-100 text-yellow-700";
-                    if (value === "Paid") bgColor = "bg-green-100 text-green-700";
-                    if (value === "Overdue") bgColor = "bg-red-100 text-red-700";
+                    if (value === "Paid")
+                        bgColor = "bg-green-100 text-green-700";
+                    if (value === "Overdue")
+                        bgColor = "bg-red-100 text-red-700";
 
                     return (
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${bgColor}`}>
+                        <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${bgColor}`}
+                        >
                             {value || "—"}
                         </span>
                     );
@@ -330,8 +361,14 @@ const ClientManagement = () => {
                             onClick={() => handleView(row.original)}
                             className="p-2 rounded-full transition-colors"
                             style={{ color: "#0d77c3" }}
-                            onMouseEnter={e => (e.currentTarget.style.backgroundColor = "#e8f2fb")}
-                            onMouseLeave={e => (e.currentTarget.style.backgroundColor = "transparent")}
+                            onMouseEnter={(e) =>
+                                (e.currentTarget.style.backgroundColor =
+                                    "#e8f2fb")
+                            }
+                            onMouseLeave={(e) =>
+                                (e.currentTarget.style.backgroundColor =
+                                    "transparent")
+                            }
                             title="View details"
                         >
                             <Eye size={16} />
@@ -354,12 +391,33 @@ const ClientManagement = () => {
                 ),
             },
         ],
-        []
+        [],
     );
 
     return (
         <AdminWrapper>
             <Head title="Client Management" />
+
+            {/* Toast container — mounted once at the top level */}
+            {/* <Toaster
+                position="top-right"
+                toastOptions={{
+                    duration: 3000,
+                    style: {
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                    },
+                    success: {
+                        iconTheme: {
+                            primary: "#4f46e5",
+                            secondary: "#fff",
+                        },
+                    },
+                }}
+            /> */}
+
+            <Toaster position="top-right" />
+
             <div className="container mx-auto">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
@@ -395,6 +453,8 @@ const ClientManagement = () => {
                     reloadTrigger={reloadTrigger}
                     setReloadTrigger={setReloadTrigger}
                     setShowForm={setShowAddForm}
+                    onStoreSuccess={handleStoreSuccess}
+                    onStoreError={handleStoreError}
                 />
             )}
 

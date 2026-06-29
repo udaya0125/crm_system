@@ -2,8 +2,16 @@ import axios from "axios";
 import { X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
+import toast from "react-hot-toast";
 
-const ACCEPTED_TYPES = ["image/png", "image/jpg", "image/jpeg", "image/webp", "application/pdf"];
+
+const ACCEPTED_TYPES = [
+    "image/png",
+    "image/jpg",
+    "image/jpeg",
+    "image/webp",
+    "application/pdf",
+];
 const ACCEPTED_EXTENSIONS = ".png,.jpg,.jpeg,.webp,.pdf";
 
 const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
@@ -43,22 +51,41 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
         control: (provided, state) => ({
             ...provided,
             minHeight: "42px",
-            borderColor: state.isFocused ? "#6366f1" : state.selectProps.error ? "#ef4444" : "#d1d5db",
-            boxShadow: state.isFocused ? "0 0 0 2px rgba(99, 102, 241, 0.2)" : "none",
+            borderColor: state.isFocused
+                ? "#6366f1"
+                : state.selectProps.error
+                  ? "#ef4444"
+                  : "#d1d5db",
+            boxShadow: state.isFocused
+                ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
+                : "none",
             "&:hover": { borderColor: "#6366f1" },
         }),
         option: (provided, state) => ({
             ...provided,
-            backgroundColor: state.isSelected ? "#6366f1" : state.isFocused ? "#e0e7ff" : "white",
+            backgroundColor: state.isSelected
+                ? "#6366f1"
+                : state.isFocused
+                  ? "#e0e7ff"
+                  : "white",
             color: state.isSelected ? "white" : "#111827",
             cursor: "pointer",
             fontSize: "0.875rem",
             padding: "8px 12px",
             "&:active": { backgroundColor: "#4f46e5" },
         }),
-        placeholder: (provided) => ({ ...provided, color: "#9ca3af", fontSize: "0.875rem" }),
+        placeholder: (provided) => ({
+            ...provided,
+            color: "#9ca3af",
+            fontSize: "0.875rem",
+        }),
         singleValue: (provided) => ({ ...provided, fontSize: "0.875rem" }),
-        menu: (provided) => ({ ...provided, borderRadius: "0.5rem", overflow: "hidden", zIndex: 9999 }),
+        menu: (provided) => ({
+            ...provided,
+            borderRadius: "0.5rem",
+            overflow: "hidden",
+            zIndex: 9999,
+        }),
         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
     };
 
@@ -123,16 +150,63 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
         if (dropped) setNewFile(dropped);
     };
 
+    // const handleCreate = async (formData) => {
+    //     try {
+    //         await axios.post(route("ourtickets.store"), formData, {
+    //             headers: { "Content-Type": "multipart/form-data" },
+    //         });
+    //         setReloadTrigger((prev) => !prev);
+    //     } catch (error) {
+    //         console.log("Error creating ticket", error);
+    //         throw error;
+    //     }
+    // };
+
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     if (!validateForm()) return;
+
+    //     const formData = new FormData();
+    //     Object.keys(ticketForm).forEach((key) => {
+    //         if (ticketForm[key] !== null && ticketForm[key] !== "") {
+    //             formData.append(key, ticketForm[key]);
+    //         }
+    //     });
+    //     if (file) formData.append("image", file);
+
+    //     try {
+    //         setSubmitting(true);
+    //         await handleCreate(formData);
+    //         alert("Ticket created successfully!");
+    //         setTicketForm(emptyForm);
+    //         setShowForm(false);
+    //     } catch (error) {
+    //         console.log("Error saving data", error);
+    //         if (error.response) {
+    //             if (error.response.data.errors) {
+    //                 setErrors(error.response.data.errors);
+    //             } else if (error.response.data.message) {
+    //                 alert(error.response.data.message);
+    //             } else {
+    //                 alert("Error saving ticket. Please try again.");
+    //             }
+    //         } else {
+    //             alert("Network error. Please check your connection.");
+    //         }
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
+    // Replace handleSubmit with:
+
+    // Replace handleCreate with a plain async — no try/catch, just throw naturally:
+    
     const handleCreate = async (formData) => {
-        try {
-            await axios.post(route("ourtickets.store"), formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
-            setReloadTrigger((prev) => !prev);
-        } catch (error) {
-            console.log("Error creating ticket", error);
-            throw error;
-        }
+        await axios.post(route("ourtickets.store"), formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        setReloadTrigger((prev) => !prev);
     };
 
     const handleSubmit = async (e) => {
@@ -149,23 +223,23 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
 
         try {
             setSubmitting(true);
-            await handleCreate(formData);
-            alert("Ticket created successfully!");
+            await toast.promise(handleCreate(formData), {
+                loading: "Creating ticket...",
+                success: "Ticket created successfully!",
+                error: (err) => {
+                    if (err.response?.data?.errors) {
+                        setErrors(err.response.data.errors);
+                    }
+                    return (
+                        err.response?.data?.message ||
+                        "Failed to create ticket."
+                    );
+                },
+            });
             setTicketForm(emptyForm);
             setShowForm(false);
         } catch (error) {
-            console.log("Error saving data", error);
-            if (error.response) {
-                if (error.response.data.errors) {
-                    setErrors(error.response.data.errors);
-                } else if (error.response.data.message) {
-                    alert(error.response.data.message);
-                } else {
-                    alert("Error saving ticket. Please try again.");
-                }
-            } else {
-                alert("Network error. Please check your connection.");
-            }
+            // errors already handled inside toast.promise
         } finally {
             setSubmitting(false);
         }
@@ -173,11 +247,15 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
 
     const validateForm = () => {
         const newErrors = {};
-        if (!ticketForm.client_name?.trim()) newErrors.client_name = "Client name is required";
-        if (!ticketForm.issue_type?.trim()) newErrors.issue_type = "Issue type is required";
-        if (!ticketForm.device_type?.trim()) newErrors.device_type = "Device type is required";
+        if (!ticketForm.client_name?.trim())
+            newErrors.client_name = "Client name is required";
+        if (!ticketForm.issue_type?.trim())
+            newErrors.issue_type = "Issue type is required";
+        if (!ticketForm.device_type?.trim())
+            newErrors.device_type = "Device type is required";
         if (!ticketForm.priority) newErrors.priority = "Priority is required";
-        if (!ticketForm.problem_description?.trim()) newErrors.problem_description = "Problem description is required";
+        if (!ticketForm.problem_description?.trim())
+            newErrors.problem_description = "Problem description is required";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -190,13 +268,19 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
 
     const handlePriorityChange = (selectedOption) => {
         setSelectedPriority(selectedOption);
-        setTicketForm((prev) => ({ ...prev, priority: selectedOption ? selectedOption.value : "" }));
+        setTicketForm((prev) => ({
+            ...prev,
+            priority: selectedOption ? selectedOption.value : "",
+        }));
         if (errors.priority) setErrors((prev) => ({ ...prev, priority: null }));
     };
 
     const handleTechnicianChange = (selectedOption) => {
         setSelectedTechnician(selectedOption);
-        setTicketForm((prev) => ({ ...prev, assigned_technician: selectedOption ? selectedOption.value : "" }));
+        setTicketForm((prev) => ({
+            ...prev,
+            assigned_technician: selectedOption ? selectedOption.value : "",
+        }));
     };
 
     const handleClose = () => {
@@ -212,7 +296,9 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
                 <div className="flex justify-between items-center mb-6 pb-4 border-b">
-                    <h2 className="text-2xl font-bold text-stone-800">Add New Ticket</h2>
+                    <h2 className="text-2xl font-bold text-stone-800">
+                        Add New Ticket
+                    </h2>
                     <button
                         type="button"
                         onClick={handleClose}
@@ -228,7 +314,8 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                         {/* Client Name */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Client Name <span className="text-red-500">*</span>
+                                Client Name{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -239,12 +326,18 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 placeholder="John Doe"
                                 disabled={submitting}
                             />
-                            {errors.client_name && <p className="mt-1 text-sm text-red-600">{errors.client_name}</p>}
+                            {errors.client_name && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.client_name}
+                                </p>
+                            )}
                         </div>
 
                         {/* Email */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Email
+                            </label>
                             <input
                                 type="email"
                                 name="email"
@@ -254,7 +347,11 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 placeholder="client@example.com"
                                 disabled={submitting}
                             />
-                            {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+                            {errors.email && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.email}
+                                </p>
+                            )}
                         </div>
 
                         {/* Issue Type */}
@@ -271,7 +368,11 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 placeholder="Hardware / Software / Network"
                                 disabled={submitting}
                             />
-                            {errors.issue_type && <p className="mt-1 text-sm text-red-600">{errors.issue_type}</p>}
+                            {errors.issue_type && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.issue_type}
+                                </p>
+                            )}
                         </div>
 
                         {/* Subject */}
@@ -288,7 +389,11 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 placeholder="Subject"
                                 disabled={submitting}
                             />
-                            {errors.device_type && <p className="mt-1 text-sm text-red-600">{errors.device_type}</p>}
+                            {errors.device_type && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.device_type}
+                                </p>
+                            )}
                         </div>
 
                         {/* Priority */}
@@ -313,12 +418,18 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 menuPosition="fixed"
                                 error={errors.priority}
                             />
-                            {errors.priority && <p className="mt-1 text-sm text-red-600">{errors.priority}</p>}
+                            {errors.priority && (
+                                <p className="mt-1 text-sm text-red-600">
+                                    {errors.priority}
+                                </p>
+                            )}
                         </div>
 
                         {/* Assigned Technician */}
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Assigned Technician</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Assigned Technician
+                            </label>
                             <Select
                                 name="assigned_technician"
                                 value={selectedTechnician}
@@ -326,7 +437,11 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 options={users}
                                 isLoading={loadingUsers}
                                 isDisabled={submitting || loadingUsers}
-                                placeholder={loadingUsers ? "Loading users..." : "Select a technician"}
+                                placeholder={
+                                    loadingUsers
+                                        ? "Loading users..."
+                                        : "Select a technician"
+                                }
                                 isClearable
                                 isSearchable
                                 styles={customSelectStyles}
@@ -337,7 +452,9 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                 menuPosition="fixed"
                             />
                             {users.length === 0 && !loadingUsers && (
-                                <p className="text-xs text-amber-600 mt-1">No users found. Please add users first.</p>
+                                <p className="text-xs text-amber-600 mt-1">
+                                    No users found. Please add users first.
+                                </p>
                             )}
                         </div>
                     </div>
@@ -345,7 +462,8 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                     {/* Problem Description */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Problem Description <span className="text-red-500">*</span>
+                            Problem Description{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <textarea
                             name="problem_description"
@@ -356,71 +474,142 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                             placeholder="Describe the issue in detail..."
                             disabled={submitting}
                         />
-                        {errors.problem_description && <p className="mt-1 text-sm text-red-600">{errors.problem_description}</p>}
+                        {errors.problem_description && (
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.problem_description}
+                            </p>
+                        )}
                     </div>
 
                     {/* Attachment */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Attachment</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Attachment
+                        </label>
 
                         {!file ? (
                             <div
-                                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    setDragging(true);
+                                }}
                                 onDragLeave={() => setDragging(false)}
                                 onDrop={onDrop}
                                 onClick={() => fileInputRef.current?.click()}
                                 className="rounded-xl border-2 border-dashed cursor-pointer transition-all duration-200 text-center py-8 px-4"
                                 style={{
-                                    borderColor: dragError ? "#f87171" : dragging ? "#6366f1" : "#e5e7eb",
-                                    background: dragError ? "rgba(248,113,113,0.04)" : dragging ? "rgba(99,102,241,0.04)" : "rgba(249,250,251,0.5)",
+                                    borderColor: dragError
+                                        ? "#f87171"
+                                        : dragging
+                                          ? "#6366f1"
+                                          : "#e5e7eb",
+                                    background: dragError
+                                        ? "rgba(248,113,113,0.04)"
+                                        : dragging
+                                          ? "rgba(99,102,241,0.04)"
+                                          : "rgba(249,250,251,0.5)",
                                 }}
                             >
                                 <div className="flex flex-col items-center gap-2 pointer-events-none select-none">
-                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-300">
+                                    <svg
+                                        width="28"
+                                        height="28"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.5"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        className="text-gray-300"
+                                    >
                                         <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                                        <path d="M12 12v9" /><path d="m16 16-4-4-4 4" />
+                                        <path d="M12 12v9" />
+                                        <path d="m16 16-4-4-4 4" />
                                     </svg>
                                     <p className="text-sm text-gray-600">
-                                        <span className="font-semibold text-indigo-600">Click to upload</span> or drag and drop
+                                        <span className="font-semibold text-indigo-600">
+                                            Click to upload
+                                        </span>{" "}
+                                        or drag and drop
                                     </p>
-                                    <p className="text-xs text-gray-400">PNG, JPG, WEBP or PDF — up to 5 MB</p>
+                                    <p className="text-xs text-gray-400">
+                                        PNG, JPG, WEBP or PDF — up to 5 MB
+                                    </p>
                                 </div>
                                 <input
                                     ref={fileInputRef}
                                     type="file"
                                     className="hidden"
                                     accept={ACCEPTED_EXTENSIONS}
-                                    onChange={(e) => { if (e.target.files[0]) setNewFile(e.target.files[0]); e.target.value = ""; }}
+                                    onChange={(e) => {
+                                        if (e.target.files[0])
+                                            setNewFile(e.target.files[0]);
+                                        e.target.value = "";
+                                    }}
                                 />
                             </div>
                         ) : (
                             <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50/70 px-4 py-3 text-sm">
                                 <div
                                     className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
-                                    style={{ background: isPdf ? "rgba(220,38,38,0.08)" : "rgba(99,102,241,0.08)" }}
+                                    style={{
+                                        background: isPdf
+                                            ? "rgba(220,38,38,0.08)"
+                                            : "rgba(99,102,241,0.08)",
+                                    }}
                                 >
                                     {isPdf ? (
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="#dc2626"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
                                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                                             <polyline points="14 2 14 8 20 8" />
                                         </svg>
                                     ) : (
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                        <svg
+                                            width="16"
+                                            height="16"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="#6366f1"
+                                            strokeWidth="2"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <rect
+                                                x="3"
+                                                y="3"
+                                                width="18"
+                                                height="18"
+                                                rx="2"
+                                                ry="2"
+                                            />
                                             <circle cx="8.5" cy="8.5" r="1.5" />
                                             <polyline points="21 15 16 10 5 21" />
                                         </svg>
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="truncate text-gray-800 font-medium leading-tight">{file.name}</p>
+                                    <p className="truncate text-gray-800 font-medium leading-tight">
+                                        {file.name}
+                                    </p>
                                     <p className="text-xs text-gray-400 mt-0.5">
-                                        {isPdf ? "PDF document" : "Image"} · {(file.size / 1024).toFixed(0)} KB
+                                        {isPdf ? "PDF document" : "Image"} ·{" "}
+                                        {(file.size / 1024).toFixed(0)} KB
                                     </p>
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() =>
+                                        fileInputRef.current?.click()
+                                    }
                                     className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border border-gray-200 text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-colors"
                                 >
                                     Replace
@@ -437,12 +626,20 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                                     type="file"
                                     className="hidden"
                                     accept={ACCEPTED_EXTENSIONS}
-                                    onChange={(e) => { if (e.target.files[0]) setNewFile(e.target.files[0]); e.target.value = ""; }}
+                                    onChange={(e) => {
+                                        if (e.target.files[0])
+                                            setNewFile(e.target.files[0]);
+                                        e.target.value = "";
+                                    }}
                                 />
                             </div>
                         )}
 
-                        {dragError && <p className="text-xs text-red-500 mt-1.5 font-medium">{dragError}</p>}
+                        {dragError && (
+                            <p className="text-xs text-red-500 mt-1.5 font-medium">
+                                {dragError}
+                            </p>
+                        )}
                     </div>
 
                     {/* Actions */}
@@ -462,9 +659,24 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
                         >
                             {submitting ? (
                                 <span className="flex items-center">
-                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    <svg
+                                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        />
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                        />
                                     </svg>
                                     Creating...
                                 </span>

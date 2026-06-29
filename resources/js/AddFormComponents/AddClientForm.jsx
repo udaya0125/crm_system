@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import toast from "react-hot-toast";
 
 const generateClientCode = () => {
     return Math.floor(10000 + Math.random() * 90000).toString();
@@ -64,9 +65,37 @@ const AddClientForm = ({ handleCreate, onSuccess, onCancel }) => {
         return Object.keys(newErrors).length === 0;
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     if (!validateForm()) return;
+
+    //     const formData = new FormData();
+    //     for (const key in clientForm) {
+    //         if (clientForm[key] !== null && clientForm[key] !== "") {
+    //             formData.append(key, clientForm[key]);
+    //         }
+    //     }
+
+    //     try {
+    //         setSubmitting(true);
+    //         await handleCreate(formData);
+    //         alert("Client created successfully!");
+    //         if (onSuccess) onSuccess();
+    //     } catch (error) {
+    //         console.log("Error saving data", error);
+    //         if (error.response && error.response.data.errors) {
+    //             setErrors(error.response.data.errors);
+    //         } else {
+    //             alert("Error saving client. Please try again.");
+    //         }
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         const formData = new FormData();
@@ -78,16 +107,19 @@ const AddClientForm = ({ handleCreate, onSuccess, onCancel }) => {
 
         try {
             setSubmitting(true);
-            await handleCreate(formData);
-            alert("Client created successfully!");
+            await toast.promise(handleCreate(formData), {
+                loading: "Creating client...",
+                success: "Client created successfully!",
+                error: (err) => {
+                    if (err.response?.data?.errors) {
+                        setErrors(err.response.data.errors);
+                    }
+                    return "Failed to create client.";
+                },
+            });
             if (onSuccess) onSuccess();
         } catch (error) {
-            console.log("Error saving data", error);
-            if (error.response && error.response.data.errors) {
-                setErrors(error.response.data.errors);
-            } else {
-                alert("Error saving client. Please try again.");
-            }
+            // errors already handled inside toast.promise
         } finally {
             setSubmitting(false);
         }
@@ -440,7 +472,6 @@ const AddClientForm = ({ handleCreate, onSuccess, onCancel }) => {
 };
 
 export default AddClientForm;
-
 
 // import React, { useEffect, useState } from "react";
 // import { X } from "lucide-react";

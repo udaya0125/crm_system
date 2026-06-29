@@ -919,7 +919,7 @@ const ToDOPage = () => {
             <Head title="ToDo List" />
 
             {/* Toast container — place once at the top level */}
-            <Toaster
+            {/* <Toaster
                 position="top-right"
                 toastOptions={{
                     duration: 3000,
@@ -934,7 +934,8 @@ const ToDOPage = () => {
                         },
                     },
                 }}
-            />
+            /> */}
+              <Toaster position="top-right" />
 
             <div className="container mx-auto">
                 {/* Header */}

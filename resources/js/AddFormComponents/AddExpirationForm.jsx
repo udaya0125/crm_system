@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import axios from "axios";
 import Select from "react-select";
+import toast from "react-hot-toast";
 
 const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     const [submitting, setSubmitting] = useState(false);
@@ -124,49 +125,80 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     };
 
     // Handle Submit
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
         
-        if (!validateForm()) {
-            return;
-        }
+    //     if (!validateForm()) {
+    //         return;
+    //     }
         
-        const formData = new FormData();
+    //     const formData = new FormData();
         
-        // Append all form data
-        Object.keys(expirationForm).forEach(key => {
-            if (expirationForm[key] !== null && expirationForm[key] !== "") {
-                formData.append(key, expirationForm[key]);
-            }
-        });
+    //     // Append all form data
+    //     Object.keys(expirationForm).forEach(key => {
+    //         if (expirationForm[key] !== null && expirationForm[key] !== "") {
+    //             formData.append(key, expirationForm[key]);
+    //         }
+    //     });
 
-        try {
-            setSubmitting(true);
-            await handleCreate(formData);
-            alert('Expiration created successfully!');
+    //     try {
+    //         setSubmitting(true);
+    //         await handleCreate(formData);
+    //         alert('Expiration created successfully!');
             
-            if (onSuccess) {
-                onSuccess();
-            }
+    //         if (onSuccess) {
+    //             onSuccess();
+    //         }
             
-        } catch (error) {
-            console.log("Error saving data", error);
+    //     } catch (error) {
+    //         console.log("Error saving data", error);
             
-            if (error.response) {
-                if (error.response.data.errors) {
-                    setErrors(error.response.data.errors);
-                } else if (error.response.data.message) {
-                    alert(error.response.data.message);
-                } else {
-                    alert('Error saving expiration. Please try again.');
-                }
-            } else {
-                alert('Network error. Please check your connection.');
-            }
-        } finally {
-            setSubmitting(false);
+    //         if (error.response) {
+    //             if (error.response.data.errors) {
+    //                 setErrors(error.response.data.errors);
+    //             } else if (error.response.data.message) {
+    //                 alert(error.response.data.message);
+    //             } else {
+    //                 alert('Error saving expiration. Please try again.');
+    //             }
+    //         } else {
+    //             alert('Network error. Please check your connection.');
+    //         }
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+
+    const formData = new FormData();
+    Object.keys(expirationForm).forEach((key) => {
+        if (expirationForm[key] !== null && expirationForm[key] !== "") {
+            formData.append(key, expirationForm[key]);
         }
-    };
+    });
+
+    try {
+        setSubmitting(true);
+        await toast.promise(handleCreate(formData), {
+            loading: "Creating expiration...",
+            success: "Expiration created successfully!",
+            error: (err) => {
+                if (err.response?.data?.errors) {
+                    setErrors(err.response.data.errors);
+                }
+                return err.response?.data?.message || "Failed to create expiration.";
+            },
+        });
+        if (onSuccess) onSuccess();
+    } catch (error) {
+        // errors already handled inside toast.promise
+    } finally {
+        setSubmitting(false);
+    }
+};
 
     // Handle change for form inputs
     const handleChange = (e) => {

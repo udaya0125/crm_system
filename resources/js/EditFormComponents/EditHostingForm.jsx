@@ -2,6 +2,7 @@ import axios from "axios";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
+import toast from "react-hot-toast";
 
 const EditHostingForm = ({
     editingHosting,
@@ -60,7 +61,7 @@ const EditHostingForm = ({
 
             if (clients.length > 0 && editingHosting.client_id) {
                 const client = clients.find(
-                    (c) => c.id === editingHosting.client_id
+                    (c) => c.id === editingHosting.client_id,
                 );
                 if (client) {
                     setSelectedClient({
@@ -95,9 +96,35 @@ const EditHostingForm = ({
         return Object.keys(newErrors).length === 0;
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     if (!validateForm()) return;
+
+    //     const formData = new FormData();
+    //     for (const key in hostingForm) {
+    //         if (hostingForm[key] !== null && hostingForm[key] !== "") {
+    //             formData.append(key, hostingForm[key]);
+    //         }
+    //     }
+
+    //     try {
+    //         setSubmitting(true);
+    //         await handleUpdate(formData, editingHosting.id);
+    //         setEditingHosting(null);
+    //     } catch (error) {
+    //         console.log("Error updating data", error);
+    //         if (error.response?.data?.errors) {
+    //             setErrors(error.response.data.errors);
+    //         }
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
+    // Replace handleSubmit's try/catch with:
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         const formData = new FormData();
@@ -109,13 +136,22 @@ const EditHostingForm = ({
 
         try {
             setSubmitting(true);
-            await handleUpdate(formData, editingHosting.id);
-            setEditingHosting(null);
+            await toast.promise(handleUpdate(formData, editingHosting.id), {
+                loading: "Updating hosting...",
+                success: () => {
+                    setReloadTrigger((prev) => !prev);
+                    setEditingHosting(null);
+                    return "Hosting updated successfully!";
+                },
+                error: (err) => {
+                    if (err.response?.data?.errors) {
+                        setErrors(err.response.data.errors);
+                    }
+                    return "Failed to update hosting.";
+                },
+            });
         } catch (error) {
-            console.log("Error updating data", error);
-            if (error.response?.data?.errors) {
-                setErrors(error.response.data.errors);
-            }
+            // errors already handled inside toast.promise
         } finally {
             setSubmitting(false);
         }
@@ -156,8 +192,8 @@ const EditHostingForm = ({
             borderColor: errors.client_id
                 ? "#ef4444"
                 : state.isFocused
-                ? "#6366f1"
-                : "#d1d5db",
+                  ? "#6366f1"
+                  : "#d1d5db",
             boxShadow: state.isFocused
                 ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
                 : "none",
@@ -168,8 +204,8 @@ const EditHostingForm = ({
             backgroundColor: state.isSelected
                 ? "#6366f1"
                 : state.isFocused
-                ? "#e0e7ff"
-                : "white",
+                  ? "#e0e7ff"
+                  : "white",
             color: state.isSelected ? "white" : "#111827",
             cursor: "pointer",
             "&:active": { backgroundColor: "#4f46e5" },
@@ -247,7 +283,8 @@ const EditHostingForm = ({
                     {/* Hosting Provider */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Hosting Provider <span className="text-red-500">*</span>
+                            Hosting Provider{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"

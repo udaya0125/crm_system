@@ -6,17 +6,61 @@ use App\Mail\TicketStatusMail;
 use App\Models\Ticket;
 use App\Models\User;
 use App\Models\UserLog;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class TicketService
 {
+    /**
+     * Verify reCAPTCHA token with Google.
+     * Returns true if valid, false otherwise.
+     */
+    public function verifyRecaptcha(string $token, string $ipAddress): bool
+    {
+        try {
+            $response = Http::asForm()->post('https://www.google.com/recaptcha/api/siteverify', [
+                'secret' => env('RECAPTCHA_SECRET_KEY'),
+                'response' => $token,
+                'remoteip' => $ipAddress,
+            ]);
+            // $response = Http::withoutVerifying()
+            //     ->asForm()
+            //     ->post('https://www.google.com/recaptcha/api/siteverify', [
+            //         'secret' => env('RECAPTCHA_SECRET_KEY'),
+            //         'response' => $token,
+            //         'remoteip' => $ipAddress,
+            //     ]);
+
+            // Add this temporarily
+            Log::info('reCAPTCHA response', $response->json());
+
+            if ($response->json('success') === true) {
+                return true;
+            }
+
+            Log::warning('reCAPTCHA verification rejected by Google.', [
+                'error_codes' => $response->json('error-codes', []),
+                'hostname' => $response->json('hostname'),
+            ]);
+
+            return false;
+        } catch (\Exception $e) {
+            Log::error('reCAPTCHA verification failed: '.$e->getMessage());
+
+            return false;
+        }
+    }
+
     public function createTicket(array $data, ?string $userName, string $ipAddress): Ticket
     {
         if (isset($data['image']) && $data['image']) {
             $data['image'] = $data['image']->store('tickets', 'public');
         }
+
+        // Remove recaptcha_token before saving to DB
+        unset($data['recaptcha_token']);
 
         $ticket = Ticket::create($data);
 
@@ -27,9 +71,9 @@ class TicketService
         $this->sendAdminMail($ticket);
 
         UserLog::create([
-            'name'       => $userName ?? 'System',
+            'name' => $userName ?? 'System',
             'ip_address' => $ipAddress,
-            'title'      => "Created ticket: {$ticket->ticket_id} for {$ticket->client_name}",
+            'title' => "Created ticket: {$ticket->ticket_id} for {$ticket->client_name}",
         ]);
 
         return $ticket;
@@ -45,7 +89,6 @@ class TicketService
         $previousStatus = $ticket->status;
 
         if (isset($data['image']) && $data['image']) {
-
             if (
                 $ticket->image &&
                 Storage::disk('public')->exists($ticket->image)
@@ -78,9 +121,9 @@ class TicketService
         }
 
         UserLog::create([
-            'name'       => $userName ?? 'System',
+            'name' => $userName ?? 'System',
             'ip_address' => $ipAddress,
-            'title'      => "Updated ticket: {$ticket->ticket_id} for {$ticket->client_name}",
+            'title' => "Updated ticket: {$ticket->ticket_id} for {$ticket->client_name}",
         ]);
 
         return $ticket;
@@ -104,31 +147,31 @@ class TicketService
         $ticket->delete();
 
         UserLog::create([
-            'name'       => $userName ?? 'System',
+            'name' => $userName ?? 'System',
             'ip_address' => $ipAddress,
-            'title'      => "Deleted ticket: {$ticketId} for {$clientName}",
+            'title' => "Deleted ticket: {$ticketId} for {$clientName}",
         ]);
     }
 
     public function formatTicket(Ticket $ticket): array
     {
         return [
-            'id'                   => $ticket->id,
-            'ticket_id'            => $ticket->ticket_id,
-            'client_name'          => $ticket->client_name,
-            'issue_type'           => $ticket->issue_type,
-            'device_type'          => $ticket->device_type,
-            'problem_description'  => $ticket->problem_description,
-            'priority'             => $ticket->priority,
-            'email'                => $ticket->email,
-            'image'                => $ticket->image
-                ? asset('storage/' . $ticket->image)
+            'id' => $ticket->id,
+            'ticket_id' => $ticket->ticket_id,
+            'client_name' => $ticket->client_name,
+            'issue_type' => $ticket->issue_type,
+            'device_type' => $ticket->device_type,
+            'problem_description' => $ticket->problem_description,
+            'priority' => $ticket->priority,
+            'email' => $ticket->email,
+            'image' => $ticket->image
+                ? asset('storage/'.$ticket->image)
                 : null,
-            'assigned_technician'  => $ticket->assigned_technician,
-            'technician_name'      => $ticket->assignedUser?->name,
-            'status'               => $ticket->status,
-            'created_at'           => $ticket->created_at,
-            'updated_at'           => $ticket->updated_at,
+            'assigned_technician' => $ticket->assigned_technician,
+            'technician_name' => $ticket->assignedUser?->name,
+            'status' => $ticket->status,
+            'created_at' => $ticket->created_at,
+            'updated_at' => $ticket->updated_at,
         ];
     }
 
@@ -139,30 +182,20 @@ class TicketService
         }
 
         try {
-            $recipient = new User();
+            $recipient = new User;
             $recipient->name = $ticket->client_name;
 
             Mail::to($ticket->email)
-                ->send(new TicketStatusMail(
-                    $ticket,
-                    $recipient,
-                    'client'
-                ));
+                ->send(new TicketStatusMail($ticket, $recipient, 'client'));
         } catch (\Exception $e) {
-            Log::error(
-                "Client mail failed for {$ticket->ticket_id}: " .
-                $e->getMessage()
-            );
+            Log::error("Client mail failed for {$ticket->ticket_id}: ".$e->getMessage());
         }
     }
 
     private function sendAdminMail(Ticket $ticket): void
     {
         $adminEmails = array_filter(
-            array_map(
-                'trim',
-                explode(',', env('ADMIN_EMAIL', ''))
-            )
+            array_map('trim', explode(',', env('ADMIN_EMAIL', '')))
         );
 
         if (empty($adminEmails)) {
@@ -170,44 +203,27 @@ class TicketService
         }
 
         try {
-            $recipient = new User();
+            $recipient = new User;
             $recipient->name = 'Admin';
 
             Mail::to($adminEmails)
-                ->send(new TicketStatusMail(
-                    $ticket,
-                    $recipient,
-                    'admin'
-                ));
+                ->send(new TicketStatusMail($ticket, $recipient, 'admin'));
         } catch (\Exception $e) {
-            Log::error(
-                "Admin mail failed for {$ticket->ticket_id}: " .
-                $e->getMessage()
-            );
+            Log::error("Admin mail failed for {$ticket->ticket_id}: ".$e->getMessage());
         }
     }
 
     private function sendTechnicianMail(Ticket $ticket): void
     {
-        if (
-            !$ticket->assignedUser ||
-            empty($ticket->assignedUser->email)
-        ) {
+        if (! $ticket->assignedUser || empty($ticket->assignedUser->email)) {
             return;
         }
 
         try {
             Mail::to($ticket->assignedUser->email)
-                ->send(new TicketStatusMail(
-                    $ticket,
-                    $ticket->assignedUser,
-                    'technician'
-                ));
+                ->send(new TicketStatusMail($ticket, $ticket->assignedUser, 'technician'));
         } catch (\Exception $e) {
-            Log::error(
-                "Technician mail failed for {$ticket->ticket_id}: " .
-                $e->getMessage()
-            );
+            Log::error("Technician mail failed for {$ticket->ticket_id}: ".$e->getMessage());
         }
     }
 }

@@ -32,6 +32,14 @@ class StoreTicketRequest extends FormRequest
             'image'               => 'nullable|mimes:jpg,jpeg,png,webp,pdf|max:5120',
             'assigned_technician' => 'nullable|exists:users,id',
             'status'              => 'required|string',
+            'recaptcha_token'     => 'required|string',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'recaptcha_token.required' => 'Please complete the reCAPTCHA.',
         ];
     }
 }

@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import toast from "react-hot-toast";
 
-const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) => {
+const EditClientForm = ({
+    editingClient,
+    handleUpdate,
+    onSuccess,
+    onCancel,
+}) => {
     const [submitting, setSubmitting] = useState(false);
     const [errors, setErrors] = useState({});
     const [clientForm, setClientForm] = useState({
@@ -84,9 +90,37 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
         return Object.keys(newErrors).length === 0;
     };
 
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+
+    //     if (!validateForm()) return;
+
+    //     const formData = new FormData();
+    //     for (const key in clientForm) {
+    //         if (clientForm[key] !== null && clientForm[key] !== "") {
+    //             formData.append(key, clientForm[key]);
+    //         }
+    //     }
+
+    //     try {
+    //         setSubmitting(true);
+    //         await handleUpdate(formData, editingClient.id);
+    //         alert("Client updated successfully!");
+    //         if (onSuccess) onSuccess();
+    //     } catch (error) {
+    //         console.log("Error updating data", error);
+    //         if (error.response && error.response.data.errors) {
+    //             setErrors(error.response.data.errors);
+    //         } else {
+    //             alert("Error updating client. Please try again.");
+    //         }
+    //     } finally {
+    //         setSubmitting(false);
+    //     }
+    // };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         if (!validateForm()) return;
 
         const formData = new FormData();
@@ -98,16 +132,19 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
 
         try {
             setSubmitting(true);
-            await handleUpdate(formData, editingClient.id);
-            alert("Client updated successfully!");
+            await toast.promise(handleUpdate(formData, editingClient.id), {
+                loading: "Updating client...",
+                success: "Client updated successfully!",
+                error: (err) => {
+                    if (err.response?.data?.errors) {
+                        setErrors(err.response.data.errors);
+                    }
+                    return "Failed to update client.";
+                },
+            });
             if (onSuccess) onSuccess();
         } catch (error) {
-            console.log("Error updating data", error);
-            if (error.response && error.response.data.errors) {
-                setErrors(error.response.data.errors);
-            } else {
-                alert("Error updating client. Please try again.");
-            }
+            // errors already handled inside toast.promise
         } finally {
             setSubmitting(false);
         }
@@ -186,7 +223,7 @@ const EditClientForm = ({ editingClient, handleUpdate, onSuccess, onCancel }) =>
                 {/* Row 2 - Branch Name only (Code removed - not editable) */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Branch Name 
+                        Branch Name
                     </label>
                     <input
                         type="text"

@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback } from "react";
 import axios from "axios";
+import ReCAPTCHA from "react-google-recaptcha";
 
 const CATEGORIES = [
     {
@@ -206,6 +207,9 @@ const ACCEPTED_TYPES = [
 ];
 const ACCEPTED_EXTENSIONS = ".png,.jpg,.jpeg,.webp,.pdf";
 
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+const isRecaptchaConfigured = Boolean(RECAPTCHA_SITE_KEY);
+
 const TechTicket = () => {
     const [form, setForm] = useState({
         name: "",
@@ -222,7 +226,9 @@ const TechTicket = () => {
     const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [createdTicketId, setCreatedTicketId] = useState("");
+    const [recaptchaToken, setRecaptchaToken] = useState(null);
     const fileInputRef = useRef(null);
+    const recaptchaRef = useRef(null);
 
     const set = (key) => (e) =>
         setForm((f) => ({ ...f, [key]: e.target.value }));
@@ -266,6 +272,11 @@ const TechTicket = () => {
         if (!form.category) e.category = "Please select a category";
         if (!form.priority) e.priority = "Please select a priority";
         if (!form.description.trim()) e.description = "Description is required";
+        if (!isRecaptchaConfigured)
+            e.recaptcha =
+                "reCAPTCHA site key is missing. Please check your environment configuration.";
+        if (isRecaptchaConfigured && !recaptchaToken)
+            e.recaptcha = "Please complete the reCAPTCHA";
         setErrors(e);
         return Object.keys(e).length === 0;
     };
@@ -283,6 +294,7 @@ const TechTicket = () => {
             formData.append("priority", form.priority);
             formData.append("problem_description", form.description);
             formData.append("status", "open");
+            formData.append("recaptcha_token", recaptchaToken);
             if (file) {
                 formData.append("image", file);
             }
@@ -297,6 +309,9 @@ const TechTicket = () => {
             setSubmitted(true);
         } catch (error) {
             console.error("Ticket submission error:", error);
+            recaptchaRef.current?.reset();
+            setRecaptchaToken(null);
+
             if (error.response?.data?.errors) {
                 const serverErrors = error.response.data.errors;
                 setErrors({
@@ -306,6 +321,7 @@ const TechTicket = () => {
                     category: serverErrors.issue_type?.[0],
                     priority: serverErrors.priority?.[0],
                     description: serverErrors.problem_description?.[0],
+                    recaptcha: serverErrors.recaptcha_token?.[0],
                 });
             } else {
                 alert(
@@ -332,6 +348,8 @@ const TechTicket = () => {
         setErrors({});
         setSubmitted(false);
         setCreatedTicketId("");
+        setRecaptchaToken(null);
+        recaptchaRef.current?.reset();
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -915,6 +933,31 @@ const TechTicket = () => {
                                         />
                                     </div>
                                 )}
+
+                                <div className="mt-6">
+                                    {isRecaptchaConfigured && (
+                                        <ReCAPTCHA
+                                            ref={recaptchaRef}
+                                            sitekey={RECAPTCHA_SITE_KEY}
+                                            onChange={(token) => {
+                                                setRecaptchaToken(token);
+                                                setErrors((e) => {
+                                                    const n = { ...e };
+                                                    delete n.recaptcha;
+                                                    return n;
+                                                });
+                                            }}
+                                            onExpired={() =>
+                                                setRecaptchaToken(null)
+                                            }
+                                        />
+                                    )}
+                                    {errors.recaptcha && (
+                                        <p className="text-xs text-rose-500 mt-1.5 font-medium">
+                                            {errors.recaptcha}
+                                        </p>
+                                    )}
+                                </div>
 
                                 {/* Submit */}
                                 <button
