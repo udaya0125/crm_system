@@ -33,7 +33,6 @@
 //         fetchTickets();
 //     }, [reloadTrigger]);
 
-
 //     const handleDelete = async (id) => {
 //         if (!window.confirm("Are you sure you want to delete this ticket?")) {
 //             return;
@@ -239,7 +238,6 @@
 
 // export default Ticket;
 
-
 import AddTicketForm from "@/AddFormComponents/AddTicketForm";
 import EditTicketForm from "@/EditFormComponents/EditTicketForm";
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
@@ -278,7 +276,8 @@ const Ticket = () => {
     }, [reloadTrigger]);
 
     const handleDelete = (id) => {
-        if (!window.confirm("Are you sure you want to delete this ticket?")) return;
+        if (!window.confirm("Are you sure you want to delete this ticket?"))
+            return;
 
         toast.promise(axios.delete(route("ourtickets.destroy", { id })), {
             loading: "Deleting ticket...",
@@ -343,7 +342,7 @@ const Ticket = () => {
                                 ? "bg-red-100 text-red-700"
                                 : value === "medium"
                                   ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-green-100 text-green-700"
+                                  : "bg-green-100 text-kkkgreen-700"
                         }`}
                     >
                         {value}
@@ -376,6 +375,29 @@ const Ticket = () => {
                     >
                         {value?.replace("_", " ")}
                     </span>
+                ),
+            },
+            {
+                Header: "Created At",
+                accessor: "created_at",
+                Cell: ({ value }) => (
+                    <div className="flex flex-col">
+                        <span className="text-gray-700">
+                            {new Date(value).toLocaleDateString("en-US", {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                            })}
+                        </span>
+                        <span className="text-gray-400 text-xs">
+                            {new Date(value).toLocaleTimeString("en-US", {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true,
+                            })}
+                        </span>
+                    </div>
                 ),
             },
             {
