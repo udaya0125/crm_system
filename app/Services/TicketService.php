@@ -25,15 +25,7 @@ class TicketService
                 'response' => $token,
                 'remoteip' => $ipAddress,
             ]);
-            // $response = Http::withoutVerifying()
-            //     ->asForm()
-            //     ->post('https://www.google.com/recaptcha/api/siteverify', [
-            //         'secret' => env('RECAPTCHA_SECRET_KEY'),
-            //         'response' => $token,
-            //         'remoteip' => $ipAddress,
-            //     ]);
 
-            // Add this temporarily
             Log::info('reCAPTCHA response', $response->json());
 
             if ($response->json('success') === true) {
@@ -68,7 +60,7 @@ class TicketService
 
         $this->sendClientMail($ticket);
         $this->sendTechnicianMail($ticket);
-        $this->sendAdminMail($ticket);
+        $this->sendDepartmentMail($ticket);
 
         UserLog::create([
             'name' => $userName ?? 'System',
@@ -175,6 +167,38 @@ class TicketService
         ];
     }
 
+    /**
+     * Resolve which category group an issue_type belongs to.
+     * Returns null if no match is found.
+     */
+    private function getCategoryGroup(string $issueType): ?string
+    {
+        foreach (config('tickets.groups', []) as $groupName => $groupData) {
+            if (in_array($issueType, $groupData['items'] ?? [], true)) {
+                return $groupName;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the email address that should receive tickets for a given
+     * issue_type, based on its category group. Falls back to the
+     * configured fallback_email (ADMIN_EMAIL) if no group matches or the
+     * group has no email configured.
+     */
+    private function getCategoryEmail(string $issueType): ?string
+    {
+        $group = $this->getCategoryGroup($issueType);
+
+        if ($group && ! empty(config("tickets.groups.{$group}.email"))) {
+            return config("tickets.groups.{$group}.email");
+        }
+
+        return config('tickets.fallback_email');
+    }
+
     private function sendClientMail(Ticket $ticket): void
     {
         if (empty($ticket->email)) {
@@ -192,24 +216,74 @@ class TicketService
         }
     }
 
-    private function sendAdminMail(Ticket $ticket): void
-    {
-        $adminEmails = array_filter(
-            array_map('trim', explode(',', env('ADMIN_EMAIL', '')))
-        );
+    /**
+     * Send the new-ticket notification to the department/category email
+     * resolved from the ticket's issue_type (e.g. "Digital Marketing" ->
+     * digital@yourdomain.com). Falls back to ADMIN_EMAIL if no category
+     * email is configured.
+     */
+    // private function sendDepartmentMail(Ticket $ticket): void
+    // {
+    //     $email = $this->getCategoryEmail($ticket->issue_type);
 
-        if (empty($adminEmails)) {
+    //     Log::info('DEBUG sendDepartmentMail', [
+    //         'issue_type' => $ticket->issue_type,
+    //         'resolved_email' => $email,
+    //     ]);
+
+    //     if (empty($email)) {
+    //         Log::warning("No department/admin email resolved for issue_type '{$ticket->issue_type}' on ticket {$ticket->ticket_id}.");
+
+    //         return;
+    //     }
+
+    //     // Support comma-separated emails in config/env, same pattern as ADMIN_EMAIL
+    //     $recipients = array_filter(array_map('trim', explode(',', $email)));
+
+    //     if (empty($recipients)) {
+    //         return;
+    //     }
+
+    //     try {
+    //         $recipient = new User;
+    //         $recipient->name = $this->getCategoryGroup($ticket->issue_type) ?? 'Admin';
+
+    //         Mail::to($recipients)
+    //             ->send(new TicketStatusMail($ticket, $recipient, 'admin'));
+    //     } catch (\Exception $e) {
+    //         Log::error("Department mail failed for {$ticket->ticket_id}: ".$e->getMessage());
+    //     }
+    // }
+
+    private function sendDepartmentMail(Ticket $ticket): void
+    {
+        $email = $this->getCategoryEmail($ticket->issue_type);
+
+        Log::info('DEBUG sendDepartmentMail', [
+            'issue_type' => $ticket->issue_type,
+            'resolved_email' => $email,
+        ]);
+
+        if (empty($email)) {
+            Log::warning("No department/admin email resolved for issue_type '{$ticket->issue_type}' on ticket {$ticket->ticket_id}.");
+
+            return;
+        }
+
+        $recipients = array_filter(array_map('trim', explode(',', $email)));
+
+        if (empty($recipients)) {
             return;
         }
 
         try {
             $recipient = new User;
-            $recipient->name = 'Admin';
+            $recipient->name = $this->getCategoryGroup($ticket->issue_type) ?? 'Admin';
 
-            Mail::to($adminEmails)
+            Mail::to($recipients)
                 ->send(new TicketStatusMail($ticket, $recipient, 'admin'));
         } catch (\Exception $e) {
-            Log::error("Admin mail failed for {$ticket->ticket_id}: ".$e->getMessage());
+            Log::error("Department mail failed for {$ticket->ticket_id}: ".$e->getMessage());
         }
     }
 

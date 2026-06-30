@@ -244,7 +244,7 @@ class CheckExpirations extends Command
 
         UserLog::create([
             'name'       => 'System',
-            'ip_address' => '127.0.0.1',
+            'ip_address' => $request->ip(),
             'title'      => $title,
         ]);
         return true;
@@ -264,7 +264,7 @@ class CheckExpirations extends Command
 
         UserLog::create([
             'name'       => 'System',
-            'ip_address' => '127.0.0.1',
+            'ip_address' => $request->ip(),
             'title'      => $title,
         ]);
         return true;

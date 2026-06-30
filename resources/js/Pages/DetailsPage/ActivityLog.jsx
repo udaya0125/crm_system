@@ -95,15 +95,36 @@ const ActivityLog = () => {
                     </span>
                 ),
             },
-            {
-                Header: "Date & Time",
-                accessor: "created_at",
-                Cell: ({ value }) => (
-                    <span className="text-sm text-gray-500">
-                        {value ? new Date(value).toLocaleString() : "—"}
-                    </span>
-                ),
-            },
+                 {
+            Header: "Created At",
+            accessor: "created_at",
+            Cell: ({ value }) => (
+                <span className="text-gray-400">
+                    {new Date(value).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                    })}
+                </span>
+            ),
+        },
+        {
+            Header: "Created Time",
+            accessor: "created_at_time",
+            Cell: ({ row }) => (
+                <span className="text-gray-400">
+                    {new Date(row.original.created_at).toLocaleTimeString(
+                        "en-US",
+                        {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: true,
+                        },
+                    )}
+                </span>
+            ),
+        },
         ],
         [],
     );
