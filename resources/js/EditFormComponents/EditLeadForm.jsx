@@ -171,7 +171,7 @@ const EditLeadForm = ({ editingLead, handleUpdate, onClose }) => {
                             <input type="date" name="next_followup_date" value={leadForm.next_followup_date} onChange={handleChange} className={inputClass} />
                         </div>
                         <div>
-                            <label className={labelClass}>Status</label>
+                            <label className={labelClass}>Status <span className="text-red-500">*</span></label>
                             <Select
                                 name="status"
                                 value={statusOptions.find((o) => o.value === leadForm.status) || null}

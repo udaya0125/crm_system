@@ -31,10 +31,10 @@ const EditClientManagement = ({
     });
 
     const paymentStatusOptions = [
-        { value: "Paid", label: "Paid" },
-        { value: "Pending", label: "Pending" },
-        { value: "Overdue", label: "Overdue" },
-        { value: "Partial", label: "Partial" },
+        { value: "paid", label: "Paid" },
+        { value: "pending", label: "Pending" },
+        { value: "overdue", label: "Overdue" },
+        { value: "partial", label: "Partial" },
     ];
 
     // Populate form when editingClient changes
@@ -234,7 +234,7 @@ const EditClientManagement = ({
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Select Lead</label>
+                            <label className={labelClass}>Select Lead <span className="text-red-500">*</span></label>
                             <Select
                                 options={leadOptions}
                                 value={selectedLead}
@@ -251,7 +251,7 @@ const EditClientManagement = ({
                             />
                         </div>
                         <div>
-                            <label className={labelClass}>Company Name</label>
+                            <label className={labelClass}>Company Name <span className="text-red-500">*</span></label>
                             <Select
                                 options={companyOptions}
                                 value={selectedCompany}
@@ -270,18 +270,18 @@ const EditClientManagement = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Contact Person</label>
+                            <label className={labelClass}>Contact Person <span className="text-red-500">*</span></label>
                             <input type="text" name="contact_person" value={clientForm.contact_person} onChange={handleChange} placeholder="Contact person" className={inputClass} />
                         </div>
                         <div>
-                            <label className={labelClass}>Phone</label>
+                            <label className={labelClass}>Phone <span className="text-red-500">*</span></label>
                             <input type="text" name="phone" value={clientForm.phone} onChange={handleChange} placeholder="Phone number" className={inputClass} />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Email</label>
+                            <label className={labelClass}>Email <span className="text-red-500">*</span></label>
                             <input type="email" name="email" value={clientForm.email} onChange={handleChange} placeholder="Email address" className={inputClass} />
                         </div>
                         <div>
@@ -292,11 +292,11 @@ const EditClientManagement = ({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Service Type</label>
+                            <label className={labelClass}>Service Type <span className="text-red-500">*</span></label>
                             <input type="text" name="service_type" value={clientForm.service_type} onChange={handleChange} placeholder="e.g. Web Development" className={inputClass} />
                         </div>
                         <div>
-                            <label className={labelClass}>Account Manager</label>
+                            <label className={labelClass}>Account Manager <span className="text-red-500">*</span></label>
                             <input type="text" name="account_manager" value={clientForm.account_manager} onChange={handleChange} placeholder="Manager name" className={inputClass} />
                         </div>
                     </div>
