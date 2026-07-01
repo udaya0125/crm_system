@@ -148,7 +148,7 @@
 
 
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
     X,
     User,
@@ -212,6 +212,13 @@ const LeadPopup = ({ lead, onClose }) => {
               day: "numeric",
           })
         : null;
+
+          useEffect(() => {
+                document.body.style.overflow = "hidden";
+                return () => {
+                    document.body.style.overflow = "";
+                };
+            }, []);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">

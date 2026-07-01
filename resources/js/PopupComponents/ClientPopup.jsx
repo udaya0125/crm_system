@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     X,
     Building2,
@@ -48,6 +48,13 @@ const FieldRow = ({ children }) => (
 const ClientPopup = ({ client, onClose }) => {
     if (!client) return null;
 
+  useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, []);
+
     const paymentClass =
         paymentColors[client.payment_status] || "bg-gray-100 text-gray-600";
 
@@ -61,23 +68,25 @@ const ClientPopup = ({ client, onClose }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
             <div className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-
                 {/* Header */}
                 <div
                     className="px-6 pt-6 pb-10 relative"
                     style={{
-                        background: "linear-gradient(135deg, #0d77c3 0%, #085a96 100%)",
+                        background:
+                            "linear-gradient(135deg, #0d77c3 0%, #085a96 100%)",
                     }}
                 >
                     <button
                         onClick={onClose}
                         className="absolute top-4 right-4 p-1.5 rounded-full text-white transition-colors"
                         style={{ backgroundColor: "rgba(255,255,255,0.2)" }}
-                        onMouseEnter={e =>
-                            (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.3)")
+                        onMouseEnter={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                "rgba(255,255,255,0.3)")
                         }
-                        onMouseLeave={e =>
-                            (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)")
+                        onMouseLeave={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                                "rgba(255,255,255,0.2)")
                         }
                     >
                         <X size={16} />
@@ -124,44 +133,78 @@ const ClientPopup = ({ client, onClose }) => {
 
                 {/* Body */}
                 <div className="flex-1 overflow-y-auto -mt-4 bg-white rounded-t-2xl px-6 pt-4 pb-6">
-
                     {/* Row 1: Lead ID + Company Name */}
                     <FieldRow>
                         {/* <Field icon={Hash} label="Lead ID" value={client.lead_id} /> */}
-                        <Field icon={Building2} label="Company Name" value={client.company_name} />
+                        <Field
+                            icon={Building2}
+                            label="Company Name"
+                            value={client.company_name}
+                        />
                     </FieldRow>
 
                     {/* Row 2: Contact Person + Email */}
                     <FieldRow>
-                        <Field icon={User} label="Contact Person" value={client.contact_person} />
+                        <Field
+                            icon={User}
+                            label="Contact Person"
+                            value={client.contact_person}
+                        />
                         <Field icon={Mail} label="Email" value={client.email} />
                     </FieldRow>
 
                     {/* Row 3: Phone + Address */}
                     <FieldRow>
-                        <Field icon={Phone} label="Phone" value={client.phone} />
-                        <Field icon={MapPin} label="Address" value={client.address} />
+                        <Field
+                            icon={Phone}
+                            label="Phone"
+                            value={client.phone}
+                        />
+                        <Field
+                            icon={MapPin}
+                            label="Address"
+                            value={client.address}
+                        />
                     </FieldRow>
 
                     {/* Row 4: Service Type + Account Manager */}
                     <FieldRow>
-                        <Field icon={Briefcase} label="Service Type" value={client.service_type} />
-                        <Field icon={UserCheck} label="Account Manager" value={client.account_manager} />
+                        <Field
+                            icon={Briefcase}
+                            label="Service Type"
+                            value={client.service_type}
+                        />
+                        <Field
+                            icon={UserCheck}
+                            label="Account Manager"
+                            value={client.account_manager}
+                        />
                     </FieldRow>
 
                     {/* Row 5: Total Projects + Total Revenue */}
                     <FieldRow>
-                        <Field icon={FolderOpen} label="Total Projects" value={client.total_projects} />
-                        <Field icon={DollarSign} label="Total Revenue" value={formattedRevenue} />
+                        <Field
+                            icon={FolderOpen}
+                            label="Total Projects"
+                            value={client.total_projects}
+                        />
+                        <Field
+                            icon={DollarSign}
+                            label="Total Revenue"
+                            value={formattedRevenue}
+                        />
                     </FieldRow>
 
                     {/* Row 6: Payment Status — alone or paired if needed */}
                     <div className="border-b border-gray-100">
                         <div className="grid grid-cols-2 gap-x-4">
-                            <Field icon={CreditCard} label="Payment Status" value={client.payment_status} />
+                            <Field
+                                icon={CreditCard}
+                                label="Payment Status"
+                                value={client.payment_status}
+                            />
                         </div>
                     </div>
-
                 </div>
 
                 {/* Footer */}
@@ -170,10 +213,10 @@ const ClientPopup = ({ client, onClose }) => {
                         onClick={onClose}
                         className="px-5 py-2 rounded-full text-sm font-medium text-white transition-colors"
                         style={{ backgroundColor: "#0d77c3" }}
-                        onMouseEnter={e =>
+                        onMouseEnter={(e) =>
                             (e.currentTarget.style.backgroundColor = "#085a96")
                         }
-                        onMouseLeave={e =>
+                        onMouseLeave={(e) =>
                             (e.currentTarget.style.backgroundColor = "#0d77c3")
                         }
                     >

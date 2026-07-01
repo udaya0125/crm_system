@@ -320,8 +320,7 @@ const Client = () => {
     const [reloadTrigger, setReloadTrigger] = useState(false);
     const [editingClient, setEditingClient] = useState(null);
     const [viewingClient, setViewingClient] = useState(null);
-    const [showAddModal, setShowAddModal] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
+    const [showForm, setShowForm] = useState(false);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -363,7 +362,7 @@ const Client = () => {
 
     const handleEdit = (client) => {
         setEditingClient(client);
-        setShowEditModal(true);
+        setShowForm(true);
     };
 
     const handleView = (client) => {
@@ -387,15 +386,13 @@ const Client = () => {
     };
 
     const handleFormSuccess = () => {
-        setShowAddModal(false);
-        setShowEditModal(false);
+        setShowForm(false);
         setEditingClient(null);
         setReloadTrigger((prev) => !prev);
     };
 
     const closeModals = () => {
-        setShowAddModal(false);
-        setShowEditModal(false);
+        setShowForm(false);
         setEditingClient(null);
     };
 
@@ -509,7 +506,7 @@ const Client = () => {
                     </h1>
                     <button
                         onClick={() => {
-                            setShowAddModal(true);
+                            setShowForm(true);
                             setEditingClient(null);
                         }}
                         className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
@@ -553,12 +550,14 @@ const Client = () => {
             {viewingClient && (
                 <ClientDetailPopup
                     client={viewingClient}
+                    showForm={showForm}
+                    setShowForm={setShowForm}
                     onClose={() => setViewingClient(null)}
                 />
             )}
 
             {/* Add Client Modal */}
-            {showAddModal && (
+            {showForm && !editingClient && (
                 <div className="fixed inset-0 z-50 backdrop-blur-sm overflow-y-auto">
                     <div
                         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -577,7 +576,7 @@ const Client = () => {
             )}
 
             {/* Edit Client Modal */}
-            {showEditModal && editingClient && (
+            {showForm && editingClient && (
                 <div className="fixed inset-0 z-50 backdrop-blur-sm overflow-y-auto">
                     <div
                         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
