@@ -4,7 +4,7 @@ return [
 
     'groups' => [
         'Digital Marketing' => [
-            'email' => 'digital@yourdomain.com',
+            'email' => 'online@sait.com.np',
             'items' => [
                 'Social Media Promotional Flyer',
                 'Social Media Reel',
@@ -21,7 +21,7 @@ return [
         ],
 
         'Exely' => [
-            'email' => 'exely@yourdomain.com',
+            'email' => 'exely@sait.com.np',
             'items' => [
                 'Channel Manager',
                 'Booking Engine',
@@ -32,7 +32,7 @@ return [
         ],
 
         'Domain and Hosting' => [
-            'email' => 'domain@yourdomain.com',
+            'email' => 'domain@sait.com.np,hosting@sait.com.np',
             'items' => [
                 'Domain Registration',
                 'Create Hosting',
@@ -45,7 +45,7 @@ return [
         ],
 
         'OTA' => [
-            'email' => 'ota@yourdomain.com',
+            'email' => 'ota@sait.com.np',
             'items' => [
                 'OTA Access – Login, Account Setup',
                 'Bookings – Reservations, Changes, Cancellations',
@@ -65,7 +65,7 @@ return [
         ],
 
         'Sales and Marketing' => [
-            'email' => 'sales@yourdomain.com',
+            'email' => 'sales@sait.com.np',
             'items' => [
                 'Invoice',
                 'Payment and Billing',
@@ -75,7 +75,7 @@ return [
         ],
 
         'Website Development' => [
-            'email' => 'webdev@yourdomain.com',
+            'email' => 'saitsolutionwebteam@gmail.com',
             'items' => [
                 'Add New Feature',
                 'Content Updates / Management',
@@ -88,7 +88,7 @@ return [
         ],
 
         'Repair' => [
-            'email' => 'repair@yourdomain.com',
+            'email' => 'adhikariudaya521@gmail.com',
             'items' => [
                 'Printer Repair',
                 'Printer Refill',
@@ -102,7 +102,7 @@ return [
         ],
 
         'Enquiry' => [
-            'email' => 'enquiry@yourdomain.com',
+            'email' => 'info@sait.com.np',
             'items' => [
                 'General Enquiry',
             ],
