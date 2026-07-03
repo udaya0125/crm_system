@@ -115,6 +115,58 @@ const ServiceContracts = () => {
         );
     }, [allService, search]);
 
+    // Helper: calculate remaining time until expiry
+const getRemainingTime = (expiryDate) => {
+    if (!expiryDate) return { label: "N/A", color: "gray" };
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expiry = new Date(expiryDate);
+    expiry.setHours(0, 0, 0, 0);
+
+    const diffTime = expiry.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+        return {
+            label: `Expired ${Math.abs(diffDays)} day${Math.abs(diffDays) !== 1 ? "s" : ""} ago`,
+            color: "red",
+            days: diffDays,
+        };
+    }
+
+    if (diffDays === 0) {
+        return { label: "Expires today", color: "red", days: diffDays };
+    }
+
+    // Convert to years / months / days breakdown for a nicer display
+    const years = Math.floor(diffDays / 365);
+    const months = Math.floor((diffDays % 365) / 30);
+    const days = diffDays % 30;
+
+    let label = "";
+    if (years > 0) label += `${years}y `;
+    if (months > 0) label += `${months}m `;
+    if (years === 0) label += `${days}d`;
+    label = label.trim() || `${diffDays}d`;
+
+    let color = "green";
+    if (diffDays <= 30) color = "yellow";
+    if (diffDays <= 7) color = "orange";
+
+    return { label: `${label} left`, color, days: diffDays };
+};
+
+// Badge color map (Tailwind)
+const badgeColorMap = {
+    red: "bg-red-50 text-red-700 border-red-200",
+    orange: "bg-orange-50 text-orange-700 border-orange-200",
+    yellow: "bg-yellow-50 text-yellow-700 border-yellow-200",
+    green: "bg-green-50 text-green-700 border-green-200",
+    gray: "bg-gray-50 text-gray-700 border-gray-200",
+};
+
     // Define table columns
     const columns = useMemo(
         () => [
@@ -159,6 +211,20 @@ const ServiceContracts = () => {
                 Header: "Expiry Date",
                 accessor: "expiry_date",
             },
+            {
+    Header: "Remaining Time",
+    accessor: "remaining_time",
+    Cell: ({ row }) => {
+        const { label, color } = getRemainingTime(row.original.expiry_date);
+        return (
+            <span
+                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${badgeColorMap[color]}`}
+            >
+                {label}
+            </span>
+        );
+    },
+},
             {
                 Header: "Invoice Date",
                 accessor: "invoice_date",

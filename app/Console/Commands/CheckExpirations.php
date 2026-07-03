@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use App\Models\Expiration;
 use App\Models\DomainManagement;
 use App\Models\HostingManagement;
+use App\Models\ServiceContract;
 use App\Models\Notification;
 use App\Models\UserLog;
 use Carbon\Carbon;
@@ -13,7 +14,7 @@ use Carbon\Carbon;
 class CheckExpirations extends Command
 {
     protected $signature   = 'expirations:check';
-    protected $description = 'Check expiring items (expirations, domains, hostings) and create notifications + logs';
+    protected $description = 'Check expiring items (expirations, domains, hostings, service contracts) and create notifications + logs';
 
     public function handle(): int
     {
@@ -21,6 +22,7 @@ class CheckExpirations extends Command
         $total += $this->processExpirations();
         $total += $this->processDomains();
         $total += $this->processHostings();
+        $total += $this->processServiceContracts();
 
         $this->info("Done. {$total} new notification(s)/log(s) created.");
         return 0;
@@ -183,6 +185,61 @@ class CheckExpirations extends Command
     }
 
     // =========================================================================
+    //  SERVICE CONTRACTS
+    //  Rule: <=7 days -> daily notification, exactly 10 or 14 days -> milestone
+    // =========================================================================
+
+    private function processServiceContracts(): int
+    {
+        $count     = 0;
+        $today     = Carbon::today();
+        $contracts = ServiceContract::all();
+
+        foreach ($contracts as $contract) {
+            if (!$contract->expiry_date) continue;
+
+            $daysLeft   = (int) $today->diffInDays(Carbon::parse($contract->expiry_date), false);
+            $clientName = $contract->customer_name ?: 'Unknown Client';
+
+            if ($daysLeft < 0) continue;
+
+            if ($daysLeft <= 7) {
+                if ($this->createDailyNotification(
+                    subject:    "Service Contract '{$contract->service_type}'",
+                    clientName: $clientName,
+                    daysLeft:   $daysLeft,
+                    context:    'expiring'
+                )) $count++;
+
+                if ($this->createDailyLog(
+                    subject:    "Service Contract '{$contract->service_type}'",
+                    clientName: $clientName,
+                    daysLeft:   $daysLeft,
+                    context:    'expiring'
+                )) $count++;
+
+            } elseif (in_array($daysLeft, [10, 14])) {
+                if ($this->createMilestoneNotification(
+                    subject:    "Service Contract '{$contract->service_type}'",
+                    clientName: $clientName,
+                    daysLeft:   $daysLeft,
+                    context:    'expiring'
+                )) $count++;
+
+                if ($this->createMilestoneLog(
+                    subject:    "Service Contract '{$contract->service_type}'",
+                    clientName: $clientName,
+                    daysLeft:   $daysLeft,
+                    context:    'expiring'
+                )) $count++;
+            }
+        }
+
+        $this->line("  Service Contracts: {$count} entries created.");
+        return $count;
+    }
+
+    // =========================================================================
     //  SHARED NOTIFICATION HELPERS
     // =========================================================================
 
@@ -244,7 +301,7 @@ class CheckExpirations extends Command
 
         UserLog::create([
             'name'       => 'System',
-            'ip_address' => $request->ip(),
+            'ip_address' => 'CLI',
             'title'      => $title,
         ]);
         return true;
@@ -264,7 +321,7 @@ class CheckExpirations extends Command
 
         UserLog::create([
             'name'       => 'System',
-            'ip_address' => $request->ip(),
+            'ip_address' => 'CLI',
             'title'      => $title,
         ]);
         return true;

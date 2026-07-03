@@ -220,19 +220,34 @@ Route::middleware(['auth', 'role:manager,admin'])->group(function () {
     });
 
     Route::get('/service-contracts', function(){
-        return Inertia::render('ClientDetails/ServiceContracts');    
+        return Inertia::render('Payment/ServiceContracts');    
     });
 
+    //  Route::get('/service-contracts', function(){
+    //     return Inertia::render('Payment/BillingManagement');    
+    // });
+
     Route::get('/payment-management', function(){
-        return Inertia::render('ClientDetails/Payment');    
+        return Inertia::render('Payment/Payment');    
     });
 
 
     Route::get('/client-details', function(){
-        return Inertia::render('ClientDetails/ClientDetails');    
+        return Inertia::render('Payment/ClientDetails');    
     });
 
+    // Route::get('/client-details', [ServiceContractController::class, 'withPayments'])->name('clientdetails.index');
+
+    // Page route - renders the React component
+// Route::get('/client-details', function () {
+//     return Inertia::render('Payment/ClientDetails');
+// })->name('clientdetails.page');
+
+// // Data route - returns JSON, called via axios from inside the page
+// Route::get('/api/client-details', [ServiceContractController::class, 'withPayments'])
+//     ->name('clientdetails.index');
     
+
     // -----------------------------------------
     // CLIENT CRUD
     // -----------------------------------------

@@ -11,6 +11,15 @@ Route::get('/user', function (Request $request) {
 
 
 
+    // ####################################################################
+    // API routes for creating payments .
+    // ####################################################################
+
     Route::post('/ourpayments', [PaymentController::class, 'store']);
+
+    // ####################################################################
+    // API routes for service contracts .
+    // ####################################################################
+
     Route::post('/ourservicecontracts', [ServiceContractController::class, 'store']);
 
