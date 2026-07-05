@@ -158,6 +158,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/ourpasswords/{id}', [PasswordController::class, 'update'])->name('ourpasswords.update');
     Route::delete('/ourpasswords/{id}', [PasswordController::class, 'destroy'])->name('ourpasswords.destroy');
 
+
+     Route::get('/task-assigned', function(){
+        return Inertia::render('DetailsPage/TaskAssigned');    
+    });
+
 });
     
 
