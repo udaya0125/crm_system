@@ -64,7 +64,6 @@ const AdminSideBar = ({
                     {
                         href: "/ticket",
                         label: "Ticket Management",
-                        show: can.adminOrTechnician,
                     },
                     {
                         href: "/project-management",
@@ -114,6 +113,12 @@ const AdminSideBar = ({
             tooltip: "Payment & Finance Tracking",
             icon: Landmark,
             show: can.adminOrAccountant,
+        },
+         {
+            href: "/task-assigned",
+            label: "Task Assigned",
+            tooltip: "Task Assigned",
+            icon: ClipboardList,
         },
         {
             href: "/client-details",
