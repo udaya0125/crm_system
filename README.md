@@ -70,5 +70,5 @@ Ensure your environment meets the following requirements:
 ### ⚙️ Installation
 
 ```bash
-git clone https://github.com/udaya0125/Sales-Support.git
+git clone https://github.com/udaya0125/crm_system.git
 cd crm
