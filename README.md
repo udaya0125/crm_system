@@ -1,4 +1,4 @@
-# 🧩 Sales Support CRM
+# 🧩CRM
 
 > A modern, web-based **Customer Relationship Management (CRM)** system built with Laravel to streamline sales operations, manage leads, track customer interactions, and generate actionable insights — all from a unified dashboard.
 
@@ -8,7 +8,7 @@
 
 ## 🚀 Overview
 
-**Sales Support CRM** is designed to help businesses efficiently manage their sales pipeline — from lead acquisition to customer retention. It provides powerful tools for tracking interactions, automating follow-ups, and analyzing performance.
+**CRM** is designed to help businesses efficiently manage their sales pipeline — from lead acquisition to customer retention. It provides powerful tools for tracking interactions, automating follow-ups, and analyzing performance.
 
 ---
 
@@ -71,4 +71,4 @@ Ensure your environment meets the following requirements:
 
 ```bash
 git clone https://github.com/udaya0125/Sales-Support.git
-cd Sales-Support
+cd crm
