@@ -2,12 +2,13 @@ import axios from "axios";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
-const AddTaskAssignedForm = ({ showForm, setShowForm, editingUser, setEditingUser, handleUpdate }) => {
+const AddTaskAssignedForm = ({ showForm, setShowForm, editingTaskAssigned, setEditingTaskAssigned, handleUpdate }) => {
     const [submitting, setSubmitting] = useState(false);
-    const [userForm, setUserForm] = useState({
+    const [taskAssignedForm, setTaskAssignedForm] = useState({
         title: "",
         department:"",
-        assigned_to: "",
+        assigned_id: "",
+        user_id: "",
         priority: "",
         start_date: "",
         due_date: "",
@@ -17,23 +18,32 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, editingUser, setEditingUse
     });
     //  Use Effect
     useEffect(() => {
-        if (editingUser) {
-            setUserForm({
-                ...editingUser,
+        if (editingTaskAssigned) {
+            setTaskAssignedForm({
+                ...editingTaskAssigned,
                 image: null,
             });
             setShowForm(true);
         } else {
-            setUserForm({
-                name: "",
+            setTaskAssignedForm({
+                title: "",
+                department: "",
+                assigned_id: "",
+                user_id: "",
+                priority: "",
+                start_date: "",
+                due_date: "",
+                description: "",
+                status: "",
+                attachment: "",
             });
         }
-    }, [editingUser]);
+    }, [editingTaskAssigned]);
 
-    // Handle Create User
+    // Handle Create Task Assigned
     const handleCreate = async (formData) => {
         try {
-            await axios.post(route("ourusers.store"), formData, {
+            await axios.post(route("ourtaskassigned.store"), formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
@@ -41,7 +51,7 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, editingUser, setEditingUse
 
             setReloadTrigger((prev) => !prev);
         } catch (error) {
-            console.log("Error creating user", error);
+            console.log("Error creating task assigned", error);
             throw error;
         }
     };
@@ -51,27 +61,36 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, editingUser, setEditingUse
         e.preventDefault();
         const formData = new FormData();
         // Append all form data except image if it's empty
-        for (const key in userForm) {
-            if (userForm[key] !== null && userForm[key] !== "") {
-                formData.append(key, userForm[key]);
+        for (const key in taskAssignedForm) {
+            if (taskAssignedForm[key] !== null && taskAssignedForm[key] !== "") {
+                formData.append(key, taskAssignedForm[key]);
             }
         }
         try {
             setSubmitting(true);
 
-            if (editingUser) {
-                // Editing existing user
-                await handleUpdate(formData, editingUser.id);
+            if (editingTaskAssigned) {
+                // Editing existing task assigned
+                await handleUpdate(formData, editingTaskAssigned.id);
             } else {
-                // Creating new user
+                // Creating new task assigned
                 await handleCreate(formData);
             }
-            setUserForm({
-                name: "",
+            setTaskAssignedForm({
+                title: "",
+                department: "",
+                assigned_id: "",
+                user_id: "",
+                priority: "",
+                start_date: "",
+                due_date: "",
+                description: "",
+                status: "",
+                attachment: "",
             });
 
             setShowForm(false);
-            setEditingUser(null);
+            setEditingTaskAssigned(null);
         } catch (error) {
             console.log("Error saving data", error);
         } finally {
@@ -83,7 +102,7 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, editingUser, setEditingUse
 
     const handleChange = (e) => {
         const { name, value, type, files } = e.target;
-        setUserForm((prev) => ({
+        setTaskAssignedForm((prev) => ({
             ...prev,
             [name]: type === "file" ? files[0] : value,
         }));

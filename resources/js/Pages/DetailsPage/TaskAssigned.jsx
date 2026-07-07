@@ -5,30 +5,32 @@ import { Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 const TaskAssigned = () => {
-    const [allUser, setAllUser] = useState([]);
+    const [allTaskAssigned, setAllTaskAssigned] = useState([]);
     const [reloadTrigger, setReloadTrigger] = useState(false);
-    const [editingUser, setEditingUser] = useState(null);
+    const [editingTaskAssigned, setEditingTaskAssigned] = useState(null);
     const [showForm, setShowForm] = useState(false);
 
-    // For fetching the user data
+    // For fetching the task assigned data
     useEffect(() => {
-        const fetchUser = async () => {
+        const fetchTaskAssigned = async () => {
             try {
-                const response = await axios.get(route("ourusers.index"));
-                setAllUser(response.data);
+                const response = await axios.get(route("ourtaskassigned.index"));
+                setAllTaskAssigned(response.data);
             } catch (error) {
                 console.error("fetching error ", error);
             }
         };
 
-        fetchUser();
+        fetchTaskAssigned();
     }, [reloadTrigger]);
 
-    // For delete the user
+    // For delete the task assigned
     const handleDelete = async (id) => {
+         if (!window.confirm("Are you sure you want to delete this task assigned?"))
+            return;
         try {
             const response = await axios.delete(
-                route("ourusers.destroy", { id: id }),
+                route("ourtaskassigned.destroy", { id: id }),
             );
             console.log(response.data);
             setReloadTrigger((prev) => !prev);
@@ -38,8 +40,8 @@ const TaskAssigned = () => {
     };
 
     // handleedit
-    const handleEdit = (user) => {
-        setEditingUser(user);
+    const handleEdit = (taskAssigned) => {
+        setEditingTaskAssigned(taskAssigned);
     };
 
     // Handlapdate after the  edit
@@ -47,7 +49,7 @@ const TaskAssigned = () => {
         try {
             formData.append("_method", "PUT");
             const response = await axios.post(
-                route("ourusers.update", { id }),
+                route("ourtaskassigned.update", { id }),
                 formData,
                 {
                     headers: {
@@ -58,7 +60,7 @@ const TaskAssigned = () => {
             setReloadTrigger((prev) => !prev);
             return response.data;
         } catch (error) {
-            console.log("Error updating user", error);
+            console.log("Error updating task assigned", error);
             throw error;
         }
     };
@@ -84,8 +86,8 @@ const TaskAssigned = () => {
                     showForm={showForm}
                     setShowForm={setShowForm}
                     setReloadTrigger={setReloadTrigger}
-                    editingUser={editingUser}
-                    setEditingUser={setEditingUser}
+                    editingTaskAssigned={editingTaskAssigned}
+                    setEditingTaskAssigned={setEditingTaskAssigned}
                     handleUpdate={handleUpdate}
                 />
             </AdminWrapper>
