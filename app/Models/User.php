@@ -101,5 +101,10 @@ class User extends Authenticatable
         return $this->hasMany(Ticket::class, 'assigned_technician');
     }
 
+    public function assignedTasks()
+    {
+        return $this->hasMany(TaskAssigned::class, 'assigned_id');
+    }
+
 
 }

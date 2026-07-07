@@ -24,6 +24,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\OrganizationController;
 use App\Http\Controllers\SubCategoryController;
 use App\Http\Controllers\SubSubCategoryController;
+use App\Http\Controllers\TaskAssignedController;
 
 
     // -----------------------------------------
@@ -162,6 +163,12 @@ Route::middleware('auth')->group(function () {
      Route::get('/task-assigned', function(){
         return Inertia::render('DetailsPage/TaskAssigned');    
     });
+
+
+    Route::get('/ourtaskassigned', [TaskAssignedController::class, 'index'])->name('ourtaskassigned.index');
+    Route::post('/ourtaskassigned', [TaskAssignedController::class, 'store'])->name('ourtaskassigned.store');
+    Route::put('/ourtaskassigned/{id}', [TaskAssignedController::class, 'update'])->name('ourtaskassigned.update');
+    Route::delete('/ourtaskassigned/{id}', [TaskAssignedController::class, 'destroy'])->name('ourtaskassigned.destroy');
 
 });
     
