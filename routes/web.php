@@ -169,6 +169,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/ourtaskassigned', [TaskAssignedController::class, 'store'])->name('ourtaskassigned.store');
     Route::put('/ourtaskassigned/{id}', [TaskAssignedController::class, 'update'])->name('ourtaskassigned.update');
     Route::delete('/ourtaskassigned/{id}', [TaskAssignedController::class, 'destroy'])->name('ourtaskassigned.destroy');
+    Route::delete('/task-assigned/{task}/attachments/{attachment}', [TaskAssignedController::class, 'destroyAttachment'])
+    ->name('ourtaskassigned.attachments.destroy');
 
 });
     

@@ -1,599 +1,3 @@
-// import {
-//     X,
-//     Paperclip,
-//     Pencil,
-//     CheckCircle2,
-//     Circle,
-//     Plus,
-//     Calendar,
-//     Check,
-//     Trash2,
-//     ArrowUp,
-//     ArrowDown,
-// } from "lucide-react";
-// import React, { useState, useEffect } from "react";
-
-// // Shared styling maps + helpers for the Task Dispatch board — exported here
-// // so both this popup and TaskAssigned.jsx (which renders the ticket cards)
-// // stay visually in sync from a single source.
-
-// export const STATUS_STYLES = {
-//     Pending: { bar: "#94A3B8" },
-//     "In Progress": { bar: "#3B6E91" },
-//     Completed: { bar: "#2F5D50" },
-// };
-
-// const STATUS_OPTIONS = Object.keys(STATUS_STYLES);
-
-// // Department / role tag styling — each department gets a distinct identity
-// // so a glance at the left edge of a ticket tells you who owns it.
-// export const DEPARTMENT_STYLES = {
-//     developer: { label: "Developer", bar: "#6D5BD0", text: "#4C3FAE", bg: "#EFEDFC" },
-//     technician: { label: "Technician", bar: "#C9762C", text: "#8A4E15", bg: "#FBEFE3" },
-//     accountant: { label: "Accountant", bar: "#3B6E91", text: "#265266", bg: "#E7F1F6" },
-//     admin: { label: "Admin", bar: "#475569", text: "#334155", bg: "#EEF1F5" },
-//     manager: { label: "Manager", bar: "#475569", text: "#334155", bg: "#EEF1F5" },
-//     user: { label: "User", bar: "#94A3B8", text: "#475569", bg: "#F1F5F9" },
-// };
-
-// export const getDeptStyle = (role) =>
-//     DEPARTMENT_STYLES[(role || "").toLowerCase()] || {
-//         label: role || "Unassigned",
-//         bar: "#CBD5E1",
-//         text: "#64748B",
-//         bg: "#F8FAFC",
-//     };
-
-// export const PRIORITY_DOT = {
-//     High: "#D64545",
-//     Medium: "#C98A1D",
-//     Low: "#2F8F5B",
-// };
-
-// export const getProgress = (taskItems) => {
-//     if (!taskItems || taskItems.length === 0) return 0;
-//     const completed = taskItems.filter((i) => i.status === "Completed").length;
-//     return Math.round((completed / taskItems.length) * 100);
-// };
-
-// export const getDueInfo = (dueDate) => {
-//     if (!dueDate) return null;
-//     const today = new Date();
-//     today.setHours(0, 0, 0, 0);
-//     const due = new Date(dueDate);
-//     const diffDays = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-
-//     if (diffDays < 0) return { text: `${Math.abs(diffDays)}d overdue`, color: "text-red-600" };
-//     if (diffDays === 0) return { text: "Due today", color: "text-orange-600" };
-//     if (diffDays <= 2) return { text: `${diffDays}d left`, color: "text-orange-500" };
-//     return { text: `${diffDays}d left`, color: "text-gray-500" };
-// };
-
-// const DetailRow = ({ label, value }) => (
-//     <div>
-//         <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 mb-0.5">{label}</p>
-//         <p className="text-sm text-gray-800">{value || "—"}</p>
-//     </div>
-// );
-
-// // Read-only-by-default ticket detail popup, with a few fields editable inline
-// // via onQuickUpdate:
-// //   - Status: select in the header, saves immediately on change.
-// //   - Due date: click to reveal a date input; requires an explicit small
-// //     confirm button click to save (no save-on-blur).
-// //   - Checklist: always shown in an editable draft state (no toggle) — items
-// //     can be added, edited, reordered (up/down), toggled complete, and
-// //     deleted at any time. Nothing is sent to the server until
-// //     "Save checklist" is pressed. The draft re-syncs from `task.task_items`
-// //     whenever the `task` prop changes (e.g. popup opened for a new ticket,
-// //     or a save round-trips fresh data back down).
-// // Full edits still go through the "Edit ticket" button -> EditTaskAssignedForm.
-// //
-// // IMPORTANT: because the backend's update() endpoint requires the full set
-// // of core fields (title, assigned_team, user_id, priority, start_date,
-// // due_date) and replaces task_items wholesale when present, every quick
-// // save here rebuilds the complete FormData from the current `task` prop
-// // with just the changed piece overridden — never a partial payload.
-// const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
-//     const [savingField, setSavingField] = useState(null); // "due_date" | "status" | "checklist" | null
-//     const [error, setError] = useState("");
-
-//     const [editingDueDate, setEditingDueDate] = useState(false);
-//     const [dueDateDraft, setDueDateDraft] = useState("");
-
-//     // Checklist draft — always "live", no separate view/edit toggle.
-//     const [checklistDraft, setChecklistDraft] = useState([]);
-
-//     // Re-sync the draft whenever the underlying task changes (popup opened
-//     // for a different ticket, or the parent re-fetched fresh data after a
-//     // save). Doing this here instead of on a button click means the draft
-//     // is ready the moment the popup renders.
-//     useEffect(() => {
-//         setChecklistDraft(
-//             (task?.task_items || []).map((item, i) => ({
-//                 clientId: item.id ?? `existing-${i}`,
-//                 description: item.description,
-//                 status: item.status || "Pending",
-//             }))
-//         );
-//     }, [task]);
-
-//     if (!task) return null;
-
-//     const dept = getDeptStyle(task.department);
-//     const progress = getProgress(checklistDraft);
-//     const dueInfo = getDueInfo(task.due_date);
-//     const canQuickEdit = typeof onQuickUpdate === "function";
-
-//     const buildFormData = (overrides = {}) => {
-//         const merged = {
-//             title: task.title,
-//             assigned_team: task.assigned_team,
-//             user_id: task.user_id,
-//             priority: task.priority,
-//             start_date: task.start_date?.slice(0, 10),
-//             due_date: task.due_date?.slice(0, 10),
-//             description: task.description || "",
-//             status: task.status,
-//             admin_remarks: task.admin_remarks || "",
-//             admin_status: task.admin_status || "",
-//             task_items: task.task_items || [],
-//             ...overrides,
-//         };
-
-//         const formData = new FormData();
-//         formData.append("title", merged.title);
-//         formData.append("assigned_team", merged.assigned_team);
-//         formData.append("user_id", merged.user_id);
-//         formData.append("priority", merged.priority);
-//         formData.append("start_date", merged.start_date);
-//         formData.append("due_date", merged.due_date);
-//         if (merged.description) formData.append("description", merged.description);
-//         formData.append("status", merged.status);
-
-//         if (merged.status === "Completed") {
-//             if (merged.admin_remarks) formData.append("admin_remarks", merged.admin_remarks);
-//             if (merged.admin_status) formData.append("admin_status", merged.admin_status);
-//         }
-
-//         merged.task_items.forEach((item, index) => {
-//             if (item.description?.trim()) {
-//                 formData.append(`task_items[${index}][description]`, item.description);
-//                 formData.append(`task_items[${index}][status]`, item.status || "Pending");
-//             }
-//         });
-
-//         return formData;
-//     };
-
-//     const handleQuickSave = async (overrides, savingKey) => {
-//         setError("");
-//         setSavingField(savingKey || Object.keys(overrides)[0]);
-//         try {
-//             await onQuickUpdate(buildFormData(overrides), task.id);
-//             return true;
-//         } catch (err) {
-//             console.log("Quick update failed", err);
-//             setError("Couldn't save that change. Please try again.");
-//             return false;
-//         } finally {
-//             setSavingField(null);
-//         }
-//     };
-
-//     // ---- Due date ----
-//     const startEditingDueDate = () => {
-//         setDueDateDraft(task.due_date?.slice(0, 10) || "");
-//         setEditingDueDate(true);
-//     };
-
-//     const handleDueDateSave = async () => {
-//         if (!dueDateDraft) {
-//             setEditingDueDate(false);
-//             return;
-//         }
-//         const ok = await handleQuickSave({ due_date: dueDateDraft }, "due_date");
-//         if (ok) setEditingDueDate(false);
-//     };
-
-//     // ---- Status (unchanged) ----
-//     const handleStatusChange = (e) => {
-//         handleQuickSave({ status: e.target.value }, "status");
-//     };
-
-//     // ---- Checklist — always-editable draft ----
-//     const addDraftItem = () => {
-//         setChecklistDraft((prev) => [
-//             ...prev,
-//             { clientId: `new-${Date.now()}`, description: "", status: "Pending" },
-//         ]);
-//     };
-
-//     const removeDraftItem = (clientId) => {
-//         setChecklistDraft((prev) => prev.filter((i) => i.clientId !== clientId));
-//     };
-
-//     const updateDraftText = (clientId, text) => {
-//         setChecklistDraft((prev) =>
-//             prev.map((i) => (i.clientId === clientId ? { ...i, description: text } : i))
-//         );
-//     };
-
-//     const toggleDraftStatus = (clientId) => {
-//         setChecklistDraft((prev) =>
-//             prev.map((i) =>
-//                 i.clientId === clientId
-//                     ? { ...i, status: i.status === "Completed" ? "Pending" : "Completed" }
-//                     : i
-//             )
-//         );
-//     };
-
-//     const moveDraftUp = (index) => {
-//         if (index === 0) return;
-//         setChecklistDraft((prev) => {
-//             const next = [...prev];
-//             [next[index - 1], next[index]] = [next[index], next[index - 1]];
-//             return next;
-//         });
-//     };
-
-//     const moveDraftDown = (index) => {
-//         setChecklistDraft((prev) => {
-//             if (index === prev.length - 1) return prev;
-//             const next = [...prev];
-//             [next[index], next[index + 1]] = [next[index + 1], next[index]];
-//             return next;
-//         });
-//     };
-
-//     const saveChecklist = async () => {
-//         const items = checklistDraft
-//             .filter((i) => i.description.trim() !== "")
-//             .map((i) => ({ description: i.description.trim(), status: i.status }));
-
-//         await handleQuickSave({ task_items: items }, "checklist");
-//         // Draft re-syncs automatically via the useEffect once `task` updates
-//         // with fresh data from the parent after a successful save.
-//     };
-
-//     return (
-//         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-//             <div className="bg-white rounded-xl max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col">
-//                 <div
-//                     className="flex justify-between items-start px-6 py-4 border-b"
-//                     style={{ borderLeft: `6px solid ${dept.bar}` }}
-//                 >
-//                     <div>
-//                         <span className="font-mono text-xs text-gray-400">{task.task_id}</span>
-//                         <h2 className="text-xl font-bold text-gray-900 mt-0.5">{task.title}</h2>
-//                         <div className="flex items-center gap-2 mt-2 flex-wrap">
-//                             <span
-//                                 className="text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded"
-//                                 style={{ backgroundColor: dept.bg, color: dept.text }}
-//                             >
-//                                 {dept.label}
-//                             </span>
-
-//                             {/* Status — unchanged */}
-//                             {canQuickEdit ? (
-//                                 <span className="flex items-center gap-1.5">
-//                                     <span
-//                                         className="w-1.5 h-1.5 rounded-full shrink-0"
-//                                         style={{ backgroundColor: STATUS_STYLES[task.status]?.bar || "#CBD5E1" }}
-//                                     />
-//                                     <select
-//                                         value={task.status}
-//                                         onChange={handleStatusChange}
-//                                         disabled={savingField === "status"}
-//                                         className="text-xs text-gray-600 border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-[#2F5D50]/30 rounded cursor-pointer disabled:opacity-50"
-//                                     >
-//                                         {STATUS_OPTIONS.map((s) => (
-//                                             <option key={s} value={s}>
-//                                                 {s}
-//                                             </option>
-//                                         ))}
-//                                     </select>
-//                                     {savingField === "status" && (
-//                                         <span className="text-[10px] text-gray-400">saving…</span>
-//                                     )}
-//                                 </span>
-//                             ) : (
-//                                 <span className="flex items-center gap-1.5 text-xs text-gray-500">
-//                                     <span
-//                                         className="w-1.5 h-1.5 rounded-full"
-//                                         style={{ backgroundColor: STATUS_STYLES[task.status]?.bar || "#CBD5E1" }}
-//                                     />
-//                                     {task.status}
-//                                 </span>
-//                             )}
-
-//                             <span className="flex items-center gap-1.5 text-xs text-gray-500">
-//                                 <span
-//                                     className="w-1.5 h-1.5 rounded-full"
-//                                     style={{ backgroundColor: PRIORITY_DOT[task.priority] || "#CBD5E1" }}
-//                                 />
-//                                 {task.priority} priority
-//                             </span>
-//                         </div>
-//                     </div>
-//                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0">
-//                         <X size={20} />
-//                     </button>
-//                 </div>
-
-//                 <div className="overflow-y-auto px-6 py-5 space-y-5">
-//                     {error && (
-//                         <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
-//                             {error}
-//                         </div>
-//                     )}
-
-//                     <div className="grid grid-cols-2 gap-4">
-//                         <DetailRow label="Assigned to" value={task.assigned_user?.name} />
-//                         <DetailRow label="Assigned by" value={task.creator?.name} />
-//                         <DetailRow label="Start date" value={task.start_date?.slice(0, 10)} />
-
-//                         {/* Due date — click to edit, small button confirms the save */}
-//                         <div>
-//                             <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 mb-0.5">
-//                                 Due date
-//                             </p>
-//                             {canQuickEdit && editingDueDate ? (
-//                                 <div className="flex items-center gap-2">
-//                                     <input
-//                                         type="date"
-//                                         value={dueDateDraft}
-//                                         onChange={(e) => setDueDateDraft(e.target.value)}
-//                                         onKeyDown={(e) => {
-//                                             if (e.key === "Enter") handleDueDateSave();
-//                                             if (e.key === "Escape") setEditingDueDate(false);
-//                                         }}
-//                                         autoFocus
-//                                         disabled={savingField === "due_date"}
-//                                         className="text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#2F5D50]/30 disabled:opacity-50"
-//                                     />
-//                                     <button
-//                                         type="button"
-//                                         onClick={handleDueDateSave}
-//                                         disabled={savingField === "due_date"}
-//                                         title="Confirm due date"
-//                                         className="p-1 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50"
-//                                     >
-//                                         <Check size={12} />
-//                                     </button>
-//                                     {savingField === "due_date" && (
-//                                         <span className="text-[10px] text-gray-400">saving…</span>
-//                                     )}
-//                                 </div>
-//                             ) : (
-//                                 <button
-//                                     type="button"
-//                                     onClick={canQuickEdit ? startEditingDueDate : undefined}
-//                                     className={`text-sm flex items-center gap-1.5 ${
-//                                         canQuickEdit ? "hover:text-[#2F5D50] cursor-pointer" : "cursor-default"
-//                                     } ${dueInfo ? dueInfo.color : "text-gray-800"}`}
-//                                 >
-//                                     {task.due_date?.slice(0, 10) || "—"}
-//                                     {dueInfo && <span>· {dueInfo.text}</span>}
-//                                     {canQuickEdit && <Calendar size={12} className="text-gray-400" />}
-//                                 </button>
-//                             )}
-//                         </div>
-//                     </div>
-
-//                     {task.description && (
-//                         <div>
-//                             <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 mb-1">
-//                                 Description
-//                             </p>
-//                             <p className="text-sm text-gray-700 whitespace-pre-wrap">{task.description}</p>
-//                         </div>
-//                     )}
-
-//                     {task.status === "Completed" && (task.admin_remarks || task.admin_status) && (
-//                         <div className="bg-[#EAF2EF] border border-[#C7DAD3] rounded-lg p-3 space-y-2">
-//                             {task.admin_status && <DetailRow label="Admin status" value={task.admin_status} />}
-//                             {task.admin_remarks && <DetailRow label="Admin remarks" value={task.admin_remarks} />}
-//                         </div>
-//                     )}
-
-//                     {/* Checklist — always in an editable draft state (no
-//                         toggle button). Add / edit / reorder / delete are
-//                         available immediately; nothing hits the server until
-//                         "Save checklist" is clicked. */}
-//                     <div>
-//                         <div className="flex justify-between items-center mb-2">
-//                             <div className="flex items-center gap-2">
-//                                 <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400">
-//                                     Checklist
-//                                 </p>
-//                                 {checklistDraft.length > 0 && (
-//                                     <span className="text-xs text-gray-400">{progress}% complete</span>
-//                                 )}
-//                             </div>
-//                             {canQuickEdit && (
-//                                 <button
-//                                     type="button"
-//                                     onClick={addDraftItem}
-//                                     className="text-xs text-[#2F5D50] hover:text-[#1D3B32] font-medium flex items-center gap-1"
-//                                 >
-//                                     <Plus size={12} /> Add item
-//                                 </button>
-//                             )}
-//                         </div>
-
-//                         {canQuickEdit ? (
-//                             <div className="space-y-2">
-//                                 {checklistDraft.length === 0 ? (
-//                                     <div className="text-center py-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
-//                                         <p className="text-xs text-gray-400">
-//                                             No items yet. Click "Add item" to create one.
-//                                         </p>
-//                                     </div>
-//                                 ) : (
-//                                     <div className="space-y-1.5">
-//                                         {checklistDraft.map((item, index) => (
-//                                             <div
-//                                                 key={item.clientId}
-//                                                 className={`flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-colors ${
-//                                                     item.status === "Completed"
-//                                                         ? "border-[#C7DAD3] bg-[#EAF2EF]"
-//                                                         : "border-gray-200 bg-gray-50"
-//                                                 }`}
-//                                             >
-//                                                 <button
-//                                                     type="button"
-//                                                     onClick={() => toggleDraftStatus(item.clientId)}
-//                                                     className="shrink-0"
-//                                                     title={
-//                                                         item.status === "Completed"
-//                                                             ? "Mark as incomplete"
-//                                                             : "Mark as complete"
-//                                                     }
-//                                                 >
-//                                                     {item.status === "Completed" ? (
-//                                                         <CheckCircle2 size={18} className="text-[#2F5D50]" />
-//                                                     ) : (
-//                                                         <Circle size={18} className="text-gray-300" />
-//                                                     )}
-//                                                 </button>
-
-//                                                 <input
-//                                                     type="text"
-//                                                     value={item.description}
-//                                                     onChange={(e) => updateDraftText(item.clientId, e.target.value)}
-//                                                     placeholder={`Item ${index + 1}`}
-//                                                     className={`flex-1 text-sm bg-transparent border-none focus:outline-none focus:ring-0 p-0 ${
-//                                                         item.status === "Completed"
-//                                                             ? "line-through text-gray-400"
-//                                                             : "text-gray-700"
-//                                                     }`}
-//                                                 />
-
-//                                                 <button
-//                                                     type="button"
-//                                                     onClick={() => moveDraftUp(index)}
-//                                                     disabled={index === 0}
-//                                                     title="Move up"
-//                                                     className={`p-1 rounded ${
-//                                                         index === 0
-//                                                             ? "text-gray-300 cursor-not-allowed"
-//                                                             : "text-gray-500 hover:bg-gray-200"
-//                                                     }`}
-//                                                 >
-//                                                     <ArrowUp size={14} />
-//                                                 </button>
-//                                                 <button
-//                                                     type="button"
-//                                                     onClick={() => moveDraftDown(index)}
-//                                                     disabled={index === checklistDraft.length - 1}
-//                                                     title="Move down"
-//                                                     className={`p-1 rounded ${
-//                                                         index === checklistDraft.length - 1
-//                                                             ? "text-gray-300 cursor-not-allowed"
-//                                                             : "text-gray-500 hover:bg-gray-200"
-//                                                     }`}
-//                                                 >
-//                                                     <ArrowDown size={14} />
-//                                                 </button>
-//                                                 <button
-//                                                     type="button"
-//                                                     onClick={() => removeDraftItem(item.clientId)}
-//                                                     title="Remove item"
-//                                                     className="p-1 text-red-500 hover:bg-red-50 rounded"
-//                                                 >
-//                                                     <Trash2 size={14} />
-//                                                 </button>
-//                                             </div>
-//                                         ))}
-//                                     </div>
-//                                 )}
-
-//                                 <div className="flex justify-end pt-1">
-//                                     <button
-//                                         type="button"
-//                                         onClick={saveChecklist}
-//                                         disabled={savingField === "checklist"}
-//                                         className="text-xs px-3 py-1.5 rounded-lg bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50"
-//                                     >
-//                                         {savingField === "checklist" ? "Saving..." : "Save checklist"}
-//                                     </button>
-//                                 </div>
-//                             </div>
-//                         ) : task.task_items?.length > 0 ? (
-//                             <div className="space-y-1.5">
-//                                 {task.task_items.map((item, i) => (
-//                                     <div key={item.id ?? i} className="flex items-center gap-2 text-sm">
-//                                         {item.status === "Completed" ? (
-//                                             <CheckCircle2 size={16} className="text-[#2F5D50] shrink-0" />
-//                                         ) : (
-//                                             <Circle size={16} className="text-gray-300 shrink-0" />
-//                                         )}
-//                                         <span
-//                                             className={
-//                                                 item.status === "Completed"
-//                                                     ? "text-gray-400 line-through"
-//                                                     : "text-gray-700"
-//                                             }
-//                                         >
-//                                             {item.description}
-//                                         </span>
-//                                     </div>
-//                                 ))}
-//                             </div>
-//                         ) : (
-//                             <p className="text-sm text-gray-400 italic">No checklist items yet.</p>
-//                         )}
-//                     </div>
-
-//                     {task.attachments?.length > 0 && (
-//                         <div>
-//                             <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 mb-2">
-//                                 Attachments
-//                             </p>
-//                             <div className="flex flex-wrap gap-2">
-//                                 {task.attachments.map((att) => (
-//                                     <a
-//                                         key={att.id}
-//                                         href={`/storage/${att.attachment}`}
-//                                         target="_blank"
-//                                         rel="noreferrer"
-//                                         className="flex items-center gap-1 text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700 hover:bg-gray-200"
-//                                     >
-//                                         <Paperclip size={12} />
-//                                         {att.attachment.split("/").pop()}
-//                                     </a>
-//                                 ))}
-//                             </div>
-//                         </div>
-//                     )}
-//                 </div>
-
-//                 <div className="flex justify-end gap-3 px-6 py-4 border-t">
-//                     <button
-//                         type="button"
-//                         onClick={onClose}
-//                         className="px-4 py-2 rounded-full border text-gray-600 hover:bg-gray-50"
-//                     >
-//                         Close
-//                     </button>
-//                     <button
-//                         type="button"
-//                         onClick={() => onEdit(task)}
-//                         className="px-5 py-2 flex items-center gap-2 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41]"
-//                     >
-//                         <Pencil size={15} /> Edit ticket
-//                     </button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default TaskDetailPopup;
-
-
 import {
     X,
     Paperclip,
@@ -608,6 +12,7 @@ import {
     ArrowDown,
     FileText,
     AlertCircle,
+    Lock,
 } from "lucide-react";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -655,6 +60,9 @@ export const PRIORITY_DOT = {
     Medium: "#C98A1D",
     Low: "#2F8F5B",
 };
+
+// Quick-edit dropdown options for priority — mirrors STATUS_OPTIONS.
+const PRIORITY_OPTIONS = Object.keys(PRIORITY_DOT);
 
 export const getProgress = (taskItems) => {
     if (!taskItems || taskItems.length === 0) return 0;
@@ -833,6 +241,8 @@ const AttachmentPdfViewer = ({ url }) => {
 // Read-only-by-default ticket detail popup, with a few fields editable inline
 // via onQuickUpdate:
 //   - Status: select in the header, saves immediately on change.
+//   - Priority: select in the header, saves immediately on change (same
+//     pattern as status).
 //   - Due date: click to reveal a date input; requires an explicit small
 //     confirm button click to save (no save-on-blur).
 //   - Checklist: always shown in an editable draft state (no toggle) — items
@@ -841,6 +251,14 @@ const AttachmentPdfViewer = ({ url }) => {
 //     "Save checklist" is pressed. The draft re-syncs from `task.task_items`
 //     whenever the `task` prop changes (e.g. popup opened for a new ticket,
 //     or a save round-trips fresh data back down).
+//
+// LOCKING: once a task's status is "Completed", it is fully locked — none
+// of the quick-edit affordances (status/priority/due date/checklist) are
+// rendered, and the "Edit ticket" button is replaced with a disabled
+// "Locked" indicator. This mirrors the backend's TaskAssignedController,
+// which rejects update()/destroyAttachment() calls for completed tasks
+// regardless of what the client sends.
+//
 // Full edits still go through the "Edit ticket" button -> EditTaskAssignedForm.
 //
 // IMPORTANT: because the backend's update() endpoint requires the full set
@@ -849,7 +267,7 @@ const AttachmentPdfViewer = ({ url }) => {
 // save here rebuilds the complete FormData from the current `task` prop
 // with just the changed piece overridden — never a partial payload.
 const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
-    const [savingField, setSavingField] = useState(null); // "due_date" | "status" | "checklist" | null
+    const [savingField, setSavingField] = useState(null); // "due_date" | "status" | "priority" | "checklist" | null
     const [error, setError] = useState("");
 
     const [editingDueDate, setEditingDueDate] = useState(false);
@@ -877,7 +295,12 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
     const dept = getDeptStyle(task.department);
     const progress = getProgress(checklistDraft);
     const dueInfo = getDueInfo(task.due_date);
-    const canQuickEdit = typeof onQuickUpdate === "function";
+
+    // Completed tasks are locked: no quick-edits (status/priority/due date/
+    // checklist) and no "Edit ticket" access, even if a parent passed an
+    // onQuickUpdate handler.
+    const isLocked = task.status === "Completed";
+    const canQuickEdit = typeof onQuickUpdate === "function" && !isLocked;
 
     const buildFormData = (overrides = {}) => {
         const merged = {
@@ -921,6 +344,7 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
     };
 
     const handleQuickSave = async (overrides, savingKey) => {
+        if (isLocked) return false;
         setError("");
         setSavingField(savingKey || Object.keys(overrides)[0]);
         try {
@@ -937,6 +361,7 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
 
     // ---- Due date ----
     const startEditingDueDate = () => {
+        if (isLocked) return;
         setDueDateDraft(task.due_date?.slice(0, 10) || "");
         setEditingDueDate(true);
     };
@@ -950,13 +375,19 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
         if (ok) setEditingDueDate(false);
     };
 
-    // ---- Status (unchanged) ----
+    // ---- Status ----
     const handleStatusChange = (e) => {
         handleQuickSave({ status: e.target.value }, "status");
     };
 
+    // ---- Priority — same pattern as status: select saves immediately ----
+    const handlePriorityChange = (e) => {
+        handleQuickSave({ priority: e.target.value }, "priority");
+    };
+
     // ---- Checklist — always-editable draft ----
     const addDraftItem = () => {
+        if (isLocked) return;
         setChecklistDraft((prev) => [
             ...prev,
             { clientId: `new-${Date.now()}`, description: "", status: "Pending" },
@@ -964,16 +395,19 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
     };
 
     const removeDraftItem = (clientId) => {
+        if (isLocked) return;
         setChecklistDraft((prev) => prev.filter((i) => i.clientId !== clientId));
     };
 
     const updateDraftText = (clientId, text) => {
+        if (isLocked) return;
         setChecklistDraft((prev) =>
             prev.map((i) => (i.clientId === clientId ? { ...i, description: text } : i))
         );
     };
 
     const toggleDraftStatus = (clientId) => {
+        if (isLocked) return;
         setChecklistDraft((prev) =>
             prev.map((i) =>
                 i.clientId === clientId
@@ -984,6 +418,7 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
     };
 
     const moveDraftUp = (index) => {
+        if (isLocked) return;
         if (index === 0) return;
         setChecklistDraft((prev) => {
             const next = [...prev];
@@ -993,6 +428,7 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
     };
 
     const moveDraftDown = (index) => {
+        if (isLocked) return;
         setChecklistDraft((prev) => {
             if (index === prev.length - 1) return prev;
             const next = [...prev];
@@ -1002,6 +438,7 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
     };
 
     const saveChecklist = async () => {
+        if (isLocked) return;
         const items = checklistDraft
             .filter((i) => i.description.trim() !== "")
             .map((i) => ({ description: i.description.trim(), status: i.status }));
@@ -1029,7 +466,13 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
                                 {dept.label}
                             </span>
 
-                            {/* Status — unchanged */}
+                            {isLocked && (
+                                <span className="flex items-center gap-1 text-[10px] font-mono uppercase tracking-wider px-2 py-0.5 rounded bg-gray-100 text-gray-500">
+                                    <Lock size={10} /> Locked
+                                </span>
+                            )}
+
+                            {/* Status */}
                             {canQuickEdit ? (
                                 <span className="flex items-center gap-1.5">
                                     <span
@@ -1062,13 +505,38 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
                                 </span>
                             )}
 
-                            <span className="flex items-center gap-1.5 text-xs text-gray-500">
-                                <span
-                                    className="w-1.5 h-1.5 rounded-full"
-                                    style={{ backgroundColor: PRIORITY_DOT[task.priority] || "#CBD5E1" }}
-                                />
-                                {task.priority} priority
-                            </span>
+                            {/* Priority — same quick-edit pattern as status */}
+                            {canQuickEdit ? (
+                                <span className="flex items-center gap-1.5">
+                                    <span
+                                        className="w-1.5 h-1.5 rounded-full shrink-0"
+                                        style={{ backgroundColor: PRIORITY_DOT[task.priority] || "#CBD5E1" }}
+                                    />
+                                    <select
+                                        value={task.priority}
+                                        onChange={handlePriorityChange}
+                                        disabled={savingField === "priority"}
+                                        className="text-xs text-gray-600 border-none bg-transparent focus:outline-none focus:ring-1 focus:ring-[#2F5D50]/30 rounded cursor-pointer disabled:opacity-50"
+                                    >
+                                        {PRIORITY_OPTIONS.map((p) => (
+                                            <option key={p} value={p}>
+                                                {p}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {savingField === "priority" && (
+                                        <span className="text-[10px] text-gray-400">saving…</span>
+                                    )}
+                                </span>
+                            ) : (
+                                <span className="flex items-center gap-1.5 text-xs text-gray-500">
+                                    <span
+                                        className="w-1.5 h-1.5 rounded-full"
+                                        style={{ backgroundColor: PRIORITY_DOT[task.priority] || "#CBD5E1" }}
+                                    />
+                                    {task.priority} priority
+                                </span>
+                            )}
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors shrink-0">
@@ -1080,6 +548,14 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
                     {error && (
                         <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
                             {error}
+                        </div>
+                    )}
+
+                    {isLocked && (
+                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+                            <Lock size={13} className="shrink-0" />
+                            This ticket is completed and locked — status, priority, due date,
+                            checklist, and attachments can no longer be changed.
                         </div>
                     )}
 
@@ -1152,10 +628,12 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
                         </div>
                     )}
 
-                    {/* Checklist — always in an editable draft state (no
-                        toggle button). Add / edit / reorder / delete are
-                        available immediately; nothing hits the server until
-                        "Save checklist" is clicked. */}
+                    {/* Checklist — always in an editable draft state when
+                        unlocked (no toggle button). Add / edit / reorder /
+                        delete are available immediately; nothing hits the
+                        server until "Save checklist" is clicked. Once the
+                        task is Completed, this falls back to the read-only
+                        render below. */}
                     <div>
                         <div className="flex justify-between items-center mb-2">
                             <div className="flex items-center gap-2">
@@ -1303,7 +781,10 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
 
                     {/* Attachments — images render inline, PDFs render in a
                         scrollable/zoomable inline viewer (same behavior as
-                        the ticketing system's attachment preview). */}
+                        the ticketing system's attachment preview). This
+                        popup never offered attachment deletion — that lives
+                        in EditTaskAssignedForm, which is itself locked out
+                        once the task is Completed. */}
                     {task.attachments?.length > 0 && (
                         <div>
                             <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 mb-2">
@@ -1364,13 +845,22 @@ const TaskDetailPopup = ({ task, onClose, onEdit, onQuickUpdate }) => {
                     >
                         Close
                     </button>
-                    <button
-                        type="button"
-                        onClick={() => onEdit(task)}
-                        className="px-5 py-2 flex items-center gap-2 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41]"
-                    >
-                        <Pencil size={15} /> Edit ticket
-                    </button>
+                    {isLocked ? (
+                        <span
+                            className="px-5 py-2 flex items-center gap-2 rounded-full bg-gray-100 text-gray-400 text-sm cursor-not-allowed select-none"
+                            title="Completed tickets are locked from editing"
+                        >
+                            <Lock size={14} /> Locked
+                        </span>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => onEdit(task)}
+                            className="px-5 py-2 flex items-center gap-2 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41]"
+                        >
+                            <Pencil size={15} /> Edit ticket
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

@@ -188,6 +188,19 @@ class TaskAssignedController extends Controller
             ], 403);
         }
 
+        // Completed tasks are locked — no further edits by anyone, including
+        // quick-updates from the popup (status/priority/due date/checklist)
+        // and full edits from the edit form. This check uses the status
+        // already persisted in the DB (before this request's `status` field
+        // is applied), so the one transition *into* Completed still goes
+        // through normally; every subsequent update attempt is rejected.
+        if ($task->status === 'Completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This task is completed and can no longer be edited.',
+            ], 403);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'assigned_team' => 'required|exists:users,id',
@@ -336,6 +349,15 @@ class TaskAssignedController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to modify this task.',
+            ], 403);
+        }
+
+        // Completed tasks are locked — attachments can no longer be removed,
+        // mirroring the same rule enforced in update().
+        if ($task->status === 'Completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This task is completed; attachments cannot be removed.',
             ], 403);
         }
 
