@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\TaskAssigned;
 use App\Models\TaskAttachment;
-use App\Models\TaskItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,20 +11,80 @@ use Illuminate\Support\Facades\Storage;
 
 class TaskAssignedController extends Controller
 {
+    // Roles that can see and manage every task, regardless of ownership.
+    private const PRIVILEGED_ROLES = ['admin', 'manager'];
+
     /**
-     * Display all tasks
+     * Whether the given user can act on any task (not just their own).
      */
-    public function index()
+    private function isPrivileged($user): bool
     {
-        $tasks = TaskAssigned::with([
+        return $user && in_array($user->role, self::PRIVILEGED_ROLES);
+    }
+
+    /**
+     * Whether the given user is involved in this task (assignee or assigner).
+     */
+    // private function ownsTask($user, TaskAssigned $task): bool
+    // {
+    //     return $user && ($task->assigned_team === $user->id || $task->user_id === $user->id);
+    // }
+
+    private function ownsTask($user, TaskAssigned $task): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        return (int) $task->assigned_team === (int) $user->id
+            || (int) $task->user_id === (int) $user->id;
+    }
+
+    /**
+     * Display all tasks — admins/managers see everything, everyone else
+     * only sees tasks assigned to them or created by them.
+     */
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        $query = TaskAssigned::with([
             'attachments',
             'taskItems',
             'assignedUser:id,name,role,email',
             'creator:id,name,role,email',
-        ])->latest()->get();
+        ])->latest();
 
-        return response()->json($tasks);
+        if (! $this->isPrivileged($user)) {
+            $query->where(function ($q) use ($user) {
+                $q->where('assigned_team', $user->id)
+                    ->orWhere('user_id', $user->id);
+            });
+        }
+
+        return response()->json($query->paginate(15)->withQueryString());
     }
+
+    // public function index(Request $request)
+    // {
+    //     $user = $request->user();
+
+    //     $query = TaskAssigned::with([
+    //         'attachments',
+    //         'taskItems',
+    //         'assignedUser:id,name,role,email',
+    //         'creator:id,name,role,email',
+    //     ])->latest();
+
+    //     if (!$this->isPrivileged($user)) {
+    //         $query->where(function ($q) use ($user) {
+    //             $q->where('assigned_team', $user->id)
+    //               ->orWhere('user_id', $user->id);
+    //         });
+    //     }
+
+    //     return response()->json($query->get());
+    // }
 
     /**
      * Store a newly created task
@@ -41,7 +100,8 @@ class TaskAssignedController extends Controller
             'due_date' => 'required|date|after_or_equal:start_date',
             'description' => 'nullable|string',
 
-            'attachments.*' => 'nullable|file|max:10240', // 10MB each
+            // 'attachments.*' => 'nullable|file|max:10240', // 10MB each
+            'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
 
             'task_items' => 'nullable|array',
             'task_items.*.description' => 'required|string',
@@ -119,6 +179,15 @@ class TaskAssignedController extends Controller
             'taskItems',
         ])->findOrFail($id);
 
+        $user = $request->user();
+
+        if (! $this->isPrivileged($user) && ! $this->ownsTask($user, $task)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to update this task.',
+            ], 403);
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'assigned_team' => 'required|exists:users,id',
@@ -129,7 +198,8 @@ class TaskAssignedController extends Controller
             'description' => 'nullable|string',
             'status' => 'nullable|string',
 
-            'attachments.*' => 'nullable|file|max:10240',
+            // 'attachments.*' => 'nullable|file|max:10240',
+            'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
 
             'task_items' => 'nullable|array',
             'task_items.*.description' => 'required|string',
@@ -204,12 +274,21 @@ class TaskAssignedController extends Controller
     /**
      * Delete Task
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $task = TaskAssigned::with([
             'attachments',
             'taskItems',
         ])->findOrFail($id);
+
+        $user = $request->user();
+
+        if (! $this->isPrivileged($user) && ! $this->ownsTask($user, $task)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to delete this task.',
+            ], 403);
+        }
 
         DB::beginTransaction();
 
@@ -247,9 +326,19 @@ class TaskAssignedController extends Controller
     /**
      * Delete a single attachment from a task
      */
-    public function destroyAttachment($taskId, $attachmentId)
+    public function destroyAttachment(Request $request, $taskId, $attachmentId)
     {
         $task = TaskAssigned::findOrFail($taskId);
+
+        $user = $request->user();
+
+        if (! $this->isPrivileged($user) && ! $this->ownsTask($user, $task)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to modify this task.',
+            ], 403);
+        }
+
         $attachment = TaskAttachment::where('task_assigned_id', $task->id)
             ->findOrFail($attachmentId);
 

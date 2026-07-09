@@ -667,7 +667,7 @@ const AdminNavBar = ({ onMenuToggle, isCollapsed = false }) => {
         <nav
             className={[
                 "fixed right-0 top-0 z-30 h-16 border-b border-slate-200 bg-white/90 shadow-sm shadow-slate-200/50 backdrop-blur transition-all duration-300",
-                isCollapsed ? "lg:left-20" : "lg:left-72",
+                isCollapsed ? "lg:left-20" : "lg:left-64",
                 "left-0",
             ].join(" ")}
         >

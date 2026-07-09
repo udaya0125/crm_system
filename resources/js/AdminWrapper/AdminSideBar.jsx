@@ -458,21 +458,6 @@ const AdminSideBar = ({
                 ],
             },
             {
-                id: "report",
-                label: "Report",
-                icon: ClipboardList,
-                show: true,
-                items: [
-                    { href: "/todo", label: "To Do List" },
-                    { href: "/ticket", label: "Ticket Management" },
-                    {
-                        href: "/project-management",
-                        label: "Project Management",
-                        show: can.adminOrDeveloper,
-                    },
-                ],
-            },
-            {
                 id: "company",
                 label: "Company",
                 icon: Building2,
@@ -482,6 +467,32 @@ const AdminSideBar = ({
                     { href: "/expiration", label: "Expirations" },
                     { href: "/hosting-tracking", label: "Hosting Management" },
                     { href: "/domain-tracking", label: "Domain Management" },
+                ],
+            },
+            // {
+            //     id: "report",
+            //     label: "Report",
+            //     icon: ClipboardList,
+            //     show: true,
+            //     items: [
+            //         { href: "/todo", label: "To Do List" },
+            //         { href: "/ticket", label: "Ticket Management" },
+            //         {
+            //             href: "/project-management",
+            //             label: "Project Management",
+            //             show: can.adminOrDeveloper,
+            //         },
+            //     ],
+            // },
+            {
+                id: "payment-management",
+                label: "Payment Management",
+                icon: Building2,
+                show: can.adminOrManager,
+                items: [
+                    { href: "/payment-management", label: "Payment Management" },
+                    { href: "/service-contracts", label: "Service Contracts" },
+                    { href: "/client-details", label: "Client Details" },
                 ],
             },
             {
@@ -497,6 +508,17 @@ const AdminSideBar = ({
                     { href: "/password", label: "Passwords" },
                 ],
             },
+            {
+                id: "user-management",
+                label: "User Management",
+                icon: User,
+                show: can.adminOrManager,
+                items: [
+                    { href: "/user-management", label: "User Management" },
+                    { href: "/activity-log", label: "Activity Log" },
+                ],
+            },
+            
         ],
         [
             can.adminOrAccountant,
@@ -518,36 +540,53 @@ const AdminSideBar = ({
             label: "Task Assigned",
             icon: ClipboardList,
         },
+        // {
+        //     href: "/client-details",
+        //     label: "Client Details",
+        //     icon: UserCircle,
+        //     show: can.admin,
+        // },
+        // {
+        //     href: "/payment-management",
+        //     label: "Payment",
+        //     icon: Receipt,
+        //     show: can.admin,
+        // },
+        // {
+        //     href: "/service-contracts",
+        //     label: "Contracts",
+        //     icon: ScrollText,
+        //     show: can.admin,
+        // },
         {
-            href: "/client-details",
-            label: "Client Details",
-            icon: UserCircle,
-            show: can.admin,
-        },
-        {
-            href: "/payment-management",
-            label: "Payment",
-            icon: Receipt,
-            show: can.admin,
-        },
-        {
-            href: "/service-contracts",
-            label: "Contracts",
+            href: "/todo",
+            label: "Todo",
             icon: ScrollText,
-            show: can.admin,
         },
         {
-            href: "/user-management",
-            label: "Users",
+            href: "/ticket",
+            label: "Ticket",
+            icon: ScrollText,
+        },
+        {
+            href: "/project-management",
+            label: "Project Management",
             icon: UserCog,
-            show: can.admin,
+             show: can.adminOrDeveloper,
         },
-        {
-            href: "/activity-log",
-            label: "Activity Log",
-            icon: Activity,
-            show: can.admin,
-        },
+        
+        // {
+        //     href: "/user-management",
+        //     label: "Users",
+        //     icon: UserCog,
+        //     show: can.admin,
+        // },
+        // {
+        //     href: "/activity-log",
+        //     label: "Activity Log",
+        //     icon: Activity,
+        //     show: can.admin,
+        // },
     ];
 
     useEffect(() => {
@@ -670,7 +709,7 @@ const AdminSideBar = ({
                     >
                         <Icon className="h-4 w-4" />
                     </button>
-                    <div className="invisible fixed top-24 ml-3 z-50 min-w-56 rounded-2xl border border-gray-100 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
+                    <div className="invisible fixed top-[27rem] ml-12 z-50 min-w-56 rounded-2xl border border-gray-100 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
                         <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
                             {group.label}
                         </p>
@@ -698,7 +737,7 @@ const AdminSideBar = ({
 
         return (
             <div>
-                <button
+                {/* <button
                     type="button"
                     onClick={() => toggleGroup(group.id)}
                     className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide text-gray-400 transition hover:text-gray-600"
@@ -712,7 +751,28 @@ const AdminSideBar = ({
                         )}
                         {group.label}
                     </span>
-                </button>
+                </button> */}
+
+                <button
+    type="button"
+    onClick={() => toggleGroup(group.id)}
+    className={[
+        "flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+        active
+            ? "text-gray-900"
+            : "text-gray-400 hover:text-gray-600",
+    ].join(" ")}
+    aria-expanded={isOpen}
+>
+    <span className="flex items-center gap-2">
+        {isOpen ? (
+            <ChevronDown className={["h-3.5 w-3.5", active ? "text-gray-900" : ""].join(" ")} />
+        ) : (
+            <ChevronRight className={["h-3.5 w-3.5", active ? "text-gray-900" : ""].join(" ")} />
+        )}
+        {group.label}
+    </span>
+</button>
 
                 {isOpen && (
                     <div className="mt-1 space-y-0.5 pl-2">
@@ -760,7 +820,7 @@ const AdminSideBar = ({
             <aside
                 className={[
                     "fixed left-0 top-0 z-50 flex h-screen flex-col bg-amber-50/60 transition-all duration-300",
-                    isCollapsed ? "w-24" : "w-72",
+                    isCollapsed ? "w-20" : "w-64",
                     isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
                 ].join(" ")}
             >
@@ -768,7 +828,7 @@ const AdminSideBar = ({
                     {/* Logo + collapse toggle */}
                     <div
                         className={[
-                            "flex items-center pb-3",
+                            "flex items-center pb-3 border-b border-slate-200",
                             isCollapsed ? "justify-center" : "justify-between",
                         ].join(" ")}
                     >
@@ -785,13 +845,16 @@ const AdminSideBar = ({
                                 />
                             </Link>
                         ) : (
-                            <Link href="/dashboard" onClick={closeMobileMenu}>
+
+                            <>
+                            <Link href="/dashboard" onClick={closeMobileMenu} className="hidden" >
                                 <img
                                     src="/images/logo2.png"
                                     alt="S.A I.T Solution"
                                     className="h-8 w-8 object-contain"
                                 />
                             </Link>
+                            </>
                         )}
 
                         <button
@@ -816,7 +879,7 @@ const AdminSideBar = ({
                         </div>
                     )} */}
 
-                    <div className="flex-1 space-y-5 overflow-y-auto pr-1">
+                    <div className="flex-1 space-y-5 overflow-y-auto pr-1 py-4">
                         {/* Grid tiles: Dashboard + quick links */}
                         <div
                             className={[
@@ -1241,12 +1304,12 @@ export default AdminSideBar;
 
 //             <aside
 //                 className={[
-//                     "fixed left-0 top-0 z-50 flex h-screen flex-col bg-gray-100 p-3 transition-all duration-300",
-//                     isCollapsed ? "w-20" : "w-72",
+//                     "fixed left-0 top-0 z-50 flex h-screen flex-col bg-gray-100  transition-all duration-300",
+//                     isCollapsed ? "w-24" : "w-72",
 //                     isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
 //                 ].join(" ")}
 //             >
-//                 <div className="flex h-full flex-col rounded-[28px] bg-white p-4 shadow-xl shadow-gray-200/60">
+//                 <div className="flex h-full flex-col  bg-white p-4 shadow-xl shadow-gray-200/60">
 //                     {/* Logo + collapse toggle */}
 //                     <div
 //                         className={[
@@ -1306,7 +1369,7 @@ export default AdminSideBar;
 //                     </nav>
 
 //                     {/* Profile card */}
-//                     <div
+//                     {/* <div
 //                         className={[
 //                             "mt-4 flex items-center gap-3 rounded-2xl bg-gray-50 p-3",
 //                             isCollapsed ? "justify-center px-2" : "",
@@ -1334,7 +1397,7 @@ export default AdminSideBar;
 //                                 </p>
 //                             </div>
 //                         )}
-//                     </div>
+//                     </div> */}
 //                 </div>
 //             </aside>
 //         </>
