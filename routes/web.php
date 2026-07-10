@@ -171,6 +171,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/ourtaskassigned/{id}', [TaskAssignedController::class, 'destroy'])->name('ourtaskassigned.destroy');
     Route::delete('/task-assigned/{task}/attachments/{attachment}', [TaskAssignedController::class, 'destroyAttachment'])
     ->name('ourtaskassigned.attachments.destroy');
+    Route::patch('task-assigned/{id}/review', [TaskAssignedController::class, 'review'])
+    ->name('ourtaskassigned.review');
 
 });
     

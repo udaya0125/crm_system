@@ -14,6 +14,10 @@ class TaskAssignedController extends Controller
     // Roles that can see and manage every task, regardless of ownership.
     private const PRIVILEGED_ROLES = ['admin', 'manager'];
 
+    // Verdicts an admin/manager can give when reviewing a completed task.
+    private const ADMIN_STATUS_REOPENED = 'Reopened';
+    private const ADMIN_STATUS_APPROVED = 'Completed';
+
     /**
      * Whether the given user can act on any task (not just their own).
      */
@@ -25,11 +29,6 @@ class TaskAssignedController extends Controller
     /**
      * Whether the given user is involved in this task (assignee or assigner).
      */
-    // private function ownsTask($user, TaskAssigned $task): bool
-    // {
-    //     return $user && ($task->assigned_team === $user->id || $task->user_id === $user->id);
-    // }
-
     private function ownsTask($user, TaskAssigned $task): bool
     {
         if (! $user) {
@@ -65,27 +64,6 @@ class TaskAssignedController extends Controller
         return response()->json($query->paginate(15)->withQueryString());
     }
 
-    // public function index(Request $request)
-    // {
-    //     $user = $request->user();
-
-    //     $query = TaskAssigned::with([
-    //         'attachments',
-    //         'taskItems',
-    //         'assignedUser:id,name,role,email',
-    //         'creator:id,name,role,email',
-    //     ])->latest();
-
-    //     if (!$this->isPrivileged($user)) {
-    //         $query->where(function ($q) use ($user) {
-    //             $q->where('assigned_team', $user->id)
-    //               ->orWhere('user_id', $user->id);
-    //         });
-    //     }
-
-    //     return response()->json($query->get());
-    // }
-
     /**
      * Store a newly created task
      */
@@ -100,7 +78,6 @@ class TaskAssignedController extends Controller
             'due_date' => 'required|date|after_or_equal:start_date',
             'description' => 'nullable|string',
 
-            // 'attachments.*' => 'nullable|file|max:10240', // 10MB each
             'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
 
             'task_items' => 'nullable|array',
@@ -193,7 +170,8 @@ class TaskAssignedController extends Controller
         // and full edits from the edit form. This check uses the status
         // already persisted in the DB (before this request's `status` field
         // is applied), so the one transition *into* Completed still goes
-        // through normally; every subsequent update attempt is rejected.
+        // through normally; every subsequent update attempt is rejected
+        // until an admin/manager reopens it via review().
         if ($task->status === 'Completed') {
             return response()->json([
                 'success' => false,
@@ -211,7 +189,6 @@ class TaskAssignedController extends Controller
             'description' => 'nullable|string',
             'status' => 'nullable|string',
 
-            // 'attachments.*' => 'nullable|file|max:10240',
             'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
 
             'task_items' => 'nullable|array',
@@ -224,6 +201,14 @@ class TaskAssignedController extends Controller
         try {
             $assignedUser = User::findOrFail($request->assigned_team);
 
+            // admin_remarks/admin_status are intentionally NOT touched here —
+            // they're exclusively owned by the review() endpoint below, and
+            // are never accepted from this endpoint's request payload. This
+            // means when a Reopened task is re-edited and resubmitted as
+            // Completed, the previous review verdict/remarks persist
+            // exactly as they were, so the admin/manager always has the
+            // prior review context in front of them until they explicitly
+            // submit a new one via review().
             $task->update([
                 'title' => $request->title,
                 'department' => $assignedUser->role, // re-derived in case assignee changed
@@ -234,8 +219,6 @@ class TaskAssignedController extends Controller
                 'due_date' => $request->due_date,
                 'description' => $request->description,
                 'status' => $request->status ?? $task->status,
-                'admin_remarks' => $request->admin_remarks,
-                'admin_status' => $request->admin_status,
             ]);
 
             /**
@@ -277,6 +260,85 @@ class TaskAssignedController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Admin/manager review of a completed task.
+     *
+     * - "Reopened": kicks the task back to In Progress so the assignee/owner
+     *   can edit it again through the normal update() flow. They resubmit
+     *   with status = Completed when done; because update() never touches
+     *   admin_remarks/admin_status, this same review verdict and remarks
+     *   remain visible on the task the whole time it's being re-edited and
+     *   after it's resubmitted, right up until the admin/manager reviews it
+     *   again.
+     * - "Completed": final approval — task stays Completed and admin_status
+     *   becomes "Completed" too, which permanently locks it from further
+     *   review (no more reopening).
+     *
+     * This can loop indefinitely: Completed -> Reopened -> In Progress ->
+     * (edited, resubmitted) -> Completed -> Reopened -> ... until an
+     * admin/manager finally approves it. Each call here fully overwrites
+     * admin_status/admin_remarks with the reviewer's latest verdict.
+     */
+    public function review(Request $request, $id)
+    {
+        $task = TaskAssigned::findOrFail($id);
+        $user = $request->user();
+
+        if (! $this->isPrivileged($user)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only admins or managers can review completed tasks.',
+            ], 403);
+        }
+
+        if ($task->status !== 'Completed') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Only completed tasks can be reviewed.',
+            ], 403);
+        }
+
+        if ($task->admin_status === self::ADMIN_STATUS_APPROVED) {
+            return response()->json([
+                'success' => false,
+                'message' => 'This task has already been approved and finalized.',
+            ], 403);
+        }
+
+        $request->validate([
+            'admin_status' => 'required|in:' . self::ADMIN_STATUS_REOPENED . ',' . self::ADMIN_STATUS_APPROVED,
+            'admin_remarks' => 'nullable|string',
+        ]);
+
+        try {
+            if ($request->admin_status === self::ADMIN_STATUS_REOPENED) {
+                $task->update([
+                    'status' => 'In Progress',
+                    'admin_status' => self::ADMIN_STATUS_REOPENED,
+                    'admin_remarks' => $request->admin_remarks,
+                ]);
+            } else {
+                $task->update([
+                    'admin_status' => self::ADMIN_STATUS_APPROVED,
+                    'admin_remarks' => $request->admin_remarks,
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => $request->admin_status === self::ADMIN_STATUS_REOPENED
+                    ? 'Task reopened — assignee can edit it again.'
+                    : 'Task approved and finalized.',
+                'data' => $task->load('attachments', 'taskItems', 'assignedUser', 'creator'),
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
