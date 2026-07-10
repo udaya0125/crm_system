@@ -24,6 +24,7 @@ import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import Select from "react-select";
 import parse from "html-react-parser";
+import { useForm, Controller } from "react-hook-form";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -423,19 +424,32 @@ const TaskDetailPopup = ({
     const [error, setError] = useState("");
 
     const [editingDueDate, setEditingDueDate] = useState(false);
-    const [dueDateDraft, setDueDateDraft] = useState("");
 
     // Checklist draft — always "live", no separate view/edit toggle.
     const [checklistDraft, setChecklistDraft] = useState([]);
 
-    // Review form state (admin/manager verdict on a Completed task) — two
-    // separate fields, submitted together. reviewStatus holds the full
-    // react-select option object (or null), not just the raw value.
-    const [reviewStatus, setReviewStatus] = useState(null);
-    const [reviewRemarks, setReviewRemarks] = useState(""); // HTML from Quill
-    const [reviewSubmitting, setReviewSubmitting] = useState(false);
-    const [reviewError, setReviewError] = useState("");
     const [menuPortalTarget, setMenuPortalTarget] = useState(null);
+
+    // ── Due-date inline edit form ───────────────────────────────────────
+    // Small RHF instance just for the due-date popover. Validated against
+    // the task's start_date so picking a due date earlier than the start
+    // date shows an inline error instead of silently saving.
+    const {
+        register: registerDueDate,
+        handleSubmit: handleDueDateSubmit,
+        reset: resetDueDateForm,
+        formState: { errors: dueDateErrors },
+    } = useForm({ defaultValues: { due_date: "" } });
+
+    // ── Admin review form ────────────────────────────────────────────────
+    // Admin Status (react-select) and Admin Remarks (Quill) submitted
+    // together via one Save Review button.
+    const {
+        control: reviewControl,
+        handleSubmit: handleReviewSubmit,
+        reset: resetReviewForm,
+        formState: { errors: reviewErrors, isSubmitting: reviewSubmitting },
+    } = useForm({ defaultValues: { admin_status: null, admin_remarks: "" } });
 
     useEffect(() => {
         setMenuPortalTarget(document.body);
@@ -489,17 +503,16 @@ const TaskDetailPopup = ({
     // slate — the admin can leave it as-is (re-save with updated notes) or
     // change the verdict entirely (e.g. switch to "Completed" to approve).
     useEffect(() => {
-        setReviewStatus(
-            task?.admin_status
+        resetReviewForm({
+            admin_status: task?.admin_status
                 ? ADMIN_STATUS_OPTIONS.find(
                       (o) => o.value === task.admin_status,
                   ) || null
                 : null,
-        );
-        setReviewRemarks(task?.admin_remarks || "");
-        setReviewError("");
-        setReviewSubmitting(false);
-    }, [task?.id]);
+            admin_remarks: task?.admin_remarks || "",
+        });
+        setEditingDueDate(false);
+    }, [task?.id, resetReviewForm]);
 
     if (!task) return null;
 
@@ -590,17 +603,17 @@ const TaskDetailPopup = ({
     // ---- Due date ----
     const startEditingDueDate = () => {
         if (isLocked) return;
-        setDueDateDraft(task.due_date?.slice(0, 10) || "");
+        resetDueDateForm({ due_date: task.due_date?.slice(0, 10) || "" });
         setEditingDueDate(true);
     };
 
-    const handleDueDateSave = async () => {
-        if (!dueDateDraft) {
+    const onDueDateSubmit = async (data) => {
+        if (!data.due_date) {
             setEditingDueDate(false);
             return;
         }
         const ok = await handleQuickSave(
-            { due_date: dueDateDraft },
+            { due_date: data.due_date },
             "due_date",
         );
         if (ok) setEditingDueDate(false);
@@ -695,34 +708,18 @@ const TaskDetailPopup = ({
     };
 
     // ---- Review (admin/manager verdict on a Completed task) ----
-    // Both fields — Admin Status (react-select) and Admin Remarks (Quill) —
-    // are submitted together when "Save Review" is clicked.
-    const isReviewValid =
-        reviewStatus?.value === "Reopened" ||
-        reviewStatus?.value === "Completed";
-
-    const submitReview = async () => {
+    const onReviewSubmit = async (data) => {
         if (typeof onReview !== "function") return;
-        if (!isReviewValid) {
-            setReviewError("Please choose an Admin Status before saving.");
-            return;
-        }
-
-        setReviewError("");
-        setReviewSubmitting(true);
         try {
             await onReview(task.id, {
-                admin_status: reviewStatus.value,
+                admin_status: data.admin_status.value,
                 admin_remarks:
-                    reviewRemarks && reviewRemarks !== "<p><br></p>"
-                        ? reviewRemarks
+                    data.admin_remarks && data.admin_remarks !== "<p><br></p>"
+                        ? data.admin_remarks
                         : null,
             });
         } catch (err) {
             console.log("Review failed", err);
-            setReviewError("Couldn't save the review. Please try again.");
-        } finally {
-            setReviewSubmitting(false);
         }
     };
 
@@ -876,15 +873,6 @@ const TaskDetailPopup = ({
                         </div>
                     )}
 
-                    {/* {isLocked && (
-                        <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
-                            <Lock size={13} className="shrink-0" />
-                            This ticket is completed and locked — status, priority, due date,
-                            checklist, and attachments can no longer be changed
-                            {isPrivileged ? " by the assignee." : "."}
-                        </div>
-                    )} */}
-
                     {/* ── Admin Review summary card ──────────────────────────
                         Shown whenever there's ANY review data on the task
                         (admin_status / admin_remarks), no matter what
@@ -996,21 +984,33 @@ const TaskDetailPopup = ({
                                     <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                                         Admin Status
                                     </label>
-                                    <Select
-                                        value={reviewStatus}
-                                        onChange={(option) =>
-                                            setReviewStatus(option)
-                                        }
-                                        options={ADMIN_STATUS_OPTIONS}
-                                        components={{
-                                            Option: AdminStatusOption,
+                                    <Controller
+                                        name="admin_status"
+                                        control={reviewControl}
+                                        rules={{
+                                            required:
+                                                "Please choose an Admin Status before saving.",
                                         }}
-                                        placeholder="Select an outcome..."
-                                        isDisabled={reviewSubmitting}
-                                        isClearable
-                                        styles={adminStatusSelectStyles}
-                                        menuPortalTarget={menuPortalTarget}
-                                        menuPosition="fixed"
+                                        render={({ field }) => (
+                                            <Select
+                                                value={field.value}
+                                                onChange={field.onChange}
+                                                options={ADMIN_STATUS_OPTIONS}
+                                                components={{
+                                                    Option: AdminStatusOption,
+                                                }}
+                                                placeholder="Select an outcome..."
+                                                isDisabled={reviewSubmitting}
+                                                isClearable
+                                                styles={
+                                                    adminStatusSelectStyles
+                                                }
+                                                menuPortalTarget={
+                                                    menuPortalTarget
+                                                }
+                                                menuPosition="fixed"
+                                            />
+                                        )}
                                     />
                                 </div>
 
@@ -1021,28 +1021,36 @@ const TaskDetailPopup = ({
                                     <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                                         Admin Remarks
                                     </label>
-                                    <div
-                                        className="rounded-lg border border-gray-200 overflow-hidden
-                                            [&_.ql-toolbar]:sticky [&_.ql-toolbar]:top-0 [&_.ql-toolbar]:z-10 [&_.ql-toolbar]:bg-white
-                                            [&_.ql-toolbar]:border-x-0 [&_.ql-toolbar]:border-t-0 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200
-                                            [&_.ql-container]:border-none
-                                            [&_.ql-editor]:h-[180px] [&_.ql-editor]:max-h-[180px] [&_.ql-editor]:overflow-y-auto"
-                                    >
-                                        <ReactQuill
-                                            theme="snow"
-                                            value={reviewRemarks}
-                                            onChange={setReviewRemarks}
-                                            readOnly={reviewSubmitting}
-                                            modules={QUILL_MODULES}
-                                            formats={QUILL_FORMATS}
-                                            placeholder="Describe what needs to change, or leave approval notes..."
-                                        />
-                                    </div>
+                                    <Controller
+                                        name="admin_remarks"
+                                        control={reviewControl}
+                                        render={({ field }) => (
+                                            <div
+                                                className="rounded-lg border border-gray-200 overflow-hidden
+                                                    [&_.ql-toolbar]:sticky [&_.ql-toolbar]:top-0 [&_.ql-toolbar]:z-10 [&_.ql-toolbar]:bg-white
+                                                    [&_.ql-toolbar]:border-x-0 [&_.ql-toolbar]:border-t-0 [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200
+                                                    [&_.ql-container]:border-none
+                                                    [&_.ql-editor]:h-[180px] [&_.ql-editor]:max-h-[180px] [&_.ql-editor]:overflow-y-auto"
+                                            >
+                                                <ReactQuill
+                                                    theme="snow"
+                                                    value={field.value}
+                                                    onChange={field.onChange}
+                                                    readOnly={
+                                                        reviewSubmitting
+                                                    }
+                                                    modules={QUILL_MODULES}
+                                                    formats={QUILL_FORMATS}
+                                                    placeholder="Describe what needs to change, or leave approval notes..."
+                                                />
+                                            </div>
+                                        )}
+                                    />
                                 </div>
 
-                                {reviewError && (
+                                {reviewErrors.admin_status && (
                                     <p className="text-xs text-red-600">
-                                        {reviewError}
+                                        {reviewErrors.admin_status.message}
                                     </p>
                                 )}
 
@@ -1050,10 +1058,10 @@ const TaskDetailPopup = ({
                                 <div className="flex justify-end pt-1">
                                     <button
                                         type="button"
-                                        onClick={submitReview}
-                                        disabled={
-                                            reviewSubmitting || !isReviewValid
-                                        }
+                                        onClick={handleReviewSubmit(
+                                            onReviewSubmit,
+                                        )}
+                                        disabled={reviewSubmitting}
                                         className="text-sm px-4 py-2 rounded-lg bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50 font-medium"
                                     >
                                         {reviewSubmitting
@@ -1085,38 +1093,60 @@ const TaskDetailPopup = ({
                                 Due date
                             </p>
                             {canQuickEdit && editingDueDate ? (
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="date"
-                                        value={dueDateDraft}
-                                        onChange={(e) =>
-                                            setDueDateDraft(e.target.value)
-                                        }
-                                        onKeyDown={(e) => {
-                                            if (e.key === "Enter")
-                                                handleDueDateSave();
-                                            if (e.key === "Escape")
-                                                setEditingDueDate(false);
-                                        }}
-                                        autoFocus
-                                        disabled={savingField === "due_date"}
-                                        className="text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#2F5D50]/30 disabled:opacity-50"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleDueDateSave}
-                                        disabled={savingField === "due_date"}
-                                        title="Confirm due date"
-                                        className="p-1 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50"
-                                    >
-                                        <Check size={12} />
-                                    </button>
-                                    {savingField === "due_date" && (
-                                        <span className="text-[10px] text-gray-400">
-                                            saving…
-                                        </span>
+                                <form
+                                    onSubmit={handleDueDateSubmit(
+                                        onDueDateSubmit,
                                     )}
-                                </div>
+                                    className="flex flex-col gap-1"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="date"
+                                            autoFocus
+                                            disabled={
+                                                savingField === "due_date"
+                                            }
+                                            {...registerDueDate("due_date", {
+                                                required: true,
+                                                validate: (value) =>
+                                                    !value ||
+                                                    !task.start_date ||
+                                                    value >=
+                                                        task.start_date.slice(
+                                                            0,
+                                                            10,
+                                                        ) ||
+                                                    "Can't be before the start date",
+                                            })}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Escape")
+                                                    setEditingDueDate(false);
+                                            }}
+                                            className="text-sm border border-gray-200 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[#2F5D50]/30 disabled:opacity-50"
+                                        />
+                                        <button
+                                            type="submit"
+                                            disabled={
+                                                savingField === "due_date"
+                                            }
+                                            title="Confirm due date"
+                                            className="p-1 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50"
+                                        >
+                                            <Check size={12} />
+                                        </button>
+                                        {savingField === "due_date" && (
+                                            <span className="text-[10px] text-gray-400">
+                                                saving…
+                                            </span>
+                                        )}
+                                    </div>
+                                    {dueDateErrors.due_date && (
+                                        <p className="text-[11px] text-red-500">
+                                            {dueDateErrors.due_date.message ||
+                                                "Due date is required"}
+                                        </p>
+                                    )}
+                                </form>
                             ) : (
                                 <button
                                     type="button"
@@ -1149,9 +1179,13 @@ const TaskDetailPopup = ({
                             <p className="text-[11px] font-mono uppercase tracking-wider text-gray-400 mb-1">
                                 Description
                             </p>
-                            <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                                {task.description}
-                            </p>
+                            <div
+                                className="text-sm text-gray-700 leading-relaxed
+                                    [&_p]:mb-1.5 [&_p:last-child]:mb-0
+                                    [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                            >
+                                {parse(sanitizeRichText(task.description))}
+                            </div>
                         </div>
                     )}
 

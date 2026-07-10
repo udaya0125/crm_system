@@ -1,31 +1,24 @@
 import axios from "axios";
-import { X, Plus, Trash2, Paperclip, FileText, UploadCloud, CheckCircle, Circle } from "lucide-react";
+import {
+    X,
+    Plus,
+    Trash2,
+    FileText,
+    UploadCloud,
+    CheckCircle,
+    Circle,
+} from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 import Select from "react-select";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 import { usePage } from "@inertiajs/react";
-
-const emptyForm = {
-    title: "",
-    department: null,
-    assigned_team: null,
-    assigned_by: null,
-    priority: null,
-    start_date: "",
-    due_date: "",
-    description: "",
-    status: "Pending",
-};
+import { useForm, Controller, useFieldArray } from "react-hook-form";
 
 const priorityOptions = [
     { value: "Low", label: "Low" },
     { value: "Medium", label: "Medium" },
     { value: "High", label: "High" },
-];
-
-const statusOptions = [
-    { value: "Pending", label: "Pending" },
-    { value: "In Progress", label: "In Progress" },
-    { value: "Completed", label: "Completed" },
 ];
 
 const ROLES = {
@@ -44,29 +37,70 @@ const DEPARTMENT_OPTIONS = [
     { value: ROLES.USER, label: "User" },
 ];
 
-const isAdminOrManager = (role) => role === ROLES.ADMIN || role === ROLES.MANAGER;
+const isAdminOrManager = (role) =>
+    role === ROLES.ADMIN || role === ROLES.MANAGER;
 
-// Accepted attachment types (kept in sync with backend validation:
-// mimes:jpg,jpeg,png,gif,webp,pdf | max:10240)
-const ACCEPTED_FILE_TYPES = "image/jpeg,image/png,image/gif,image/webp,application/pdf";
+const ACCEPTED_FILE_TYPES =
+    "image/jpeg,image/png,image/gif,image/webp,application/pdf";
 const isImageFile = (file) => !!file?.type?.startsWith("image/");
 
-const AddTaskAssignedForm = ({
-    showForm,
-    setShowForm,
-    handleCreate,
-}) => {
+// Kept intentionally small/plain to match the compact modal — matches the
+// toolbar already used for Admin Remarks in TaskDetailPopup.jsx.
+const QUILL_MODULES = {
+    toolbar: [
+        ["bold", "italic", "underline"],
+        [{ list: "ordered" }, { list: "bullet" }],
+        ["clean"],
+    ],
+};
+const QUILL_FORMATS = ["bold", "italic", "underline", "list", "bullet"];
+
+const buildDefaultValues = () => ({
+    title: "",
+    department: null,
+    assigned_team: null,
+    assigned_by: null,
+    priority: null,
+    start_date: "",
+    due_date: "",
+    description: "",
+    status: "Pending",
+    task_items: [{ description: "", status: "Pending" }],
+});
+
+const AddTaskAssignedForm = ({ showForm, setShowForm, handleCreate }) => {
     const { auth } = usePage().props;
     const currentUser = auth?.user;
 
     const [submitting, setSubmitting] = useState(false);
-    const [taskAssignedForm, setTaskAssignedForm] = useState(emptyForm);
-    const [taskItems, setTaskItems] = useState([{ description: "", status: "Pending" }]);
     const [attachments, setAttachments] = useState([]);
     const [attachmentPreviews, setAttachmentPreviews] = useState([]); // [{ name, isImage, url }]
     const [users, setUsers] = useState([]);
     const [loadingUsers, setLoadingUsers] = useState(true);
     const [menuPortalTarget, setMenuPortalTarget] = useState(null);
+
+    const {
+        register,
+        control,
+        handleSubmit,
+        watch,
+        setValue,
+        getValues,
+        reset,
+        formState: { errors },
+    } = useForm({ defaultValues: buildDefaultValues() });
+
+    const {
+        fields: taskItemFields,
+        append: appendTaskItem,
+        remove: removeTaskItem,
+    } = useFieldArray({
+        control,
+        name: "task_items",
+    });
+
+    const department = watch("department");
+    const taskItems = watch("task_items");
 
     useEffect(() => {
         setMenuPortalTarget(document.body);
@@ -121,117 +155,95 @@ const AddTaskAssignedForm = ({
     }, []);
 
     const assignedTeamOptions = useMemo(() => {
-        if (!taskAssignedForm.department) {
-            return users;
-        }
+        if (!department) return users;
         return users.filter(
-            (u) =>
-                u.role === taskAssignedForm.department.value ||
-                isAdminOrManager(u.role)
+            (u) => u.role === department.value || isAdminOrManager(u.role),
         );
-    }, [users, taskAssignedForm.department]);
+    }, [users, department]);
+
+    const buildMeOption = () =>
+        currentUser &&
+        (users.find((u) => u.value === currentUser.id) || {
+            value: currentUser.id,
+            label: currentUser.role
+                ? `${currentUser.name} (${currentUser.role})`
+                : currentUser.name,
+            role: currentUser.role,
+        });
 
     useEffect(() => {
         if (showForm && users.length > 0 && currentUser) {
-            const me = users.find((u) => u.value === currentUser.id) || {
-                value: currentUser.id,
-                label: currentUser.role ? `${currentUser.name} (${currentUser.role})` : currentUser.name,
-                role: currentUser.role,
-            };
-            setTaskAssignedForm({ ...emptyForm, assigned_by: me });
-            setTaskItems([{ description: "", status: "Pending" }]);
+            reset({ ...buildDefaultValues(), assigned_by: buildMeOption() });
             setAttachments([]);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showForm, users, currentUser]);
 
     const resetForm = () => {
-        const me =
-            currentUser &&
-            (users.find((u) => u.value === currentUser.id) || {
-                value: currentUser.id,
-                label: currentUser.role ? `${currentUser.name} (${currentUser.role})` : currentUser.name,
-                role: currentUser.role,
-            });
-        setTaskAssignedForm({ ...emptyForm, assigned_by: me || null });
-        setTaskItems([{ description: "", status: "Pending" }]);
+        reset({
+            ...buildDefaultValues(),
+            assigned_by: buildMeOption() || null,
+        });
         setAttachments([]);
     };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setTaskAssignedForm((prev) => ({ ...prev, [name]: value }));
-    };
+    const handleDepartmentChange = (option, fieldOnChange) => {
+        fieldOnChange(option);
 
-    const handleSelectChange = (option, fieldName) => {
-        setTaskAssignedForm((prev) => {
-            const next = { ...prev, [fieldName]: option };
-
-            if (fieldName === "department" && prev.assigned_team) {
-                const stillValid =
-                    !option ||
-                    prev.assigned_team.role === option.value ||
-                    isAdminOrManager(prev.assigned_team.role);
-                if (!stillValid) next.assigned_team = null;
-            }
-
-            return next;
-        });
+        const currentAssignee = getValues("assigned_team");
+        if (currentAssignee) {
+            const stillValid =
+                !option ||
+                currentAssignee.role === option.value ||
+                isAdminOrManager(currentAssignee.role);
+            if (!stillValid)
+                setValue("assigned_team", null, { shouldDirty: true });
+        }
     };
 
     const assignToMe = () => {
         if (!currentUser) return;
-        const me = users.find((u) => u.value === currentUser.id) || {
-            value: currentUser.id,
-            label: currentUser.role ? `${currentUser.name} (${currentUser.role})` : currentUser.name,
-            role: currentUser.role,
-        };
+        const me = buildMeOption();
+        if (!me) return;
 
         // Auto-select the Department dropdown to match the logged-in user's
         // own role, so "Assign to me" doesn't leave Department blank/stale.
         // Admins/managers don't have a department in DEPARTMENT_OPTIONS
         // (they're role-based, not department-based), so leave that field
         // alone for them rather than clearing or guessing.
-        const myDepartment = DEPARTMENT_OPTIONS.find((d) => d.value === me.role) || null;
+        const myDepartment =
+            DEPARTMENT_OPTIONS.find((d) => d.value === me.role) || null;
 
-        setTaskAssignedForm((prev) => ({
-            ...prev,
-            assigned_team: me,
-            department: isAdminOrManager(me.role) ? prev.department : myDepartment,
-        }));
+        setValue("assigned_team", me, { shouldDirty: true, shouldValidate: true });
+        if (!isAdminOrManager(me.role)) {
+            setValue("department", myDepartment, { shouldDirty: true, shouldValidate: true });
+        }
     };
 
-    const addTaskItem = () =>
-        setTaskItems((prev) => [...prev, { description: "", status: "Pending" }]);
-
-    const removeTaskItem = (index) =>
-        setTaskItems((prev) => prev.filter((_, i) => i !== index));
-
-    const updateTaskItem = (index, field, value) =>
-        setTaskItems((prev) =>
-            prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    const toggleTaskItemStatus = (index) => {
+        const current = getValues(`task_items.${index}.status`);
+        setValue(
+            `task_items.${index}.status`,
+            current === "Completed" ? "Pending" : "Completed",
+            { shouldDirty: true },
         );
+    };
 
-    // Toggles a checklist item between "Pending" and "Completed" — same
-    // interaction pattern as AddProjectForm's toggleTaskCompletion, just
-    // driven off the string status field instead of a boolean.
-    const toggleTaskItemStatus = (index) =>
-        setTaskItems((prev) =>
-            prev.map((item, i) =>
-                i === index
-                    ? { ...item, status: item.status === "Completed" ? "Pending" : "Completed" }
-                    : item
-            )
-        );
-
-    // Progress preview — mirrors the filtering handleSubmit already applies
+    // Progress preview — mirrors the filtering onSubmit already applies
     // (blank-description items are dropped before being sent to the server),
     // so the percentage shown here matches what actually gets saved.
-    const validTaskItems = taskItems.filter((item) => item.description.trim() !== "");
-    const completedTaskItems = validTaskItems.filter((item) => item.status === "Completed");
+    const validTaskItems = (taskItems || []).filter(
+        (item) => item.description?.trim() !== "",
+    );
+    const completedTaskItems = validTaskItems.filter(
+        (item) => item.status === "Completed",
+    );
     const checklistProgress =
         validTaskItems.length === 0
             ? 0
-            : Math.round((completedTaskItems.length / validTaskItems.length) * 100);
+            : Math.round(
+                  (completedTaskItems.length / validTaskItems.length) * 100,
+              );
 
     const addFiles = (fileList) => {
         const incoming = Array.from(fileList || []);
@@ -252,30 +264,39 @@ const AddTaskAssignedForm = ({
     const removeAttachment = (index) =>
         setAttachments((prev) => prev.filter((_, i) => i !== index));
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const onSubmit = async (data) => {
         setSubmitting(true);
 
         try {
             const formData = new FormData();
 
-            formData.append("title", taskAssignedForm.title);
-            formData.append("start_date", taskAssignedForm.start_date);
-            formData.append("due_date", taskAssignedForm.due_date);
-            if (taskAssignedForm.description) formData.append("description", taskAssignedForm.description);
+            formData.append("title", data.title);
+            formData.append("start_date", data.start_date);
+            formData.append("due_date", data.due_date);
+            if (data.description && data.description !== "<p><br></p>") {
+                formData.append("description", data.description);
+            }
 
-            formData.append("status", taskAssignedForm.status);
+            formData.append("status", data.status);
 
-            if (taskAssignedForm.assigned_team) formData.append("assigned_team", taskAssignedForm.assigned_team.value);
-            if (taskAssignedForm.assigned_by) formData.append("user_id", taskAssignedForm.assigned_by.value);
-            if (taskAssignedForm.priority) formData.append("priority", taskAssignedForm.priority.value);
+            formData.append("assigned_team", data.assigned_team.value);
+            formData.append("user_id", data.assigned_by.value);
+            formData.append("priority", data.priority.value);
 
-            attachments.forEach((file) => formData.append("attachments[]", file));
+            attachments.forEach((file) =>
+                formData.append("attachments[]", file),
+            );
 
-            taskItems.forEach((item, index) => {
+            (data.task_items || []).forEach((item, index) => {
                 if (item.description.trim() !== "") {
-                    formData.append(`task_items[${index}][description]`, item.description);
-                    formData.append(`task_items[${index}][status]`, item.status || "Pending");
+                    formData.append(
+                        `task_items[${index}][description]`,
+                        item.description,
+                    );
+                    formData.append(
+                        `task_items[${index}][status]`,
+                        item.status || "Pending",
+                    );
                 }
             });
 
@@ -295,6 +316,30 @@ const AddTaskAssignedForm = ({
         resetForm();
     };
 
+    const errorSelectStyles = {
+        control: (base) => ({
+            ...base,
+            borderColor: "#fca5a5",
+            borderRadius: "0.5rem",
+            padding: "0.125rem 0",
+            boxShadow: "none",
+            "&:hover": { borderColor: "#f87171" },
+        }),
+        option: (base, { isFocused, isSelected }) => ({
+            ...base,
+            backgroundColor: isSelected ? "#6366f1" : isFocused ? "#e0e7ff" : "white",
+            color: isSelected ? "white" : "#1f2937",
+            cursor: "pointer",
+        }),
+        menu: (base) => ({
+            ...base,
+            borderRadius: "0.5rem",
+            overflow: "hidden",
+            zIndex: 9999,
+        }),
+        menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    };
+
     const selectStyles = {
         control: (base) => ({
             ...base,
@@ -306,11 +351,20 @@ const AddTaskAssignedForm = ({
         }),
         option: (base, { isFocused, isSelected }) => ({
             ...base,
-            backgroundColor: isSelected ? "#6366f1" : isFocused ? "#e0e7ff" : "white",
+            backgroundColor: isSelected
+                ? "#6366f1"
+                : isFocused
+                  ? "#e0e7ff"
+                  : "white",
             color: isSelected ? "white" : "#1f2937",
             cursor: "pointer",
         }),
-        menu: (base) => ({ ...base, borderRadius: "0.5rem", overflow: "hidden", zIndex: 9999 }),
+        menu: (base) => ({
+            ...base,
+            borderRadius: "0.5rem",
+            overflow: "hidden",
+            zIndex: 9999,
+        }),
         menuPortal: (base) => ({ ...base, zIndex: 9999 }),
     };
 
@@ -320,46 +374,78 @@ const AddTaskAssignedForm = ({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-2xl w-full shadow-xl max-h-[90vh] flex flex-col">
                 <div className="flex justify-between items-center px-6 py-4 border-b">
-                    <h2 className="text-2xl font-bold text-gray-800">Add New Task</h2>
-                    <button onClick={closeForm} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        Add New Task
+                    </h2>
+                    <button
+                        onClick={closeForm}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
                         <X size={22} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="overflow-y-auto px-6 py-4 space-y-4">
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="overflow-y-auto px-6 py-4 space-y-4"
+                >
                     <div className="grid grid-cols-2 gap-4">
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Title <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="text"
-                                name="title"
-                                value={taskAssignedForm.title}
-                                onChange={handleChange}
-                                required
+                                {...register("title", {
+                                    required: "Title is required",
+                                })}
                                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
+                            {errors.title && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.title.message}
+                                </p>
+                            )}
                         </div>
 
                         <div className="col-span-2">
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Department
+                                Department <span className="text-red-500">*</span>
                             </label>
-                            <Select
-                                value={taskAssignedForm.department}
-                                onChange={(option) => handleSelectChange(option, "department")}
-                                options={DEPARTMENT_OPTIONS}
-                                placeholder="Select department"
-                                isClearable
-                                styles={selectStyles}
-                                menuPortalTarget={menuPortalTarget}
-                                menuPosition="fixed"
+                            <Controller
+                                name="department"
+                                control={control}
+                                rules={{ required: "Department is required" }}
+                                render={({ field }) => (
+                                    <Select
+                                        value={field.value}
+                                        onChange={(option) =>
+                                            handleDepartmentChange(option, field.onChange)
+                                        }
+                                        options={DEPARTMENT_OPTIONS}
+                                        placeholder="Select department"
+                                        isClearable
+                                        styles={
+                                            errors.department
+                                                ? errorSelectStyles
+                                                : selectStyles
+                                        }
+                                        menuPortalTarget={menuPortalTarget}
+                                        menuPosition="fixed"
+                                    />
+                                )}
                             />
+                            {errors.department && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.department.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
                             <div className="flex justify-between items-center mb-1">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Assigned To
+                                    Assigned To <span className="text-red-500">*</span>
                                 </label>
                                 <button
                                     type="button"
@@ -369,90 +455,178 @@ const AddTaskAssignedForm = ({
                                     Assign to me
                                 </button>
                             </div>
-                            <Select
-                                value={taskAssignedForm.assigned_team}
-                                onChange={(option) => handleSelectChange(option, "assigned_team")}
-                                options={assignedTeamOptions}
-                                isLoading={loadingUsers}
-                                isDisabled={loadingUsers}
-                                placeholder={
-                                    loadingUsers
-                                        ? "Loading users..."
-                                        : taskAssignedForm.department
-                                        ? `Select from ${taskAssignedForm.department.label}`
-                                        : "Select"
-                                }
-                                isClearable
-                                styles={selectStyles}
-                                menuPortalTarget={menuPortalTarget}
-                                menuPosition="fixed"
+                            <Controller
+                                name="assigned_team"
+                                control={control}
+                                rules={{ required: "Assignee is required" }}
+                                render={({ field }) => (
+                                    <Select
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        options={assignedTeamOptions}
+                                        isLoading={loadingUsers}
+                                        isDisabled={loadingUsers}
+                                        placeholder={
+                                            loadingUsers
+                                                ? "Loading users..."
+                                                : department
+                                                  ? `Select from ${department.label}`
+                                                  : "Select"
+                                        }
+                                        isClearable
+                                        styles={
+                                            errors.assigned_team
+                                                ? errorSelectStyles
+                                                : selectStyles
+                                        }
+                                        menuPortalTarget={menuPortalTarget}
+                                        menuPosition="fixed"
+                                    />
+                                )}
                             />
+                            {errors.assigned_team && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.assigned_team.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Assigned By
+                                Assigned By <span className="text-red-500">*</span>
                             </label>
-                            <Select
-                                value={taskAssignedForm.assigned_by}
-                                onChange={(option) => handleSelectChange(option, "assigned_by")}
-                                options={users}
-                                isLoading={loadingUsers}
-                                isDisabled={loadingUsers}
-                                placeholder={loadingUsers ? "Loading users..." : "Select assigner"}
-                                isClearable
-                                styles={selectStyles}
-                                menuPortalTarget={menuPortalTarget}
-                                menuPosition="fixed"
+                            <Controller
+                                name="assigned_by"
+                                control={control}
+                                rules={{ required: "Assigner is required" }}
+                                render={({ field }) => (
+                                    <Select
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        options={users}
+                                        isLoading={loadingUsers}
+                                        isDisabled={loadingUsers}
+                                        placeholder={
+                                            loadingUsers
+                                                ? "Loading users..."
+                                                : "Select assigner"
+                                        }
+                                        isClearable
+                                        styles={
+                                            errors.assigned_by
+                                                ? errorSelectStyles
+                                                : selectStyles
+                                        }
+                                        menuPortalTarget={menuPortalTarget}
+                                        menuPosition="fixed"
+                                    />
+                                )}
                             />
+                            {errors.assigned_by && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.assigned_by.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                            <Select
-                                value={taskAssignedForm.priority}
-                                onChange={(option) => handleSelectChange(option, "priority")}
-                                options={priorityOptions}
-                                placeholder="Select priority"
-                                isClearable
-                                styles={selectStyles}
-                                menuPortalTarget={menuPortalTarget}
-                                menuPosition="fixed"
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Priority <span className="text-red-500">*</span>
+                            </label>
+                            <Controller
+                                name="priority"
+                                control={control}
+                                rules={{ required: "Priority is required" }}
+                                render={({ field }) => (
+                                    <Select
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        options={priorityOptions}
+                                        placeholder="Select priority"
+                                        isClearable
+                                        styles={
+                                            errors.priority
+                                                ? errorSelectStyles
+                                                : selectStyles
+                                        }
+                                        menuPortalTarget={menuPortalTarget}
+                                        menuPosition="fixed"
+                                    />
+                                )}
                             />
+                            {errors.priority && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.priority.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Start Date <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="date"
-                                name="start_date"
-                                value={taskAssignedForm.start_date}
-                                onChange={handleChange}
-                                required
+                                {...register("start_date", {
+                                    required: "Start date is required",
+                                })}
                                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
+                            {errors.start_date && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.start_date.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Due Date <span className="text-red-500">*</span>
+                            </label>
                             <input
                                 type="date"
-                                name="due_date"
-                                value={taskAssignedForm.due_date}
-                                onChange={handleChange}
-                                required
+                                {...register("due_date", {
+                                    required: "Due date is required",
+                                    validate: (value) =>
+                                        !value ||
+                                        !watch("start_date") ||
+                                        value >= watch("start_date") ||
+                                        "Due date can't be before the start date",
+                                })}
                                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             />
+                            {errors.due_date && (
+                                <p className="text-xs text-red-500 mt-1">
+                                    {errors.due_date.message}
+                                </p>
+                            )}
                         </div>
 
                         <div className="col-span-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Description
+                            </label>
+                            <Controller
                                 name="description"
-                                value={taskAssignedForm.description}
-                                onChange={handleChange}
-                                rows={3}
-                                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                control={control}
+                                render={({ field }) => (
+                                    <div
+                                        className="rounded-lg border border-gray-200 overflow-hidden
+                                            [&_.ql-toolbar]:bg-white [&_.ql-toolbar]:border-x-0 [&_.ql-toolbar]:border-t-0
+                                            [&_.ql-toolbar]:border-b [&_.ql-toolbar]:border-gray-200
+                                            [&_.ql-container]:border-none
+                                            [&_.ql-editor]:min-h-[120px] [&_.ql-editor]:max-h-[240px] [&_.ql-editor]:overflow-y-auto"
+                                    >
+                                        <ReactQuill
+                                            theme="snow"
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            modules={QUILL_MODULES}
+                                            formats={QUILL_FORMATS}
+                                            placeholder="Add any extra context for this ticket..."
+                                        />
+                                    </div>
+                                )}
                             />
                         </div>
                     </div>
@@ -460,7 +634,7 @@ const AddTaskAssignedForm = ({
                     {/* Task Checklist — styled to match AddProjectForm's
                         "Project Tasks" box: bordered container, pill-style
                         "Add Item" button, checkbox-toggle rows, and a live
-                        progress bar. */}
+                        progress bar. Now backed by useFieldArray. */}
                     <div className="border border-stone-200 rounded-lg p-4 bg-stone-50">
                         <div className="flex justify-between items-center mb-3">
                             <label className="block text-xs font-semibold tracking-wide text-stone-500 uppercase">
@@ -468,7 +642,12 @@ const AddTaskAssignedForm = ({
                             </label>
                             <button
                                 type="button"
-                                onClick={addTaskItem}
+                                onClick={() =>
+                                    appendTaskItem({
+                                        description: "",
+                                        status: "Pending",
+                                    })
+                                }
                                 className="flex items-center gap-1 text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-full hover:bg-indigo-700 transition"
                             >
                                 <Plus size={14} />
@@ -477,38 +656,51 @@ const AddTaskAssignedForm = ({
                         </div>
 
                         <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                            {taskItems.length === 0 ? (
+                            {taskItemFields.length === 0 ? (
                                 <p className="text-sm text-stone-400 text-center py-4">
-                                    No items added yet. Click "Add Item" to create your first checklist item.
+                                    No items added yet. Click "Add Item" to
+                                    create your first checklist item.
                                 </p>
                             ) : (
-                                taskItems.map((item, index) => (
+                                taskItemFields.map((field, index) => (
                                     <div
-                                        key={index}
+                                        key={field.id}
                                         className="flex items-center gap-2 bg-white p-2 rounded-lg border border-stone-200"
                                     >
                                         <button
                                             type="button"
-                                            onClick={() => toggleTaskItemStatus(index)}
+                                            onClick={() =>
+                                                toggleTaskItemStatus(index)
+                                            }
                                             className="flex-shrink-0"
                                         >
-                                            {item.status === "Completed" ? (
-                                                <CheckCircle size={20} className="text-emerald-500" />
+                                            {taskItems?.[index]?.status ===
+                                            "Completed" ? (
+                                                <CheckCircle
+                                                    size={20}
+                                                    className="text-emerald-500"
+                                                />
                                             ) : (
-                                                <Circle size={20} className="text-stone-400" />
+                                                <Circle
+                                                    size={20}
+                                                    className="text-stone-400"
+                                                />
                                             )}
                                         </button>
                                         <input
                                             type="text"
-                                            value={item.description}
-                                            onChange={(e) => updateTaskItem(index, "description", e.target.value)}
+                                            {...register(
+                                                `task_items.${index}.description`,
+                                            )}
                                             placeholder={`Item ${index + 1} description`}
                                             className="flex-1 text-sm border-none focus:ring-0 p-1 bg-transparent"
                                         />
-                                        {taskItems.length > 1 && (
+                                        {taskItemFields.length > 1 && (
                                             <button
                                                 type="button"
-                                                onClick={() => removeTaskItem(index)}
+                                                onClick={() =>
+                                                    removeTaskItem(index)
+                                                }
                                                 className="flex-shrink-0 p-1 hover:bg-red-100 rounded-full text-red-500 transition"
                                             >
                                                 <Trash2 size={16} />
@@ -532,19 +724,26 @@ const AddTaskAssignedForm = ({
                                 <div className="w-full bg-stone-200 rounded-full h-2">
                                     <div
                                         className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
-                                        style={{ width: `${checklistProgress}%` }}
+                                        style={{
+                                            width: `${checklistProgress}%`,
+                                        }}
                                     />
                                 </div>
                                 <p className="text-xs text-stone-400 mt-1">
-                                    {completedTaskItems.length} of {validTaskItems.length} items completed
+                                    {completedTaskItems.length} of{" "}
+                                    {validTaskItems.length} items completed
                                 </p>
                             </div>
                         )}
                     </div>
 
-                    {/* Attachments */}
+                    {/* Attachments — unchanged, kept as plain useState since
+                        FileList objects don't play well with RHF's dirty/
+                        reset tracking. */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Attachments</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Attachments
+                        </label>
 
                         <label
                             htmlFor="add-task-attachments"
@@ -554,9 +753,14 @@ const AddTaskAssignedForm = ({
                         >
                             <UploadCloud size={22} className="text-gray-400" />
                             <span className="text-sm text-gray-600">
-                                <span className="text-indigo-600 font-medium">Click to upload</span> or drag and drop
+                                <span className="text-indigo-600 font-medium">
+                                    Click to upload
+                                </span>{" "}
+                                or drag and drop
                             </span>
-                            <span className="text-xs text-gray-400">Images or PDF, up to 10MB each</span>
+                            <span className="text-xs text-gray-400">
+                                Images or PDF, up to 10MB each
+                            </span>
                             <input
                                 id="add-task-attachments"
                                 type="file"
@@ -573,20 +777,32 @@ const AddTaskAssignedForm = ({
                                     <div key={index} className="relative group">
                                         <div className="w-full aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-50 flex items-center justify-center">
                                             {p.isImage ? (
-                                                <img src={p.url} alt={p.name} className="w-full h-full object-cover" />
+                                                <img
+                                                    src={p.url}
+                                                    alt={p.name}
+                                                    className="w-full h-full object-cover"
+                                                />
                                             ) : (
-                                                <FileText size={26} className="text-red-400" />
+                                                <FileText
+                                                    size={26}
+                                                    className="text-red-400"
+                                                />
                                             )}
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => removeAttachment(index)}
+                                            onClick={() =>
+                                                removeAttachment(index)
+                                            }
                                             className="absolute -top-1.5 -right-1.5 bg-white border border-gray-200 rounded-full p-0.5 text-gray-500 hover:text-red-600 hover:border-red-300 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                                             title="Remove"
                                         >
                                             <X size={12} />
                                         </button>
-                                        <p className="text-[10px] text-gray-500 mt-1 truncate" title={p.name}>
+                                        <p
+                                            className="text-[10px] text-gray-500 mt-1 truncate"
+                                            title={p.name}
+                                        >
                                             {p.name}
                                         </p>
                                     </div>
@@ -597,12 +813,16 @@ const AddTaskAssignedForm = ({
                 </form>
 
                 <div className="flex justify-end gap-3 px-6 py-4 border-t">
-                    <button type="button" onClick={closeForm} className="px-4 py-2 rounded-full border text-gray-600 hover:bg-gray-50">
+                    <button
+                        type="button"
+                        onClick={closeForm}
+                        className="px-4 py-2 rounded-full border text-gray-600 hover:bg-gray-50"
+                    >
                         Cancel
                     </button>
                     <button
-                        type="submit"
-                        onClick={handleSubmit}
+                        type="button"
+                        onClick={handleSubmit(onSubmit)}
                         disabled={submitting || loadingUsers}
                         className="px-5 py-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
                     >
@@ -615,7 +835,6 @@ const AddTaskAssignedForm = ({
 };
 
 export default AddTaskAssignedForm;
-
 
 // import axios from "axios";
 // import { X, Plus, Trash2, Paperclip, FileText, UploadCloud } from "lucide-react";
@@ -1154,5 +1373,3 @@ export default AddTaskAssignedForm;
 // };
 
 // export default AddTaskAssignedForm;
-
-

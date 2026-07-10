@@ -2,41 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ReviewTaskAssignedRequest;
+use App\Http\Requests\StoreTaskAssignedRequest;
+use App\Http\Requests\UpdateTaskAssignedRequest;
 use App\Models\TaskAssigned;
-use App\Models\TaskAttachment;
-use App\Models\User;
+use App\Models\UserLog;
+use App\Services\TaskAssignedService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class TaskAssignedController extends Controller
 {
-    // Roles that can see and manage every task, regardless of ownership.
-    private const PRIVILEGED_ROLES = ['admin', 'manager'];
-
-    // Verdicts an admin/manager can give when reviewing a completed task.
-    private const ADMIN_STATUS_REOPENED = 'Reopened';
-    private const ADMIN_STATUS_APPROVED = 'Completed';
-
-    /**
-     * Whether the given user can act on any task (not just their own).
-     */
-    private function isPrivileged($user): bool
+    public function __construct(private readonly TaskAssignedService $tasks)
     {
-        return $user && in_array($user->role, self::PRIVILEGED_ROLES);
-    }
-
-    /**
-     * Whether the given user is involved in this task (assignee or assigner).
-     */
-    private function ownsTask($user, TaskAssigned $task): bool
-    {
-        if (! $user) {
-            return false;
-        }
-
-        return (int) $task->assigned_team === (int) $user->id
-            || (int) $task->user_id === (int) $user->id;
     }
 
     /**
@@ -45,100 +22,35 @@ class TaskAssignedController extends Controller
      */
     public function index(Request $request)
     {
-        $user = $request->user();
-
-        $query = TaskAssigned::with([
-            'attachments',
-            'taskItems',
-            'assignedUser:id,name,role,email',
-            'creator:id,name,role,email',
-        ])->latest();
-
-        if (! $this->isPrivileged($user)) {
-            $query->where(function ($q) use ($user) {
-                $q->where('assigned_team', $user->id)
-                    ->orWhere('user_id', $user->id);
-            });
-        }
-
-        return response()->json($query->paginate(15)->withQueryString());
+        return response()->json(
+            $this->tasks->paginatedFor($request->user())
+        );
     }
 
     /**
-     * Store a newly created task
+     * Store a newly created task.
      */
-    public function store(Request $request)
+    public function store(StoreTaskAssignedRequest $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'assigned_team' => 'required|exists:users,id', // who the task is assigned TO
-            'user_id' => 'required|exists:users,id',      // who is assigning it
-            'priority' => 'required|string',
-            'start_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:start_date',
-            'description' => 'nullable|string',
-
-            'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
-
-            'task_items' => 'nullable|array',
-            'task_items.*.description' => 'required|string',
-            'task_items.*.status' => 'nullable|string',
-        ]);
-
-        DB::beginTransaction();
-
         try {
-            $assignedUser = User::findOrFail($request->assigned_team);
+            $task = $this->tasks->create(
+                $request->validated(),
+                $request->file('attachments'),
+                $request->input('task_items')
+            );
 
-            $task = TaskAssigned::create([
-                'title' => $request->title,
-                'department' => $assignedUser->role, // snapshot of assignee's role at creation time
-                'assigned_team' => $assignedUser->id,
-                'user_id' => $request->user_id,
-                'priority' => $request->priority,
-                'start_date' => $request->start_date,
-                'due_date' => $request->due_date,
-                'description' => $request->description,
-                'status' => 'Pending',
+            UserLog::create([
+                'name'       => $request->user()?->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title'      => "Created task: \"{$task->title}\"",
             ]);
-
-            /**
-             * Upload Attachments
-             */
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('task_attachments', 'public');
-
-                    $task->attachments()->create([
-                        'attachment' => $path,
-                    ]);
-                }
-            }
-
-            /**
-             * Store Task Items
-             */
-            if ($request->filled('task_items')) {
-                foreach ($request->task_items as $index => $item) {
-                    $task->taskItems()->create([
-                        'description' => $item['description'],
-                        'status' => $item['status'] ?? 'Pending',
-                        'sort_order' => $index + 1,
-                    ]);
-                }
-            }
-
-            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Task Created Successfully',
-                'data' => $task->load('attachments', 'taskItems', 'assignedUser', 'creator'),
+                'data' => $task,
             ]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -147,119 +59,32 @@ class TaskAssignedController extends Controller
     }
 
     /**
-     * Update Task
+     * Update Task.
+     * Authorization (ownership/privilege + "completed is locked") and
+     * validation both live in UpdateTaskAssignedRequest.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateTaskAssignedRequest $request, $id)
     {
-        $task = TaskAssigned::with([
-            'attachments',
-            'taskItems',
-        ])->findOrFail($id);
-
-        $user = $request->user();
-
-        if (! $this->isPrivileged($user) && ! $this->ownsTask($user, $task)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are not authorized to update this task.',
-            ], 403);
-        }
-
-        // Completed tasks are locked — no further edits by anyone, including
-        // quick-updates from the popup (status/priority/due date/checklist)
-        // and full edits from the edit form. This check uses the status
-        // already persisted in the DB (before this request's `status` field
-        // is applied), so the one transition *into* Completed still goes
-        // through normally; every subsequent update attempt is rejected
-        // until an admin/manager reopens it via review().
-        if ($task->status === 'Completed') {
-            return response()->json([
-                'success' => false,
-                'message' => 'This task is completed and can no longer be edited.',
-            ], 403);
-        }
-
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'assigned_team' => 'required|exists:users,id',
-            'user_id' => 'required|exists:users,id',
-            'priority' => 'required|string',
-            'start_date' => 'required|date',
-            'due_date' => 'required|date|after_or_equal:start_date',
-            'description' => 'nullable|string',
-            'status' => 'nullable|string',
-
-            'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
-
-            'task_items' => 'nullable|array',
-            'task_items.*.description' => 'required|string',
-            'task_items.*.status' => 'nullable|string',
-        ]);
-
-        DB::beginTransaction();
-
         try {
-            $assignedUser = User::findOrFail($request->assigned_team);
+            $task = $this->tasks->update(
+                $request->attributes->get('task'),
+                $request->validated(),
+                $request->file('attachments'),
+                $request->input('task_items')
+            );
 
-            // admin_remarks/admin_status are intentionally NOT touched here —
-            // they're exclusively owned by the review() endpoint below, and
-            // are never accepted from this endpoint's request payload. This
-            // means when a Reopened task is re-edited and resubmitted as
-            // Completed, the previous review verdict/remarks persist
-            // exactly as they were, so the admin/manager always has the
-            // prior review context in front of them until they explicitly
-            // submit a new one via review().
-            $task->update([
-                'title' => $request->title,
-                'department' => $assignedUser->role, // re-derived in case assignee changed
-                'assigned_team' => $assignedUser->id,
-                'user_id' => $request->user_id,
-                'priority' => $request->priority,
-                'start_date' => $request->start_date,
-                'due_date' => $request->due_date,
-                'description' => $request->description,
-                'status' => $request->status ?? $task->status,
+            UserLog::create([
+                'name'       => $request->user()?->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title'      => "Updated task: \"{$task->title}\"",
             ]);
-
-            /**
-             * Upload New Attachments (appends to existing ones)
-             */
-            if ($request->hasFile('attachments')) {
-                foreach ($request->file('attachments') as $file) {
-                    $path = $file->store('task_attachments', 'public');
-
-                    $task->attachments()->create([
-                        'attachment' => $path,
-                    ]);
-                }
-            }
-
-            /**
-             * Replace Task Items
-             */
-            if ($request->filled('task_items')) {
-                $task->taskItems()->delete();
-
-                foreach ($request->task_items as $index => $item) {
-                    $task->taskItems()->create([
-                        'description' => $item['description'],
-                        'status' => $item['status'] ?? 'Pending',
-                        'sort_order' => $index + 1,
-                    ]);
-                }
-            }
-
-            DB::commit();
 
             return response()->json([
                 'success' => true,
                 'message' => 'Task Updated Successfully',
-                'data' => $task->load('attachments', 'taskItems', 'assignedUser', 'creator'),
+                'data' => $task,
             ]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -269,74 +94,32 @@ class TaskAssignedController extends Controller
 
     /**
      * Admin/manager review of a completed task.
-     *
-     * - "Reopened": kicks the task back to In Progress so the assignee/owner
-     *   can edit it again through the normal update() flow. They resubmit
-     *   with status = Completed when done; because update() never touches
-     *   admin_remarks/admin_status, this same review verdict and remarks
-     *   remain visible on the task the whole time it's being re-edited and
-     *   after it's resubmitted, right up until the admin/manager reviews it
-     *   again.
-     * - "Completed": final approval — task stays Completed and admin_status
-     *   becomes "Completed" too, which permanently locks it from further
-     *   review (no more reopening).
-     *
-     * This can loop indefinitely: Completed -> Reopened -> In Progress ->
-     * (edited, resubmitted) -> Completed -> Reopened -> ... until an
-     * admin/manager finally approves it. Each call here fully overwrites
-     * admin_status/admin_remarks with the reviewer's latest verdict.
+     * Authorization (privileged-only, task must be Completed, not already
+     * Approved) and validation both live in ReviewTaskAssignedRequest.
      */
-    public function review(Request $request, $id)
+    public function review(ReviewTaskAssignedRequest $request, $id)
     {
-        $task = TaskAssigned::findOrFail($id);
-        $user = $request->user();
-
-        if (! $this->isPrivileged($user)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only admins or managers can review completed tasks.',
-            ], 403);
-        }
-
-        if ($task->status !== 'Completed') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only completed tasks can be reviewed.',
-            ], 403);
-        }
-
-        if ($task->admin_status === self::ADMIN_STATUS_APPROVED) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This task has already been approved and finalized.',
-            ], 403);
-        }
-
-        $request->validate([
-            'admin_status' => 'required|in:' . self::ADMIN_STATUS_REOPENED . ',' . self::ADMIN_STATUS_APPROVED,
-            'admin_remarks' => 'nullable|string',
-        ]);
-
         try {
-            if ($request->admin_status === self::ADMIN_STATUS_REOPENED) {
-                $task->update([
-                    'status' => 'In Progress',
-                    'admin_status' => self::ADMIN_STATUS_REOPENED,
-                    'admin_remarks' => $request->admin_remarks,
-                ]);
-            } else {
-                $task->update([
-                    'admin_status' => self::ADMIN_STATUS_APPROVED,
-                    'admin_remarks' => $request->admin_remarks,
-                ]);
-            }
+            $task = $this->tasks->review(
+                $request->attributes->get('task'),
+                $request->admin_status,
+                $request->admin_remarks
+            );
+
+            UserLog::create([
+                'name'       => $request->user()?->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title'      => $request->admin_status === TaskAssignedService::ADMIN_STATUS_REOPENED
+                    ? "Reopened task: \"{$task->title}\""
+                    : "Approved task: \"{$task->title}\"",
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => $request->admin_status === self::ADMIN_STATUS_REOPENED
+                'message' => $request->admin_status === TaskAssignedService::ADMIN_STATUS_REOPENED
                     ? 'Task reopened — assignee can edit it again.'
                     : 'Task approved and finalized.',
-                'data' => $task->load('attachments', 'taskItems', 'assignedUser', 'creator'),
+                'data' => $task,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -351,46 +134,32 @@ class TaskAssignedController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $task = TaskAssigned::with([
-            'attachments',
-            'taskItems',
-        ])->findOrFail($id);
-
+        $task = TaskAssigned::with(['attachments', 'taskItems'])->findOrFail($id);
         $user = $request->user();
 
-        if (! $this->isPrivileged($user) && ! $this->ownsTask($user, $task)) {
+        if (! $this->tasks->isPrivileged($user) && ! $this->tasks->ownsTask($user, $task)) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to delete this task.',
             ], 403);
         }
 
-        DB::beginTransaction();
-
         try {
-            /**
-             * Delete Files
-             */
-            foreach ($task->attachments as $attachment) {
-                if (Storage::disk('public')->exists($attachment->attachment)) {
-                    Storage::disk('public')->delete($attachment->attachment);
-                }
-            }
+            $taskTitle = $task->title;
 
-            $task->attachments()->delete();
-            $task->taskItems()->delete();
-            $task->delete();
+            $this->tasks->delete($task);
 
-            DB::commit();
+            UserLog::create([
+                'name'       => $user?->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title'      => "Deleted task \"{$taskTitle}\"",
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Task Deleted Successfully',
             ]);
-
         } catch (\Exception $e) {
-            DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -404,10 +173,9 @@ class TaskAssignedController extends Controller
     public function destroyAttachment(Request $request, $taskId, $attachmentId)
     {
         $task = TaskAssigned::findOrFail($taskId);
-
         $user = $request->user();
 
-        if (! $this->isPrivileged($user) && ! $this->ownsTask($user, $task)) {
+        if (! $this->tasks->isPrivileged($user) && ! $this->tasks->ownsTask($user, $task)) {
             return response()->json([
                 'success' => false,
                 'message' => 'You are not authorized to modify this task.',
@@ -423,21 +191,19 @@ class TaskAssignedController extends Controller
             ], 403);
         }
 
-        $attachment = TaskAttachment::where('task_assigned_id', $task->id)
-            ->findOrFail($attachmentId);
-
         try {
-            if (Storage::disk('public')->exists($attachment->attachment)) {
-                Storage::disk('public')->delete($attachment->attachment);
-            }
+            $this->tasks->deleteAttachment($task, $attachmentId);
 
-            $attachment->delete();
+            UserLog::create([
+                'name'       => $user?->name ?? 'System',
+                'ip_address' => $request->ip(),
+                'title'      => "Removed an attachment from task: \"{$task->title}\"",
+            ]);
 
             return response()->json([
                 'success' => true,
                 'message' => 'Attachment removed successfully',
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
