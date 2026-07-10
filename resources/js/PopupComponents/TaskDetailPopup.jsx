@@ -1062,7 +1062,7 @@ const TaskDetailPopup = ({
                                             onReviewSubmit,
                                         )}
                                         disabled={reviewSubmitting}
-                                        className="text-sm px-4 py-2 rounded-lg bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50 font-medium"
+                                        className="text-sm px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 font-medium"
                                     >
                                         {reviewSubmitting
                                             ? "Saving..."
@@ -1207,7 +1207,7 @@ const TaskDetailPopup = ({
                                 <button
                                     type="button"
                                     onClick={addDraftItem}
-                                    className="text-xs text-[#2F5D50] hover:text-[#1D3B32] font-medium flex items-center gap-1"
+                                    className="text-xs text-indigo-600 hover:text-indigo-700 font-medium flex items-center gap-1"
                                 >
                                     <Plus size={12} /> Add item
                                 </button>
@@ -1339,7 +1339,7 @@ const TaskDetailPopup = ({
                                         type="button"
                                         onClick={saveChecklist}
                                         disabled={savingField === "checklist"}
-                                        className="text-xs px-3 py-1.5 rounded-lg bg-[#2F5D50] text-white hover:bg-[#264C41] disabled:opacity-50"
+                                        className="text-xs px-3 py-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
                                     >
                                         {savingField === "checklist"
                                             ? "Saving..."
@@ -1419,7 +1419,7 @@ const TaskDetailPopup = ({
                                                     href={url}
                                                     target="_blank"
                                                     rel="noreferrer"
-                                                    className="text-[11px] text-[#2F5D50] hover:underline shrink-0 ml-2"
+                                                    className="text-[11px] text-indigo-600 hover:underline shrink-0 ml-2"
                                                 >
                                                     Open in new tab
                                                 </a>
@@ -1469,7 +1469,7 @@ const TaskDetailPopup = ({
                         <button
                             type="button"
                             onClick={() => onEdit(task)}
-                            className="px-5 py-2 flex items-center gap-2 rounded-full bg-[#2F5D50] text-white hover:bg-[#264C41]"
+                            className="px-5 py-2 flex items-center gap-2 rounded-full bg-indigo-600 text-white hover:bg-indigo-700 text-sm"
                         >
                             <Pencil size={15} /> Edit ticket
                         </button>

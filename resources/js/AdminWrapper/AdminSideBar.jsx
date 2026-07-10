@@ -572,7 +572,7 @@ const AdminSideBar = ({
             href: "/project-management",
             label: "Project Management",
             icon: UserCog,
-             show: can.adminOrDeveloper,
+            show: can.adminOrDeveloper,
         },
         
         // {

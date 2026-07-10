@@ -152,7 +152,7 @@ class TaskAssignedController extends Controller
             UserLog::create([
                 'name'       => $user?->name ?? 'System',
                 'ip_address' => $request->ip(),
-                'title'      => "Deleted task \"{$taskTitle}\"",
+                'title'      => "Deleted task: \"{$taskTitle}\"",
             ]);
 
             return response()->json([

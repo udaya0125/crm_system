@@ -989,7 +989,7 @@ const TaskAssigned = () => {
         <AdminWrapper>
             <div className="bg-[#F3F4F7] -m-6 p-6 h-full overflow-y-auto">
                 {/* Header */}
-                <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+                {/* <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
                     <div>
                         <p className="font-mono text-[11px] tracking-[0.2em] text-gray-400 uppercase mb-1">
                             Operations Board
@@ -1004,13 +1004,28 @@ const TaskAssigned = () => {
                         </div>
                         <button
                             onClick={() => setShowAddForm(true)}
-                            className="px-4 py-2 flex items-center gap-2 bg-[#2F5D50] text-white rounded-full hover:bg-[#264C41] transition shadow-sm"
+                            className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
                         >
                             <Plus size={18} />
                             <span>New ticket</span>
                         </button>
                     </div>
-                </div>
+                </div> */}
+
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 className="text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase">
+                              Task 
+                            </h1>
+                        </div>
+                        <button
+                            onClick={() => setShowAddForm(true)}
+                            className="flex items-center gap-2 bg-indigo-600 text-amber-50 px-6 py-2.5 rounded-full text-sm font-medium tracking-widest uppercase hover:bg-indigo-700 transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                        >
+                            <Plus size={18} />
+                            Create
+                        </button>
+                    </div>
 
                 {/* Search + filters */}
                 <div className="flex flex-wrap items-center gap-2 mb-6 bg-white border border-gray-200 rounded-xl p-2 shadow-sm">
