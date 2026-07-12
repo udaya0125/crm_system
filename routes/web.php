@@ -174,6 +174,19 @@ Route::middleware('auth')->group(function () {
     Route::patch('task-assigned/{id}/review', [TaskAssignedController::class, 'review'])
     ->name('ourtaskassigned.review');
 
+
+    Route::get('/ticket', function(){
+        return Inertia::render('DetailsPage/Ticket'); 
+    });
+
+    // ---------------------------------------------------------
+    // TICKET MANAGEMENT CRUD for the Tech Support Team
+    // ---------------------------------------------------------
+    Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
+    // Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
+    Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
+    Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
+
 });
     
 
@@ -338,21 +351,6 @@ Route::middleware(['auth', 'role:developer,admin'])->group(function () {
     // Only Technician and admin can access task management
     // *************************************************************
 
-
-Route::middleware(['auth', 'role:technician,admin'])->group(function () {
-
-    Route::get('/ticket', function(){
-        return Inertia::render('DetailsPage/Ticket'); 
-    });
-
-    // ---------------------------------------------------------
-    // TICKET MANAGEMENT CRUD for the Tech Support Team
-    // ---------------------------------------------------------
-    Route::get('/ourtickets', [TicketController::class, 'index'])->name('ourtickets.index');
-    // Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
-    Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
-    Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
-});
 
 
     // ************************************************************

@@ -275,6 +275,8 @@ const Ticket = () => {
         fetchTickets();
     }, [reloadTrigger]);
 
+    console.log("allTickets", allTickets);
+
     const handleDelete = (id) => {
         if (!window.confirm("Are you sure you want to delete this ticket?"))
             return;

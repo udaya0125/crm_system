@@ -12,12 +12,12 @@ class TaskNotificationMail extends Mailable
     use Queueable, SerializesModels;
 
     public TaskAssigned $task;
-    public string $type; // 'assigned' | 'completed' | 'reviewed'
+    public string $type; // 'assigned' | 'created' | 'completed' | 'reviewed'
     public bool $isReopened;
 
     /**
      * @param TaskAssigned $task
-     * @param string $type 'assigned' | 'completed' | 'reviewed'
+     * @param string $type 'assigned' | 'created' | 'completed' | 'reviewed'
      */
     public function __construct(TaskAssigned $task, string $type)
     {
@@ -41,6 +41,7 @@ class TaskNotificationMail extends Mailable
     {
         return match ($this->type) {
             'assigned' => 'New Task Assigned: ' . $this->task->title,
+            'created' => 'New Task Created: ' . $this->task->title,
             'completed' => 'Task Marked Completed: ' . $this->task->title,
             'reviewed' => $this->isReopened
                 ? 'Task Reopened: ' . $this->task->title

@@ -156,9 +156,7 @@ class TicketService
             'problem_description' => $ticket->problem_description,
             'priority' => $ticket->priority,
             'email' => $ticket->email,
-            'image' => $ticket->image
-                ? asset('storage/'.$ticket->image)
-                : null,
+            'image' => $ticket->image,
             'assigned_technician' => $ticket->assigned_technician,
             'technician_name' => $ticket->assignedUser?->name,
             'status' => $ticket->status,

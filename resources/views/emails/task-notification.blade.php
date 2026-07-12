@@ -8,6 +8,7 @@
         .header { padding: 24px; color: #ffffff; }
         .header h1 { margin: 0; font-size: 20px; }
         .header.assigned { background-color: #2563eb; }
+        .header.created { background-color: #7c3aed; }
         .header.completed { background-color: #16a34a; }
         .header.reopened { background-color: #dc2626; }
         .header.approved { background-color: #16a34a; }
@@ -30,6 +31,8 @@
         {{-- Header --}}
         @if ($type === 'assigned')
             <div class="header assigned"><h1>New Task Assigned</h1></div>
+        @elseif ($type === 'created')
+            <div class="header created"><h1>New Task Created</h1></div>
         @elseif ($type === 'completed')
             <div class="header completed"><h1>Task Marked as Completed</h1></div>
         @elseif ($type === 'reviewed')
@@ -40,7 +43,7 @@
 
         <div class="body">
 
-            {{-- ===================== ASSIGNED ===================== --}}
+            {{-- ===================== ASSIGNED (to the user) ===================== --}}
             @if ($type === 'assigned')
                 <p>Hi {{ $task->assignedUser->name ?? 'there' }},</p>
                 <p>A new task has been assigned to you. Here are the details:</p>
@@ -48,6 +51,7 @@
                 <div class="details">
                     <table>
                         <tr><td class="label">Title</td><td><strong>{{ $task->title }}</strong></td></tr>
+                        <tr><td class="label">Status</td><td><span class="badge status">{{ $task->status }}</span></td></tr>
                         <tr><td class="label">Priority</td><td><span class="badge priority">{{ $task->priority }}</span></td></tr>
                         <tr><td class="label">Start Date</td><td>{{ \Carbon\Carbon::parse($task->start_date)->format('d M, Y') }}</td></tr>
                         <tr><td class="label">Due Date</td><td>{{ \Carbon\Carbon::parse($task->due_date)->format('d M, Y') }}</td></tr>
@@ -61,7 +65,25 @@
 
                 <p>Please log in to the dashboard to view the full task and checklist.</p>
 
-            {{-- ===================== COMPLETED ===================== --}}
+            {{-- ===================== CREATED (to admin/manager) ===================== --}}
+            @elseif ($type === 'created')
+                <p>Hi,</p>
+                <p>A new task has just been created and assigned:</p>
+
+                <div class="details">
+                    <table>
+                        <tr><td class="label">Title</td><td><strong>{{ $task->title }}</strong></td></tr>
+                        <tr><td class="label">Status</td><td><span class="badge status">{{ $task->status }}</span></td></tr>
+                        <tr><td class="label">Priority</td><td><span class="badge priority">{{ $task->priority }}</span></td></tr>
+                        <tr><td class="label">Assigned To</td><td>{{ $task->assignedUser->name ?? 'N/A' }}</td></tr>
+                        <tr><td class="label">Assigned By</td><td>{{ $task->creator->name ?? 'N/A' }}</td></tr>
+                        <tr><td class="label">Due Date</td><td>{{ \Carbon\Carbon::parse($task->due_date)->format('d M, Y') }}</td></tr>
+                    </table>
+                </div>
+
+                <p>No action is required unless you'd like to review or reassign it. Log in to the dashboard for full details.</p>
+
+            {{-- ===================== COMPLETED (to admin/manager) ===================== --}}
             @elseif ($type === 'completed')
                 <p>Hi,</p>
                 <p>A task requires your review — it has just been marked as completed by the assignee:</p>
@@ -78,7 +100,7 @@
 
                 <p>Please log in to the dashboard to review this task and either approve it or reopen it with remarks.</p>
 
-            {{-- ===================== REVIEWED ===================== --}}
+            {{-- ===================== REVIEWED (to the user) ===================== --}}
             @elseif ($type === 'reviewed')
                 <p>Hi {{ $task->assignedUser->name ?? 'there' }},</p>
 

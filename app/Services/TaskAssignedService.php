@@ -65,8 +65,9 @@ class TaskAssignedService
 
     /**
      * Create a task, its attachments, and its checklist items, then notify
-     * the assignee. Runs in a transaction; email failures are logged but
-     * never roll back the transaction or bubble up.
+     * the assignee AND all privileged reviewers (admin/manager) that a new
+     * task was created. Runs in a transaction; email failures are logged
+     * but never roll back the transaction or bubble up.
      */
     public function create(array $data, ?array $attachments, ?array $taskItems): TaskAssigned
     {
@@ -91,6 +92,7 @@ class TaskAssignedService
             $task->load('attachments', 'taskItems', 'assignedUser', 'creator');
 
             $this->notify($assignedUser, $task, 'assigned', 'task assigned');
+            $this->notifyReviewers($task, 'created', 'task created');
 
             return $task;
         });
@@ -131,7 +133,7 @@ class TaskAssignedService
             $task->load('attachments', 'taskItems', 'assignedUser', 'creator');
 
             if (! $wasCompletedBefore && $task->status === 'Completed') {
-                $this->notifyReviewers($task);
+                $this->notifyReviewers($task, 'completed', 'task completed');
             }
 
             return $task;
@@ -244,10 +246,15 @@ class TaskAssignedService
         return User::whereIn('role', self::PRIVILEGED_ROLES)->get();
     }
 
-    private function notifyReviewers(TaskAssigned $task): void
+    /**
+     * Notify every privileged (admin/manager) user about a task event —
+     * used both when a new task is created and when one is marked
+     * completed and needs review.
+     */
+    private function notifyReviewers(TaskAssigned $task, string $type, string $label): void
     {
         foreach ($this->reviewers() as $reviewer) {
-            $this->notify($reviewer, $task, 'completed', 'task completed');
+            $this->notify($reviewer, $task, $type, $label);
         }
     }
 
