@@ -7,17 +7,18 @@ use App\Models\TaskAssigned;
 use App\Models\TaskAttachment;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Collection;
 
 class TaskAssignedService
 {
     public const PRIVILEGED_ROLES = ['admin', 'manager'];
 
     public const ADMIN_STATUS_REOPENED = 'Reopened';
+
     public const ADMIN_STATUS_APPROVED = 'Completed';
 
     /**
@@ -268,7 +269,7 @@ class TaskAssignedService
         try {
             Mail::to($recipient->email)->send(new TaskNotificationMail($task, $type));
         } catch (\Exception $e) {
-            Log::error("Failed to send {$label} email to {$recipient->email}: " . $e->getMessage());
+            Log::error("Failed to send {$label} email to {$recipient->email}: ".$e->getMessage());
         }
     }
 }

@@ -28,14 +28,14 @@ class DomainManagementService
         $clientName = $domain->client?->name ?? 'Unknown Client';
 
         Notification::create([
-            'message' => "New domain created: '{$domain->domain_name}' for {$clientName}. Expires on " .
+            'message' => "New domain created: '{$domain->domain_name}' for {$clientName}. Expires on ".
                 Carbon::parse($domain->expiry_date)->format('M d, Y'),
             'is_read' => false,
         ]);
 
         $this->createUserLog(
             'Domain Created',
-            "Created domain '{$domain->domain_name}' for {$clientName}. Expires on " .
+            "Created domain '{$domain->domain_name}' for {$clientName}. Expires on ".
             Carbon::parse($domain->expiry_date)->format('M d, Y'),
             $request
         );
@@ -54,14 +54,14 @@ class DomainManagementService
         $clientName = $domain->client?->name ?? 'Unknown Client';
 
         Notification::create([
-            'message' => "Domain updated: '{$domain->domain_name}' for {$clientName}. Expires on " .
+            'message' => "Domain updated: '{$domain->domain_name}' for {$clientName}. Expires on ".
                 Carbon::parse($domain->expiry_date)->format('M d, Y'),
             'is_read' => false,
         ]);
 
         $this->createUserLog(
             'Domain Updated',
-            "Updated domain '{$domain->domain_name}' for {$clientName}. Expires on " .
+            "Updated domain '{$domain->domain_name}' for {$clientName}. Expires on ".
             Carbon::parse($domain->expiry_date)->format('M d, Y'),
             $request
         );
@@ -122,10 +122,10 @@ class DomainManagementService
                     'like',
                     "%{$domain->domain_name}%"
                 )
-                ->whereDate('created_at', today())
-                ->exists();
+                    ->whereDate('created_at', today())
+                    ->exists();
 
-                if (!$exists) {
+                if (! $exists) {
 
                     Notification::create([
                         'message' => "⚠️ Domain '{$domain->domain_name}' for {$clientName} is expiring in {$daysLeft} days.",
