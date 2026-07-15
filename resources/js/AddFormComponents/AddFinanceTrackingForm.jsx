@@ -216,7 +216,6 @@
 
 // export default AddFinanceTrackingForm;
 
-
 import axios from "axios";
 import { X } from "lucide-react";
 import React, { useState } from "react";
@@ -399,7 +398,9 @@ const AddFinanceTrackingForm = ({ setShowForm, setReloadTrigger }) => {
                                 <option value="">Select status</option>
                                 <option value="unpaid">Unpaid</option>
                                 <option value="paid">Paid</option>
-                                <option value="partially_paid">Partially Paid</option>
+                                <option value="partially_paid">
+                                    Partially Paid
+                                </option>
                                 <option value="pending">Pending</option>
                                 <option value="overdue">Overdue</option>
                             </select>
