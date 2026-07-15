@@ -11,29 +11,29 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     const [selectedClient, setSelectedClient] = useState(null);
     const [selectedTitle, setSelectedTitle] = useState(null);
     const [expirationForm, setExpirationForm] = useState({
-        client_id: '',
-        title: '',
-        last_renewal_date: '',
-        duration: '',
-        expiration_date: '',
+        client_id: "",
+        title: "",
+        last_renewal_date: "",
+        duration: "",
+        expiration_date: "",
     });
 
     // Title options for dropdown
     const titleOptions = [
-        { value: 'domain', label: 'Domain' },
-        { value: 'e-attendance', label: 'E-Attendance' },
+        { value: "domain", label: "Domain" },
+        { value: "e-attendance", label: "E-Attendance" },
     ];
 
     // Lock body scroll when form mounts
     useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
+
         return () => {
-            document.body.style.overflow = 'unset';
-            document.body.style.position = 'static';
-            document.body.style.width = 'auto';
+            document.body.style.overflow = "unset";
+            document.body.style.position = "static";
+            document.body.style.width = "auto";
         };
     }, []);
 
@@ -55,19 +55,24 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
         if (expirationForm.last_renewal_date && expirationForm.duration) {
             const lastRenewal = new Date(expirationForm.last_renewal_date);
             const durationMonths = parseInt(expirationForm.duration);
-            
+
             if (!isNaN(durationMonths) && durationMonths > 0) {
                 const expirationDate = new Date(lastRenewal);
-                expirationDate.setMonth(lastRenewal.getMonth() + durationMonths);
-                
+                expirationDate.setMonth(
+                    lastRenewal.getMonth() + durationMonths,
+                );
+
                 // Format as YYYY-MM-DD for input
                 const year = expirationDate.getFullYear();
-                const month = String(expirationDate.getMonth() + 1).padStart(2, '0');
-                const day = String(expirationDate.getDate()).padStart(2, '0');
-                
-                setExpirationForm(prev => ({
+                const month = String(expirationDate.getMonth() + 1).padStart(
+                    2,
+                    "0",
+                );
+                const day = String(expirationDate.getDate()).padStart(2, "0");
+
+                setExpirationForm((prev) => ({
                     ...prev,
-                    expiration_date: `${year}-${month}-${day}`
+                    expiration_date: `${year}-${month}-${day}`,
                 }));
             }
         }
@@ -76,27 +81,28 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     // Validate form
     const validateForm = () => {
         const newErrors = {};
-        
+
         if (!expirationForm.client_id) {
             newErrors.client_id = "Client is required";
         }
-        
+
         if (!expirationForm.title.trim()) {
             newErrors.title = "Title is required";
         }
-        
+
         if (!expirationForm.last_renewal_date) {
             newErrors.last_renewal_date = "Last renewal date is required";
         } else {
             const selectedDate = new Date(expirationForm.last_renewal_date);
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
+
             if (selectedDate > today) {
-                newErrors.last_renewal_date = "Last renewal date cannot be in the future";
+                newErrors.last_renewal_date =
+                    "Last renewal date cannot be in the future";
             }
         }
-        
+
         if (!expirationForm.duration) {
             newErrors.duration = "Duration is required";
         } else {
@@ -104,22 +110,24 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
             if (durationValue <= 0) {
                 newErrors.duration = "Duration must be greater than 0";
             } else if (durationValue > 120) {
-                newErrors.duration = "Duration cannot exceed 120 months (10 years)";
+                newErrors.duration =
+                    "Duration cannot exceed 120 months (10 years)";
             }
         }
-        
+
         if (!expirationForm.expiration_date) {
             newErrors.expiration_date = "Expiration date is required";
         } else {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const expDate = new Date(expirationForm.expiration_date);
-            
+
             if (expDate < today) {
-                newErrors.expiration_date = "Expiration date cannot be in the past";
+                newErrors.expiration_date =
+                    "Expiration date cannot be in the past";
             }
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -127,13 +135,13 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     // Handle Submit
     // const handleSubmit = async (e) => {
     //     e.preventDefault();
-        
+
     //     if (!validateForm()) {
     //         return;
     //     }
-        
+
     //     const formData = new FormData();
-        
+
     //     // Append all form data
     //     Object.keys(expirationForm).forEach(key => {
     //         if (expirationForm[key] !== null && expirationForm[key] !== "") {
@@ -145,14 +153,14 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     //         setSubmitting(true);
     //         await handleCreate(formData);
     //         alert('Expiration created successfully!');
-            
+
     //         if (onSuccess) {
     //             onSuccess();
     //         }
-            
+
     //     } catch (error) {
     //         console.log("Error saving data", error);
-            
+
     //         if (error.response) {
     //             if (error.response.data.errors) {
     //                 setErrors(error.response.data.errors);
@@ -170,35 +178,38 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     // };
 
     const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+        e.preventDefault();
+        if (!validateForm()) return;
 
-    const formData = new FormData();
-    Object.keys(expirationForm).forEach((key) => {
-        if (expirationForm[key] !== null && expirationForm[key] !== "") {
-            formData.append(key, expirationForm[key]);
-        }
-    });
-
-    try {
-        setSubmitting(true);
-        await toast.promise(handleCreate(formData), {
-            loading: "Creating expiration...",
-            success: "Expiration created successfully!",
-            error: (err) => {
-                if (err.response?.data?.errors) {
-                    setErrors(err.response.data.errors);
-                }
-                return err.response?.data?.message || "Failed to create expiration.";
-            },
+        const formData = new FormData();
+        Object.keys(expirationForm).forEach((key) => {
+            if (expirationForm[key] !== null && expirationForm[key] !== "") {
+                formData.append(key, expirationForm[key]);
+            }
         });
-        if (onSuccess) onSuccess();
-    } catch (error) {
-        // errors already handled inside toast.promise
-    } finally {
-        setSubmitting(false);
-    }
-};
+
+        try {
+            setSubmitting(true);
+            await toast.promise(handleCreate(formData), {
+                loading: "Creating expiration...",
+                success: "Expiration created successfully!",
+                error: (err) => {
+                    if (err.response?.data?.errors) {
+                        setErrors(err.response.data.errors);
+                    }
+                    return (
+                        err.response?.data?.message ||
+                        "Failed to create expiration."
+                    );
+                },
+            });
+            if (onSuccess) onSuccess();
+        } catch (error) {
+            // errors already handled inside toast.promise
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     // Handle change for form inputs
     const handleChange = (e) => {
@@ -207,7 +218,7 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
             ...prev,
             [name]: value,
         }));
-        
+
         // Clear error for this field
         if (errors[name]) {
             setErrors((prev) => ({
@@ -222,9 +233,9 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
         setSelectedClient(selectedOption);
         setExpirationForm((prev) => ({
             ...prev,
-            client_id: selectedOption ? selectedOption.value : '',
+            client_id: selectedOption ? selectedOption.value : "",
         }));
-        
+
         // Clear client error
         if (errors.client_id) {
             setErrors((prev) => ({
@@ -239,9 +250,9 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
         setSelectedTitle(selectedOption);
         setExpirationForm((prev) => ({
             ...prev,
-            title: selectedOption ? selectedOption.value : '',
+            title: selectedOption ? selectedOption.value : "",
         }));
-        
+
         // Clear title error
         if (errors.title) {
             setErrors((prev) => ({
@@ -259,38 +270,48 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
     };
 
     // Get today's date in YYYY-MM-DD format for max attribute
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
 
     // Transform clients for react-select
-    const clientOptions = clients.map(client => ({
+    const clientOptions = clients.map((client) => ({
         value: client.id,
-        label: client.organization_name || client.name
+        label: client.organization_name || client.name,
     }));
 
     // Custom styles for react-select
     const customSelectStyles = {
         control: (provided, state) => ({
             ...provided,
-            minHeight: '42px',
-            borderColor: errors.client_id ? '#ef4444' : (state.isFocused ? '#6366f1' : '#d1d5db'),
-            boxShadow: state.isFocused ? '0 0 0 2px rgba(99, 102, 241, 0.2)' : 'none',
-            '&:hover': {
-                borderColor: '#6366f1'
-            }
+            minHeight: "42px",
+            borderColor: errors.client_id
+                ? "#ef4444"
+                : state.isFocused
+                  ? "#6366f1"
+                  : "#d1d5db",
+            boxShadow: state.isFocused
+                ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
+                : "none",
+            "&:hover": {
+                borderColor: "#6366f1",
+            },
         }),
         option: (provided, state) => ({
             ...provided,
-            backgroundColor: state.isSelected ? '#6366f1' : (state.isFocused ? '#e0e7ff' : 'white'),
-            color: state.isSelected ? 'white' : '#111827',
-            cursor: 'pointer',
-            '&:active': {
-                backgroundColor: '#4f46e5'
-            }
+            backgroundColor: state.isSelected
+                ? "#6366f1"
+                : state.isFocused
+                  ? "#e0e7ff"
+                  : "white",
+            color: state.isSelected ? "white" : "#111827",
+            cursor: "pointer",
+            "&:active": {
+                backgroundColor: "#4f46e5",
+            },
         }),
         placeholder: (provided) => ({
             ...provided,
-            color: '#9ca3af'
-        })
+            color: "#9ca3af",
+        }),
     };
 
     return (
@@ -335,7 +356,9 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                             loadingMessage={() => "Loading clients..."}
                         />
                         {errors.client_id && (
-                            <p className="mt-1 text-sm text-red-600">{errors.client_id}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.client_id}
+                            </p>
                         )}
                     </div>
 
@@ -359,7 +382,9 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                             noOptionsMessage={() => "No titles found"}
                         />
                         {errors.title && (
-                            <p className="mt-1 text-sm text-red-600">{errors.title}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.title}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -369,7 +394,8 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                     {/* Last Renewal Date Field */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Last Renewal Date <span className="text-red-500">*</span>
+                            Last Renewal Date{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="date"
@@ -378,20 +404,25 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                             onChange={handleChange}
                             max={today}
                             className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                                errors.last_renewal_date ? 'border-red-500' : 'border-gray-300'
+                                errors.last_renewal_date
+                                    ? "border-red-500"
+                                    : "border-gray-300"
                             }`}
                             disabled={submitting}
                             required
                         />
                         {errors.last_renewal_date && (
-                            <p className="mt-1 text-sm text-red-600">{errors.last_renewal_date}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.last_renewal_date}
+                            </p>
                         )}
                     </div>
 
                     {/* Duration Field */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Duration (Months) <span className="text-red-500">*</span>
+                            Duration (Months){" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="number"
@@ -399,7 +430,9 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                             value={expirationForm.duration}
                             onChange={handleChange}
                             className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
-                                errors.duration ? 'border-red-500' : 'border-gray-300'
+                                errors.duration
+                                    ? "border-red-500"
+                                    : "border-gray-300"
                             }`}
                             placeholder="Enter duration in months"
                             min="1"
@@ -409,7 +442,9 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                             required
                         />
                         {errors.duration && (
-                            <p className="mt-1 text-sm text-red-600">{errors.duration}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.duration}
+                            </p>
                         )}
                     </div>
                 </div>
@@ -419,7 +454,8 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                     {/* Expiration Date Field */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Expiration Date <span className="text-red-500">*</span>
+                            Expiration Date{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="date"
@@ -428,17 +464,22 @@ const AddExpirationForm = ({ handleCreate, onSuccess, onCancel }) => {
                             onChange={handleChange}
                             min={today}
                             className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 ${
-                                errors.expiration_date ? 'border-red-500' : 'border-gray-300'
+                                errors.expiration_date
+                                    ? "border-red-500"
+                                    : "border-gray-300"
                             }`}
                             disabled={true}
                             readOnly
                             required
                         />
                         {errors.expiration_date && (
-                            <p className="mt-1 text-sm text-red-600">{errors.expiration_date}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.expiration_date}
+                            </p>
                         )}
                         <p className="mt-1 text-xs text-gray-500 flex items-center gap-1">
-                            Automatically calculated based on last renewal date + duration (months)
+                            Automatically calculated based on last renewal date
+                            + duration (months)
                         </p>
                     </div>
                 </div>

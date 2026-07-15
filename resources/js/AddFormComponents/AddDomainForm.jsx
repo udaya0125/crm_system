@@ -243,7 +243,6 @@
 
 // export default AddDomainForm;
 
-
 import axios from "axios";
 import { X } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -288,7 +287,9 @@ const AddDomainForm = ({ setReloadTrigger, onClose }) => {
             ...provided,
             minHeight: "42px",
             borderColor: state.isFocused ? "#6366f1" : "#d1d5db",
-            boxShadow: state.isFocused ? "0 0 0 2px rgba(99, 102, 241, 0.2)" : "none",
+            boxShadow: state.isFocused
+                ? "0 0 0 2px rgba(99, 102, 241, 0.2)"
+                : "none",
             "&:hover": { borderColor: "#6366f1" },
         }),
         option: (provided, state) => ({
@@ -296,8 +297,8 @@ const AddDomainForm = ({ setReloadTrigger, onClose }) => {
             backgroundColor: state.isSelected
                 ? "#6366f1"
                 : state.isFocused
-                ? "#e0e7ff"
-                : "white",
+                  ? "#e0e7ff"
+                  : "white",
             color: state.isSelected ? "white" : "#111827",
             cursor: "pointer",
             "&:active": { backgroundColor: "#4f46e5" },
@@ -353,10 +354,11 @@ const AddDomainForm = ({ setReloadTrigger, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="relative px-6 py-6 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white shadow-2xl">
-
                 {/* Header */}
                 <div className="flex justify-between items-center mb-6 pb-4 border-b">
-                    <h2 className="text-2xl font-bold text-stone-800">Add New Domain</h2>
+                    <h2 className="text-2xl font-bold text-stone-800">
+                        Add New Domain
+                    </h2>
                     <button
                         type="button"
                         onClick={onClose}
@@ -368,7 +370,6 @@ const AddDomainForm = ({ setReloadTrigger, onClose }) => {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-
                     <div>
                         <label className={labelClass}>
                             Client <span className="text-red-500">*</span>
@@ -417,7 +418,9 @@ const AddDomainForm = ({ setReloadTrigger, onClose }) => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label className={labelClass}>Purchase Date *</label>
+                            <label className={labelClass}>
+                                Purchase Date *
+                            </label>
                             <input
                                 type="date"
                                 name="purchase_date"
@@ -441,7 +444,9 @@ const AddDomainForm = ({ setReloadTrigger, onClose }) => {
                     </div>
 
                     <div>
-                        <label className={labelClass}>Auto Renewal Status *</label>
+                        <label className={labelClass}>
+                            Auto Renewal Status *
+                        </label>
                         <select
                             name="auto_renewal_status"
                             value={domainForm.auto_renewal_status}
