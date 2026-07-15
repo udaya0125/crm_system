@@ -88,7 +88,7 @@ return [
         ],
 
         'Repair' => [
-            'email' => 'adhikariudaya521@gmail.com',
+            'email' => 'techsupport@sait.com.np',
             'items' => [
                 'Printer Repair',
                 'Printer Refill',
