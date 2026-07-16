@@ -4,7 +4,6 @@ import React, { useEffect, useRef, useState } from "react";
 import Select from "react-select";
 import toast from "react-hot-toast";
 
-
 const ACCEPTED_TYPES = [
     "image/png",
     "image/jpg",
@@ -201,7 +200,7 @@ const AddTicketForm = ({ setShowForm, setReloadTrigger }) => {
     // Replace handleSubmit with:
 
     // Replace handleCreate with a plain async — no try/catch, just throw naturally:
-    
+
     const handleCreate = async (formData) => {
         await axios.post(route("ourtickets.store"), formData, {
             headers: { "Content-Type": "multipart/form-data" },

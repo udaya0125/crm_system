@@ -24,24 +24,24 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
 
     // Watch the selected task list ID
     const selectedTaskListId = watch("task_list_id");
-    
+
     // Find the selected task list with its assigned user and creator
     const selectedTaskList = taskLists?.find(
-        (list) => list.id.toString() === selectedTaskListId?.toString()
+        (list) => list.id.toString() === selectedTaskListId?.toString(),
     );
 
     // Add this useEffect to lock body scroll when form mounts
     useEffect(() => {
         // Lock body scroll
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
-        
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
+
         // Cleanup function to restore scroll when component unmounts
         return () => {
-            document.body.style.overflow = 'unset';
-            document.body.style.position = 'static';
-            document.body.style.width = 'auto';
+            document.body.style.overflow = "unset";
+            document.body.style.position = "static";
+            document.body.style.width = "auto";
         };
     }, []);
 
@@ -104,43 +104,48 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
     };
 
     // Transform taskLists into options for react-select
-    const taskListOptions = taskLists?.map(list => ({
-        value: list.id,
-        label: list.title
-    })) || [];
+    const taskListOptions =
+        taskLists?.map((list) => ({
+            value: list.id,
+            label: list.title,
+        })) || [];
 
     // Custom styles for react-select
     const selectStyles = {
         control: (base, state) => ({
             ...base,
-            minHeight: '42px',
-            borderColor: errors.task_list_id ? '#ef4444' : '#d1d5db',
-            boxShadow: 'none',
-            '&:hover': {
-                borderColor: '#3b82f6'
+            minHeight: "42px",
+            borderColor: errors.task_list_id ? "#ef4444" : "#d1d5db",
+            boxShadow: "none",
+            "&:hover": {
+                borderColor: "#3b82f6",
             },
             ...(state.isFocused && {
-                borderColor: '#3b82f6',
-                boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.5)'
-            })
+                borderColor: "#3b82f6",
+                boxShadow: "0 0 0 2px rgba(59, 130, 246, 0.5)",
+            }),
         }),
         option: (base, state) => ({
             ...base,
-            backgroundColor: state.isSelected ? '#3b82f6' : state.isFocused ? '#e5e7eb' : 'white',
-            color: state.isSelected ? 'white' : '#1f2937',
-            cursor: 'pointer',
-            '&:active': {
-                backgroundColor: state.isSelected ? '#3b82f6' : '#d1d5db'
-            }
+            backgroundColor: state.isSelected
+                ? "#3b82f6"
+                : state.isFocused
+                  ? "#e5e7eb"
+                  : "white",
+            color: state.isSelected ? "white" : "#1f2937",
+            cursor: "pointer",
+            "&:active": {
+                backgroundColor: state.isSelected ? "#3b82f6" : "#d1d5db",
+            },
         }),
         menu: (base) => ({
             ...base,
-            zIndex: 50
+            zIndex: 50,
         }),
         placeholder: (base) => ({
             ...base,
-            color: '#9ca3af'
-        })
+            color: "#9ca3af",
+        }),
     };
 
     // Handle form submission
@@ -213,7 +218,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                         type="text"
                                         placeholder="Enter task title"
                                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                            errors.title ? 'border-red-500' : 'border-gray-300'
+                                            errors.title
+                                                ? "border-red-500"
+                                                : "border-gray-300"
                                         }`}
                                         disabled={isSubmitting}
                                         required
@@ -222,7 +229,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                             />
                         </div>
                         {errors.title && (
-                            <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                            <p className="mt-1 text-sm text-red-600">
+                                {errors.title.message}
+                            </p>
                         )}
                     </div>
 
@@ -240,7 +249,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                         {...field}
                                         type="datetime-local"
                                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        min={new Date().toISOString().slice(0, 16)}
+                                        min={new Date()
+                                            .toISOString()
+                                            .slice(0, 16)}
                                         disabled={isSubmitting}
                                     />
                                 )}
@@ -255,13 +266,16 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                         {/* Task List Dropdown with React Select */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Task List <span className="text-red-500">*</span>
+                                Task List{" "}
+                                <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
                                 <Controller
                                     name="task_list_id"
                                     control={control}
-                                    rules={{ required: "Task list is required" }}
+                                    rules={{
+                                        required: "Task list is required",
+                                    }}
                                     render={({ field }) => (
                                         <Select
                                             {...field}
@@ -271,16 +285,32 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                             isDisabled={isSubmitting}
                                             isClearable={false}
                                             isSearchable={true}
-                                            value={taskListOptions.find(option => option.value === field.value) || null}
+                                            value={
+                                                taskListOptions.find(
+                                                    (option) =>
+                                                        option.value ===
+                                                        field.value,
+                                                ) || null
+                                            }
                                             onChange={(selectedOption) => {
-                                                field.onChange(selectedOption ? selectedOption.value : '');
+                                                field.onChange(
+                                                    selectedOption
+                                                        ? selectedOption.value
+                                                        : "",
+                                                );
                                             }}
                                             onBlur={field.onBlur}
-                                            getOptionLabel={(option) => option.label}
-                                            getOptionValue={(option) => option.value}
+                                            getOptionLabel={(option) =>
+                                                option.label
+                                            }
+                                            getOptionValue={(option) =>
+                                                option.value
+                                            }
                                             className="react-select-container"
                                             classNamePrefix="react-select"
-                                            noOptionsMessage={() => "No task lists available"}
+                                            noOptionsMessage={() =>
+                                                "No task lists available"
+                                            }
                                         />
                                     )}
                                 />
@@ -293,7 +323,8 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                 Assigned by:
                             </label>
                             <div className="h-10 w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 flex items-center">
-                                {selectedTaskList && selectedTaskList.creator ? (
+                                {selectedTaskList &&
+                                selectedTaskList.creator ? (
                                     <div className="flex items-center space-x-2 text-gray-700">
                                         <UserPlus className="w-5 h-5 text-gray-500" />
                                         <span className="text-base font-medium">
@@ -301,12 +332,17 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                         </span>
                                         {selectedTaskList.creator.email && (
                                             <span className="text-gray-500 text-sm">
-                                                ({selectedTaskList.creator.email})
+                                                (
+                                                {selectedTaskList.creator.email}
+                                                )
                                             </span>
                                         )}
                                     </div>
                                 ) : (
-                                    <span className="text-gray-400 text-base">Select a task list to see who assigned it</span>
+                                    <span className="text-gray-400 text-base">
+                                        Select a task list to see who assigned
+                                        it
+                                    </span>
                                 )}
                             </div>
                         </div>
@@ -314,7 +350,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
 
                     {/* Error Message for Task List */}
                     {errors.task_list_id && (
-                        <p className="mt-1 text-sm text-red-600">{errors.task_list_id.message}</p>
+                        <p className="mt-1 text-sm text-red-600">
+                            {errors.task_list_id.message}
+                        </p>
                     )}
 
                     {/* Assigned To User (Below the grid) - With increased text size */}
@@ -322,8 +360,12 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                         <div className="mt-3 flex items-center space-x-2 text-gray-700">
                             <User className="w-5 h-5 text-gray-500" />
                             <span>
-                                <span className="font-medium text-base">Assigned to:</span>{' '}
-                                <span className="text-base">{selectedTaskList.assigned_user.name}</span>
+                                <span className="font-medium text-base">
+                                    Assigned to:
+                                </span>{" "}
+                                <span className="text-base">
+                                    {selectedTaskList.assigned_user.name}
+                                </span>
                             </span>
                         </div>
                     )}
@@ -347,7 +389,9 @@ const AddTask = ({ onAddTask, onClose, taskLists }) => {
                                         formats={quillFormats}
                                         className="h-40 mb-12"
                                         placeholder="Enter task description..."
-                                        onChange={(content) => field.onChange(content)}
+                                        onChange={(content) =>
+                                            field.onChange(content)
+                                        }
                                         readOnly={isSubmitting}
                                     />
                                 </div>
