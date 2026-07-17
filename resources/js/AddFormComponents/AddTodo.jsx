@@ -31,7 +31,7 @@
 //         document.body.style.overflow = 'hidden';
 //         document.body.style.position = 'fixed';
 //         document.body.style.width = '100%';
-        
+
 //         return () => {
 //             document.body.style.overflow = 'unset';
 //             document.body.style.position = 'static';
@@ -264,7 +264,6 @@
 
 // export default AddTodo;
 
-
 import React, { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
@@ -295,14 +294,14 @@ const AddTodo = ({ onClose, handleAdd }) => {
 
     // Lock body scroll when modal mounts
     useEffect(() => {
-        document.body.style.overflow = 'hidden';
-        document.body.style.position = 'fixed';
-        document.body.style.width = '100%';
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
 
         return () => {
-            document.body.style.overflow = 'unset';
-            document.body.style.position = 'static';
-            document.body.style.width = 'auto';
+            document.body.style.overflow = "unset";
+            document.body.style.position = "static";
+            document.body.style.width = "auto";
         };
     }, []);
 
@@ -370,7 +369,7 @@ const AddTodo = ({ onClose, handleAdd }) => {
             console.log("Error saving data", error);
             setError(
                 error.response?.data?.message ||
-                    "An error occurred. Please try again."
+                    "An error occurred. Please try again.",
             );
         }
     };
@@ -387,9 +386,7 @@ const AddTodo = ({ onClose, handleAdd }) => {
                 <div className="p-6 text-gray-800">
                     <div className="flex justify-between items-center mb-6">
                         <div className="flex items-center space-x-3">
-                            <h2 className="text-2xl font-bold">
-                                Add New Todo
-                            </h2>
+                            <h2 className="text-2xl font-bold">Add New Todo</h2>
                         </div>
                         <button
                             onClick={handleCancel}
@@ -414,7 +411,8 @@ const AddTodo = ({ onClose, handleAdd }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Title <span className="text-red-500">*</span>
+                                    Title{" "}
+                                    <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
                                     <input
@@ -428,14 +426,18 @@ const AddTodo = ({ onClose, handleAdd }) => {
                                             },
                                         })}
                                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                                            errors.title ? 'border-red-500' : 'border-gray-300'
+                                            errors.title
+                                                ? "border-red-500"
+                                                : "border-gray-300"
                                         }`}
                                         placeholder="Enter todo title"
                                         disabled={isSubmitting}
                                     />
                                 </div>
                                 {errors.title && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+                                    <p className="mt-1 text-sm text-red-600">
+                                        {errors.title.message}
+                                    </p>
                                 )}
                             </div>
 

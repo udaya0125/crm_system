@@ -205,7 +205,9 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
     useEffect(() => {
         const fetchSubCategories = async () => {
             try {
-                const response = await axios.get(route("oursubcategories.index"));
+                const response = await axios.get(
+                    route("oursubcategories.index"),
+                );
                 setSubCategories(response.data.data);
             } catch (error) {
                 console.error("Error fetching subcategories", error);
@@ -230,7 +232,10 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
         e.preventDefault();
         const formData = new FormData();
         for (const key in childCategoryForm) {
-            if (childCategoryForm[key] !== null && childCategoryForm[key] !== "") {
+            if (
+                childCategoryForm[key] !== null &&
+                childCategoryForm[key] !== ""
+            ) {
                 formData.append(key, childCategoryForm[key]);
             }
         }
@@ -274,7 +279,10 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
                     <h2 className="text-2xl font-bold text-gray-800">
                         Add New Child Category
                     </h2>
-                    <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <button
+                        onClick={handleClose}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
                         <X size={24} />
                     </button>
                 </div>
@@ -282,7 +290,8 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Child Category Name <span className="text-red-500">*</span>
+                            Child Category Name{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -297,13 +306,16 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
 
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Parent SubCategory <span className="text-red-500">*</span>
+                            Parent SubCategory{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <Select
                             name="sub_category_id"
                             options={subCategoryOptions}
                             value={subCategoryOptions.find(
-                                (option) => option.value === childCategoryForm.sub_category_id
+                                (option) =>
+                                    option.value ===
+                                    childCategoryForm.sub_category_id,
                             )}
                             onChange={handleSubCategoryChange}
                             placeholder="— Select a subcategory —"
@@ -314,17 +326,36 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
                                 control: (base, state) => ({
                                     ...base,
                                     borderRadius: "0.5rem",
-                                    borderColor: state.isFocused ? "#6366f1" : "#d1d5db",
-                                    boxShadow: state.isFocused ? "0 0 0 1px #6366f1" : "none",
-                                    "&:hover": { borderColor: state.isFocused ? "#6366f1" : "#9ca3af" },
+                                    borderColor: state.isFocused
+                                        ? "#6366f1"
+                                        : "#d1d5db",
+                                    boxShadow: state.isFocused
+                                        ? "0 0 0 1px #6366f1"
+                                        : "none",
+                                    "&:hover": {
+                                        borderColor: state.isFocused
+                                            ? "#6366f1"
+                                            : "#9ca3af",
+                                    },
                                     minHeight: "42px",
                                 }),
-                                placeholder: (base) => ({ ...base, color: "#9ca3af", fontSize: "0.875rem" }),
-                                singleValue: (base) => ({ ...base, fontSize: "0.875rem" }),
+                                placeholder: (base) => ({
+                                    ...base,
+                                    color: "#9ca3af",
+                                    fontSize: "0.875rem",
+                                }),
+                                singleValue: (base) => ({
+                                    ...base,
+                                    fontSize: "0.875rem",
+                                }),
                                 option: (base, state) => ({
                                     ...base,
-                                    backgroundColor: state.isFocused ? "#e0e7ff" : "white",
-                                    color: state.isFocused ? "#4f46e5" : "#374151",
+                                    backgroundColor: state.isFocused
+                                        ? "#e0e7ff"
+                                        : "white",
+                                    color: state.isFocused
+                                        ? "#4f46e5"
+                                        : "#374151",
                                     "&:active": { backgroundColor: "#c7d2fe" },
                                 }),
                             }}
@@ -344,7 +375,9 @@ const AddChildCategory = ({ showForm, setShowForm, setReloadTrigger }) => {
                             disabled={submitting}
                             className="px-5 py-2 text-sm rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            {submitting ? "Creating..." : "Create Child Category"}
+                            {submitting
+                                ? "Creating..."
+                                : "Create Child Category"}
                         </button>
                     </div>
                 </form>

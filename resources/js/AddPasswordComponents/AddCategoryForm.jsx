@@ -108,7 +108,6 @@
 
 // export default AddCategoryForm;
 
-
 import React, { useState } from "react";
 import axios from "axios";
 import { X } from "lucide-react";
@@ -162,8 +161,13 @@ const AddCategoryForm = ({ showForm, setShowForm, setReloadTrigger }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-xl">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Add New Category</h2>
-                    <button onClick={handleClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                    <h2 className="text-2xl font-bold text-gray-800">
+                        Add New Category
+                    </h2>
+                    <button
+                        onClick={handleClose}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    >
                         <X size={24} />
                     </button>
                 </div>
@@ -171,7 +175,8 @@ const AddCategoryForm = ({ showForm, setShowForm, setReloadTrigger }) => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Category Name <span className="text-red-500">*</span>
+                            Category Name{" "}
+                            <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -207,8 +212,6 @@ const AddCategoryForm = ({ showForm, setShowForm, setReloadTrigger }) => {
 };
 
 export default AddCategoryForm;
-
-
 
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
