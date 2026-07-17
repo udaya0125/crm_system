@@ -394,7 +394,9 @@
 
 
 
-import React, { useEffect, useMemo, useState } from "react";
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, usePage } from "@inertiajs/react";
 import axios from "axios";
 import {
@@ -490,7 +492,10 @@ const AdminSideBar = ({
                 icon: Building2,
                 show: can.adminOrManager,
                 items: [
-                    { href: "/payment-management", label: "Payment Management" },
+                    {
+                        href: "/payment-management",
+                        label: "Payment Management",
+                    },
                     { href: "/service-contracts", label: "Service Contracts" },
                     { href: "/client-details", label: "Client Details" },
                 ],
@@ -518,7 +523,6 @@ const AdminSideBar = ({
                     { href: "/activity-log", label: "Activity Log" },
                 ],
             },
-            
         ],
         [
             can.adminOrAccountant,
@@ -574,7 +578,7 @@ const AdminSideBar = ({
             icon: UserCog,
             show: can.adminOrDeveloper,
         },
-        
+
         // {
         //     href: "/user-management",
         //     label: "Users",
@@ -591,7 +595,9 @@ const AdminSideBar = ({
 
     useEffect(() => {
         const activeGroups = groups.reduce((next, group) => {
-            const visibleItems = group.items.filter((item) => item.show !== false);
+            const visibleItems = group.items.filter(
+                (item) => item.show !== false,
+            );
             if (isGroupActive(visibleItems)) {
                 next[group.id] = true;
             }
@@ -676,12 +682,16 @@ const AdminSideBar = ({
                 <span
                     className={[
                         "flex h-8 w-8 items-center justify-center rounded-full",
-                        active ? "bg-white/15 text-white" : "bg-gray-100 text-gray-500",
+                        active
+                            ? "bg-white/15 text-white"
+                            : "bg-gray-100 text-gray-500",
                     ].join(" ")}
                 >
                     <Icon className="h-4 w-4" />
                 </span>
-                <span className="text-xs font-semibold leading-tight">{label}</span>
+                <span className="text-xs font-semibold leading-tight">
+                    {label}
+                </span>
             </Link>
         );
     };
@@ -691,13 +701,50 @@ const AdminSideBar = ({
         const active = isGroupActive(visibleItems);
         const Icon = group.icon;
         const isOpen = Boolean(openGroups[group.id]);
+        const triggerRef = useRef(null);
+        const closeTimeoutRef = useRef(null);
+        const [flyoutPos, setFlyoutPos] = useState(null);
 
         if (visibleItems.length === 0 || group.show === false) return null;
 
         if (isCollapsed) {
+            const clearCloseTimeout = () => {
+                if (closeTimeoutRef.current) {
+                    clearTimeout(closeTimeoutRef.current);
+                    closeTimeoutRef.current = null;
+                }
+            };
+
+            const showFlyout = () => {
+                clearCloseTimeout();
+                const rect = triggerRef.current?.getBoundingClientRect();
+                if (rect) {
+                    setFlyoutPos({
+                        top: rect.top,
+                        left: rect.right + 8,
+                    });
+                }
+            };
+
+            const scheduleHideFlyout = () => {
+                clearCloseTimeout();
+                // Small delay avoids the flyout closing when the pointer
+                // crosses the gap between the button and the flyout itself.
+                closeTimeoutRef.current = setTimeout(() => {
+                    setFlyoutPos(null);
+                }, 120);
+            };
+
+            useEffect(() => clearCloseTimeout, []);
+
             return (
-                <div className="group/flyout relative">
+                <div
+                    className="relative"
+                    onMouseEnter={showFlyout}
+                    onMouseLeave={scheduleHideFlyout}
+                >
                     <button
+                        ref={triggerRef}
                         type="button"
                         className={[
                             "flex h-11 w-11 items-center justify-center rounded-2xl transition-colors duration-200",
@@ -709,70 +756,78 @@ const AdminSideBar = ({
                     >
                         <Icon className="h-4 w-4" />
                     </button>
-                    <div className="invisible fixed top-[27rem] ml-12 z-50 min-w-56 rounded-2xl border border-gray-100 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
-                        <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
-                            {group.label}
-                        </p>
-                        <div className="space-y-0.5">
-                            {visibleItems.map((item) => (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={closeMobileMenu}
-                                    className={[
-                                        "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-200",
-                                        isActive(item.href)
-                                            ? "bg-gray-900 font-medium text-white"
-                                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
-                                    ].join(" ")}
-                                >
-                                    {item.label}
-                                </Link>
-                            ))}
-                        </div>
-                    </div>
+
+                    {flyoutPos &&
+                        createPortal(
+                            <div
+                                style={{
+                                    position: "fixed",
+                                    top: flyoutPos.top,
+                                    left: flyoutPos.left,
+                                }}
+                                className="z-[100] min-w-56 rounded-2xl border border-gray-100 bg-white p-2 shadow-lg"
+                                onMouseEnter={showFlyout}
+                                onMouseLeave={scheduleHideFlyout}
+                            >
+                                <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
+                                    {group.label}
+                                </p>
+                                <div className="space-y-0.5">
+                                    {visibleItems.map((item) => (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            onClick={closeMobileMenu}
+                                            className={[
+                                                "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-200",
+                                                isActive(item.href)
+                                                    ? "bg-gray-900 font-medium text-white"
+                                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+                                            ].join(" ")}
+                                        >
+                                            {item.label}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>,
+                            document.body,
+                        )}
                 </div>
             );
         }
 
         return (
             <div>
-                {/* <button
+                <button
                     type="button"
                     onClick={() => toggleGroup(group.id)}
-                    className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide text-gray-400 transition hover:text-gray-600"
+                    className={[
+                        "flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+                        active
+                            ? "text-gray-900"
+                            : "text-gray-400 hover:text-gray-600",
+                    ].join(" ")}
                     aria-expanded={isOpen}
                 >
                     <span className="flex items-center gap-2">
                         {isOpen ? (
-                            <ChevronDown className="h-3.5 w-3.5" />
+                            <ChevronDown
+                                className={[
+                                    "h-3.5 w-3.5",
+                                    active ? "text-gray-900" : "",
+                                ].join(" ")}
+                            />
                         ) : (
-                            <ChevronRight className="h-3.5 w-3.5" />
+                            <ChevronRight
+                                className={[
+                                    "h-3.5 w-3.5",
+                                    active ? "text-gray-900" : "",
+                                ].join(" ")}
+                            />
                         )}
                         {group.label}
                     </span>
-                </button> */}
-
-                <button
-    type="button"
-    onClick={() => toggleGroup(group.id)}
-    className={[
-        "flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide transition",
-        active
-            ? "text-gray-900"
-            : "text-gray-400 hover:text-gray-600",
-    ].join(" ")}
-    aria-expanded={isOpen}
->
-    <span className="flex items-center gap-2">
-        {isOpen ? (
-            <ChevronDown className={["h-3.5 w-3.5", active ? "text-gray-900" : ""].join(" ")} />
-        ) : (
-            <ChevronRight className={["h-3.5 w-3.5", active ? "text-gray-900" : ""].join(" ")} />
-        )}
-        {group.label}
-    </span>
-</button>
+                </button>
 
                 {isOpen && (
                     <div className="mt-1 space-y-0.5 pl-2">
@@ -793,10 +848,14 @@ const AdminSideBar = ({
                                     <span
                                         className={[
                                             "h-1.5 w-1.5 shrink-0 rounded-full",
-                                            itemActive ? "bg-amber-400" : "bg-amber-300/70",
+                                            itemActive
+                                                ? "bg-amber-400"
+                                                : "bg-amber-300/70",
                                         ].join(" ")}
                                     />
-                                    <span className="truncate">{item.label}</span>
+                                    <span className="truncate">
+                                        {item.label}
+                                    </span>
                                 </Link>
                             );
                         })}
@@ -821,7 +880,9 @@ const AdminSideBar = ({
                 className={[
                     "fixed left-0 top-0 z-50 flex h-screen flex-col bg-amber-50/60 transition-all duration-300",
                     isCollapsed ? "w-20" : "w-64",
-                    isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+                    isMobileOpen
+                        ? "translate-x-0"
+                        : "-translate-x-full lg:translate-x-0",
                 ].join(" ")}
             >
                 <div className="flex h-full flex-col  bg-white p-4 shadow-xl shadow-amber-100/60">
@@ -841,19 +902,22 @@ const AdminSideBar = ({
                                 <img
                                     src="/images/logo2.png"
                                     alt="S.A I.T Solution"
-                                    className="h-9 w-auto max-w-[150px] object-contain"
+                                    className="h-9 w-[150px] max-w-[500px] object-contain"
                                 />
                             </Link>
                         ) : (
-
                             <>
-                            <Link href="/dashboard" onClick={closeMobileMenu} className="hidden" >
-                                <img
-                                    src="/images/logo2.png"
-                                    alt="S.A I.T Solution"
-                                    className="h-8 w-8 object-contain"
-                                />
-                            </Link>
+                                <Link
+                                    href="/dashboard"
+                                    onClick={closeMobileMenu}
+                                    className="hidden"
+                                >
+                                    <img
+                                        src="/images/logo2.png"
+                                        alt="S.A I.T Solution"
+                                        className="h-8 w-8 object-contain"
+                                    />
+                                </Link>
                             </>
                         )}
 
@@ -861,23 +925,15 @@ const AdminSideBar = ({
                             type="button"
                             onClick={onToggleCollapse}
                             className="hidden rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-900 lg:inline-flex"
-                            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                            title={
+                                isCollapsed
+                                    ? "Expand sidebar"
+                                    : "Collapse sidebar"
+                            }
                         >
                             <Menu className="h-5 w-5" />
                         </button>
                     </div>
-
-                    {/* Search (decorative) */}
-                    {/* {!isCollapsed && (
-                        <div className="mb-4 flex items-center gap-2 rounded-xl bg-gray-50 px-3 py-2.5">
-                            <Search className="h-4 w-4 shrink-0 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search here"
-                                className="w-full bg-transparent text-sm text-gray-600 placeholder:text-gray-400 focus:outline-none"
-                            />
-                        </div>
-                    )} */}
 
                     <div className="flex-1 space-y-5 overflow-y-auto pr-1 py-4">
                         {/* Grid tiles: Dashboard + quick links */}
@@ -906,84 +962,18 @@ const AdminSideBar = ({
                                 Menu
                             </p>
                         )}
-                        <div className={isCollapsed ? "flex flex-col items-center gap-2" : "space-y-3"}>
+                        <div
+                            className={
+                                isCollapsed
+                                    ? "flex flex-col items-center gap-2"
+                                    : "space-y-3"
+                            }
+                        >
                             {groups.map((group) => (
                                 <GroupSection key={group.id} group={group} />
                             ))}
                         </div>
                     </div>
-
-                    {/* Profile bar */}
-                    {/* <div className="relative mt-4">
-                        {isProfileMenuOpen && !isCollapsed && (
-                            <div className="absolute bottom-full left-0 mb-2 w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-xl shadow-gray-200/70">
-                                <Link
-                                    href="/profile"
-                                    className="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
-                                >
-                                    <User className="h-4 w-4" />
-                                    Profile
-                                </Link>
-                                <button
-                                    type="button"
-                                    onClick={handleLogout}
-                                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-                                >
-                                    <LogOut className="h-4 w-4" />
-                                    Sign Out
-                                </button>
-                            </div>
-                        )}
-
-                        <div
-                            className={[
-                                "flex items-center gap-2",
-                                isCollapsed ? "flex-col" : "",
-                            ].join(" ")}
-                        >
-                            <button
-                                type="button"
-                                onClick={() => setIsProfileMenuOpen((current) => !current)}
-                                className={[
-                                    "flex min-w-0 flex-1 items-center gap-3 rounded-2xl bg-gray-900 p-2.5 text-left transition hover:bg-gray-800",
-                                    isCollapsed ? "w-11 justify-center" : "",
-                                ].join(" ")}
-                            >
-                                <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 text-xs font-bold text-white">
-                                    {user?.image ? (
-                                        <img
-                                            src={`${imgurl}/${user.image}`}
-                                            alt={`${user?.name || "User"} profile`}
-                                            className="h-full w-full object-cover"
-                                        />
-                                    ) : initials ? (
-                                        initials
-                                    ) : (
-                                        <UserCircle className="h-6 w-6" />
-                                    )}
-                                </span>
-
-                                {!isCollapsed && (
-                                    <>
-                                        <span className="min-w-0 flex-1">
-                                            <span className="block truncate text-sm font-semibold text-white">
-                                                {user?.name || "Guest"}
-                                            </span>
-                                            <span className="block truncate text-xs capitalize text-gray-400">
-                                                {user?.role || "User"}
-                                            </span>
-                                        </span>
-                                        <ChevronDown
-                                            className={[
-                                                "h-4 w-4 shrink-0 text-gray-400 transition",
-                                                isProfileMenuOpen ? "rotate-180" : "",
-                                            ].join(" ")}
-                                        />
-                                    </>
-                                )}
-                            </button>
-                        </div>
-                    </div> */}
                 </div>
             </aside>
         </>
@@ -991,6 +981,557 @@ const AdminSideBar = ({
 };
 
 export default AdminSideBar;
+
+// import React, { useEffect, useMemo, useState } from "react";
+// import { Link, usePage } from "@inertiajs/react";
+// import axios from "axios";
+// import {
+//     Activity,
+//     Bell,
+//     Building2,
+//     ChevronDown,
+//     ChevronRight,
+//     ClipboardList,
+//     Key,
+//     Landmark,
+//     LayoutDashboard,
+//     ListFilter,
+//     LogOut,
+//     Menu,
+//     Receipt,
+//     ScrollText,
+//     Search,
+//     User,
+//     UserCircle,
+//     UserCog,
+// } from "lucide-react";
+
+// const AdminSideBar = ({
+//     isMobileOpen,
+//     onMobileToggle,
+//     isCollapsed,
+//     onToggleCollapse,
+// }) => {
+//     const { url, props } = usePage();
+//     const user = props?.auth?.user;
+//     const role = user?.role;
+//     const [openGroups, setOpenGroups] = useState({});
+//     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+//     const currentUrl = url.split("?")[0];
+//     const imgurl = import.meta.env.VITE_IMAGE_PATH;
+//     const canUseRoutes = typeof route === "function";
+
+//     const can = {
+//         admin: role === "admin",
+//         adminOrTechnician: role === "admin" || role === "technician",
+//         adminOrDeveloper: role === "admin" || role === "developer",
+//         adminOrAccountant: role === "admin" || role === "accountant",
+//         adminOrManager: role === "admin" || role === "manager",
+//     };
+
+//     const isActive = (href) =>
+//         currentUrl === href || currentUrl.startsWith(`${href}/`);
+//     const isGroupActive = (items) => items.some((item) => isActive(item.href));
+
+//     const groups = useMemo(
+//         () => [
+//             {
+//                 id: "crm",
+//                 label: "CRM",
+//                 icon: ListFilter,
+//                 show: can.adminOrAccountant,
+//                 items: [
+//                     { href: "/leads", label: "Leads" },
+//                     { href: "/client-management", label: "Client Management" },
+//                 ],
+//             },
+//             {
+//                 id: "company",
+//                 label: "Company",
+//                 icon: Building2,
+//                 show: can.adminOrManager,
+//                 items: [
+//                     { href: "/client", label: "Clients" },
+//                     { href: "/expiration", label: "Expirations" },
+//                     { href: "/hosting-tracking", label: "Hosting Management" },
+//                     { href: "/domain-tracking", label: "Domain Management" },
+//                 ],
+//             },
+//             // {
+//             //     id: "report",
+//             //     label: "Report",
+//             //     icon: ClipboardList,
+//             //     show: true,
+//             //     items: [
+//             //         { href: "/todo", label: "To Do List" },
+//             //         { href: "/ticket", label: "Ticket Management" },
+//             //         {
+//             //             href: "/project-management",
+//             //             label: "Project Management",
+//             //             show: can.adminOrDeveloper,
+//             //         },
+//             //     ],
+//             // },
+//             {
+//                 id: "payment-management",
+//                 label: "Payment Management",
+//                 icon: Building2,
+//                 show: can.adminOrManager,
+//                 items: [
+//                     {
+//                         href: "/payment-management",
+//                         label: "Payment Management",
+//                     },
+//                     { href: "/service-contracts", label: "Service Contracts" },
+//                     { href: "/client-details", label: "Client Details" },
+//                 ],
+//             },
+//             {
+//                 id: "passwords",
+//                 label: "Password Manager",
+//                 icon: Key,
+//                 show: true,
+//                 items: [
+//                     { href: "/category", label: "Categories" },
+//                     { href: "/sub-category", label: "Sub Categories" },
+//                     { href: "/sub-sub-category", label: "Sub Sub Categories" },
+//                     { href: "/organization", label: "Organizations" },
+//                     { href: "/password", label: "Passwords" },
+//                 ],
+//             },
+//             {
+//                 id: "user-management",
+//                 label: "User Management",
+//                 icon: User,
+//                 show: can.adminOrManager,
+//                 items: [
+//                     { href: "/user-management", label: "User Management" },
+//                     { href: "/activity-log", label: "Activity Log" },
+//                 ],
+//             },
+//         ],
+//         [
+//             can.adminOrAccountant,
+//             can.adminOrDeveloper,
+//             can.adminOrManager,
+//             can.adminOrTechnician,
+//         ],
+//     );
+
+//     const quickLinks = [
+//         {
+//             href: "/payment-finance-tracking",
+//             label: "Finance",
+//             icon: Landmark,
+//             show: can.adminOrAccountant,
+//         },
+//         {
+//             href: "/task-assigned",
+//             label: "Task Assigned",
+//             icon: ClipboardList,
+//         },
+//         // {
+//         //     href: "/client-details",
+//         //     label: "Client Details",
+//         //     icon: UserCircle,
+//         //     show: can.admin,
+//         // },
+//         // {
+//         //     href: "/payment-management",
+//         //     label: "Payment",
+//         //     icon: Receipt,
+//         //     show: can.admin,
+//         // },
+//         // {
+//         //     href: "/service-contracts",
+//         //     label: "Contracts",
+//         //     icon: ScrollText,
+//         //     show: can.admin,
+//         // },
+//         {
+//             href: "/todo",
+//             label: "Todo",
+//             icon: ScrollText,
+//         },
+//         {
+//             href: "/ticket",
+//             label: "Ticket",
+//             icon: ScrollText,
+//         },
+//         {
+//             href: "/project-management",
+//             label: "Project Management",
+//             icon: UserCog,
+//             show: can.adminOrDeveloper,
+//         },
+
+//         // {
+//         //     href: "/user-management",
+//         //     label: "Users",
+//         //     icon: UserCog,
+//         //     show: can.admin,
+//         // },
+//         // {
+//         //     href: "/activity-log",
+//         //     label: "Activity Log",
+//         //     icon: Activity,
+//         //     show: can.admin,
+//         // },
+//     ];
+
+//     useEffect(() => {
+//         const activeGroups = groups.reduce((next, group) => {
+//             const visibleItems = group.items.filter(
+//                 (item) => item.show !== false,
+//             );
+//             if (isGroupActive(visibleItems)) {
+//                 next[group.id] = true;
+//             }
+//             return next;
+//         }, {});
+
+//         if (Object.keys(activeGroups).length > 0) {
+//             setOpenGroups((current) => ({ ...current, ...activeGroups }));
+//         }
+//     }, [groups, url]);
+
+//     useEffect(() => {
+//         setIsProfileMenuOpen(false);
+//     }, [url]);
+
+//     const toggleGroup = (groupId) => {
+//         if (isCollapsed) return;
+//         setOpenGroups((current) => ({
+//             ...current,
+//             [groupId]: !current[groupId],
+//         }));
+//     };
+
+//     const closeMobileMenu = () => {
+//         if (isMobileOpen) onMobileToggle();
+//     };
+
+//     const handleLogout = async () => {
+//         try {
+//             if (canUseRoutes) {
+//                 await axios.post(route("logout"));
+//             }
+//         } catch (error) {
+//             console.error("Logout error:", error);
+//         } finally {
+//             window.location.href = "/login";
+//         }
+//     };
+
+//     const initials = (user?.name || "Guest")
+//         .split(" ")
+//         .filter(Boolean)
+//         .slice(0, 2)
+//         .map((part) => part[0])
+//         .join("")
+//         .toUpperCase();
+
+//     // ---- Visual primitives ----
+
+//     const GridTile = ({ href, label, icon: Icon }) => {
+//         const active = isActive(href);
+
+//         if (isCollapsed) {
+//             return (
+//                 <Link
+//                     href={href}
+//                     onClick={closeMobileMenu}
+//                     title={label}
+//                     className={[
+//                         "flex h-11 w-11 items-center justify-center rounded-2xl transition-colors duration-200",
+//                         active
+//                             ? "bg-gray-900 text-white shadow-sm"
+//                             : "bg-white text-gray-500 hover:bg-gray-50",
+//                     ].join(" ")}
+//                 >
+//                     <Icon className="h-4 w-4" />
+//                 </Link>
+//             );
+//         }
+
+//         return (
+//             <Link
+//                 href={href}
+//                 onClick={closeMobileMenu}
+//                 className={[
+//                     "flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 text-center transition-colors duration-200",
+//                     active
+//                         ? "bg-gray-900 text-white shadow-sm"
+//                         : "bg-white text-gray-500 ring-1 ring-inset ring-gray-100 hover:bg-gray-50",
+//                 ].join(" ")}
+//             >
+//                 <span
+//                     className={[
+//                         "flex h-8 w-8 items-center justify-center rounded-full",
+//                         active
+//                             ? "bg-white/15 text-white"
+//                             : "bg-gray-100 text-gray-500",
+//                     ].join(" ")}
+//                 >
+//                     <Icon className="h-4 w-4" />
+//                 </span>
+//                 <span className="text-xs font-semibold leading-tight">
+//                     {label}
+//                 </span>
+//             </Link>
+//         );
+//     };
+
+//     const GroupSection = ({ group }) => {
+//         const visibleItems = group.items.filter((item) => item.show !== false);
+//         const active = isGroupActive(visibleItems);
+//         const Icon = group.icon;
+//         const isOpen = Boolean(openGroups[group.id]);
+
+//         if (visibleItems.length === 0 || group.show === false) return null;
+
+//         if (isCollapsed) {
+//             return (
+//                 <div className="group/flyout relative">
+//                     <button
+//                         type="button"
+//                         className={[
+//                             "flex h-11 w-11 items-center justify-center rounded-2xl transition-colors duration-200",
+//                             active
+//                                 ? "bg-gray-900 text-white shadow-sm"
+//                                 : "bg-white text-gray-500 hover:bg-gray-50",
+//                         ].join(" ")}
+//                         title={group.label}
+//                     >
+//                         <Icon className="h-4 w-4" />
+//                     </button>
+//                     <div className="invisible absolute left-full top-0 ml-2 z-[999] min-w-56 rounded-2xl border border-gray-100 bg-white p-2 opacity-0 shadow-lg transition group-hover/flyout:visible group-hover/flyout:opacity-100">
+//                         <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
+//                             {group.label}
+//                         </p>
+//                         <div className="space-y-0.5">
+//                             {visibleItems.map((item) => (
+//                                 <Link
+//                                     key={item.href}
+//                                     href={item.href}
+//                                     onClick={closeMobileMenu}
+//                                     className={[
+//                                         "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-200",
+//                                         isActive(item.href)
+//                                             ? "bg-gray-900 font-medium text-white"
+//                                             : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+//                                     ].join(" ")}
+//                                 >
+//                                     {item.label}
+//                                 </Link>
+//                             ))}
+//                         </div>
+//                     </div>
+//                 </div>
+//             );
+//         }
+
+//         return (
+//             <div>
+//                 {/* <button
+//                     type="button"
+//                     onClick={() => toggleGroup(group.id)}
+//                     className="flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide text-gray-400 transition hover:text-gray-600"
+//                     aria-expanded={isOpen}
+//                 >
+//                     <span className="flex items-center gap-2">
+//                         {isOpen ? (
+//                             <ChevronDown className="h-3.5 w-3.5" />
+//                         ) : (
+//                             <ChevronRight className="h-3.5 w-3.5" />
+//                         )}
+//                         {group.label}
+//                     </span>
+//                 </button> */}
+
+//                 <button
+//                     type="button"
+//                     onClick={() => toggleGroup(group.id)}
+//                     className={[
+//                         "flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide transition",
+//                         active
+//                             ? "text-gray-900"
+//                             : "text-gray-400 hover:text-gray-600",
+//                     ].join(" ")}
+//                     aria-expanded={isOpen}
+//                 >
+//                     <span className="flex items-center gap-2">
+//                         {isOpen ? (
+//                             <ChevronDown
+//                                 className={[
+//                                     "h-3.5 w-3.5",
+//                                     active ? "text-gray-900" : "",
+//                                 ].join(" ")}
+//                             />
+//                         ) : (
+//                             <ChevronRight
+//                                 className={[
+//                                     "h-3.5 w-3.5",
+//                                     active ? "text-gray-900" : "",
+//                                 ].join(" ")}
+//                             />
+//                         )}
+//                         {group.label}
+//                     </span>
+//                 </button>
+
+//                 {isOpen && (
+//                     <div className="mt-1 space-y-0.5 pl-2">
+//                         {visibleItems.map((item) => {
+//                             const itemActive = isActive(item.href);
+//                             return (
+//                                 <Link
+//                                     key={item.href}
+//                                     href={item.href}
+//                                     onClick={closeMobileMenu}
+//                                     className={[
+//                                         "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors duration-200",
+//                                         itemActive
+//                                             ? "bg-gray-900 font-medium text-white"
+//                                             : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+//                                     ].join(" ")}
+//                                 >
+//                                     <span
+//                                         className={[
+//                                             "h-1.5 w-1.5 shrink-0 rounded-full",
+//                                             itemActive
+//                                                 ? "bg-amber-400"
+//                                                 : "bg-amber-300/70",
+//                                         ].join(" ")}
+//                                     />
+//                                     <span className="truncate">
+//                                         {item.label}
+//                                     </span>
+//                                 </Link>
+//                             );
+//                         })}
+//                     </div>
+//                 )}
+//             </div>
+//         );
+//     };
+
+//     return (
+//         <>
+//             {isMobileOpen && (
+//                 <button
+//                     type="button"
+//                     className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden"
+//                     aria-label="Close sidebar"
+//                     onClick={onMobileToggle}
+//                 />
+//             )}
+
+//             <aside
+//                 className={[
+//                     "fixed left-0 top-0 z-50 flex h-screen flex-col bg-amber-50/60 transition-all duration-300",
+//                     isCollapsed ? "w-20" : "w-64",
+//                     isMobileOpen
+//                         ? "translate-x-0"
+//                         : "-translate-x-full lg:translate-x-0",
+//                 ].join(" ")}
+//             >
+//                 <div className="flex h-full flex-col  bg-white p-4 shadow-xl shadow-amber-100/60">
+//                     {/* Logo + collapse toggle */}
+//                     <div
+//                         className={[
+//                             "flex items-center pb-3 border-b border-slate-200",
+//                             isCollapsed ? "justify-center" : "justify-between",
+//                         ].join(" ")}
+//                     >
+//                         {!isCollapsed ? (
+//                             <Link
+//                                 href="/dashboard"
+//                                 className="flex min-w-0 items-center gap-2"
+//                                 onClick={closeMobileMenu}
+//                             >
+//                                 <img
+//                                     src="/images/logo2.png"
+//                                     alt="S.A I.T Solution"
+//                                     className="h-9 w-[150px] max-w-[500px] object-contain"
+//                                 />
+//                             </Link>
+//                         ) : (
+//                             <>
+//                                 <Link
+//                                     href="/dashboard"
+//                                     onClick={closeMobileMenu}
+//                                     className="hidden"
+//                                 >
+//                                     <img
+//                                         src="/images/logo2.png"
+//                                         alt="S.A I.T Solution"
+//                                         className="h-8 w-8 object-contain"
+//                                     />
+//                                 </Link>
+//                             </>
+//                         )}
+
+//                         <button
+//                             type="button"
+//                             onClick={onToggleCollapse}
+//                             className="hidden rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-900 lg:inline-flex"
+//                             title={
+//                                 isCollapsed
+//                                     ? "Expand sidebar"
+//                                     : "Collapse sidebar"
+//                             }
+//                         >
+//                             <Menu className="h-5 w-5" />
+//                         </button>
+//                     </div>
+
+//                     <div className="flex-1 space-y-5 overflow-y-auto pr-1 py-4">
+//                         {/* Grid tiles: Dashboard + quick links */}
+//                         <div
+//                             className={[
+//                                 isCollapsed
+//                                     ? "flex flex-col items-center gap-2"
+//                                     : "grid grid-cols-2 gap-2",
+//                             ].join(" ")}
+//                         >
+//                             <GridTile
+//                                 href="/dashboard"
+//                                 label="Dashboard"
+//                                 icon={LayoutDashboard}
+//                             />
+//                             {quickLinks
+//                                 .filter((link) => link.show !== false)
+//                                 .map((link) => (
+//                                     <GridTile key={link.href} {...link} />
+//                                 ))}
+//                         </div>
+
+//                         {/* Collapsible groups */}
+//                         {!isCollapsed && (
+//                             <p className="px-1 text-xs font-bold uppercase tracking-wide text-gray-300">
+//                                 Menu
+//                             </p>
+//                         )}
+//                         <div
+//                             className={
+//                                 isCollapsed
+//                                     ? "flex flex-col items-center gap-2"
+//                                     : "space-y-3"
+//                             }
+//                         >
+//                             {groups.map((group) => (
+//                                 <GroupSection key={group.id} group={group} />
+//                             ))}
+//                         </div>
+//                     </div>
+//                 </div>
+//             </aside>
+//         </>
+//     );
+// };
+
+// export default AdminSideBar;
 
 // import React, { useEffect, useMemo, useState } from "react";
 // import { Link, usePage } from "@inertiajs/react";
