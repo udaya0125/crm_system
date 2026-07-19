@@ -114,7 +114,7 @@ class TaskAssignedService
 
             $task->update([
                 'title' => $data['title'],
-                'department' => $assignedUser->role, // re-derived in case assignee changed
+                'department' => $assignedUser->role, 
                 'assigned_team' => $assignedUser->id,
                 'user_id' => $data['user_id'],
                 'priority' => $data['priority'],

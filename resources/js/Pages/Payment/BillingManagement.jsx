@@ -1,4 +1,3 @@
-// pages/BillingManagement/index.jsx
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Head } from "@inertiajs/react";
 import { useState, useEffect } from "react";

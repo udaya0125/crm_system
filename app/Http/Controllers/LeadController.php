@@ -29,118 +29,56 @@ class LeadController extends Controller
     /**
      * Store a newly created lead
      */
-    // public function store(Request $request)
-    // {
-    //     $validated = $request->validate([
-    //         'client_name'          => 'required|string|max:255',
-    //         'company_name'         => 'nullable|string|max:255',
-    //         'phone'                => 'required|string|max:20',
-    //         'email'                => 'nullable|email|max:255',
-    //         'service_interested'   => 'nullable|string|max:255',
-    //         'lead_source'          => 'nullable|string|max:255',
-    //         'assigned_salesperson' => 'nullable|string|max:255',
-    //         'next_followup_date'   => 'nullable|date',
-    //         'notes'                => 'nullable|string',
-    //         'status'               => 'nullable|string|max:100',
-    //     ]);
-
-    //     $lead = Lead::create($validated);
-
-    //     // ── Notify admin of new lead ───────────────────────────────────────
-    //     $this->sendAdminMail($lead, 'created');
-
-    //     UserLog::create([
-    //         'name'       => $request->user()?->name ?? 'System',
-    //         'ip_address' => $request->ip(),
-    //         'title'      => "Created lead: {$lead->client_name}",
-    //     ]);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Lead created successfully',
-    //         'data'    => $lead
-    //     ], 201);
-    // }
-
     public function store(StoreLeadRequest $request)
-{
-    $validated = $request->validated();
+    {
+        $validated = $request->validated();
 
-    $lead = Lead::create($validated);
+        $lead = Lead::create($validated);
 
-    $this->sendAdminMail($lead, 'created');
+        // ── Notify admin only if a follow-up date was assigned on creation ──
+        if (!empty($lead->next_followup_date)) {
+            $this->sendAdminMail($lead, 'created');
+        }
 
-    UserLog::create([
-        'name'       => $request->user()?->name ?? 'System',
-        'ip_address' => $request->ip(),
-        'title'      => "Created lead: {$lead->client_name}",
-    ]);
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Created lead: {$lead->client_name}",
+        ]);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Lead created successfully',
-        'data'    => $lead
-    ], 201);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead created successfully',
+            'data'    => $lead
+        ], 201);
+    }
 
     /**
      * Update the specified lead
      */
-    // public function update(Request $request, $id)
-    // {
-    //     $lead = Lead::findOrFail($id);
-
-    //     $validated = $request->validate([
-    //         'client_name'          => 'sometimes|required|string|max:255',
-    //         'company_name'         => 'nullable|string|max:255',
-    //         'phone'                => 'sometimes|required|string|max:20',
-    //         'email'                => 'nullable|email|max:255',
-    //         'service_interested'   => 'nullable|string|max:255',
-    //         'lead_source'          => 'nullable|string|max:255',
-    //         'assigned_salesperson' => 'nullable|string|max:255',
-    //         'next_followup_date'   => 'nullable|date',
-    //         'notes'                => 'nullable|string',
-    //         'status'               => 'nullable|string|max:100',
-    //     ]);
-
-    //     $lead->update($validated);
-
-    //     // ── Notify admin of lead update ────────────────────────────────────
-    //     $this->sendAdminMail($lead, 'updated');
-
-    //     UserLog::create([
-    //         'name'       => $request->user()?->name ?? 'System',
-    //         'ip_address' => $request->ip(),
-    //         'title'      => "Updated lead: {$lead->client_name}",
-    //     ]);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'message' => 'Lead updated successfully',
-    //         'data'    => $lead
-    //     ]);
-    // }
-
     public function update(UpdateLeadRequest $request, $id)
-{
-    $lead = Lead::findOrFail($id);
+    {
+        $lead = Lead::findOrFail($id);
 
-    $lead->update($request->validated());
+        $lead->update($request->validated());
 
-    $this->sendAdminMail($lead, 'updated');
+        // ── Notify admin only if next_followup_date was just assigned/changed ──
+        if ($lead->wasChanged('next_followup_date') && !empty($lead->next_followup_date)) {
+            $this->sendAdminMail($lead, 'updated');
+        }
 
-    UserLog::create([
-        'name'       => $request->user()?->name ?? 'System',
-        'ip_address' => $request->ip(),
-        'title'      => "Updated lead: {$lead->client_name}",
-    ]);
+        UserLog::create([
+            'name'       => $request->user()?->name ?? 'System',
+            'ip_address' => $request->ip(),
+            'title'      => "Updated lead: {$lead->client_name}",
+        ]);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Lead updated successfully',
-        'data'    => $lead
-    ]);
-}
+        return response()->json([
+            'success' => true,
+            'message' => 'Lead updated successfully',
+            'data'    => $lead
+        ]);
+    }
 
     /**
      * Remove the specified lead
@@ -168,18 +106,15 @@ class LeadController extends Controller
     // ──────────────────────────────────────────────────────────────────────
 
     /**
-     * Send lead notification email to admin(s).
-     * Reads ADMIN_EMAIL from .env — supports comma-separated multiple addresses.
+     * Send lead follow-up notification email to admin(s).
+     *
+     * NOTE: Recipient is temporarily hardcoded to a placeholder address.
+     * Swap FOLLOWUP_ADMIN_EMAIL below for the real address(es) when ready —
+     * or move it back to .env via ADMIN_EMAIL once confirmed.
      */
     private function sendAdminMail(Lead $lead, string $mailType): void
     {
-        $adminEmails = array_filter(
-            array_map('trim', explode(',', env('ADMIN_EMAIL', '')))
-        );
-
-        if (empty($adminEmails)) {
-            return;
-        }
+        $adminEmails = ['admin@gmail.com'];
 
         try {
             Mail::to($adminEmails)

@@ -133,7 +133,7 @@ const AdminWrapper = ({ children }) => {
             <main
                 className={[
                     "min-h-[calc(100vh-4rem)] pt-16 transition-all duration-300",
-                    isCollapsed ? "lg:ml-20" : "lg:ml-72",
+                    isCollapsed ? "lg:ml-20" : "lg:ml-64",
                 ].join(" ")}
             >
                 <div className="p-6 lg:p-8">
