@@ -660,7 +660,7 @@ const AdminSideBar = ({
                         "flex h-11 w-11 items-center justify-center rounded-2xl transition-colors duration-200",
                         active
                             ? "bg-gray-900 text-white shadow-sm"
-                            : "bg-white text-gray-500 hover:bg-gray-50",
+                            : "bg-white text-gray-900 hover:bg-gray-50",
                     ].join(" ")}
                 >
                     <Icon className="h-4 w-4" />
@@ -676,7 +676,7 @@ const AdminSideBar = ({
                     "flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 text-center transition-colors duration-200",
                     active
                         ? "bg-gray-900 text-white shadow-sm"
-                        : "bg-white text-gray-500 ring-1 ring-inset ring-gray-100 hover:bg-gray-50",
+                        : "bg-white text-gray-900 ring-1 ring-inset ring-gray-100 hover:bg-gray-50",
                 ].join(" ")}
             >
                 <span
@@ -684,7 +684,7 @@ const AdminSideBar = ({
                         "flex h-8 w-8 items-center justify-center rounded-full",
                         active
                             ? "bg-white/15 text-white"
-                            : "bg-gray-100 text-gray-500",
+                            : "bg-gray-100 text-gray-900",
                     ].join(" ")}
                 >
                     <Icon className="h-4 w-4" />
@@ -750,7 +750,7 @@ const AdminSideBar = ({
                             "flex h-11 w-11 items-center justify-center rounded-2xl transition-colors duration-200",
                             active
                                 ? "bg-gray-900 text-white shadow-sm"
-                                : "bg-white text-gray-500 hover:bg-gray-50",
+                                : "bg-white text-gray-900 hover:bg-gray-50",
                         ].join(" ")}
                         title={group.label}
                     >
@@ -769,7 +769,7 @@ const AdminSideBar = ({
                                 onMouseEnter={showFlyout}
                                 onMouseLeave={scheduleHideFlyout}
                             >
-                                <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-gray-400">
+                                <p className="px-3 pb-2 pt-1 text-xs font-bold uppercase tracking-wide text-gray-900">
                                     {group.label}
                                 </p>
                                 <div className="space-y-0.5">
@@ -782,7 +782,7 @@ const AdminSideBar = ({
                                                 "flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition-colors duration-200",
                                                 isActive(item.href)
                                                     ? "bg-gray-900 font-medium text-white"
-                                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900",
+                                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
                                             ].join(" ")}
                                         >
                                             {item.label}
@@ -805,7 +805,7 @@ const AdminSideBar = ({
                         "flex w-full items-center justify-between rounded-xl px-1 py-1.5 text-xs font-bold uppercase tracking-wide transition",
                         active
                             ? "text-gray-900"
-                            : "text-gray-400 hover:text-gray-600",
+                            : "text-gray-600 hover:text-gray-600",
                     ].join(" ")}
                     aria-expanded={isOpen}
                 >
@@ -842,7 +842,7 @@ const AdminSideBar = ({
                                         "flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm transition-colors duration-200",
                                         itemActive
                                             ? "bg-gray-900 font-medium text-white"
-                                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                                            : "text-gray-900 hover:bg-gray-50 hover:text-gray-900",
                                     ].join(" ")}
                                 >
                                     <span
@@ -924,7 +924,7 @@ const AdminSideBar = ({
                         <button
                             type="button"
                             onClick={onToggleCollapse}
-                            className="hidden rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-900 lg:inline-flex"
+                            className="hidden rounded-full p-2 text-gray-900 transition hover:bg-gray-100 hover:text-gray-900 lg:inline-flex"
                             title={
                                 isCollapsed
                                     ? "Expand sidebar"
