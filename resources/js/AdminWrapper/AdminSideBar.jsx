@@ -406,6 +406,7 @@ import {
     ChevronDown,
     ChevronRight,
     ClipboardList,
+    DollarSign,
     Key,
     Landmark,
     LayoutDashboard,
@@ -419,6 +420,7 @@ import {
     UserCircle,
     UserCog,
 } from "lucide-react";
+import { GiDoughRoller } from "react-icons/gi";
 
 const AdminSideBar = ({
     isMobileOpen,
@@ -489,7 +491,7 @@ const AdminSideBar = ({
             {
                 id: "payment-management",
                 label: "Payment Management",
-                icon: Building2,
+                icon: DollarSign,
                 show: can.adminOrManager,
                 items: [
                     {

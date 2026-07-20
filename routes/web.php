@@ -160,7 +160,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/ourpasswords/{id}', [PasswordController::class, 'destroy'])->name('ourpasswords.destroy');
 
 
-     Route::get('/task-assigned', function(){
+    Route::get('/task-assigned', function(){
         return Inertia::render('DetailsPage/TaskAssigned');    
     });
 
@@ -169,10 +169,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/ourtaskassigned', [TaskAssignedController::class, 'store'])->name('ourtaskassigned.store');
     Route::put('/ourtaskassigned/{id}', [TaskAssignedController::class, 'update'])->name('ourtaskassigned.update');
     Route::delete('/ourtaskassigned/{id}', [TaskAssignedController::class, 'destroy'])->name('ourtaskassigned.destroy');
-    Route::delete('/task-assigned/{task}/attachments/{attachment}', [TaskAssignedController::class, 'destroyAttachment'])
-    ->name('ourtaskassigned.attachments.destroy');
-    Route::patch('task-assigned/{id}/review', [TaskAssignedController::class, 'review'])
-    ->name('ourtaskassigned.review');
+    Route::delete('/task-assigned/{task}/attachments/{attachment}', [TaskAssignedController::class, 'destroyAttachment'])->name('ourtaskassigned.attachments.destroy');
+    Route::patch('task-assigned/{id}/review', [TaskAssignedController::class, 'review'])->name('ourtaskassigned.review');
+    Route::get('/ourtaskassigned/reports', [TaskAssignedController::class, 'reportSummary'])->name('ourtaskassigned.reports');
+    Route::get('/ourtaskassigned/reports/monthly', [TaskAssignedController::class, 'monthlyByRole'])->name('ourtaskassigned.reports.monthly');
 
 
     Route::get('/ticket', function(){
@@ -186,6 +186,15 @@ Route::middleware('auth')->group(function () {
     // Route::post('/ourtickets', [TicketController::class, 'store'])->name('ourtickets.store');
     Route::put('/ourtickets/{id}', [TicketController::class, 'update'])->name('ourtickets.update');
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
+
+
+    Route::get('/task-report', function(){
+        return Inertia::render('Dashboard/TaskReports');    
+    });
+
+     Route::get('/line-chart', function(){
+        return Inertia::render('Dashboard/MonthlyReports');    
+    });
 
 });
     

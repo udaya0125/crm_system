@@ -28,6 +28,112 @@ class TaskAssignedController extends Controller
     }
 
     /**
+     * Aggregated report data for dashboards:
+     * - task counts grouped by assigned agent
+     * - task counts grouped by status
+     * Scoped the same way index() is: privileged roles see everything,
+     * everyone else sees only tasks assigned to or created by them.
+     */
+    public function reportSummary(Request $request)
+    {
+        $user = $request->user();
+        $table = (new TaskAssigned())->getTable();
+
+        $scope = function ($query) use ($user) {
+            if (! $this->tasks->isPrivileged($user)) {
+                $query->where(function ($q) use ($user) {
+                    $q->where('assigned_team', $user->id)
+                        ->orWhere('user_id', $user->id);
+                });
+            }
+        };
+
+        $byAgentQuery = TaskAssigned::query()
+            ->join('users', 'users.id', '=', "{$table}.assigned_team")
+            ->selectRaw('users.id as agent_id, users.name as agent, COUNT(*) as total')
+            ->groupBy('users.id', 'users.name')
+            ->orderByDesc('total');
+        $scope($byAgentQuery);
+        $byAgent = $byAgentQuery->get();
+
+        $byStatusQuery = TaskAssigned::query()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->orderByDesc('total');
+        $scope($byStatusQuery);
+        $byStatus = $byStatusQuery->get();
+
+        return response()->json([
+            'success' => true,
+            'by_agent' => $byAgent,
+            'by_status' => $byStatus,
+            'total_tasks' => $byStatus->sum('total'),
+        ]);
+    }
+
+    /**
+     * Monthly count of *completed* tasks, broken down by the assignee's
+     * role, for a line-chart trend view. Window defaults to 6 months and
+     * is capped at 24 via ?months=.
+     *
+     * "Done" is defined as status Closed/Completed (case-insensitive) —
+     * adjust the whereIn list below if your status values differ.
+     */
+    public function monthlyByRole(Request $request)
+    {
+        $user = $request->user();
+        $table = (new TaskAssigned())->getTable();
+
+        $months = max(1, min((int) $request->query('months', 6), 24));
+        $start = now()->subMonths($months - 1)->startOfMonth();
+
+        $query = TaskAssigned::query()
+            ->join('users', 'users.id', '=', "{$table}.assigned_team")
+            ->where("{$table}.updated_at", '>=', $start)
+            ->whereRaw('LOWER(status) IN (?, ?)', ['closed', 'completed'])
+            ->selectRaw(
+                "DATE_FORMAT({$table}.updated_at, '%Y-%m') as month_key, ".
+                "COALESCE(users.role, 'unknown') as role, ".
+                'COUNT(*) as total'
+            )
+            ->groupBy('month_key', 'role');
+
+        if (! $this->tasks->isPrivileged($user)) {
+            $query->where(function ($q) use ($user, $table) {
+                $q->where("{$table}.assigned_team", $user->id)
+                    ->orWhere("{$table}.user_id", $user->id);
+            });
+        }
+
+        $rows = $query->get();
+        $roles = $rows->pluck('role')->unique()->sort()->values();
+
+        // Build every month in the window (even ones with zero completions)
+        // so the line chart doesn't show gaps.
+        $series = collect(range(0, $months - 1))->map(function ($i) use ($months, $rows, $roles) {
+            $date = now()->subMonths($months - 1 - $i);
+            $key = $date->format('Y-m');
+
+            $entry = [
+                'monthKey' => $key,
+                'month' => $date->format('M Y'),
+            ];
+            foreach ($roles as $role) {
+                $match = $rows->first(fn ($r) => $r->month_key === $key && $r->role === $role);
+                $entry[$role] = (int) ($match->total ?? 0);
+            }
+
+            return $entry;
+        })->values();
+
+        return response()->json([
+            'success' => true,
+            'roles' => $roles,
+            'series' => $series,
+        ]);
+    }
+
+    /**
      * Store a newly created task.
      */
     public function store(StoreTaskAssignedRequest $request)
