@@ -33,42 +33,70 @@ class TaskAssignedController extends Controller
      * - task counts grouped by status
      * Scoped the same way index() is: privileged roles see everything,
      * everyone else sees only tasks assigned to or created by them.
+     *
+     * Query params (all optional):
+     * - scope: "agent" | "status" — return only that block. Omit to get both
+     *   (kept for backward compatibility with any other callers).
+     * - start_date / end_date: "YYYY-MM-DD" — filters on the task's own
+     *   `start_date` column (when the task was started), NOT created_at.
+     *
+     * The frontend now sends two independent requests (one per chart),
+     * each with its own scope + date range, so each chart can be filtered
+     * without affecting the other.
      */
     public function reportSummary(Request $request)
     {
         $user = $request->user();
         $table = (new TaskAssigned())->getTable();
 
-        $scope = function ($query) use ($user) {
+        $applyAuthScope = function ($query) use ($user, $table) {
             if (! $this->tasks->isPrivileged($user)) {
-                $query->where(function ($q) use ($user) {
-                    $q->where('assigned_team', $user->id)
-                        ->orWhere('user_id', $user->id);
+                $query->where(function ($q) use ($user, $table) {
+                    $q->where("{$table}.assigned_team", $user->id)
+                        ->orWhere("{$table}.user_id", $user->id);
                 });
             }
         };
 
-        $byAgentQuery = TaskAssigned::query()
-            ->join('users', 'users.id', '=', "{$table}.assigned_team")
-            ->selectRaw('users.id as agent_id, users.name as agent, COUNT(*) as total')
-            ->groupBy('users.id', 'users.name')
-            ->orderByDesc('total');
-        $scope($byAgentQuery);
-        $byAgent = $byAgentQuery->get();
+        $applyDateRange = function ($query) use ($request, $table) {
+            if ($start = $request->query('start_date')) {
+                $query->whereDate("{$table}.start_date", '>=', $start);
+            }
+            if ($end = $request->query('end_date')) {
+                $query->whereDate("{$table}.start_date", '<=', $end);
+            }
+        };
 
-        $byStatusQuery = TaskAssigned::query()
-            ->selectRaw('status, COUNT(*) as total')
-            ->groupBy('status')
-            ->orderByDesc('total');
-        $scope($byStatusQuery);
-        $byStatus = $byStatusQuery->get();
+        $requestedScope = $request->query('scope'); // 'agent' | 'status' | null
 
-        return response()->json([
-            'success' => true,
-            'by_agent' => $byAgent,
-            'by_status' => $byStatus,
-            'total_tasks' => $byStatus->sum('total'),
-        ]);
+        $response = ['success' => true];
+
+        if ($requestedScope === null || $requestedScope === 'agent') {
+            $byAgentQuery = TaskAssigned::query()
+                ->join('users', 'users.id', '=', "{$table}.assigned_team")
+                ->selectRaw('users.id as agent_id, users.name as agent, COUNT(*) as total')
+                ->groupBy('users.id', 'users.name')
+                ->orderByDesc('total');
+            $applyAuthScope($byAgentQuery);
+            $applyDateRange($byAgentQuery);
+            $response['by_agent'] = $byAgentQuery->get();
+        }
+
+        if ($requestedScope === null || $requestedScope === 'status') {
+            $byStatusQuery = TaskAssigned::query()
+                ->selectRaw('status, COUNT(*) as total')
+                ->groupBy('status')
+                ->orderByDesc('total');
+            $applyAuthScope($byStatusQuery);
+            $applyDateRange($byStatusQuery);
+            $response['by_status'] = $byStatusQuery->get();
+        }
+
+        if (isset($response['by_status'])) {
+            $response['total_tasks'] = $response['by_status']->sum('total');
+        }
+
+        return response()->json($response);
     }
 
     /**
@@ -316,5 +344,77 @@ class TaskAssignedController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Monthly count of Completed tasks for a line-chart trend view,
+     * filtered by the task's own `start_date` column. Falls back to
+     * `created_at` for any Completed task where `start_date` is null,
+     * so it never silently drops rows from the chart.
+     *
+     * Query params (all optional):
+     * - start_date / end_date: "YYYY-MM-DD" — bounds the range. If omitted,
+     *   the range defaults to the first/last month with completed data.
+     */
+    public function monthlySummary(Request $request)
+    {
+        $user = $request->user();
+        $table = (new TaskAssigned())->getTable();
+
+        $startDateParam = $request->query('start_date');
+        $endDateParam = $request->query('end_date');
+
+        $dateExpr = "COALESCE({$table}.start_date, {$table}.created_at)";
+
+        $query = TaskAssigned::query()
+            ->where("{$table}.status", 'Completed')
+            ->selectRaw("DATE_FORMAT({$dateExpr}, '%Y-%m') as month_key, COUNT(*) as total")
+            ->groupBy('month_key')
+            ->orderBy('month_key');
+
+        if ($startDateParam) {
+            $query->whereRaw("DATE({$dateExpr}) >= ?", [$startDateParam]);
+        }
+        if ($endDateParam) {
+            $query->whereRaw("DATE({$dateExpr}) <= ?", [$endDateParam]);
+        }
+
+        if (! $this->tasks->isPrivileged($user)) {
+            $query->where(function ($q) use ($user, $table) {
+                $q->where("{$table}.assigned_team", $user->id)
+                    ->orWhere("{$table}.user_id", $user->id);
+            });
+        }
+
+        $rows = $query->get();
+
+        if ($rows->isEmpty()) {
+            return response()->json(['success' => true, 'series' => []]);
+        }
+
+        $periodStart = $startDateParam
+            ? \Carbon\Carbon::parse($startDateParam)->startOfMonth()
+            : \Carbon\Carbon::createFromFormat('Y-m', $rows->first()->month_key)->startOfMonth();
+        $periodEnd = $endDateParam
+            ? \Carbon\Carbon::parse($endDateParam)->startOfMonth()
+            : \Carbon\Carbon::createFromFormat('Y-m', $rows->last()->month_key)->startOfMonth();
+
+        $byMonth = $rows->keyBy('month_key');
+        $series = [];
+        $cursor = $periodStart->copy();
+        while ($cursor->lte($periodEnd)) {
+            $key = $cursor->format('Y-m');
+            $series[] = [
+                'monthKey' => $key,
+                'month' => $cursor->format('M Y'),
+                'total' => (int) ($byMonth[$key]->total ?? 0),
+            ];
+            $cursor->addMonth();
+        }
+
+        return response()->json([
+            'success' => true,
+            'series' => $series,
+        ]);
     }
 }

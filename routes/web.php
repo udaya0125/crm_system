@@ -173,7 +173,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('task-assigned/{id}/review', [TaskAssignedController::class, 'review'])->name('ourtaskassigned.review');
     Route::get('/ourtaskassigned/reports', [TaskAssignedController::class, 'reportSummary'])->name('ourtaskassigned.reports');
     Route::get('/ourtaskassigned/reports/monthly', [TaskAssignedController::class, 'monthlyByRole'])->name('ourtaskassigned.reports.monthly');
-
+    Route::get('ourtaskassigned/reports/monthly', [TaskAssignedController::class, 'monthlySummary'])->name('ourtaskassigned.reports.monthly');
 
     Route::get('/ticket', function(){
         return Inertia::render('DetailsPage/Ticket'); 

@@ -1,45 +1,181 @@
-
-bash
-
-cat > /home/claude/MonthlyReports.jsx << 'ENDOFFILE'
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import gsap from "gsap";
 import {
-    LineChart,
-    Line,
+    AreaChart,
+    Area,
     XAxis,
     YAxis,
     CartesianGrid,
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Calendar, ChevronDown, X } from "lucide-react";
 
-const AGENT_COLORS = [
-    "#6366F1", "#F97316", "#10B981", "#EC4899", "#0EA5E9",
-    "#F59E0B", "#8B5CF6", "#14B8A6", "#EF4444", "#84CC16",
-    "#3B82F6", "#D946EF", "#22C55E", "#F43F5E",
+const COMPLETED_COLOR = "#059669";
+const COMPLETED_COLOR_SOFT = "#10B981";
+
+// ---------------------------------------------------------------------------
+// Date range filter — only 7 Days / All Time / Custom for this chart
+// ---------------------------------------------------------------------------
+
+const RANGE_PRESETS = [
+    { key: "7d", label: "7 Days" },
+    { key: "all", label: "All Time" },
+    { key: "custom", label: "Custom" },
 ];
 
-// One fixed color per known role, cycling through AGENT_COLORS for
-// anything unrecognized so it never collides visually with the others.
-const ROLE_COLORS = {
-    admin: "#6366F1",
-    manager: "#F97316",
-    agent: "#10B981",
-    staff: "#EC4899",
-    unknown: "#94A3B8",
-};
-const roleColor = (role, i) => ROLE_COLORS[String(role).toLowerCase()] ?? AGENT_COLORS[i % AGENT_COLORS.length];
-const roleLabel = (role) => String(role).charAt(0).toUpperCase() + String(role).slice(1);
+const DEFAULT_FILTER = { preset: "all", startDate: "", endDate: "" };
 
-/**
- * Tilts a card toward the cursor with GSAP quickTo tweens — cheap,
- * interruptible, and reset smoothly on mouse-leave. Same behavior as
- * TaskReports.jsx's card, kept local here so this file has no dependency
- * on that one.
- */
+function toISODate(d) {
+    return d.toISOString().split("T")[0];
+}
+
+function computeRange(presetKey) {
+    if (presetKey === "all" || presetKey === "custom") return { startDate: "", endDate: "" };
+    const end = new Date();
+    const start = new Date();
+    switch (presetKey) {
+        case "7d":
+            start.setDate(start.getDate() - 7);
+            break;
+        default:
+            return { startDate: "", endDate: "" };
+    }
+    return { startDate: toISODate(start), endDate: toISODate(end) };
+}
+
+function fmtShort(dateStr) {
+    if (!dateStr) return "";
+    const d = new Date(`${dateStr}T00:00:00`);
+    return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+function filterLabel(filter) {
+    if (filter.preset === "custom") {
+        return filter.startDate && filter.endDate
+            ? `${fmtShort(filter.startDate)} – ${fmtShort(filter.endDate)}`
+            : "Custom range";
+    }
+    return RANGE_PRESETS.find((p) => p.key === filter.preset)?.label ?? "All Time";
+}
+
+function DateRangeFilter({ filter, onChange, accent }) {
+    const [open, setOpen] = useState(false);
+    const rootRef = useRef(null);
+
+    useEffect(() => {
+        if (!open) return;
+        const handleClick = (e) => {
+            if (rootRef.current && !rootRef.current.contains(e.target)) setOpen(false);
+        };
+        document.addEventListener("mousedown", handleClick);
+        return () => document.removeEventListener("mousedown", handleClick);
+    }, [open]);
+
+    const isActive = filter.preset !== "all";
+
+    const handlePresetClick = (preset) => {
+        if (preset.key === "custom") {
+            onChange({ preset: "custom", startDate: filter.startDate, endDate: filter.endDate });
+            return;
+        }
+        onChange({ preset: preset.key, ...computeRange(preset.key) });
+        setOpen(false);
+    };
+
+    const handleCustomDate = (field, value) => {
+        onChange({ ...filter, preset: "custom", [field]: value });
+    };
+
+    return (
+        <div className="relative" ref={rootRef}>
+            <button
+                type="button"
+                onClick={() => setOpen((o) => !o)}
+                className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full border transition-colors ${
+                    isActive
+                        ? "border-transparent text-white shadow-sm"
+                        : "border-gray-200 text-gray-500 hover:bg-gray-50"
+                }`}
+                style={isActive ? { background: accent } : undefined}
+            >
+                <Calendar size={12} strokeWidth={2.25} />
+                <span className="max-w-[120px] truncate">{filterLabel(filter)}</span>
+                <ChevronDown size={12} strokeWidth={2.5} className={open ? "rotate-180 transition-transform" : "transition-transform"} />
+            </button>
+
+            {isActive && (
+                <button
+                    type="button"
+                    onClick={() => onChange(DEFAULT_FILTER)}
+                    className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-gray-900 text-white flex items-center justify-center shadow"
+                    title="Clear filter"
+                >
+                    <X size={9} strokeWidth={3} />
+                </button>
+            )}
+
+            {open && (
+                <div className="absolute right-0 mt-2 z-20 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-3">
+                    <div className="grid grid-cols-3 gap-1.5">
+                        {RANGE_PRESETS.map((p) => {
+                            const selected = filter.preset === p.key;
+                            return (
+                                <button
+                                    key={p.key}
+                                    type="button"
+                                    onClick={() => handlePresetClick(p)}
+                                    className={`text-xs font-medium px-2.5 py-1.5 rounded-xl transition-colors ${
+                                        selected ? "text-white" : "text-gray-600 bg-gray-50 hover:bg-gray-100"
+                                    }`}
+                                    style={selected ? { background: accent } : undefined}
+                                >
+                                    {p.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {filter.preset === "custom" && (
+                        <div className="mt-3 pt-3 border-t border-gray-100 space-y-2">
+                            <label className="block text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+                                From
+                                <input
+                                    type="date"
+                                    value={filter.startDate}
+                                    max={filter.endDate || undefined}
+                                    onChange={(e) => handleCustomDate("startDate", e.target.value)}
+                                    className="mt-1 w-full text-sm text-gray-700 border border-gray-200 rounded-lg px-2 py-1.5 normal-case font-normal focus:outline-none focus:ring-2 focus:ring-gray-200"
+                                />
+                            </label>
+                            <label className="block text-[11px] font-medium text-gray-400 uppercase tracking-wide">
+                                To
+                                <input
+                                    type="date"
+                                    value={filter.endDate}
+                                    min={filter.startDate || undefined}
+                                    onChange={(e) => handleCustomDate("endDate", e.target.value)}
+                                    className="mt-1 w-full text-sm text-gray-700 border border-gray-200 rounded-lg px-2 py-1.5 normal-case font-normal focus:outline-none focus:ring-2 focus:ring-gray-200"
+                                />
+                            </label>
+                            <button
+                                type="button"
+                                onClick={() => setOpen(false)}
+                                disabled={!filter.startDate || !filter.endDate}
+                                className="w-full text-xs font-semibold text-white rounded-lg py-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                                style={{ background: accent }}
+                            >
+                                Apply
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
 function useTiltRef() {
     const ref = useRef(null);
 
@@ -82,11 +218,15 @@ function CardShell({ title, subtitle, icon: Icon, iconTint, headerExtra, childre
         <div
             ref={tiltRef}
             style={{ transformStyle: "preserve-3d", transformPerspective: 900, willChange: "transform" }}
-            className="relative w-full rounded-[28px] p-px bg-gradient-to-br from-gray-200/70 via-gray-100 to-transparent shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_24px_48px_-18px_rgba(30,41,59,0.22)] transition-shadow duration-300"
+            className="relative w-full rounded-[28px] p-px bg-gradient-to-br from-gray-200/70 via-gray-100 to-transparent"
         >
             <div className="relative bg-white rounded-[27px] h-full p-7 overflow-hidden">
                 <div
-                    className="pointer-events-none absolute -top-24 -right-24 w-56 h-56 rounded-full opacity-[0.08] blur-2xl"
+                    className="pointer-events-none absolute -top-24 -right-24 w-64 h-64 rounded-full opacity-[0.10] blur-3xl"
+                    style={{ background: iconTint }}
+                />
+                <div
+                    className="pointer-events-none absolute -bottom-16 -left-16 w-40 h-40 rounded-full opacity-[0.06] blur-3xl"
                     style={{ background: iconTint }}
                 />
                 <div className="relative flex items-center justify-between gap-3 mb-6 flex-wrap">
@@ -115,7 +255,7 @@ function ChartSkeleton() {
         <div className="h-80 flex items-center justify-center">
             <div className="relative w-44 h-44">
                 <div className="absolute inset-0 rounded-full border-[10px] border-gray-100" />
-                <div className="absolute inset-0 rounded-full border-[10px] border-transparent border-t-indigo-400 border-r-indigo-200 animate-spin" />
+                <div className="absolute inset-0 rounded-full border-[10px] border-transparent border-t-emerald-400 border-r-emerald-200 animate-spin" />
             </div>
         </div>
     );
@@ -130,51 +270,33 @@ function EmptyState({ label }) {
     );
 }
 
-function GlassTooltip({ title, lines }) {
+function LineTooltip({ active, payload, label }) {
+    if (!active || !payload?.length) return null;
+    const total = Math.round(payload[0]?.value ?? 0);
     return (
         <div className="bg-gray-900/95 backdrop-blur text-white shadow-2xl rounded-xl px-4 py-2.5 text-sm border border-white/10 min-w-[140px]">
-            <p className="font-semibold">{title}</p>
-            {lines.map((l, i) => (
-                <div key={i} className="flex items-center justify-between gap-4 text-xs mt-1">
-                    <span className="flex items-center gap-1.5 text-gray-300">
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: l.color }} />
-                        {l.label}
-                    </span>
-                    <span className="font-medium text-white tabular-nums">{l.value}</span>
-                </div>
-            ))}
+            <p className="font-semibold">{label}</p>
+            <div className="flex items-center justify-between gap-4 text-xs mt-1">
+                <span className="flex items-center gap-1.5 text-gray-300">
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COMPLETED_COLOR_SOFT }} />
+                    Completed
+                </span>
+                <span className="font-medium text-white tabular-nums">{total}</span>
+            </div>
         </div>
     );
 }
 
-function LineTooltip({ active, payload, label, roles }) {
-    if (!active || !payload?.length) return null;
-    return (
-        <GlassTooltip
-            title={label}
-            lines={roles.map((role, i) => ({
-                label: roleLabel(role),
-                value: Math.round(payload.find((p) => p.dataKey === role)?.value ?? 0),
-                color: roleColor(role, i),
-            }))}
-        />
-    );
-}
-
 /**
- * Monthly count of *completed* tasks, one line per assignee role.
- * Fetches from GET /ourtaskassigned/reports/monthly?months=6|12.
+ * Monthly count of Completed tasks, filtered by the task's own `start_date`
+ * column. Fetches from GET /ourtaskassigned/reports/monthly.
  */
 const MonthlyReports = () => {
-    const [monthsRange, setMonthsRange] = useState(6);
+    const [filter, setFilter] = useState(DEFAULT_FILTER);
     const [series, setSeries] = useState([]);
-    const [roles, setRoles] = useState([]);
-    const [hiddenRoles, setHiddenRoles] = useState(() => new Set());
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // 0 -> 1 reveal progress, driven by a single GSAP tween once data lands —
-    // every line grows up from the baseline together instead of snapping in.
     const [progress, setProgress] = useState(0);
     const hasAnimatedRef = useRef(false);
 
@@ -188,11 +310,13 @@ const MonthlyReports = () => {
             setProgress(0);
             try {
                 const response = await axios.get(route("ourtaskassigned.reports.monthly"), {
-                    params: { months: monthsRange },
+                    params: {
+                        start_date: filter.startDate || undefined,
+                        end_date: filter.endDate || undefined,
+                    },
                 });
                 if (cancelled) return;
                 setSeries(response.data.series ?? []);
-                setRoles(response.data.roles ?? []);
             } catch (err) {
                 console.error("Failed to fetch monthly trend", err);
                 if (!cancelled) setError("Couldn't load the monthly trend.");
@@ -205,9 +329,9 @@ const MonthlyReports = () => {
         return () => {
             cancelled = true;
         };
-    }, [monthsRange]);
+    }, [filter.startDate, filter.endDate]);
 
-    const hasData = !loading && !error && series.length > 0 && roles.length > 0;
+    const hasData = !loading && !error && series.length > 0;
 
     useEffect(() => {
         if (!hasData || hasAnimatedRef.current) return;
@@ -224,45 +348,21 @@ const MonthlyReports = () => {
     }, [hasData]);
 
     const animatedSeries = useMemo(
-        () =>
-            series.map((row) => {
-                const scaled = { ...row };
-                roles.forEach((role) => {
-                    scaled[role] = (row[role] ?? 0) * progress;
-                });
-                return scaled;
-            }),
-        [series, roles, progress]
+        () => series.map((row) => ({ ...row, total: (row.total ?? 0) * progress })),
+        [series, progress]
     );
 
-    const toggleRole = (role) => {
-        setHiddenRoles((prev) => {
-            const next = new Set(prev);
-            next.has(role) ? next.delete(role) : next.add(role);
-            return next;
-        });
-    };
+    const totalCompleted = series.reduce((sum, row) => sum + (row.total ?? 0), 0);
+    const peak = series.reduce((max, row) => Math.max(max, row.total ?? 0), 0);
 
     return (
         <CardShell
-            title="Monthly Task Completion by Role"
-            subtitle={hasData ? `Closed tasks over the last ${monthsRange} months` : null}
+            title="Completed Tasks Trend"
+            subtitle={hasData ? `${totalCompleted} completed over this period` : null}
             icon={TrendingUp}
-            iconTint="linear-gradient(135deg,#0EA5E9,#6366F1)"
+            iconTint="linear-gradient(135deg,#10B981,#059669)"
             headerExtra={
-                <div className="flex bg-gray-100 rounded-full p-1 text-xs font-medium">
-                    {[6, 12].map((m) => (
-                        <button
-                            key={m}
-                            onClick={() => setMonthsRange(m)}
-                            className={`px-3 py-1 rounded-full transition-colors ${
-                                monthsRange === m ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                            }`}
-                        >
-                            {m}M
-                        </button>
-                    ))}
-                </div>
+                <DateRangeFilter filter={filter} onChange={setFilter} accent="linear-gradient(135deg,#10B981,#059669)" />
             }
         >
             {loading ? (
@@ -273,33 +373,20 @@ const MonthlyReports = () => {
                 <EmptyState label="No completed tasks in this period yet" />
             ) : (
                 <>
-                    {/* role legend / toggles */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {roles.map((role, i) => {
-                            const isHidden = hiddenRoles.has(role);
-                            const color = roleColor(role, i);
-                            return (
-                                <button
-                                    key={role}
-                                    onClick={() => toggleRole(role)}
-                                    className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full border transition-all ${
-                                        isHidden
-                                            ? "border-gray-100 text-gray-300 bg-gray-50"
-                                            : "border-gray-100 text-gray-700 bg-white shadow-sm"
-                                    }`}
-                                >
-                                    <span
-                                        className="w-2 h-2 rounded-full"
-                                        style={{ backgroundColor: isHidden ? "#D1D5DB" : color }}
-                                    />
-                                    {roleLabel(role)}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <ResponsiveContainer width="100%" height={320}>
-                        <LineChart data={animatedSeries} margin={{ top: 12, right: 16, left: -8, bottom: 0 }}>
+                    {peak > 0 && (
+                        <div className="flex items-baseline gap-2 mb-4">
+                            <span className="text-4xl font-bold text-gray-900 tabular-nums">{totalCompleted}</span>
+                            <span className="text-xs font-medium text-gray-400">tasks completed</span>
+                        </div>
+                    )}
+                    <ResponsiveContainer width="100%" height={300}>
+                        <AreaChart data={animatedSeries} margin={{ top: 8, right: 16, left: -8, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id="completedFill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor={COMPLETED_COLOR_SOFT} stopOpacity={0.35} />
+                                    <stop offset="100%" stopColor={COMPLETED_COLOR_SOFT} stopOpacity={0} />
+                                </linearGradient>
+                            </defs>
                             <CartesianGrid vertical={false} stroke="#F1F5F9" />
                             <XAxis
                                 dataKey="month"
@@ -308,23 +395,19 @@ const MonthlyReports = () => {
                                 tick={{ fill: "#64748B", fontSize: 12 }}
                             />
                             <YAxis tickLine={false} axisLine={false} tick={{ fill: "#94A3B8", fontSize: 12 }} allowDecimals={false} />
-                            <Tooltip cursor={{ stroke: "#E2E8F0", strokeWidth: 1 }} content={<LineTooltip roles={roles} />} />
-                            {roles.map((role, i) =>
-                                hiddenRoles.has(role) ? null : (
-                                    <Line
-                                        key={role}
-                                        type="monotone"
-                                        dataKey={role}
-                                        name={roleLabel(role)}
-                                        stroke={roleColor(role, i)}
-                                        strokeWidth={2.5}
-                                        dot={{ r: 3, fill: roleColor(role, i), strokeWidth: 0 }}
-                                        activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
-                                        isAnimationActive={false}
-                                    />
-                                )
-                            )}
-                        </LineChart>
+                            <Tooltip cursor={{ stroke: "#E2E8F0", strokeWidth: 1 }} content={<LineTooltip />} />
+                            <Area
+                                type="monotone"
+                                dataKey="total"
+                                name="Completed"
+                                stroke={COMPLETED_COLOR}
+                                strokeWidth={2.5}
+                                fill="url(#completedFill)"
+                                dot={{ r: 3, fill: COMPLETED_COLOR, strokeWidth: 0 }}
+                                activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
+                                isAnimationActive={false}
+                            />
+                        </AreaChart>
                     </ResponsiveContainer>
                 </>
             )}

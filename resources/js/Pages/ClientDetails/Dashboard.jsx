@@ -707,6 +707,7 @@ import ExpiryDashboard from "../Dashboard/ExpiryDashboard";
 import FinanceDashboard from "../Dashboard/FinanceDashboard";
 import HostingDashboard from "../Dashboard/HostingDashboard";
 import PageLoader from "@/Loader/PageLoader";
+import MonthlyReports from "../Dashboard/MonthlyReports";
 
 // ─── Accent tokens ─────────────────────────────────────────────────────────────
 const ACCENTS = {
@@ -978,6 +979,7 @@ const Dashboard = () => {
                                     <HostingDashboard />
                                     <TicketDashboard />
                                 </div>
+                                <MonthlyReports />
                             </div>
                         )}
 
