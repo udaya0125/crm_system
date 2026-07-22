@@ -417,4 +417,104 @@ class TaskAssignedController extends Controller
             'series' => $series,
         ]);
     }
+
+    /**
+     * Total task counts grouped by the assignee's role (i.e. "department"),
+     * filtered by the task's own `start_date` column (falls back to
+     * created_at for any row with a null start_date).
+     *
+     * Query params (all optional):
+     * - start_date / end_date: "YYYY-MM-DD"
+     */
+    // public function departmentSummary(Request $request)
+    // {
+    //     $user = $request->user();
+    //     $table = (new TaskAssigned())->getTable();
+
+    //     $dateExpr = "COALESCE({$table}.start_date, {$table}.created_at)";
+
+    //     $query = TaskAssigned::query()
+    //         ->join('users', 'users.id', '=', "{$table}.assigned_team")
+    //         ->selectRaw("COALESCE(users.role, 'unknown') as role, COUNT(*) as total")
+    //         ->groupBy('role')
+    //         ->orderByDesc('total');
+
+    //     if ($start = $request->query('start_date')) {
+    //         $query->whereRaw("DATE({$dateExpr}) >= ?", [$start]);
+    //     }
+    //     if ($end = $request->query('end_date')) {
+    //         $query->whereRaw("DATE({$dateExpr}) <= ?", [$end]);
+    //     }
+
+    //     if (! $this->tasks->isPrivileged($user)) {
+    //         $query->where(function ($q) use ($user, $table) {
+    //             $q->where("{$table}.assigned_team", $user->id)
+    //                 ->orWhere("{$table}.user_id", $user->id);
+    //         });
+    //     }
+
+    //     $rows = $query->get()->map(fn ($r) => [
+    //         'role' => ucfirst($r->role),
+    //         'total' => (int) $r->total,
+    //     ]);
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'by_role' => $rows,
+    //     ]);
+    // }
+
+    /**
+     * Total task counts grouped by the assignee's role ("department"),
+     * plus a Completed vs Pending/In Progress breakdown per role for the
+     * hover tooltip. Filtered by the task's own `start_date` column
+     * (falls back to created_at for any row with a null start_date).
+     *
+     * Query params (all optional):
+     * - start_date / end_date: "YYYY-MM-DD"
+     */
+    public function departmentSummary(Request $request)
+    {
+        $user = $request->user();
+        $table = (new TaskAssigned())->getTable();
+
+        $dateExpr = "COALESCE({$table}.start_date, {$table}.created_at)";
+
+        $query = TaskAssigned::query()
+            ->join('users', 'users.id', '=', "{$table}.assigned_team")
+            ->selectRaw(
+                "COALESCE(users.role, 'unknown') as role, ".
+                "COUNT(*) as total, ".
+                "SUM(CASE WHEN LOWER({$table}.status) = 'completed' THEN 1 ELSE 0 END) as completed, ".
+                "SUM(CASE WHEN LOWER({$table}.status) IN ('pending', 'in progress', 'inprogress') THEN 1 ELSE 0 END) as pending"
+            )
+            ->groupBy('role')
+            ->orderByDesc('total');
+
+        if ($start = $request->query('start_date')) {
+            $query->whereRaw("DATE({$dateExpr}) >= ?", [$start]);
+        }
+        if ($end = $request->query('end_date')) {
+            $query->whereRaw("DATE({$dateExpr}) <= ?", [$end]);
+        }
+
+        if (! $this->tasks->isPrivileged($user)) {
+            $query->where(function ($q) use ($user, $table) {
+                $q->where("{$table}.assigned_team", $user->id)
+                    ->orWhere("{$table}.user_id", $user->id);
+            });
+        }
+
+        $rows = $query->get()->map(fn ($r) => [
+            'role' => ucfirst($r->role),
+            'total' => (int) $r->total,
+            'completed' => (int) $r->completed,
+            'pending' => (int) $r->pending,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'by_role' => $rows,
+        ]);
+    }
 }

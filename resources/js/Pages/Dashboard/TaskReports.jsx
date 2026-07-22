@@ -578,7 +578,7 @@ function DateRangeFilter({ filter, onChange, accent }) {
             )}
 
             {open && (
-                <div className="absolute right-0 mt-2 z-20 w-64 bg-white rounded-2xl shadow-xl border border-gray-100 p-3">
+                <div className="absolute right-0 mt-2 z-20 w-64 bg-white rounded-2xl  border border-gray-100 p-3">
                     <div className="grid grid-cols-2 gap-1.5">
                         {RANGE_PRESETS.map((p) => {
                             const selected = filter.preset === p.key;
@@ -681,7 +681,7 @@ function CardShell({ title, subtitle, icon: Icon, iconTint, headerRight, childre
         <div
             ref={tiltRef}
             style={{ transformStyle: "preserve-3d", transformPerspective: 900, willChange: "transform" }}
-            className="relative flex-1 min-w-[360px] rounded-[28px] p-px bg-gradient-to-br from-gray-200/70 via-gray-100 to-transparent shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-[0_24px_48px_-18px_rgba(30,41,59,0.22)] transition-shadow duration-300"
+            className="relative flex-1 min-w-[360px] rounded-[28px] p-px bg-gradient-to-br from-gray-200/70 via-gray-100 to-transparent"
         >
             <div className="relative bg-white rounded-[27px] h-full p-7 overflow-hidden">
                 <div
@@ -691,7 +691,7 @@ function CardShell({ title, subtitle, icon: Icon, iconTint, headerRight, childre
                 <div className="relative flex items-start justify-between gap-3 mb-6">
                     <div className="flex items-center gap-3">
                         <div
-                            className="w-11 h-11 rounded-2xl flex items-center justify-center shadow-lg shrink-0"
+                            className="w-11 h-11 rounded-2xl flex items-center justify-center  shrink-0"
                             style={{ background: iconTint }}
                         >
                             <Icon className="text-white" size={20} strokeWidth={2.25} />

@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
     });
 
 
-        // *********************************************************************
+    // *********************************************************************
     // Only user can access task list viewing
     // *********************************************************************
 
@@ -174,6 +174,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/ourtaskassigned/reports', [TaskAssignedController::class, 'reportSummary'])->name('ourtaskassigned.reports');
     Route::get('/ourtaskassigned/reports/monthly', [TaskAssignedController::class, 'monthlyByRole'])->name('ourtaskassigned.reports.monthly');
     Route::get('ourtaskassigned/reports/monthly', [TaskAssignedController::class, 'monthlySummary'])->name('ourtaskassigned.reports.monthly');
+    Route::get('ourtaskassigned/reports/department', [TaskAssignedController::class, 'departmentSummary'])->name('ourtaskassigned.reports.department');
 
     Route::get('/ticket', function(){
         return Inertia::render('DetailsPage/Ticket'); 
@@ -188,13 +189,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
 
 
-    Route::get('/task-report', function(){
-        return Inertia::render('Dashboard/TaskReports');    
-    });
+    // Route::get('/task-report', function(){
+    //     return Inertia::render('Dashboard/TaskReports');    
+    // });
 
-     Route::get('/line-chart', function(){
-        return Inertia::render('Dashboard/MonthlyReports');    
-    });
+    //  Route::get('/line-chart', function(){
+    //     return Inertia::render('Dashboard/MonthlyReports');    
+    // });
 
 });
     

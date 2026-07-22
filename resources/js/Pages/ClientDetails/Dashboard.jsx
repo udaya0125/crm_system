@@ -708,6 +708,8 @@ import FinanceDashboard from "../Dashboard/FinanceDashboard";
 import HostingDashboard from "../Dashboard/HostingDashboard";
 import PageLoader from "@/Loader/PageLoader";
 import MonthlyReports from "../Dashboard/MonthlyReports";
+import TaskReports from "../Dashboard/TaskReports";
+import DepartmentReports from "../Dashboard/DepartmentReports";
 
 // ─── Accent tokens ─────────────────────────────────────────────────────────────
 const ACCENTS = {
@@ -979,7 +981,11 @@ const Dashboard = () => {
                                     <HostingDashboard />
                                     <TicketDashboard />
                                 </div>
+                                <div className="grid grid-cols-1  gap-4 sm:gap-5 md:gap-6 mb-8">
                                 <MonthlyReports />
+                                <DepartmentReports />
+                                <TaskReports />
+                                </div>
                             </div>
                         )}
 

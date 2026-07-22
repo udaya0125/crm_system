@@ -149,7 +149,7 @@ const TaskCard = ({ task, onEdit, onView, onDelete }) => {
                                 <Pencil size={15} />
                             </button>
                         )}
-                        <button
+                        {/* <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDelete(task.id);
@@ -158,7 +158,7 @@ const TaskCard = ({ task, onEdit, onView, onDelete }) => {
                             title="Delete ticket"
                         >
                             <Trash2 size={15} />
-                        </button>
+                        </button> */}
                     </div>
                 </div>
 

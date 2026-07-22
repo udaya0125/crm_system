@@ -62,6 +62,10 @@ class UpdateTaskAssignedRequest extends FormRequest
             'attachments.*' => 'nullable|file|max:10240|mimes:jpg,jpeg,png,gif,webp,pdf',
 
             'task_items' => 'nullable|array',
+            // Existing items must send their own id so the backend can match
+            // and update them in place instead of recreating them (which
+            // would reset created_at). New items simply omit id.
+            'task_items.*.id' => 'nullable|integer|exists:task_items,id',
             'task_items.*.description' => 'required|string',
             'task_items.*.status' => 'nullable|string',
         ];

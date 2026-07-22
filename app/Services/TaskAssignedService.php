@@ -100,10 +100,11 @@ class TaskAssignedService
     }
 
     /**
-     * Update a task's core fields, append attachments, replace checklist
-     * items, and notify reviewers if this update transitions the task into
-     * Completed. admin_remarks/admin_status are never touched here — they
-     * are exclusively owned by review().
+     * Update a task's core fields, append attachments, sync checklist
+     * items (update existing / create new / delete removed), and notify
+     * reviewers if this update transitions the task into Completed.
+     * admin_remarks/admin_status are never touched here — they are
+     * exclusively owned by review().
      */
     public function update(TaskAssigned $task, array $data, ?array $attachments, ?array $taskItems): TaskAssigned
     {
@@ -114,7 +115,7 @@ class TaskAssignedService
 
             $task->update([
                 'title' => $data['title'],
-                'department' => $assignedUser->role, 
+                'department' => $assignedUser->role,
                 'assigned_team' => $assignedUser->id,
                 'user_id' => $data['user_id'],
                 'priority' => $data['priority'],
@@ -127,8 +128,7 @@ class TaskAssignedService
             $this->storeAttachments($task, $attachments);
 
             if (! empty($taskItems)) {
-                $task->taskItems()->delete();
-                $this->storeTaskItems($task, $taskItems);
+                $this->syncTaskItems($task, $taskItems);
             }
 
             $task->load('attachments', 'taskItems', 'assignedUser', 'creator');
@@ -217,6 +217,45 @@ class TaskAssignedService
         }
     }
 
+    /**
+     * Reconcile the task's checklist items with the incoming payload:
+     * - items with an existing 'id' are updated in place
+     * - items without an 'id' (or with an id that doesn't belong to this
+     *   task) are created fresh
+     * - any existing item whose id is NOT present in the incoming payload
+     *   is deleted (it was removed on the frontend)
+     *
+     * This preserves row IDs and created_at across edits, instead of
+     * wiping and recreating every item on every update.
+     *
+     * @param  array<int, array{id?: int|string|null, description: string, status?: string|null}>  $items
+     */
+    private function syncTaskItems(TaskAssigned $task, array $items): void
+    {
+        $incomingIds = collect($items)
+            ->pluck('id')
+            ->filter() // drop null/empty ids (new items)
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        // Delete items that existed before but are no longer in the payload.
+        // whereNotIn('id', [0]) when $incomingIds is empty means "delete all",
+        // which is correct: an empty incoming id list means every item is new.
+        $task->taskItems()
+            ->whereNotIn('id', $incomingIds ?: [0])
+            ->delete();
+
+        $this->storeTaskItems($task, $items);
+    }
+
+    /**
+     * Create or update each incoming task item.
+     * - If the item has an 'id' belonging to this task, it's updated.
+     * - Otherwise a new row is created.
+     * sort_order always reflects the incoming array position.
+     *
+     * @param  array<int, array{id?: int|string|null, description: string, status?: string|null}>  $items
+     */
     private function storeTaskItems(TaskAssigned $task, ?array $items): void
     {
         if (empty($items)) {
@@ -224,11 +263,20 @@ class TaskAssignedService
         }
 
         foreach ($items as $index => $item) {
-            $task->taskItems()->create([
+            $id = $item['id'] ?? null;
+            $status = $item['status'] ?? 'Pending';
+
+            $attributes = [
                 'description' => $item['description'],
-                'status' => $item['status'] ?? 'Pending',
+                'status' => $status,
                 'sort_order' => $index + 1,
-            ]);
+            ];
+
+            if ($id && $task->taskItems()->where('id', $id)->exists()) {
+                $task->taskItems()->where('id', $id)->update($attributes);
+            } else {
+                $task->taskItems()->create($attributes);
+            }
         }
     }
 
