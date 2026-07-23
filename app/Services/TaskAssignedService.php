@@ -65,6 +65,75 @@ class TaskAssignedService
     }
 
     /**
+     * Every user who has at least one task assigned to them, with counts
+     * split by status — powers the Task Report user-card grid.
+     * Requires a `assignedTasks` hasMany relation on the User model
+     * (assigned_team -> TaskAssigned).
+     */
+    public function usersWithTaskCounts(): Collection
+    {
+        return User::query()
+            ->select('id', 'name', 'role', 'email')
+            ->withCount([
+                'assignedTasks as total_tasks',
+                'assignedTasks as completed_tasks' => fn ($q) => $q->where('status', 'Completed'),
+                'assignedTasks as in_progress_tasks' => fn ($q) => $q->where('status', 'In Progress'),
+                'assignedTasks as pending_tasks' => fn ($q) => $q->where('status', 'Pending'),
+            ])
+            ->having('total_tasks', '>', 0)
+            ->orderByDesc('total_tasks')
+            ->get();
+    }
+
+    /**
+     * Every task assigned to a given user — with checklist items,
+     * assignee, and creator — used by the Task Report workload popup to
+     * list "everything this person has done." The task's rich-text
+     * `description` is still present on the model but the frontend never
+     * renders it for this view.
+     */
+    public function tasksForUser(int $userId)
+    {
+        return TaskAssigned::with([
+            'taskItems',
+            'assignedUser:id,name,role,email',
+            'creator:id,name,role,email',
+        ])
+            ->where('assigned_team', $userId)
+            ->latest()
+            ->get();
+    }
+
+    /**
+     * Aggregate stats for a single assignee, shown in the Task Report
+     * workload popup: how many tasks they've handled in total, their
+     * current split by status, and their average completion time across
+     * every Completed task — measured from start_date to due_date, since
+     * due_date is what marks the completion point here (no separate
+     * completed_at column).
+     */
+    public function userTaskStats(int $userId): array
+    {
+        $tasks = TaskAssigned::where('assigned_team', $userId)->get();
+
+        $completed = $tasks->where('status', 'Completed');
+
+        $completionSeconds = $completed
+            ->filter(fn ($t) => $t->start_date && $t->due_date)
+            ->map(fn ($t) => \Carbon\Carbon::parse($t->start_date)->diffInSeconds($t->due_date));
+
+        return [
+            'total_tasks' => $tasks->count(),
+            'completed' => $completed->count(),
+            'in_progress' => $tasks->where('status', 'In Progress')->count(),
+            'pending' => $tasks->where('status', 'Pending')->count(),
+            'avg_completion_seconds' => $completionSeconds->isNotEmpty()
+                ? (int) round($completionSeconds->avg())
+                : null,
+        ];
+    }
+
+    /**
      * Create a task, its attachments, and its checklist items, then notify
      * the assignee AND all privileged reviewers (admin/manager) that a new
      * task was created. Runs in a transaction; email failures are logged
@@ -109,11 +178,12 @@ class TaskAssignedService
     public function update(TaskAssigned $task, array $data, ?array $attachments, ?array $taskItems): TaskAssigned
     {
         return DB::transaction(function () use ($task, $data, $attachments, $taskItems) {
-            $wasCompletedBefore = $task->status === 'Completed';
+            $previousStatus = $task->status;
+            $newStatus = $data['status'] ?? $task->status;
 
             $assignedUser = User::findOrFail($data['assigned_team']);
 
-            $task->update([
+            $updateData = [
                 'title' => $data['title'],
                 'department' => $assignedUser->role,
                 'assigned_team' => $assignedUser->id,
@@ -122,8 +192,10 @@ class TaskAssignedService
                 'start_date' => $data['start_date'],
                 'due_date' => $data['due_date'],
                 'description' => $data['description'] ?? null,
-                'status' => $data['status'] ?? $task->status,
-            ]);
+                'status' => $newStatus,
+            ];
+
+            $task->update($updateData);
 
             $this->storeAttachments($task, $attachments);
 
@@ -133,7 +205,7 @@ class TaskAssignedService
 
             $task->load('attachments', 'taskItems', 'assignedUser', 'creator');
 
-            if (! $wasCompletedBefore && $task->status === 'Completed') {
+            if ($previousStatus !== 'Completed' && $newStatus === 'Completed') {
                 $this->notifyReviewers($task, 'completed', 'task completed');
             }
 
@@ -256,6 +328,45 @@ class TaskAssignedService
      *
      * @param  array<int, array{id?: int|string|null, description: string, status?: string|null}>  $items
      */
+    // private function storeTaskItems(TaskAssigned $task, ?array $items): void
+    // {
+    //     if (empty($items)) {
+    //         return;
+    //     }
+
+    //     foreach ($items as $index => $item) {
+    //         $id = $item['id'] ?? null;
+    //         $status = $item['status'] ?? 'Pending';
+
+    //         $attributes = [
+    //             'description' => $item['description'],
+    //             'status' => $status,
+    //             'sort_order' => $index + 1,
+    //         ];
+
+    //         if ($id && $task->taskItems()->where('id', $id)->exists()) {
+    //             $task->taskItems()->where('id', $id)->update($attributes);
+    //         } else {
+    //             $task->taskItems()->create($attributes);
+    //         }
+    //     }
+    // }
+
+    /**
+     * Create or update each incoming task item.
+     * - If the item has an 'id' belonging to this task, it's updated —
+     *   but ONLY if something actually changed. Since the frontend
+     *   resends the full checklist on every save, running update() on
+     *   every row unconditionally would bump updated_at on every sibling
+     *   item just because one of them was edited. We compare first and
+     *   skip the save entirely for untouched rows.
+     * - A pure reorder (sort_order shifts but description/status don't)
+     *   is persisted without touching updated_at, since that's not a
+     *   content edit — only a real description/status change bumps it.
+     * - Otherwise a new row is created.
+     *
+     * @param  array<int, array{id?: int|string|null, description: string, status?: string|null}>  $items
+     */
     private function storeTaskItems(TaskAssigned $task, ?array $items): void
     {
         if (empty($items)) {
@@ -272,11 +383,30 @@ class TaskAssignedService
                 'sort_order' => $index + 1,
             ];
 
-            if ($id && $task->taskItems()->where('id', $id)->exists()) {
-                $task->taskItems()->where('id', $id)->update($attributes);
-            } else {
-                $task->taskItems()->create($attributes);
+            if ($id) {
+                $existing = $task->taskItems()->find($id);
+
+                if ($existing) {
+                    $contentChanged = $existing->description !== $attributes['description']
+                        || $existing->status !== $attributes['status'];
+
+                    $existing->fill($attributes);
+
+                    if ($existing->isDirty()) {
+                        if (! $contentChanged) {
+                            // Only the sort position moved — save it
+                            // silently, don't touch updated_at.
+                            $existing->timestamps = false;
+                        }
+
+                        $existing->save();
+                    }
+
+                    continue;
+                }
             }
+
+            $task->taskItems()->create($attributes);
         }
     }
 

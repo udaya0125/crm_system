@@ -28,6 +28,34 @@ class TaskAssignedController extends Controller
     }
 
     /**
+     * Task Report page: every team member who has at least one task
+     * assigned to them, with total / completed / in-progress / pending
+     * counts — powers the user-card grid. Route name: ourtaskreport.index.
+     */
+    public function usersSummary(Request $request)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->tasks->usersWithTaskCounts(),
+        ]);
+    }
+
+    /**
+     * Task Report workload popup: every task assigned to one user (with
+     * checklist items, assignee, creator) plus their aggregate stats.
+     * Fetched the moment a user card on the Task Report page is clicked.
+     * Route name: ourtaskreport.usertasks.
+     */
+    public function userTasks(Request $request, $userId)
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->tasks->tasksForUser((int) $userId),
+            'stats' => $this->tasks->userTaskStats((int) $userId),
+        ]);
+    }
+
+    /**
      * Aggregated report data for dashboards:
      * - task counts grouped by assigned agent
      * - task counts grouped by status
@@ -417,52 +445,6 @@ class TaskAssignedController extends Controller
             'series' => $series,
         ]);
     }
-
-    /**
-     * Total task counts grouped by the assignee's role (i.e. "department"),
-     * filtered by the task's own `start_date` column (falls back to
-     * created_at for any row with a null start_date).
-     *
-     * Query params (all optional):
-     * - start_date / end_date: "YYYY-MM-DD"
-     */
-    // public function departmentSummary(Request $request)
-    // {
-    //     $user = $request->user();
-    //     $table = (new TaskAssigned())->getTable();
-
-    //     $dateExpr = "COALESCE({$table}.start_date, {$table}.created_at)";
-
-    //     $query = TaskAssigned::query()
-    //         ->join('users', 'users.id', '=', "{$table}.assigned_team")
-    //         ->selectRaw("COALESCE(users.role, 'unknown') as role, COUNT(*) as total")
-    //         ->groupBy('role')
-    //         ->orderByDesc('total');
-
-    //     if ($start = $request->query('start_date')) {
-    //         $query->whereRaw("DATE({$dateExpr}) >= ?", [$start]);
-    //     }
-    //     if ($end = $request->query('end_date')) {
-    //         $query->whereRaw("DATE({$dateExpr}) <= ?", [$end]);
-    //     }
-
-    //     if (! $this->tasks->isPrivileged($user)) {
-    //         $query->where(function ($q) use ($user, $table) {
-    //             $q->where("{$table}.assigned_team", $user->id)
-    //                 ->orWhere("{$table}.user_id", $user->id);
-    //         });
-    //     }
-
-    //     $rows = $query->get()->map(fn ($r) => [
-    //         'role' => ucfirst($r->role),
-    //         'total' => (int) $r->total,
-    //     ]);
-
-    //     return response()->json([
-    //         'success' => true,
-    //         'by_role' => $rows,
-    //     ]);
-    // }
 
     /**
      * Total task counts grouped by the assignee's role ("department"),

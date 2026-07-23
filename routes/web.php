@@ -197,6 +197,20 @@ Route::middleware('auth')->group(function () {
     //     return Inertia::render('Dashboard/MonthlyReports');    
     // });
 
+
+    // Route::get('/task-report', function(){
+    //     return Inertia::render('DetailsPage/TaskReport');    
+    // });
+
+    Route::get('/task-report', function () {
+    return Inertia::render('DetailsPage/TaskReport');
+})->name('taskreport.page');
+
+  Route::get('/ourtask-report', [TaskAssignedController::class, 'usersSummary'])
+    ->name('ourtaskreport.index'); // now returns user cards, not task rows
+
+Route::get('/task-report/users/{userId}/tasks', [TaskAssignedController::class, 'userTasks'])
+    ->name('ourtaskreport.usertasks');
 });
     
 
