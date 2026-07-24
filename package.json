@@ -27,6 +27,7 @@
         "@tanstack/react-table": "^8.21.3",
         "gsap": "^3.15.0",
         "html-react-parser": "^5.2.10",
+        "jspdf": "^4.2.1",
         "lucide-react": "^0.554.0",
         "react-google-recaptcha": "^3.1.0",
         "react-hook-form": "^7.66.1",

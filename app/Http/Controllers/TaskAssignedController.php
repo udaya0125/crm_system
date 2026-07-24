@@ -28,17 +28,45 @@ class TaskAssignedController extends Controller
     }
 
     /**
-     * Task Report page: every team member who has at least one task
-     * assigned to them, with total / completed / in-progress / pending
-     * counts — powers the user-card grid. Route name: ourtaskreport.index.
-     */
-    public function usersSummary(Request $request)
-    {
-        return response()->json([
-            'success' => true,
-            'data' => $this->tasks->usersWithTaskCounts(),
-        ]);
-    }
+ * Every user (id, name, role), unfiltered — powers the Task Report
+ * "select a team member" dropdown so it always lists everyone, not just
+ * users who currently have a matching task. Route name:
+ * ourtaskreport.teammembers.
+ */
+public function teamMembers(Request $request)
+{
+    return response()->json([
+        'success' => true,
+        'data' => $this->tasks->allTeamMembers(),
+    ]);
+}
+
+  /**
+ * Task Report page: every team member who has at least one task
+ * assigned to them, with total / completed / in-progress / pending
+ * counts — powers the user-card grid. Route name: ourtaskreport.index.
+ *
+ * Query params (all optional), same filters the old task-row report
+ * supported:
+ * - search: matches the user's name
+ * - role: matches the user's role
+ * - status: only include users with at least one task of this status
+ * - start_date / end_date: "YYYY-MM-DD" — bounds the counts to tasks
+ *   whose own start_date falls in this range
+ */
+public function usersSummary(Request $request)
+{
+    return response()->json([
+        'success' => true,
+        'data' => $this->tasks->usersWithTaskCounts([
+            'user_id' => $request->query('user_id'),
+            'role' => $request->query('role'),
+            'status' => $request->query('status'),
+            'start_date' => $request->query('start_date'),
+            'end_date' => $request->query('end_date'),
+        ]),
+    ]);
+}
 
     /**
      * Task Report workload popup: every task assigned to one user (with
@@ -499,4 +527,30 @@ class TaskAssignedController extends Controller
             'by_role' => $rows,
         ]);
     }
+
+
+    /**
+ * Full nested task data (with checklist items + creator) for every
+ * filtered team member — feeds the "Export PDF" button on the Task
+ * Report page. Unlike usersSummary(), this returns every task's full
+ * detail, not just counts, so the PDF can include everything the model
+ * provides: assigned to/by, start/due dates, and every checklist item's
+ * description, status, and completed_at.
+ *
+ * Query params: same as usersSummary() — search, role, status,
+ * start_date, end_date.
+ */
+public function exportData(Request $request)
+{
+    return response()->json([
+        'success' => true,
+        'data' => $this->tasks->usersWithFullTasks([
+            'user_id' => $request->query('user_id'),
+            'role' => $request->query('role'),
+            'status' => $request->query('status'),
+            'start_date' => $request->query('start_date'),
+            'end_date' => $request->query('end_date'),
+        ]),
+    ]);
+}
 }

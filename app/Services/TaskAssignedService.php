@@ -65,25 +65,91 @@ class TaskAssignedService
     }
 
     /**
-     * Every user who has at least one task assigned to them, with counts
-     * split by status — powers the Task Report user-card grid.
-     * Requires a `assignedTasks` hasMany relation on the User model
-     * (assigned_team -> TaskAssigned).
+     * Every user (id, name, role), for the Task Report filter dropdown.
+     * Deliberately NOT scoped to "has at least one task" like
+     * usersWithTaskCounts() — the dropdown should let you pick any team
+     * member, not just ones who already show up in the current results.
      */
-    public function usersWithTaskCounts(): Collection
+    public function allTeamMembers(): Collection
     {
         return User::query()
-            ->select('id', 'name', 'role', 'email')
-            ->withCount([
-                'assignedTasks as total_tasks',
-                'assignedTasks as completed_tasks' => fn ($q) => $q->where('status', 'Completed'),
-                'assignedTasks as in_progress_tasks' => fn ($q) => $q->where('status', 'In Progress'),
-                'assignedTasks as pending_tasks' => fn ($q) => $q->where('status', 'Pending'),
-            ])
-            ->having('total_tasks', '>', 0)
-            ->orderByDesc('total_tasks')
+            ->select('id', 'name', 'role')
+            ->orderBy('name')
             ->get();
     }
+
+  /**
+ * Every user who has at least one task assigned to them, with counts
+ * split by status — powers the Task Report user-card grid. Requires a
+ * `assignedTasks` hasMany relation on the User model
+ * (assigned_team -> TaskAssigned).
+ *
+ * Filters (all optional), mirroring the old task-row report filters:
+ * - user_id: only include this specific user (from the Task Report's
+ *   team-member dropdown)
+ * - role: matches the user's role column
+ * - status: only include users who have at least one task with this
+ *   status (the task counts themselves still show the full breakdown —
+ *   this only narrows which cards appear)
+ * - start_date / end_date: bounds every count subquery to tasks whose
+ *   own `start_date` falls in this range, same convention used
+ *   elsewhere (reportSummary, departmentSummary)
+ */
+public function usersWithTaskCounts(array $filters = []): Collection
+{
+    $dateScope = function ($q) use ($filters) {
+        if (! empty($filters['start_date'])) {
+            $q->whereDate('start_date', '>=', $filters['start_date']);
+        }
+        if (! empty($filters['end_date'])) {
+            $q->whereDate('start_date', '<=', $filters['end_date']);
+        }
+    };
+
+    $query = User::query()
+        ->select('id', 'name', 'role', 'email')
+        ->withCount([
+            'assignedTasks as total_tasks' => $dateScope,
+            'assignedTasks as completed_tasks' => function ($q) use ($dateScope) {
+                $dateScope($q);
+                $q->where('status', 'Completed');
+            },
+            'assignedTasks as in_progress_tasks' => function ($q) use ($dateScope) {
+                $dateScope($q);
+                $q->where('status', 'In Progress');
+            },
+            'assignedTasks as pending_tasks' => function ($q) use ($dateScope) {
+                $dateScope($q);
+                $q->where('status', 'Pending');
+            },
+        ])
+        ->having('total_tasks', '>', 0);
+
+    if (! empty($filters['user_id'])) {
+        $query->where('id', $filters['user_id']);
+    }
+
+    if (! empty($filters['role'])) {
+        $query->where('role', $filters['role']);
+    }
+
+    $users = $query->orderByDesc('total_tasks')->get();
+
+    if (! empty($filters['status'])) {
+        $countColumn = match ($filters['status']) {
+            'Completed' => 'completed_tasks',
+            'In Progress' => 'in_progress_tasks',
+            'Pending' => 'pending_tasks',
+            default => null,
+        };
+
+        if ($countColumn) {
+            $users = $users->filter(fn ($u) => $u->{$countColumn} > 0)->values();
+        }
+    }
+
+    return $users;
+}
 
     /**
      * Every task assigned to a given user — with checklist items,
@@ -352,14 +418,19 @@ class TaskAssignedService
     //     }
     // }
 
-    /**
+   /**
      * Create or update each incoming task item.
-     * - If the item has an 'id' belonging to this task, it's updated —
-     *   but ONLY if something actually changed. Since the frontend
-     *   resends the full checklist on every save, running update() on
-     *   every row unconditionally would bump updated_at on every sibling
-     *   item just because one of them was edited. We compare first and
-     *   skip the save entirely for untouched rows.
+     * - If the item has an 'id' belonging to this task AND is already
+     *   marked Completed, it is PERMANENTLY locked — skipped entirely,
+     *   regardless of what the incoming payload says. This mirrors the
+     *   frontend, where a Completed checklist item can no longer be
+     *   toggled back to Pending or have its description edited.
+     * - Otherwise, if the item has an 'id' belonging to this task, it's
+     *   updated — but ONLY if something actually changed. Since the
+     *   frontend resends the full checklist on every save, running
+     *   update() on every row unconditionally would bump updated_at on
+     *   every sibling item just because one of them was edited. We
+     *   compare first and skip the save entirely for untouched rows.
      * - A pure reorder (sort_order shifts but description/status don't)
      *   is persisted without touching updated_at, since that's not a
      *   content edit — only a real description/status change bumps it.
@@ -387,6 +458,13 @@ class TaskAssignedService
                 $existing = $task->taskItems()->find($id);
 
                 if ($existing) {
+                    // Permanently locked — once Completed, ignore any
+                    // further change (status flip, description edit, or
+                    // even a reorder) sent from the client.
+                    if ($existing->status === 'Completed') {
+                        continue;
+                    }
+
                     $contentChanged = $existing->description !== $attributes['description']
                         || $existing->status !== $attributes['status'];
 
@@ -450,4 +528,71 @@ class TaskAssignedService
             Log::error("Failed to send {$label} email to {$recipient->email}: ".$e->getMessage());
         }
     }
+
+
+    /**
+ * Every filtered team member with their FULL task detail nested in —
+ * every task (with checklist items + creator), not just counts. Used
+ * exclusively by the "Export PDF" button on the Task Report page so the
+ * export contains everything the model provides (assigned to/by, start/
+ * due dates, every checklist item's description/status/completed_at),
+ * not just what the card grid displays on screen.
+ *
+ * Filters (all optional), same semantics as usersWithTaskCounts():
+ * - user_id: only include this specific user
+ * - role: matches the user's role column
+ * - status: only include tasks with this status (narrows the nested
+ *   task list itself, not just which users appear)
+ * - start_date / end_date: bounds on the task's own start_date column
+ */
+public function usersWithFullTasks(array $filters = []): Collection
+{
+    $taskScope = function ($q) use ($filters) {
+        if (! empty($filters['start_date'])) {
+            $q->whereDate('start_date', '>=', $filters['start_date']);
+        }
+        if (! empty($filters['end_date'])) {
+            $q->whereDate('start_date', '<=', $filters['end_date']);
+        }
+        if (! empty($filters['status'])) {
+            $q->where('status', $filters['status']);
+        }
+        $q->with(['taskItems', 'creator:id,name,role,email'])->latest();
+    };
+
+    $countScope = function ($q) use ($filters) {
+        if (! empty($filters['start_date'])) {
+            $q->whereDate('start_date', '>=', $filters['start_date']);
+        }
+        if (! empty($filters['end_date'])) {
+            $q->whereDate('start_date', '<=', $filters['end_date']);
+        }
+    };
+
+    $query = User::query()
+        ->select('id', 'name', 'role', 'email')
+        ->with(['assignedTasks' => $taskScope])
+        ->withCount(['assignedTasks as total_tasks' => $countScope])
+        ->having('total_tasks', '>', 0);
+
+    if (! empty($filters['user_id'])) {
+        $query->where('id', $filters['user_id']);
+    }
+
+    if (! empty($filters['role'])) {
+        $query->where('role', $filters['role']);
+    }
+
+    $users = $query->orderByDesc('total_tasks')->get();
+
+    // When a status filter is active, a user may have total_tasks > 0
+    // overall but zero tasks matching that specific status once the
+    // nested assignedTasks relation is scoped above — drop those.
+    if (! empty($filters['status'])) {
+        $users = $users->filter(fn ($u) => $u->assignedTasks->isNotEmpty())->values();
+    }
+
+    return $users;
+}
+
 }

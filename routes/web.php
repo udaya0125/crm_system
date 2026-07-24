@@ -198,19 +198,23 @@ Route::middleware('auth')->group(function () {
     // });
 
 
-    // Route::get('/task-report', function(){
-    //     return Inertia::render('DetailsPage/TaskReport');    
-    // });
+   
 
-    Route::get('/task-report', function () {
-    return Inertia::render('DetailsPage/TaskReport');
-})->name('taskreport.page');
+//     Route::get('/task-report', function () {
+//     return Inertia::render('DetailsPage/TaskReport');
+// })->name('taskreport.page');
 
   Route::get('/ourtask-report', [TaskAssignedController::class, 'usersSummary'])
     ->name('ourtaskreport.index'); // now returns user cards, not task rows
 
 Route::get('/task-report/users/{userId}/tasks', [TaskAssignedController::class, 'userTasks'])
     ->name('ourtaskreport.usertasks');
+
+    Route::get('/task-report/export', [TaskAssignedController::class, 'exportData'])
+    ->name('ourtaskreport.export');
+
+    Route::get('/task-report/team-members', [TaskAssignedController::class, 'teamMembers'])
+    ->name('ourtaskreport.teammembers');
 });
     
 
@@ -245,6 +249,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // -----------------------------------------
 
     Route::get('/ourlogs', [UserLogController::class, 'index'])->name('ourlogs.index');
+
+
+    Route::get('/task-report', function(){
+        return Inertia::render('DetailsPage/TaskReport');    
+    });
     
 });
 

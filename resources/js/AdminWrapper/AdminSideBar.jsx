@@ -519,7 +519,7 @@ const AdminSideBar = ({
                 id: "user-management",
                 label: "User Management",
                 icon: User,
-                show: can.adminOrManager,
+                show: can.admin,
                 items: [
                     { href: "/user-management", label: "User Management" },
                     { href: "/activity-log", label: "Activity Log" },
@@ -531,6 +531,7 @@ const AdminSideBar = ({
             can.adminOrDeveloper,
             can.adminOrManager,
             can.adminOrTechnician,
+            can.admin,
         ],
     );
 
@@ -544,6 +545,11 @@ const AdminSideBar = ({
         {
             href: "/task-assigned",
             label: "Task Assigned",
+            icon: ClipboardList,
+        },
+        {
+            href: "/task-report",
+            label: "Task Report",
             icon: ClipboardList,
         },
         // {
@@ -881,7 +887,7 @@ const AdminSideBar = ({
             <aside
                 className={[
                     "fixed left-0 top-0 z-50 flex h-screen flex-col bg-amber-50/60 transition-all duration-300",
-                    isCollapsed ? "w-20" : "w-64",
+                    isCollapsed ? "w-24" : "w-72",
                     isMobileOpen
                         ? "translate-x-0"
                         : "-translate-x-full lg:translate-x-0",
