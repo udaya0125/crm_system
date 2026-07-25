@@ -392,9 +392,6 @@
 
 // export default AdminSideBar;
 
-
-
-
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, usePage } from "@inertiajs/react";
@@ -443,6 +440,10 @@ const AdminSideBar = ({
         adminOrDeveloper: role === "admin" || role === "developer",
         adminOrAccountant: role === "admin" || role === "accountant",
         adminOrManager: role === "admin" || role === "manager",
+        adminOrManagerOrAccountant:
+            role === "admin" || role === "manager" || role === "accountant",
+        adminOrManagerOrDeveloper:
+            role === "admin" || role === "manager" || role === "developer",
     };
 
     const isActive = (href) =>
@@ -455,7 +456,7 @@ const AdminSideBar = ({
                 id: "crm",
                 label: "CRM",
                 icon: ListFilter,
-                show: can.adminOrAccountant,
+                show: can.adminOrAccountantorManager,
                 items: [
                     { href: "/leads", label: "Leads" },
                     { href: "/client-management", label: "Client Management" },
@@ -465,7 +466,7 @@ const AdminSideBar = ({
                 id: "company",
                 label: "Company",
                 icon: Building2,
-                show: can.adminOrManager,
+                show: can.adminOrManagerOrAccountant,
                 items: [
                     { href: "/client", label: "Clients" },
                     { href: "/expiration", label: "Expirations" },
@@ -473,26 +474,11 @@ const AdminSideBar = ({
                     { href: "/domain-tracking", label: "Domain Management" },
                 ],
             },
-            // {
-            //     id: "report",
-            //     label: "Report",
-            //     icon: ClipboardList,
-            //     show: true,
-            //     items: [
-            //         { href: "/todo", label: "To Do List" },
-            //         { href: "/ticket", label: "Ticket Management" },
-            //         {
-            //             href: "/project-management",
-            //             label: "Project Management",
-            //             show: can.adminOrDeveloper,
-            //         },
-            //     ],
-            // },
             {
                 id: "payment-management",
                 label: "Payment Management",
                 icon: DollarSign,
-                show: can.adminOrManager,
+                show: can.adminOrManagerOrAccountant,
                 items: [
                     {
                         href: "/payment-management",
@@ -519,7 +505,7 @@ const AdminSideBar = ({
                 id: "user-management",
                 label: "User Management",
                 icon: User,
-                show: can.admin,
+                show: can.adminOrManager,
                 items: [
                     { href: "/user-management", label: "User Management" },
                     { href: "/activity-log", label: "Activity Log" },
@@ -540,7 +526,7 @@ const AdminSideBar = ({
             href: "/payment-finance-tracking",
             label: "Finance",
             icon: Landmark,
-            show: can.adminOrAccountant,
+            show: can.adminOrAccountantormanager,
         },
         {
             href: "/task-assigned",
@@ -550,6 +536,7 @@ const AdminSideBar = ({
         {
             href: "/task-report",
             label: "Task Report",
+            show: can.adminOrManager,
             icon: ClipboardList,
         },
         // {
@@ -584,7 +571,7 @@ const AdminSideBar = ({
             href: "/project-management",
             label: "Project Management",
             icon: UserCog,
-            show: can.adminOrDeveloper,
+            show: can.adminOrDeveloperOrManager,
         },
 
         // {
@@ -910,7 +897,7 @@ const AdminSideBar = ({
                                 <img
                                     src="/images/logo2.png"
                                     alt="S.A I.T Solution"
-                                    className="h-9 w-[150px] max-w-[500px] object-contain"
+                                    className="h-8 w-8 object-contain"
                                 />
                             </Link>
                         ) : (

@@ -382,9 +382,6 @@
 
 // export default Dashboard;
 
-
-
-
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import { Head, Link, usePage } from "@inertiajs/react";
 // import React, { useState, useEffect } from "react";
@@ -693,11 +690,18 @@
 
 // export default Dashboard;
 
-
 import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 import { Head, Link, usePage } from "@inertiajs/react";
 import React, { useState, useEffect } from "react";
-import { ClipboardCheck, Users, ArrowUpRight, Sunrise, Sun, Sunset, Moon } from "lucide-react";
+import {
+    ClipboardCheck,
+    Users,
+    ArrowUpRight,
+    Sunrise,
+    Sun,
+    Sunset,
+    Moon,
+} from "lucide-react";
 import ClientDashboard from "../Dashboard/ClientDashboard";
 import BackToTop from "@/AdminWrapper/BackToTop";
 import TicketDashboard from "../Dashboard/TicketDashboard";
@@ -710,6 +714,7 @@ import PageLoader from "@/Loader/PageLoader";
 import MonthlyReports from "../Dashboard/MonthlyReports";
 import TaskReports from "../Dashboard/TaskReports";
 import DepartmentReports from "../Dashboard/DepartmentReports";
+import TaskDashboard from "../Dashboard/TaskDashboard";
 
 // ─── Accent tokens ─────────────────────────────────────────────────────────────
 const ACCENTS = {
@@ -749,7 +754,7 @@ const ACCENTS = {
 
 // ─── Greeting header ───────────────────────────────────────────────────────────
 const getGreetingMeta = (hour) => {
-    if (hour < 5)  return { text: "Good night", Icon: Moon };
+    if (hour < 5) return { text: "Good night", Icon: Moon };
     if (hour < 12) return { text: "Good morning", Icon: Sunrise };
     if (hour < 17) return { text: "Good afternoon", Icon: Sun };
     if (hour < 21) return { text: "Good evening", Icon: Sunset };
@@ -764,7 +769,9 @@ const GreetingHeader = ({ name, role }) => {
         return () => clearInterval(timer);
     }, []);
 
-    const { text: greeting, Icon: GreetingIcon } = getGreetingMeta(now.getHours());
+    const { text: greeting, Icon: GreetingIcon } = getGreetingMeta(
+        now.getHours(),
+    );
 
     const time = now.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -783,16 +790,20 @@ const GreetingHeader = ({ name, role }) => {
     const firstName = name?.split(" ")[0] || "there";
 
     return (
-        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl mb-6 sm:mb-8 mx-3 sm:mx-4 md:mx-0
-            bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl">
+        <div
+            className="relative overflow-hidden rounded-2xl border  sm:rounded-3xl mb-6 sm:mb-8 mx-3 sm:mx-4 md:mx-0
+            bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white shadow-xl"
+        >
             {/* ambient glow accents */}
             <div className="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-indigo-500/20 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-24 -left-10 w-64 h-64 rounded-full bg-fuchsia-500/10 blur-3xl" />
 
-            <div className="relative flex flex-col items-center text-center
+            <div
+                className="relative flex flex-col items-center text-center
                 sm:items-start sm:text-left
                 md:flex-row md:items-center md:justify-between md:text-left
-                gap-5 sm:gap-6 p-5 sm:p-7 md:p-8">
+                gap-5 sm:gap-6 p-5 sm:p-7 md:p-8"
+            >
                 {/* left: greeting + role */}
                 <div>
                     <div className="flex items-center justify-center sm:justify-start gap-2 mb-2">
@@ -804,7 +815,8 @@ const GreetingHeader = ({ name, role }) => {
                         </span>
                     </div>
                     <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight leading-tight">
-                        {greeting}, <span className="text-indigo-300">{firstName}</span>
+                        {greeting},{" "}
+                        <span className="text-indigo-300">{firstName}</span>
                     </h1>
                     <p className="mt-2 text-xs sm:text-sm md:text-base text-slate-300/90">
                         Here's what's happening across your workspace today.
@@ -837,7 +849,13 @@ const GreetingHeader = ({ name, role }) => {
 };
 
 // ─── Reusable card ────────────────────────────────────────────────────────────
-const DashboardCard = ({ title, breadcrumb, icon: Icon, link, accent = "indigo" }) => {
+const DashboardCard = ({
+    title,
+    breadcrumb,
+    icon: Icon,
+    link,
+    accent = "indigo",
+}) => {
     const a = ACCENTS[accent] ?? ACCENTS.indigo;
 
     return (
@@ -901,36 +919,132 @@ const DashboardCard = ({ title, breadcrumb, icon: Icon, link, accent = "indigo" 
 
 // ─── Card grids per role ──────────────────────────────────────────────────────
 const userCards = [
-    { title: "Tasks", breadcrumb: "Tasks", icon: Users, link: "/task-assigned", accent: "indigo" },
-    { title: "To Do List", breadcrumb: "To Do", icon: ClipboardCheck, link: "/todo", accent: "emerald" },
-     { title: "Tickets", breadcrumb: "Tickets", icon: Users, link: "/ticket", accent: "amber" },
+    {
+        title: "Tasks",
+        breadcrumb: "Tasks",
+        icon: Users,
+        link: "/task-assigned",
+        accent: "indigo",
+    },
+    {
+        title: "To Do List",
+        breadcrumb: "To Do",
+        icon: ClipboardCheck,
+        link: "/todo",
+        accent: "emerald",
+    },
+    {
+        title: "Tickets",
+        breadcrumb: "Tickets",
+        icon: Users,
+        link: "/ticket",
+        accent: "amber",
+    },
 ];
 
 const developerCards = [
-    { title: "Projects", breadcrumb: "Projects", icon: Users, link: "/project-management", accent: "indigo" },
-    { title: "To Do List", breadcrumb: "To Do", icon: ClipboardCheck, link: "/todo", accent: "emerald" },
-     { title: "Tasks", breadcrumb: "Tasks", icon: Users, link: "/task-assigned", accent: "indigo" },
-      { title: "Tickets", breadcrumb: "Tickets", icon: Users, link: "/ticket", accent: "amber" },
+    {
+        title: "Projects",
+        breadcrumb: "Projects",
+        icon: Users,
+        link: "/project-management",
+        accent: "indigo",
+    },
+    {
+        title: "To Do List",
+        breadcrumb: "To Do",
+        icon: ClipboardCheck,
+        link: "/todo",
+        accent: "emerald",
+    },
+    {
+        title: "Tasks",
+        breadcrumb: "Tasks",
+        icon: Users,
+        link: "/task-assigned",
+        accent: "indigo",
+    },
+    {
+        title: "Tickets",
+        breadcrumb: "Tickets",
+        icon: Users,
+        link: "/ticket",
+        accent: "amber",
+    },
 ];
 
 const technicianCards = [
-    { title: "Tickets", breadcrumb: "Tickets", icon: Users, link: "/ticket", accent: "amber" },
-    { title: "To Do List", breadcrumb: "To Do", icon: ClipboardCheck, link: "/todo", accent: "emerald" },
-     { title: "Tasks", breadcrumb: "Tasks", icon: Users, link: "/task-assigned", accent: "indigo" },
+    {
+        title: "Tickets",
+        breadcrumb: "Tickets",
+        icon: Users,
+        link: "/ticket",
+        accent: "amber",
+    },
+    {
+        title: "To Do List",
+        breadcrumb: "To Do",
+        icon: ClipboardCheck,
+        link: "/todo",
+        accent: "emerald",
+    },
+    {
+        title: "Tasks",
+        breadcrumb: "Tasks",
+        icon: Users,
+        link: "/task-assigned",
+        accent: "indigo",
+    },
 ];
 
 const accountantCards = [
-    { title: "Leads", breadcrumb: "Leads", icon: Users, link: "/leads", accent: "rose" },
-    { title: "Clients", breadcrumb: "Clients", icon: Users, link: "/client-management", accent: "indigo" },
-    { title: "Finance Tracking", breadcrumb: "Finance Tracking", icon: Users, link: "/payment-finance-tracking", accent: "amber" },
-    { title: "To Do List", breadcrumb: "To Do", icon: ClipboardCheck, link: "/todo", accent: "emerald" },
-     { title: "Tasks", breadcrumb: "Tasks", icon: Users, link: "/task-assigned", accent: "indigo" },
-      { title: "Tickets", breadcrumb: "Tickets", icon: Users, link: "/ticket", accent: "amber" },
+    {
+        title: "Leads",
+        breadcrumb: "Leads",
+        icon: Users,
+        link: "/leads",
+        accent: "rose",
+    },
+    {
+        title: "Clients",
+        breadcrumb: "Clients",
+        icon: Users,
+        link: "/client-management",
+        accent: "indigo",
+    },
+    {
+        title: "Finance Tracking",
+        breadcrumb: "Finance Tracking",
+        icon: Users,
+        link: "/payment-finance-tracking",
+        accent: "amber",
+    },
+    {
+        title: "To Do List",
+        breadcrumb: "To Do",
+        icon: ClipboardCheck,
+        link: "/todo",
+        accent: "emerald",
+    },
+    {
+        title: "Tasks",
+        breadcrumb: "Tasks",
+        icon: Users,
+        link: "/task-assigned",
+        accent: "indigo",
+    },
+    {
+        title: "Tickets",
+        breadcrumb: "Tickets",
+        icon: Users,
+        link: "/ticket",
+        accent: "amber",
+    },
 ];
 
 // ─── Card grid wrapper ────────────────────────────────────────────────────────
 const CardGrid = ({ label, cards }) => (
-    <div className="w-full py-4 px-3 sm:px-4 md:px-0">
+    <div className="w-full">
         <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase mb-4 sm:mb-5 md:mb-6">
             {label}
         </h2>
@@ -947,12 +1061,13 @@ const Dashboard = () => {
     const [loading] = useState(false);
 
     const user = usePage().props.auth.user;
-    const isAdmin      = user?.role === "admin";
-    const isManager    = user?.role === "manager";
-    const isDeveloper  = user?.role === "developer";
+    const isAdmin = user?.role === "admin";
+    const isManager = user?.role === "manager";
+    const isDeveloper = user?.role === "developer";
     const isTechnician = user?.role === "technician";
     const isAccountant = user?.role === "accountant";
-    const isUser       = user?.role === "user";
+    const isUser = user?.role === "user";
+    const isAdminOrManager = isAdmin || isManager;
 
     return (
         <>
@@ -967,10 +1082,12 @@ const Dashboard = () => {
                         <GreetingHeader name={user?.name} role={user?.role} />
 
                         {/* ── Admin ─────────────────────────────────────── */}
-                        {isAdmin && (
-                            <div className="px-3 sm:px-4 md:px-0">
+                        {isAdminOrManager && (
+                            <div className="">
                                 <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase mb-4 sm:mb-5 md:mb-6">
-                                    Admin Dashboard
+                                    {isAdmin
+                                        ? "Admin Dashboard"
+                                        : "Manager Dashboard"}
                                 </h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-6 mb-8">
                                     <ClientDashboard />
@@ -980,34 +1097,54 @@ const Dashboard = () => {
                                     <FinanceDashboard />
                                     <HostingDashboard />
                                     <TicketDashboard />
+                                    <TaskDashboard />
                                 </div>
                                 <div className="grid grid-cols-1  gap-4 sm:gap-5 md:gap-6 mb-8">
-                                <MonthlyReports />
-                                <DepartmentReports />
-                                <TaskReports />
+                                    <MonthlyReports />
+                                    <DepartmentReports />
+                                    <TaskReports />
                                 </div>
                             </div>
                         )}
 
                         {/* ── Manager ───────────────────────────────────── */}
-                        {isManager && (
-                            <div className="px-3 sm:px-4 md:px-0">
+                        {isAccountant && (
+                            <div className="">
                                 <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold tracking-tight text-gray-900 uppercase mb-4 sm:mb-5 md:mb-6">
-                                    Manager Dashboard
+                                    Accountant Dashboard
                                 </h2>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-8">
+                                    <ClientDashboard />
                                     <ExpiryDashboard />
                                     <DomainDashboard />
+                                    <FinanceDashboard />
                                     <HostingDashboard />
                                 </div>
                             </div>
                         )}
 
                         {/* ── Role-based card grids ─────────────────────── */}
-                        {isUser       && <CardGrid label="Dashboard" cards={userCards} />}
-                        {isDeveloper  && <CardGrid label="Dashboard" cards={developerCards} />}
-                        {isAccountant && <CardGrid label="Dashboard" cards={accountantCards} />}
-                        {isTechnician && <CardGrid label="Dashboard" cards={technicianCards} />}
+                        {isUser && (
+                            <CardGrid label="Dashboard" cards={userCards} />
+                        )}
+                        {isDeveloper && (
+                            <CardGrid
+                                label="Dashboard"
+                                cards={developerCards}
+                            />
+                        )}
+                        {/* {isAccountant && (
+                            <CardGrid
+                                label="Dashboard"
+                                cards={accountantCards}
+                            />
+                        )} */}
+                        {isTechnician && (
+                            <CardGrid
+                                label="Dashboard"
+                                cards={technicianCards}
+                            />
+                        )}
 
                         <BackToTop />
                     </>
@@ -1018,7 +1155,6 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
 
 // import AdminWrapper from "@/AdminWrapper/AdminWrapper";
 // import { Head, Link, usePage } from "@inertiajs/react";
@@ -1096,7 +1232,6 @@ export default Dashboard;
 // );
 
 // // ─── Loading spinner ──────────────────────────────────────────────────────────
-
 
 // // ─── Main component ───────────────────────────────────────────────────────────
 // const Dashboard = () => {

@@ -150,7 +150,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/ourchildcategories/{id}', [SubSubCategoryController::class, 'update'])->name('ourchildcategories.update');
     Route::delete('/ourchildcategories/{id}', [SubSubCategoryController::class, 'destroy'])->name('ourchildcategories.destroy');
 
-     Route::get('/password',function (){
+    Route::get('/password',function (){
         return Inertia::render('Passwords/Password');
     });
 
@@ -189,32 +189,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/ourtickets/{id}', [TicketController::class, 'destroy'])->name('ourtickets.destroy');
 
 
-    // Route::get('/task-report', function(){
-    //     return Inertia::render('Dashboard/TaskReports');    
-    // });
+    Route::get('/ourtask-report', [TaskAssignedController::class, 'usersSummary'])->name('ourtaskreport.index');
 
-    //  Route::get('/line-chart', function(){
-    //     return Inertia::render('Dashboard/MonthlyReports');    
-    // });
+    Route::get('/task-report/users/{userId}/tasks', [TaskAssignedController::class, 'userTasks'])->name('ourtaskreport.usertasks');
 
+    Route::get('/task-report/export', [TaskAssignedController::class, 'exportData'])->name('ourtaskreport.export');
 
-   
-
-//     Route::get('/task-report', function () {
-//     return Inertia::render('DetailsPage/TaskReport');
-// })->name('taskreport.page');
-
-  Route::get('/ourtask-report', [TaskAssignedController::class, 'usersSummary'])
-    ->name('ourtaskreport.index'); // now returns user cards, not task rows
-
-Route::get('/task-report/users/{userId}/tasks', [TaskAssignedController::class, 'userTasks'])
-    ->name('ourtaskreport.usertasks');
-
-    Route::get('/task-report/export', [TaskAssignedController::class, 'exportData'])
-    ->name('ourtaskreport.export');
-
-    Route::get('/task-report/team-members', [TaskAssignedController::class, 'teamMembers'])
-    ->name('ourtaskreport.teammembers');
+    Route::get('/task-report/team-members', [TaskAssignedController::class, 'teamMembers'])->name('ourtaskreport.teammembers');
 });
     
 
@@ -222,7 +203,7 @@ Route::get('/task-report/users/{userId}/tasks', [TaskAssignedController::class, 
     // Only admin can access user management
     // *********************************************************************
 
-Route::middleware(['auth', 'role:admin'])->group(function () {
+Route::middleware(['auth', 'role:admin,manager'])->group(function () {
 
 
     // -----------------------------------------
@@ -262,7 +243,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Only project manager and admin can access task management
     // ****************************************************************
 
-Route::middleware(['auth', 'role:manager,admin'])->group(function () {
+Route::middleware(['auth', 'role:manager,admin,accountant'])->group(function () {
 
     Route::get('/domain-tracking', function(){
         return Inertia::render('ClientDetails/DomainManagement'); 
@@ -285,10 +266,6 @@ Route::middleware(['auth', 'role:manager,admin'])->group(function () {
         return Inertia::render('Payment/ServiceContracts');    
     });
 
-    //  Route::get('/service-contracts', function(){
-    //     return Inertia::render('Payment/BillingManagement');    
-    // });
-
     Route::get('/payment-management', function(){
         return Inertia::render('Payment/Payment');    
     });
@@ -297,18 +274,7 @@ Route::middleware(['auth', 'role:manager,admin'])->group(function () {
     Route::get('/client-details', function(){
         return Inertia::render('Payment/ClientDetails');    
     });
-
-    // Route::get('/client-details', [ServiceContractController::class, 'withPayments'])->name('clientdetails.index');
-
-    // Page route - renders the React component
-// Route::get('/client-details', function () {
-//     return Inertia::render('Payment/ClientDetails');
-// })->name('clientdetails.page');
-
-// // Data route - returns JSON, called via axios from inside the page
-// Route::get('/api/client-details', [ServiceContractController::class, 'withPayments'])
-//     ->name('clientdetails.index');
-    
+  
 
     // -----------------------------------------
     // CLIENT CRUD
@@ -362,7 +328,8 @@ Route::middleware(['auth', 'role:manager,admin'])->group(function () {
     // **********************************************************
 
 
-Route::middleware(['auth', 'role:developer,admin'])->group(function () {
+
+Route::middleware(['auth', 'role:developer,admin,manager'])->group(function () {
 
     Route::get('/project-management', function(){
         return Inertia::render('ClientDetails/ProjectManagement');  
@@ -391,7 +358,8 @@ Route::middleware(['auth', 'role:developer,admin'])->group(function () {
     // ************************************************************
 
 
-Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
+
+Route::middleware(['auth', 'role:accountant,admin,manager'])->group(function () {
 
 
     Route::get('/leads', function(){
@@ -431,9 +399,16 @@ Route::middleware(['auth', 'role:accountant,admin'])->group(function () {
     Route::put('/ourclientmanagement/{id}', [ClientManagementController::class, 'update'])->name('ourclientmanagement.update');
     Route::delete('/ourclientmanagement/{id}', [ClientManagementController::class, 'destroy'])->name('ourclientmanagement.destroy');
 
-
 });
    
+    
+
+
+
+    // #######################################################################################
+    // This below is for the non authenticated users, but only for the login and register pages
+    // ############################################################################################
+
 
     // ---------------------------------------------------------
     // TICKET MANAGEMENT for the Tech Support Team
