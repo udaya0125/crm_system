@@ -196,6 +196,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/task-report/export', [TaskAssignedController::class, 'exportData'])->name('ourtaskreport.export');
 
     Route::get('/task-report/team-members', [TaskAssignedController::class, 'teamMembers'])->name('ourtaskreport.teammembers');
+
+    
+    Route::get('/project-management', function(){
+        return Inertia::render('ClientDetails/ProjectManagement');  
+    });
+
+    // ---------------------------------------------------------
+    // PROJECT MANAGEMENT CRUD for the Development Team
+    // ---------------------------------------------------------
+
+    Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
+    Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
+    Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
+    Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
 });
     
 
@@ -331,18 +345,7 @@ Route::middleware(['auth', 'role:manager,admin,accountant'])->group(function () 
 
 Route::middleware(['auth', 'role:developer,admin,manager'])->group(function () {
 
-    Route::get('/project-management', function(){
-        return Inertia::render('ClientDetails/ProjectManagement');  
-    });
 
-    // ---------------------------------------------------------
-    // PROJECT MANAGEMENT CRUD for the Development Team
-    // ---------------------------------------------------------
-
-    Route::get('/ourprojects', [ProjectManagementController::class, 'index'])->name('ourprojects.index');
-    Route::post('/ourprojects', [ProjectManagementController::class, 'store'])->name('ourprojects.store');
-    Route::put('/ourprojects/{id}', [ProjectManagementController::class, 'update'])->name('ourprojects.update');
-    Route::delete('/ourprojects/{id}', [ProjectManagementController::class, 'destroy'])->name('ourprojects.destroy');
     
 });
 

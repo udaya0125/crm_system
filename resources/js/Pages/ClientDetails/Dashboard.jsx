@@ -750,6 +750,54 @@ const ACCENTS = {
         underline: "bg-rose-500",
         arrowHover: "group-hover:bg-rose-600 group-hover:border-rose-600",
     },
+    sky: {
+        gradient: "from-sky-500 to-blue-600",
+        blob: "bg-sky-400/20",
+        ring: "group-hover:ring-sky-200/70",
+        border: "group-hover:border-sky-200",
+        underline: "bg-sky-500",
+        arrowHover: "group-hover:bg-sky-600 group-hover:border-sky-600",
+    },
+    fuchsia: {
+        gradient: "from-fuchsia-500 to-purple-600",
+        blob: "bg-fuchsia-400/20",
+        ring: "group-hover:ring-fuchsia-200/70",
+        border: "group-hover:border-fuchsia-200",
+        underline: "bg-fuchsia-500",
+        arrowHover: "group-hover:bg-fuchsia-600 group-hover:border-fuchsia-600",
+    },
+    lime: {
+        gradient: "from-lime-500 to-green-600",
+        blob: "bg-lime-400/20",
+        ring: "group-hover:ring-lime-200/70",
+        border: "group-hover:border-lime-200",
+        underline: "bg-lime-500",
+        arrowHover: "group-hover:bg-lime-600 group-hover:border-lime-600",
+    },
+    cyan: {
+        gradient: "from-cyan-500 to-teal-600",
+        blob: "bg-cyan-400/20",
+        ring: "group-hover:ring-cyan-200/70",
+        border: "group-hover:border-cyan-200",
+        underline: "bg-cyan-500",
+        arrowHover: "group-hover:bg-cyan-600 group-hover:border-cyan-600",
+    },
+    red: {
+        gradient: "from-red-500 to-rose-600",
+        blob: "bg-red-400/20",
+        ring: "group-hover:ring-red-200/70",
+        border: "group-hover:border-red-200",
+        underline: "bg-red-500",
+        arrowHover: "group-hover:bg-red-600 group-hover:border-red-600",
+    },
+    slate: {
+        gradient: "from-slate-500 to-gray-700",
+        blob: "bg-slate-400/20",
+        ring: "group-hover:ring-slate-200/70",
+        border: "group-hover:border-slate-200",
+        underline: "bg-slate-500",
+        arrowHover: "group-hover:bg-slate-600 group-hover:border-slate-600",
+    },
 };
 
 // ─── Greeting header ───────────────────────────────────────────────────────────
@@ -940,6 +988,20 @@ const userCards = [
         link: "/ticket",
         accent: "amber",
     },
+    {
+        title: "Task Assigned",
+        breadcrumb: "Tasks",
+        icon: Users,
+        link: "/task-assigned",
+        accent: "indigo",
+    },
+    {
+        title: "Projects",
+        breadcrumb: "Projects",
+        icon: Users,
+        link: "/project-management",
+        accent: "cyan",
+    },
 ];
 
 const developerCards = [
@@ -948,7 +1010,7 @@ const developerCards = [
         breadcrumb: "Projects",
         icon: Users,
         link: "/project-management",
-        accent: "indigo",
+        accent: "cyan",
     },
     {
         title: "To Do List",
@@ -971,6 +1033,7 @@ const developerCards = [
         link: "/ticket",
         accent: "amber",
     },
+    
 ];
 
 const technicianCards = [
@@ -994,6 +1057,13 @@ const technicianCards = [
         icon: Users,
         link: "/task-assigned",
         accent: "indigo",
+    },
+    {
+        title: "Projects",
+        breadcrumb: "Projects",
+        icon: Users,
+        link: "/project-management",
+        accent: "cyan",
     },
 ];
 

@@ -456,7 +456,7 @@ const AdminSideBar = ({
                 id: "crm",
                 label: "CRM",
                 icon: ListFilter,
-                show: can.adminOrAccountantorManager,
+                show: can.adminOrManagerOrAccountant,
                 items: [
                     { href: "/leads", label: "Leads" },
                     { href: "/client-management", label: "Client Management" },
@@ -526,7 +526,7 @@ const AdminSideBar = ({
             href: "/payment-finance-tracking",
             label: "Finance",
             icon: Landmark,
-            show: can.adminOrAccountantormanager,
+            show: can.adminOrManagerOrAccountant,
         },
         {
             href: "/task-assigned",
@@ -571,7 +571,6 @@ const AdminSideBar = ({
             href: "/project-management",
             label: "Project Management",
             icon: UserCog,
-            show: can.adminOrDeveloperOrManager,
         },
 
         // {
