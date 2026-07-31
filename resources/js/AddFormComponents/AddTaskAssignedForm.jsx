@@ -638,7 +638,7 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, handleCreate }) => {
                     <div className="border border-stone-200 rounded-lg p-4 bg-stone-50">
                         <div className="flex justify-between items-center mb-3">
                             <label className="block text-xs font-semibold tracking-wide text-stone-500 uppercase">
-                                Task Checklist
+                                Task List
                             </label>
                             <button
                                 type="button"
@@ -651,15 +651,15 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, handleCreate }) => {
                                 className="flex items-center gap-1 text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-full hover:bg-indigo-700 transition"
                             >
                                 <Plus size={14} />
-                                Add Item
+                                Add list
                             </button>
                         </div>
 
                         <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                             {taskItemFields.length === 0 ? (
                                 <p className="text-sm text-stone-400 text-center py-4">
-                                    No items added yet. Click "Add Item" to
-                                    create your first checklist item.
+                                    No items added yet. Click "Add list" to
+                                    create your first Task list item.
                                 </p>
                             ) : (
                                 taskItemFields.map((field, index) => (
@@ -692,7 +692,7 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, handleCreate }) => {
                                             {...register(
                                                 `task_items.${index}.description`,
                                             )}
-                                            placeholder={`Item ${index + 1} description`}
+                                            placeholder={`Task list ${index + 1} `}
                                             className="flex-1 text-sm border-none focus:ring-0 p-1 bg-transparent"
                                         />
                                         {taskItemFields.length > 1 && (
@@ -731,7 +731,7 @@ const AddTaskAssignedForm = ({ showForm, setShowForm, handleCreate }) => {
                                 </div>
                                 <p className="text-xs text-stone-400 mt-1">
                                     {completedTaskItems.length} of{" "}
-                                    {validTaskItems.length} items completed
+                                    {validTaskItems.length} task completed
                                 </p>
                             </div>
                         )}

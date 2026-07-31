@@ -28,9 +28,17 @@ class UpdateTaskAssignedRequest extends FormRequest
             $this->denyWith('You are not authorized to update this task.');
         }
 
-        if ($task->status === 'Completed') {
-            $this->denyWith('This task is completed and can no longer be edited.');
-        }
+        // Note: we deliberately do NOT block the request just because
+        // task.status === 'Completed'. A Completed task's checklist items
+        // still need to be editable (per-item, until that item's own
+        // status is Completed) — see TaskDetailPopup.jsx. The actual
+        // "everything except task_items is frozen once Completed" rule is
+        // enforced in TaskAssignedService::update(), which ignores
+        // title/assigned_team/priority/dates/description/status entirely
+        // for a Completed task and only syncs task_items. So letting the
+        // request through here is safe: ownership/privilege is still
+        // required above, and the service is the real gatekeeper for what
+        // can actually change.
 
         return true;
     }

@@ -21,6 +21,8 @@ class TodoController extends Controller
             ->latest()
             ->get();
 
+        $todos = $this->attachSequenceNumbers($todos);
+
         return response()->json([
             'status' => true,
             'data' => $todos,
@@ -55,10 +57,13 @@ class TodoController extends Controller
             'is_read' => false,
         ]);
 
+        $todo->load('descriptions');
+        $todo->sequence_no = $this->getSequenceNumber($todo);
+
         return response()->json([
             'status' => true,
             'message' => 'Todo created successfully.',
-            'data' => $todo->load('descriptions'),
+            'data' => $todo,
         ], 201);
     }
 
@@ -70,6 +75,8 @@ class TodoController extends Controller
         $todo = Todo::with('descriptions')
             ->where('user_id', Auth::id())
             ->findOrFail($id);
+
+        $todo->sequence_no = $this->getSequenceNumber($todo);
 
         return response()->json([
             'status' => true,
@@ -121,10 +128,13 @@ class TodoController extends Controller
             'is_read' => false,
         ]);
 
+        $todo->load('descriptions');
+        $todo->sequence_no = $this->getSequenceNumber($todo);
+
         return response()->json([
             'status' => true,
             'message' => 'Todo updated successfully.',
-            'data' => $todo->load('descriptions'),
+            'data' => $todo,
         ]);
     }
 
@@ -150,5 +160,33 @@ class TodoController extends Controller
             'status' => true,
             'message' => 'Todo deleted successfully.',
         ]);
+    }
+
+    /**
+     * Assign a 1..n per-user sequence number to a collection of todos,
+     * based on ascending id order (oldest todo = 1).
+     */
+    private function attachSequenceNumbers($todos)
+    {
+        $orderedIds = Todo::where('user_id', Auth::id())
+            ->orderBy('id')
+            ->pluck('id')
+            ->flip(); // id => rank(zero-based) position in the flipped collection
+
+        return $todos->map(function ($todo) use ($orderedIds) {
+            $todo->sequence_no = $orderedIds[$todo->id] + 1;
+            return $todo;
+        });
+    }
+
+    /**
+     * Get the per-user sequence number for a single todo
+     * (count of that user's todos created at or before this one, by id).
+     */
+    private function getSequenceNumber(Todo $todo): int
+    {
+        return Todo::where('user_id', $todo->user_id)
+            ->where('id', '<=', $todo->id)
+            ->count();
     }
 }

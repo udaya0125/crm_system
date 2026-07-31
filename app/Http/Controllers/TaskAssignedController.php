@@ -538,7 +538,13 @@ public function usersSummary(Request $request)
  * description, status, and completed_at.
  *
  * Query params: same as usersSummary() — search, role, status,
- * start_date, end_date.
+ * start_date, end_date — plus:
+ * - user_id: a single team member id (kept for backward compatibility
+ *   with the top-bar "select a team member" filter)
+ * - user_ids: an array of team member ids, e.g. ?user_ids[]=3&user_ids[]=7
+ *   — used by the "Export a few" picker on the Task Report page. When
+ *   present, this takes priority over user_id (see
+ *   TaskAssignedService::usersWithFullTasks()).
  */
 public function exportData(Request $request)
 {
@@ -546,6 +552,7 @@ public function exportData(Request $request)
         'success' => true,
         'data' => $this->tasks->usersWithFullTasks([
             'user_id' => $request->query('user_id'),
+            'user_ids' => $request->query('user_ids'),
             'role' => $request->query('role'),
             'status' => $request->query('status'),
             'start_date' => $request->query('start_date'),

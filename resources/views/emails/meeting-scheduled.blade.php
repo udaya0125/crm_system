@@ -55,7 +55,8 @@
                 <tr>
                     <td align="center" style="background-color:#0d77c3; background-image:linear-gradient(135deg,#0a5c96 0%,#0d77c3 60%,#2196e0 100%); padding:36px 40px;">
                         <div style="font-size:22px; font-weight:700; color:#ffffff; letter-spacing:1px;">
-                            {{ config('app.name') }}
+                            {{-- {{ config('app.name') }} --}}
+                            S.A.I.T Solution and Trade Concern
                         </div>
                         <div style="font-size:13px; color:#bfe1f7; margin-top:4px;">
                             Lead Management System
@@ -260,8 +261,12 @@
                 <!-- Footer -->
                 <tr>
                     <td align="center" class="px-pad" style="background:#f8fafc; border-top:1px solid #e2e8f0; padding:20px 40px;">
-                        <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.6;">
+                        {{-- <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.6;">
                             This is an automated notification from <span style="font-weight:600; color:#64748b;">{{ config('app.name') }}</span>.
+                        </p> --}}
+
+                        <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.6;">
+                            This is an automated notification from <span style="font-weight:600; color:#64748b;"> S.A.I.T Solution and Trade Concern</span>.
                         </p>
                         <p style="margin:0; font-size:12px; color:#94a3b8; line-height:1.6;">
                             Please do not reply directly to this email.
